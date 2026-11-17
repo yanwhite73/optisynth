@@ -295,3 +295,16 @@ does not establish exhaustive preset, performance or Live/VST3 verification.
 Continue the accepted next milestone: shared sample timing and note-event rules,
 then independent sequencer and arp modules. Preserve the working 0.0.6 app while
 qualifying the timing foundation offline.
+
+## 38 — Research sequencer models and UI architecture before further building
+
+```text
+collect proper open source sequencer research before building anything, categorise models and methods, and then see if you can synthesise that into modes, determining what UI can be shared and where it makes more sense to either build a configurable multi-mode sequencer, or standalone modules
+```
+
+Pause implementation. Collect substantive primary manuals, source and licence
+evidence; categorise stored-data models, generation and traversal methods,
+interaction and performance needs. Synthesize a proposed set of modes, shared UI
+components and separate modules, explaining the tradeoffs. Save the research and
+verbatim request. The existing timing prototype remains experimental context,
+not a constraint on the research or authorization to build the chosen design now.

@@ -26,6 +26,15 @@ the editor, automation and agent interface must address the same stable identiti
 
 ## Sequencer and effect interfaces
 
+Request 38 pauses further implementation for the expanded source study in
+[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md). The resulting
+[UI/module proposal](SEQUENCER_UI_ARCHITECTURE.md) recommends a shared configurable
+Pattern module, distinct live-process/arp/conductor modules, and explicit capture
+between incompatible native states. Views, traversal options and pattern generators
+are not automatically separate module types. Definitions and playback-instance
+state should be separate; control lanes retain their own types and units. Existing
+timing code is provisional until assessed against these requirements.
+
 Requests 33–35 add requirements for independent sequencer/arp models and modular
 delay/reverb. Detailed proposals and evidence: `SEQUENCERS_AND_ARPEGGIATORS.md`
 and `OPEN_SOURCE_DELAY_REVERB.md`. The local sample clock, grid divisions, bounded

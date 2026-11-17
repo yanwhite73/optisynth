@@ -370,3 +370,52 @@ Independent backup: `../../backups/optisynth/optisynth-source-20261117-205148.ta
 plus `.sha256`; 168 files, 2,006,332 bytes, archive checksum and every manifest
 entry verified. This later receipt is recorded in Git. No app restart/installation,
 audio device, Live action or third-party dependency was used for this milestone.
+
+## Request 38: research before further sequencing implementation
+
+Recorded the request verbatim and paused implementation. The earlier shortlist
+and timing prototype did not provide the model/UI comparison Yan now requires.
+Expand primary-source research into a taxonomy of sequence state, generation,
+traversal, note transformation and arrangement, then recommend shared modes versus
+separate modules. Inspect source/licences and manuals without running, installing
+or adopting third-party code. Keep the timing prototype provisional.
+
+Research complete: SEQUENCER_MODELS_RESEARCH.md categorises 15 families and separates
+stored representation from view, traversal, generator, live process, note effect
+and arrangement. Source cards identify inspected functions/sections rather than
+claiming complete reviews from downloads. Fourteen pinned repository inventories
+and 86 source/manual/image files (2,157,919 bytes) are collected locally; every
+file hash checked against sequencer_research_sources_20261117.json. Three original
+UI diagrams/screenshots were viewed. No third-party program or build script ran.
+
+Findings that changed or sharpened the plan: PER|FORMER's Euclidean generator writes
+through a sequence builder, distinct from a live generator; Stochas's weighted
+single selection differs from independent probability; Kria parameter failure can
+hold a prior value; Marbles requires memory/history as well as a random seed;
+Bespoke stages dwell for pulses rather than subdividing a step like ratchets;
+Meadowphysics uses explicit rule/reset passes; Seq separates reusable definitions
+from playback instances and bounds zero-time graph traversal. These support the
+hybrid proposal in SEQUENCER_UI_ARCHITECTURE.md and its concrete shared-UI matrix.
+
+Licence/source corrections: PER|FORMER software is MIT, hardware separately
+licensed; Mutable Grids is GPLv3-or-later while inspected Marbles headers are MIT.
+Current Stellare repo/listing is not verified reusable source. Tidal's GitHub
+snapshot points to Codeberg and is treated as historical evidence. Full chosen
+dependency/docs/side-effect review remains required before adoption. Research is
+not a benchmark or host verification.
+
+Reconciled STATUS, ARCHITECTURE, RESEARCH, CONTEXTUAL_UI and the old sequencer doc.
+No runtime, tests, app or plugin changes. Before the next build, specify the typed
+Pattern contract, complete the chosen source review and compare static contextual
+wireframes; the existing timing prototype does not decide the architecture.
+
+Verification: documentation links resolve locally, JSON parses, all repository
+inventories report complete trees, every collected file matches its recorded hash,
+and `git diff --check` passes. No DSP tests were repeated for documentation-only
+changes. Independent source archive:
+`../../backups/optisynth/optisynth-source-20261117-212559.tar.gz` plus checksum,
+171 files / 2,117,334 bytes, verified and restored into a fresh directory. The
+git-ignored research collection is also preserved independently in
+`../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
+plus checksum; all 103 archived reference/manifest files verified. These receipts
+postdate archive creation. Temporary collection and archive jobs finished normally.

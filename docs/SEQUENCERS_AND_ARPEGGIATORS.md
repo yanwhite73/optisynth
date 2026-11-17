@@ -1,10 +1,16 @@
 # Sequencers and independent arpeggiators
 
-Research/design, 17 November 2026. Requests 33–34 are retained verbatim in
-`USER_REQUESTS.md`. No sequencer runtime is added by this document. The subsequent
-0.0.6 milestone implements complete Spectral, stereo and shared parameter routing.
-Next implementation work is the timestamped event/transport boundary followed by
-the first independent step sequencer and arp; the multi-model design below remains.
+Research/design history, 17 November 2026. Requests 33–34 are retained verbatim in
+`USER_REQUESTS.md`. Standalone 0.0.6 implements complete Spectral, stereo and shared
+parameter routing; an isolated timing prototype followed.
+
+**Request 38 supersedes the implementation order below.** Research is now expanded
+in [SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md), with pinned source,
+manual/licence evidence and a model/method taxonomy. The proposed hybrid of shared
+Pattern modes and specialist modules is in
+[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md). No further building in
+this research task. The earlier shortlist and timing contract remain historical
+context, not a constraint on the revised design or an instruction to resume coding.
 
 ## Direction
 
@@ -127,7 +133,7 @@ and probability. Its voltage-scaled pitch/velocity require explicit conversion.
 Use a portable note subset alongside full native state; it cannot represent every
 model's algorithm, modulation lanes and evolving register state.
 
-## Implementation order and acceptance
+## Earlier implementation order and acceptance — superseded by request 38
 
 1. Preserve the complete-Spectral milestone; establish note/transport boundaries
    alongside its stereo/state integration rather than binding it only to keyboard.

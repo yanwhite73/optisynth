@@ -17,7 +17,9 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Contextual rack interface](docs/CONTEXTUAL_UI.md)
 - [Sample player and asset loading](docs/SAMPLE_PLAYER.md)
 - [Complete Spectral engine and modulation matrix](docs/SPECTRAL_ENGINE_INTEGRATION.md)
-- [Sequencer models and arpeggiators](docs/SEQUENCERS_AND_ARPEGGIATORS.md)
+- [Open-source sequencer research and model taxonomy](docs/SEQUENCER_MODELS_RESEARCH.md)
+- [Sequencer modes, shared UI and specialist modules](docs/SEQUENCER_UI_ARCHITECTURE.md)
+- [Earlier sequencer/Optiseq findings and isolated timing prototype](docs/SEQUENCERS_AND_ARPEGGIATORS.md)
 - [Open-source delay/reverb candidates](docs/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/source_snapshot_20261117.json)
 

@@ -1,0 +1,1015 @@
+{
+  "schema": 1,
+  "collected_date": "2026-11-17",
+  "purpose": "Request 38 sequencer model/method/UI research before implementation",
+  "activity": "Read-only source/manual inspection; no third-party execution, build, installation or adoption",
+  "reference_copies_git_ignored": true,
+  "repository_count": 14,
+  "file_count": 86,
+  "total_bytes": 2157919,
+  "repositories": [
+    {
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "commit_date": "2026-11-17T05:38:40Z",
+      "repository_url": "https://github.com/BespokeSynth/BespokeSynth/tree/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "tree_truncated": false,
+      "inventory_file_count": 1353,
+      "family": "Software modular environment, variable-duration stages, live Euclidean",
+      "declared_licence": "GPL-3.0-or-later inspected source headers",
+      "inspection_scope": "README features/build overview and official reference; IPulseReceiver.h, INoteReceiver.h, Transport.h contracts; M185Sequencer StepBy/FindNextStep; Euclidean editor/generation entry points",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "commit_date": "2024-10-07T12:46:49Z",
+      "repository_url": "https://github.com/MarcBoule/ImpromptuModular/tree/cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "tree_truncated": false,
+      "inventory_file_count": 143,
+      "family": "Stored steps, traversal, phrase arrangement",
+      "declared_licence": "GPL-3.0-or-later src with separate exceptions; panels CC-BY-NC-ND-4.0; components separately licensed",
+      "inspection_scope": "Manual/concepts, PhraseSeqUtil run-mode state and FoundrySequencerKernel persistence/traversal sections; full dependency review pending",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "VCVRack/Befaco",
+      "commit": "5774d41468be885902ea3bdd399f0872996b98a2",
+      "commit_date": "2026-10-20T19:20:32Z",
+      "repository_url": "https://github.com/VCVRack/Befaco/tree/5774d41468be885902ea3bdd399f0872996b98a2",
+      "tree_truncated": false,
+      "inventory_file_count": 284,
+      "family": "Sequential signal routing",
+      "declared_licence": "GPL-3.0-or-later code; graphics permissions separate",
+      "inspection_scope": "README/licence and docs/Muxlicer.md; src/Muxlicer.cpp collected, runtime not fully reviewed",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "VCVRack/Fundamental",
+      "commit": "ce3326407eb49ba188509b07912d58772b22e284",
+      "commit_date": "2026-11-08T12:30:28Z",
+      "repository_url": "https://github.com/VCVRack/Fundamental/tree/ce3326407eb49ba188509b07912d58772b22e284",
+      "tree_truncated": false,
+      "inventory_file_count": 273,
+      "family": "Fixed step/CV",
+      "declared_licence": "GPL-3.0-or-later code; panel designs CC-BY-NC-ND-4.0",
+      "inspection_scope": "manual/SEQ3.md and licence; src/SEQ3.cpp collected, not fully reviewed",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "commit_date": "2025-05-27T19:59:36Z",
+      "repository_url": "https://github.com/bogaudio/BogaudioModules/tree/656eaae458e045602dc974bae82e15a11e104958",
+      "tree_truncated": false,
+      "inventory_file_count": 1366,
+      "family": "Addressed sequence",
+      "declared_licence": "GPL-3.0-or-later outside lib; graphics CC-BY-SA-4.0",
+      "inspection_scope": "README ADDR-SEQ; addressable_sequence.cpp inspected including nextStep and persistence",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "commit_date": "2026-11-12T04:35:42Z",
+      "repository_url": "https://github.com/eclab/seq/tree/932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "tree_truncated": false,
+      "inventory_file_count": 304,
+      "family": "Hierarchical composition and automata",
+      "declared_licence": "Apache-2.0 root/source; dependencies not audited",
+      "inspection_scope": "README; manual.tex hierarchy/contextual-editor sections; Motif.java definition/instance contract; AutomatonClip.process cycle and logical-thread bounds",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "commit_date": "2026-10-31T07:08:30Z",
+      "repository_url": "https://github.com/emuse/qmidiarp/tree/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "tree_truncated": false,
+      "inventory_file_count": 183,
+      "family": "Live held-note arpeggiator, separate steps/LFOs",
+      "declared_licence": "GPL-2.0-or-later source header",
+      "inspection_scope": "README, man/qmidiarp.1 arp/input/pattern/trigger sections and midiarp.cpp licence header; full worker review pending",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "commit_date": "2025-11-16T18:19:01Z",
+      "repository_url": "https://github.com/hundredrabbits/Orca/tree/223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "tree_truncated": false,
+      "inventory_file_count": 43,
+      "family": "Spatial procedural language",
+      "declared_licence": "MIT",
+      "inspection_scope": "README operators and I/O, resources/MANUAL.txt; orca.js parse/operate/write paths; library.js collected for future review",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "commit_date": "2025-09-05T13:08:54Z",
+      "repository_url": "https://github.com/monome/ansible/tree/9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "tree_truncated": false,
+      "inventory_file_count": 51,
+      "family": "Kria independent lanes; Meadowphysics counter rules",
+      "declared_licence": "GPL-2.0 licence included; file/dependency qualifiers need adoption audit",
+      "inspection_scope": "Kria and Meadowphysics manuals/diagrams; ansible_grid.h lane state; clock_kria_note, clock_kria_track and clock_mp source sections",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "commit_date": "2026-10-12T06:39:16Z",
+      "repository_url": "https://github.com/pichenettes/eurorack/tree/f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "tree_truncated": false,
+      "inventory_file_count": 1202,
+      "family": "Marbles evolving memory; Grids rhythm-map interpolation",
+      "declared_licence": "Marbles inspected headers MIT; Grids pattern_generator GPL-3.0-or-later; hardware separate",
+      "inspection_scope": "README licensing, original manuals; full marbles/random/random_sequence.h and grids/pattern_generator.cc; other selected files collected for closure review",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "stellare-modular/vcv-rack",
+      "commit": "2bdfa2a736306dd7a6722c3b1565704a8027427d",
+      "commit_date": "2019-02-06T10:35:12Z",
+      "repository_url": "https://github.com/stellare-modular/vcv-rack/tree/2bdfa2a736306dd7a6722c3b1565704a8027427d",
+      "tree_truncated": false,
+      "inventory_file_count": 4,
+      "family": "Negative finding for current Turing software reuse",
+      "declared_licence": "No usable implementation licence found in this current snapshot; VCV listing Freeware",
+      "inspection_scope": "Complete four-file inventory and README checked; no current implementation found here, no claim about all historical repositories",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "commit_date": "2026-11-13T14:02:15Z",
+      "repository_url": "https://github.com/surge-synthesizer/stochas/tree/340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "tree_truncated": false,
+      "inventory_file_count": 80,
+      "family": "Weighted and independent note probability, conditional chains",
+      "declared_licence": "GPL-3.0; exact file notices preserved",
+      "inspection_scope": "Website documentation status, screenshot; SequenceData cell/chain declarations; StochaEngine selection, dependency, mute and release sections",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "tidalcycles/Tidal",
+      "commit": "fefb1c364af42be265e9f02477d6d2d8fb2ec2b9",
+      "commit_date": "2025-06-13T19:22:15Z",
+      "repository_url": "https://github.com/tidalcycles/Tidal/tree/fefb1c364af42be265e9f02477d6d2d8fb2ec2b9",
+      "tree_truncated": false,
+      "inventory_file_count": 413,
+      "family": "Time-query functional patterns",
+      "declared_licence": "GPL-3.0; README gives derivative-work guidance",
+      "inspection_scope": "README migration notice; official cycle/composition docs; Pattern.hs State/Pattern and event whole/part definitions; GitHub snapshot is historical, current development moved to Codeberg",
+      "adoption_review_complete": false
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "commit_date": "2023-11-13T22:59:12Z",
+      "repository_url": "https://github.com/westlicht/performer/tree/f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "tree_truncated": false,
+      "inventory_file_count": 613,
+      "family": "Typed tracks, curves, generators",
+      "declared_licence": "MIT software; CC-BY-NC-SA-4.0 hardware",
+      "inspection_scope": "Manual (identifies 0.1.40); EuclideanGenerator.cpp, SequenceState.h; NoteTrackEngine condition/retrigger and CurveTrackEngine shape/queue sections",
+      "adoption_review_complete": false
+    }
+  ],
+  "files": [
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/README.md",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/README.md",
+      "bytes": 8129,
+      "sha256": "9156784bdbe3f177489bd5a70b25f5ffaa533dd275e6b79fa50b94199076c1b2",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/LICENSE",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/LICENSE",
+      "bytes": 35141,
+      "sha256": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "LICENSE",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/EuclideanSequencer.cpp",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/EuclideanSequencer.cpp",
+      "bytes": 30664,
+      "sha256": "59f234c562932a33769a2dadd17892b610d2d08e459d4b130597b0bd14f64136",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/EuclideanSequencer.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/Arpeggiator.cpp",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/Arpeggiator.cpp",
+      "bytes": 7900,
+      "sha256": "3344108551077998beb4d79ccf2382779cd978c0660355e25c3816308d1d7482",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/Arpeggiator.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/M185Sequencer.cpp",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/M185Sequencer.cpp",
+      "bytes": 7059,
+      "sha256": "11a7e4117896a61b8b6f5474f43352bd562e9615af43fb9d78d6e677e51c20a3",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/M185Sequencer.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/Transport.h",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/Transport.h",
+      "bytes": 8412,
+      "sha256": "44a3ca8d0dd4017729610f795410c6793a6084801c3d7107104e3ef4bfb54b71",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/Transport.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/INoteReceiver.h",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/INoteReceiver.h",
+      "bytes": 2491,
+      "sha256": "28cca8bf0fa3ccee0fc02de98b3fcf7c55feb0523897786d60f679f99a24e6d2",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/INoteReceiver.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/BespokeSynth/BespokeSynth/a0608a1acc704105c084af3b0fc3e63a6ed3e1b3/Source/IPulseReceiver.h",
+      "local_path": "docs/references/sequencer_research_20261117/BespokeSynth__BespokeSynth/Source/IPulseReceiver.h",
+      "bytes": 1667,
+      "sha256": "58380808c0487fce5726f4fb6c78cdebdb9b69286b7943aeade9f651bfe74620",
+      "repo": "BespokeSynth/BespokeSynth",
+      "commit": "a0608a1acc704105c084af3b0fc3e63a6ed3e1b3",
+      "path": "Source/IPulseReceiver.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://westlicht.github.io/performer/manual/",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/performer-manual.html",
+      "bytes": 186095,
+      "sha256": "cb9de9fdf7f7d2f8d82bc26f1d9e9dbc748e71eac6dbcd5b2cca29f69f5d9839",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://monome.org/docs/ansible/kria/",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/kria-manual.html",
+      "bytes": 43121,
+      "sha256": "780fed20a75b25e906debdccafcb0ac606b2f2cbfa849d5fb2beebccfdde1617",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://monome.org/docs/ansible/meadowphysics/",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/meadowphysics-manual.html",
+      "bytes": 22610,
+      "sha256": "5ea2934af4b21ea661d1cce24aaaeb11810b2289e03f2834fe84e0c2830302fb",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://pichenettes.github.io/mutable-instruments-documentation/modules/marbles/manual/",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/marbles-manual.html",
+      "bytes": 55171,
+      "sha256": "06b030c2b77a470422eb6857af9f36a2b51600b8bedd4670e58ba3b349adbac8",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://pichenettes.github.io/mutable-instruments-documentation/modules/grids/manual/",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/grids-manual.html",
+      "bytes": 42601,
+      "sha256": "6831a09c2eca2dd3a733d23a9358c865d12f77e400fc1646697102065a833b04",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://www.bespokesynth.com/docs/index.html",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/bespoke-reference.html",
+      "bytes": 166099,
+      "sha256": "bd82dbdb74c7533c1646d522ec2e4441f2d256ac9387f862e3c305230f341f88",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://stochas.org/assets/img/stochas_screenshot.png",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/stochas.png",
+      "bytes": 90541,
+      "sha256": "5350221f9306febe0cf081b6e598290bc2eeeb2bd4cb0d469322f4d4e583ac97",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://monome.org/docs/ansible/images/grid_KR_NAVIGATION_1.2.png",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/kria.png",
+      "bytes": 45857,
+      "sha256": "c87ccc82891a10d06326ca59fb038cab92b1e28a8468d852353259231aea39c0",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "url": "https://monome.org/docs/ansible/images/grid_MP_OVERVIEW_1.1.png",
+      "local_path": "docs/references/sequencer_research_20261117/manuals/meadowphysics.png",
+      "bytes": 36874,
+      "sha256": "54dd61aab82549961a56055afd40a89f7be421c579e7ea4e9f682e9e725f23cd",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Fundamental",
+      "commit": "ce3326407eb49ba188509b07912d58772b22e284",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Fundamental/ce3326407eb49ba188509b07912d58772b22e284/README.md",
+      "bytes": 440,
+      "sha256": "f1f70da022c9b27740cc340cb430ee1068939b7248dd3a3a0dcb87fa15b17834",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Fundamental/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Fundamental",
+      "commit": "ce3326407eb49ba188509b07912d58772b22e284",
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Fundamental/ce3326407eb49ba188509b07912d58772b22e284/LICENSE.md",
+      "bytes": 785,
+      "sha256": "cabee107063029e5e64c7c436eee5751ded7d0f47fa7db1685add354b0b42021",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Fundamental/LICENSE.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Fundamental",
+      "commit": "ce3326407eb49ba188509b07912d58772b22e284",
+      "path": "manual/SEQ3.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Fundamental/ce3326407eb49ba188509b07912d58772b22e284/manual/SEQ3.md",
+      "bytes": 2460,
+      "sha256": "2de063bf28678ad73522876f6565a1dcb4d9321040f07ce7b96fd41f402cebc0",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Fundamental/manual/SEQ3.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Fundamental",
+      "commit": "ce3326407eb49ba188509b07912d58772b22e284",
+      "path": "src/SEQ3.cpp",
+      "url": "https://raw.githubusercontent.com/VCVRack/Fundamental/ce3326407eb49ba188509b07912d58772b22e284/src/SEQ3.cpp",
+      "bytes": 17686,
+      "sha256": "5144a35b58c2187fd6611acfdccc7a938e16fd8a8febc8310871aa2f8fde7131",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Fundamental/src/SEQ3.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/README.md",
+      "bytes": 120547,
+      "sha256": "d749f13a440632e4692f25b43aa7d9b56998a533c431eb1643b57645d6ed4276",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/LICENSE.md",
+      "bytes": 1498,
+      "sha256": "fd841f087094622e45766658e248336d25fecfc39142764c47b2c00c8a6bda7d",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/LICENSE.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "LICENSE-ext.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/LICENSE-ext.md",
+      "bytes": 1065,
+      "sha256": "ff5fd1b09f643cdde5f5d7b417a92b1973ed15b8f60d2166a689f97cfd08d528",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/LICENSE-ext.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "CHANGELOG.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/CHANGELOG.md",
+      "bytes": 9214,
+      "sha256": "8941cecde464edcc9f5fc2f007a1b619e7195b750f4e4c57539b4ec8d7b7beda",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/CHANGELOG.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "README_SeqCode.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/README_SeqCode.md",
+      "bytes": 1848,
+      "sha256": "6765609aa09b430d4ad4029871fa19b6fd9e1a44fae55fd3f4a6653024153a3a",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/README_SeqCode.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "clipboard-format.md",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/clipboard-format.md",
+      "bytes": 7866,
+      "sha256": "0b546649b800a66871c1889e47e2c5ab6e872792921e9aa5c2bb93570834476c",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/clipboard-format.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "src/FoundrySequencerKernel.hpp",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/src/FoundrySequencerKernel.hpp",
+      "bytes": 19980,
+      "sha256": "109cec6b6b854f236f946849d720c791db303d093dcd714c0a3d716fd6e47d62",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/src/FoundrySequencerKernel.hpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "src/FoundrySequencerKernel.cpp",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/src/FoundrySequencerKernel.cpp",
+      "bytes": 31987,
+      "sha256": "7e08402831b2e9ab4a635039150ba0d111c48f3e7c69f552d10957635a7c3978",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/src/FoundrySequencerKernel.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "MarcBoule/ImpromptuModular",
+      "commit": "cf87c918875e502043cabe3deaa2e52adda7cecd",
+      "path": "src/PhraseSeqUtil.hpp",
+      "url": "https://raw.githubusercontent.com/MarcBoule/ImpromptuModular/cf87c918875e502043cabe3deaa2e52adda7cecd/src/PhraseSeqUtil.hpp",
+      "bytes": 8786,
+      "sha256": "664e7e6ef62a51ddd8c6192dcb80f29fc21539ff20080223c6d2d59c7035c0aa",
+      "local_path": "docs/references/sequencer_research_20261117/MarcBoule__ImpromptuModular/src/PhraseSeqUtil.hpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/bogaudio/BogaudioModules/656eaae458e045602dc974bae82e15a11e104958/README.md",
+      "bytes": 127716,
+      "sha256": "cfb21c6dfc48c0b084befc53ba5cfbbedecfe7885548acbf9110025b76b577a5",
+      "local_path": "docs/references/sequencer_research_20261117/bogaudio__BogaudioModules/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/bogaudio/BogaudioModules/656eaae458e045602dc974bae82e15a11e104958/LICENSE.md",
+      "bytes": 415,
+      "sha256": "32881c52e22ac815c310d5efb78157c73fa7c1fcb6ea82bdbdfb4a82d5f1bb2d",
+      "local_path": "docs/references/sequencer_research_20261117/bogaudio__BogaudioModules/LICENSE.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "path": "src/AddrSeq.cpp",
+      "url": "https://raw.githubusercontent.com/bogaudio/BogaudioModules/656eaae458e045602dc974bae82e15a11e104958/src/AddrSeq.cpp",
+      "bytes": 4837,
+      "sha256": "3e023ad5ee7c2ff0d996cfcc0e26f9bf45a0fc27ff3645001badba540e5763df",
+      "local_path": "docs/references/sequencer_research_20261117/bogaudio__BogaudioModules/src/AddrSeq.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "path": "src/addressable_sequence.cpp",
+      "url": "https://raw.githubusercontent.com/bogaudio/BogaudioModules/656eaae458e045602dc974bae82e15a11e104958/src/addressable_sequence.cpp",
+      "bytes": 5012,
+      "sha256": "74d076af17e9485930e6f4f61249ef1051cc5360ce2c0f7ea47828607be068c9",
+      "local_path": "docs/references/sequencer_research_20261117/bogaudio__BogaudioModules/src/addressable_sequence.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "bogaudio/BogaudioModules",
+      "commit": "656eaae458e045602dc974bae82e15a11e104958",
+      "path": "src/addressable_sequence.hpp",
+      "url": "https://raw.githubusercontent.com/bogaudio/BogaudioModules/656eaae458e045602dc974bae82e15a11e104958/src/addressable_sequence.hpp",
+      "bytes": 1430,
+      "sha256": "df79928b950ed556aeb2e1aa87219e93c2562cca5ab5ba19e593865f2964e5bf",
+      "local_path": "docs/references/sequencer_research_20261117/bogaudio__BogaudioModules/src/addressable_sequence.hpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/surge-synthesizer/stochas/340a5b7d84d184e9c5d3487ef722e7962705bb0a/README.md",
+      "bytes": 3768,
+      "sha256": "19be79f246610ab7962549c27aaf473b4dc2a84bf4d0743f2dd95f03053160a6",
+      "local_path": "docs/references/sequencer_research_20261117/surge-synthesizer__stochas/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "path": "COPYING",
+      "url": "https://raw.githubusercontent.com/surge-synthesizer/stochas/340a5b7d84d184e9c5d3487ef722e7962705bb0a/COPYING",
+      "bytes": 35148,
+      "sha256": "8b1ba204bb69a0ade2bfcf65ef294a920f6bb361b317dba43c7ef29d96332b9b",
+      "local_path": "docs/references/sequencer_research_20261117/surge-synthesizer__stochas/COPYING",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "path": "src/SequenceData.h",
+      "url": "https://raw.githubusercontent.com/surge-synthesizer/stochas/340a5b7d84d184e9c5d3487ef722e7962705bb0a/src/SequenceData.h",
+      "bytes": 24877,
+      "sha256": "fd1cbbcbd970f157d6b1e4941d90883156fb72d37dffa4e57361b880714dc451",
+      "local_path": "docs/references/sequencer_research_20261117/surge-synthesizer__stochas/src/SequenceData.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "path": "src/StochaEngine.cpp",
+      "url": "https://raw.githubusercontent.com/surge-synthesizer/stochas/340a5b7d84d184e9c5d3487ef722e7962705bb0a/src/StochaEngine.cpp",
+      "bytes": 45531,
+      "sha256": "ff9d68e560a3ad73cded048b97bf18fe0d571e99375de7c440f1c5f221fec466",
+      "local_path": "docs/references/sequencer_research_20261117/surge-synthesizer__stochas/src/StochaEngine.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "surge-synthesizer/stochas",
+      "commit": "340a5b7d84d184e9c5d3487ef722e7962705bb0a",
+      "path": "src/StochaEngine.h",
+      "url": "https://raw.githubusercontent.com/surge-synthesizer/stochas/340a5b7d84d184e9c5d3487ef722e7962705bb0a/src/StochaEngine.h",
+      "bytes": 11447,
+      "sha256": "3b0a3154c235b66e8233ab3489095fe1eedf64587e56014a81c4f818a9eeb934",
+      "local_path": "docs/references/sequencer_research_20261117/surge-synthesizer__stochas/src/StochaEngine.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/README.md",
+      "bytes": 8305,
+      "sha256": "67d14e8fd19e369491f3db1aee7b493cd1dfbf5dc38ee05fb881c52166fa64b5",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/LICENSE",
+      "bytes": 1086,
+      "sha256": "eadb6ddacabae9f7da1420ac5bdc1eccbec712f32b2afa2894e6018d4e7692b0",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/LICENSE",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/engine/NoteTrackEngine.cpp",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/engine/NoteTrackEngine.cpp",
+      "bytes": 16769,
+      "sha256": "3a289d5b5d9e0e465db847ed2c3b6e9160db4442f9aa4102cdf060821d623b9b",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/engine/NoteTrackEngine.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/engine/CurveTrackEngine.cpp",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/engine/CurveTrackEngine.cpp",
+      "bytes": 9510,
+      "sha256": "c9d7a583fe539f0e62417931b24cd7e9ea81e9bae81b65ab3cdbf456c56b97fd",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/engine/CurveTrackEngine.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/engine/SequenceState.h",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/engine/SequenceState.h",
+      "bytes": 700,
+      "sha256": "efece95d2bb7e9ae542614f8e0fb9b6b1e792595e88ec4d3292f79a5367a22d2",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/engine/SequenceState.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/engine/generators/EuclideanGenerator.cpp",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/engine/generators/EuclideanGenerator.cpp",
+      "bytes": 1436,
+      "sha256": "02d9c1edc576108fd73f59dbb55d8493626f318ece9a95d4300a24931982f196",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/engine/generators/EuclideanGenerator.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/model/NoteSequence.h",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/model/NoteSequence.h",
+      "bytes": 15057,
+      "sha256": "41499ca57f73472f79150760b41dc99f5592d0e35bcf9b46c2a993e99ed5116e",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/model/NoteSequence.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "westlicht/performer",
+      "commit": "f0c2328eb4ec6e638352fb2b04edffea1017c251",
+      "path": "src/apps/sequencer/ui/pages/GeneratorPage.cpp",
+      "url": "https://raw.githubusercontent.com/westlicht/performer/f0c2328eb4ec6e638352fb2b04edffea1017c251/src/apps/sequencer/ui/pages/GeneratorPage.cpp",
+      "bytes": 6569,
+      "sha256": "33d6636f65bf3c0ad7c0aca3d5f69dbd2e1eb7397c4bc5eace3925a4691c7c33",
+      "local_path": "docs/references/sequencer_research_20261117/westlicht__performer/src/apps/sequencer/ui/pages/GeneratorPage.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/monome/ansible/9796656cbbe9eb0227d380d555e31192f0cf32bf/README.md",
+      "bytes": 386,
+      "sha256": "609005ba906458fdd4b24d16be70ecbb3b13896bf55672ed81911309cbc79b12",
+      "local_path": "docs/references/sequencer_research_20261117/monome__ansible/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/monome/ansible/9796656cbbe9eb0227d380d555e31192f0cf32bf/LICENSE",
+      "bytes": 18026,
+      "sha256": "39db8f9acf036595a2566ea3fe560bc7bd65d8749f088e0f4a4ef2f8a6cb4b34",
+      "local_path": "docs/references/sequencer_research_20261117/monome__ansible/LICENSE",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "path": "CHANGELOG.md",
+      "url": "https://raw.githubusercontent.com/monome/ansible/9796656cbbe9eb0227d380d555e31192f0cf32bf/CHANGELOG.md",
+      "bytes": 2157,
+      "sha256": "8bd30e7be3296a4af9a06acc0162962e2b87fc962f83bb856b55ed1ec8c8fdaa",
+      "local_path": "docs/references/sequencer_research_20261117/monome__ansible/CHANGELOG.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "path": "src/ansible_grid.h",
+      "url": "https://raw.githubusercontent.com/monome/ansible/9796656cbbe9eb0227d380d555e31192f0cf32bf/src/ansible_grid.h",
+      "bytes": 5132,
+      "sha256": "2a3e5dc681cc253f42cc5915906578bf87eb04141ed2c8b8ffdba6bac989a0a3",
+      "local_path": "docs/references/sequencer_research_20261117/monome__ansible/src/ansible_grid.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "monome/ansible",
+      "commit": "9796656cbbe9eb0227d380d555e31192f0cf32bf",
+      "path": "src/ansible_grid.c",
+      "url": "https://raw.githubusercontent.com/monome/ansible/9796656cbbe9eb0227d380d555e31192f0cf32bf/src/ansible_grid.c",
+      "bytes": 143122,
+      "sha256": "dcee226ecc756bc496b6e0fb7a07443d9bfd392eff801ef2060f0d515cc2acab",
+      "local_path": "docs/references/sequencer_research_20261117/monome__ansible/src/ansible_grid.c",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/README.md",
+      "bytes": 2960,
+      "sha256": "437f4a15b7683dafabfbda1c09e0e8055e2d304cfefcb6b58c9c1f66539728c4",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "grids/pattern_generator.h",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/grids/pattern_generator.h",
+      "bytes": 6951,
+      "sha256": "d0a2038d01289a2a554658e8832d099e2c47459ee26d31a61ab92c9f92a3d3ef",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/grids/pattern_generator.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "grids/pattern_generator.cc",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/grids/pattern_generator.cc",
+      "bytes": 6119,
+      "sha256": "33bea2b5233a6becf86a70b455dfba5ffa4a831dd7fdcd3a8ebaac61a722ddd5",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/grids/pattern_generator.cc",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "marbles/random/random_sequence.h",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/marbles/random/random_sequence.h",
+      "bytes": 7889,
+      "sha256": "3fbf59649d3cd8ebad3bfa4120d29afffd8ca5f7c13e4ce05bafadfb7c49d55c",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/marbles/random/random_sequence.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "marbles/random/t_generator.h",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/marbles/random/t_generator.h",
+      "bytes": 5895,
+      "sha256": "f0351107105e565c6891725b349644178eae5cf663b66f7eb94817ef3a170a49",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/marbles/random/t_generator.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "marbles/random/t_generator.cc",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/marbles/random/t_generator.cc",
+      "bytes": 13220,
+      "sha256": "997e3a6872601f8894b0995cb282c692dd637f83f7cef360f342158d52e8d60a",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/marbles/random/t_generator.cc",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "marbles/random/x_y_generator.cc",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/marbles/random/x_y_generator.cc",
+      "bytes": 6729,
+      "sha256": "92b81a1cc2792a869b61548fea6575eeba374885d7abd3bfce04812966348924",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/marbles/random/x_y_generator.cc",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "pichenettes/eurorack",
+      "commit": "f4cfa7697095a28d292bff758beb51deb49b5a86",
+      "path": "marbles/random/output_channel.cc",
+      "url": "https://raw.githubusercontent.com/pichenettes/eurorack/f4cfa7697095a28d292bff758beb51deb49b5a86/marbles/random/output_channel.cc",
+      "bytes": 4912,
+      "sha256": "9de92f55030d59da41f3591645d1f9307e6c1ec0fda7e31a2177f8e2cce535a4",
+      "local_path": "docs/references/sequencer_research_20261117/pichenettes__eurorack/marbles/random/output_channel.cc",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/README.md",
+      "bytes": 8370,
+      "sha256": "62d6856811fecd77aa5f3db674e750cd58a1525f81de139b172d35aec5d2bfdc",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/LICENSE",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "docs/manual.tex",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/docs/manual.tex",
+      "bytes": 180131,
+      "sha256": "519e8687673963da289a236f33ab8b3b239797718e5c345f5bcd2430949e1a9c",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/docs/manual.tex",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "seq/engine/Motif.java",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/seq/engine/Motif.java",
+      "bytes": 45745,
+      "sha256": "c1bedec8235d6ba80ebca4daee4f0aa204bee80a838fc24b15582e8bddfd9e5a",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/seq/engine/Motif.java",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "seq/motif/automaton/AutomatonClip.java",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/seq/motif/automaton/AutomatonClip.java",
+      "bytes": 42005,
+      "sha256": "b98672c7a1e9aab413ee9e9ea2b5e2828966d0bef8f5f1ebb025d0706ecb285a",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/seq/motif/automaton/AutomatonClip.java",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "seq/motif/series/SeriesClip.java",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/seq/motif/series/SeriesClip.java",
+      "bytes": 26777,
+      "sha256": "acca6a573f58d2f0de540501558b85cc4440e223b8ffd89e991b677bef65de17",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/seq/motif/series/SeriesClip.java",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "eclab/seq",
+      "commit": "932cb70fb9b4f68621e45f49d41c8331a4fa69ac",
+      "path": "seq/motif/parallel/ParallelClip.java",
+      "url": "https://raw.githubusercontent.com/eclab/seq/932cb70fb9b4f68621e45f49d41c8331a4fa69ac/seq/motif/parallel/ParallelClip.java",
+      "bytes": 28205,
+      "sha256": "9e3c2b223fc3c8761652fce0f94e2b866c9cce2137835bf4598521fe70197be3",
+      "local_path": "docs/references/sequencer_research_20261117/eclab__seq/seq/motif/parallel/ParallelClip.java",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/hundredrabbits/Orca/223e45c84db14cb77fb1d31e29a3ad94652080d8/README.md",
+      "bytes": 13302,
+      "sha256": "345d068be97d91910ec82f6a2f1a0d857e50ca4066103e34ff9af9e18b6aff29",
+      "local_path": "docs/references/sequencer_research_20261117/hundredrabbits__Orca/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/hundredrabbits/Orca/223e45c84db14cb77fb1d31e29a3ad94652080d8/LICENSE.md",
+      "bytes": 1071,
+      "sha256": "d6c6f0c7b36370fc9607fe710b9fa7eed5d8196ceedb5263ed6e025d1b312519",
+      "local_path": "docs/references/sequencer_research_20261117/hundredrabbits__Orca/LICENSE.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "path": "resources/MANUAL.txt",
+      "url": "https://raw.githubusercontent.com/hundredrabbits/Orca/223e45c84db14cb77fb1d31e29a3ad94652080d8/resources/MANUAL.txt",
+      "bytes": 2589,
+      "sha256": "0920aaa4ab883d08a9e8aad81d9598a70f1fab746063d4bc561dc6bc1c9f3a89",
+      "local_path": "docs/references/sequencer_research_20261117/hundredrabbits__Orca/resources/MANUAL.txt",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "path": "desktop/sources/scripts/core/library.js",
+      "url": "https://raw.githubusercontent.com/hundredrabbits/Orca/223e45c84db14cb77fb1d31e29a3ad94652080d8/desktop/sources/scripts/core/library.js",
+      "bytes": 21348,
+      "sha256": "a0a20db009fcb090bfee81400cc791141ca2bccaaa62a2d06ac64140cabe8304",
+      "local_path": "docs/references/sequencer_research_20261117/hundredrabbits__Orca/desktop/sources/scripts/core/library.js",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "hundredrabbits/Orca",
+      "commit": "223e45c84db14cb77fb1d31e29a3ad94652080d8",
+      "path": "desktop/sources/scripts/core/orca.js",
+      "url": "https://raw.githubusercontent.com/hundredrabbits/Orca/223e45c84db14cb77fb1d31e29a3ad94652080d8/desktop/sources/scripts/core/orca.js",
+      "bytes": 5084,
+      "sha256": "e1891f257680c3056bec3053fb50d8e26d5f1d5c7a3b1d09379314c1e8ef737f",
+      "local_path": "docs/references/sequencer_research_20261117/hundredrabbits__Orca/desktop/sources/scripts/core/orca.js",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "path": "README",
+      "url": "https://raw.githubusercontent.com/emuse/qmidiarp/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480/README",
+      "bytes": 2552,
+      "sha256": "1566b5f7b5ae1783d5b7c565a75875f2540ab7c738dfbeaadc55eda82b8ec664",
+      "local_path": "docs/references/sequencer_research_20261117/emuse__qmidiarp/README",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "path": "COPYING",
+      "url": "https://raw.githubusercontent.com/emuse/qmidiarp/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480/COPYING",
+      "bytes": 15131,
+      "sha256": "67f82e045cf7acfef853ea0f426575a8359161a0a325e19f02b529a87c4b6c34",
+      "local_path": "docs/references/sequencer_research_20261117/emuse__qmidiarp/COPYING",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "path": "man/qmidiarp.1",
+      "url": "https://raw.githubusercontent.com/emuse/qmidiarp/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480/man/qmidiarp.1",
+      "bytes": 21819,
+      "sha256": "06099845e5a01af2adaa34fa21d6620362141a44a2f7bb3b5d2680a24082d327",
+      "local_path": "docs/references/sequencer_research_20261117/emuse__qmidiarp/man/qmidiarp.1",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "path": "src/midiarp.cpp",
+      "url": "https://raw.githubusercontent.com/emuse/qmidiarp/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480/src/midiarp.cpp",
+      "bytes": 26279,
+      "sha256": "f94ea9d42ce53d6ce101d0d7b852a2ce1c1ea41e5ebd53035e177ae1ab04f882",
+      "local_path": "docs/references/sequencer_research_20261117/emuse__qmidiarp/src/midiarp.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "emuse/qmidiarp",
+      "commit": "9ef4dfd0672c1023b9995da5d7a270dc2ab2f480",
+      "path": "src/midiarp.h",
+      "url": "https://raw.githubusercontent.com/emuse/qmidiarp/9ef4dfd0672c1023b9995da5d7a270dc2ab2f480/src/midiarp.h",
+      "bytes": 14456,
+      "sha256": "1aed56f2f5eb4153e0b3ece43d3cd89822f469995da48aef66cb2144c69c71c6",
+      "local_path": "docs/references/sequencer_research_20261117/emuse__qmidiarp/src/midiarp.h",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "tidalcycles/Tidal",
+      "commit": "fefb1c364af42be265e9f02477d6d2d8fb2ec2b9",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/tidalcycles/Tidal/fefb1c364af42be265e9f02477d6d2d8fb2ec2b9/README.md",
+      "bytes": 566,
+      "sha256": "cddb630aa1e81d510d22c3f0e623c45d6b00185449ad015b57af91b0f2a0ca09",
+      "local_path": "docs/references/sequencer_research_20261117/tidalcycles__Tidal/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "tidalcycles/Tidal",
+      "commit": "fefb1c364af42be265e9f02477d6d2d8fb2ec2b9",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/tidalcycles/Tidal/fefb1c364af42be265e9f02477d6d2d8fb2ec2b9/LICENSE",
+      "bytes": 35106,
+      "sha256": "804821a9171f6eb0e0d26635922480bf479c2d646c2609f6273a85191949b8df",
+      "local_path": "docs/references/sequencer_research_20261117/tidalcycles__Tidal/LICENSE",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "tidalcycles/Tidal",
+      "commit": "fefb1c364af42be265e9f02477d6d2d8fb2ec2b9",
+      "path": "tidal-core/src/Sound/Tidal/Pattern.hs",
+      "url": "https://raw.githubusercontent.com/tidalcycles/Tidal/fefb1c364af42be265e9f02477d6d2d8fb2ec2b9/tidal-core/src/Sound/Tidal/Pattern.hs",
+      "bytes": 46105,
+      "sha256": "66f89d162575e126cd7931fb54aaf00c992821de6665515e47acb641d88282d4",
+      "local_path": "docs/references/sequencer_research_20261117/tidalcycles__Tidal/tidal-core/src/Sound/Tidal/Pattern.hs",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Befaco",
+      "commit": "5774d41468be885902ea3bdd399f0872996b98a2",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Befaco/5774d41468be885902ea3bdd399f0872996b98a2/README.md",
+      "bytes": 2017,
+      "sha256": "910521a50b69030bd576b8fbcff05a6ed8b9dd9df688f3082af8dc7eec3101ec",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Befaco/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Befaco",
+      "commit": "5774d41468be885902ea3bdd399f0872996b98a2",
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Befaco/5774d41468be885902ea3bdd399f0872996b98a2/LICENSE.md",
+      "bytes": 843,
+      "sha256": "324c476aa8ec20398ebf0831073b4739e1fe131d285c08c1f58aa766d2d21ab5",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Befaco/LICENSE.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Befaco",
+      "commit": "5774d41468be885902ea3bdd399f0872996b98a2",
+      "path": "docs/Muxlicer.md",
+      "url": "https://raw.githubusercontent.com/VCVRack/Befaco/5774d41468be885902ea3bdd399f0872996b98a2/docs/Muxlicer.md",
+      "bytes": 1748,
+      "sha256": "dd03575832d45ec1f50d82fc99d2f22f8cac77f5013fbf507bc9ad1453105023",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Befaco/docs/Muxlicer.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "VCVRack/Befaco",
+      "commit": "5774d41468be885902ea3bdd399f0872996b98a2",
+      "path": "src/Muxlicer.cpp",
+      "url": "https://raw.githubusercontent.com/VCVRack/Befaco/5774d41468be885902ea3bdd399f0872996b98a2/src/Muxlicer.cpp",
+      "bytes": 46413,
+      "sha256": "9ad99384a1260d3e0a827660aab2c13492f4a7c89894293b373afd19c37a9738",
+      "local_path": "docs/references/sequencer_research_20261117/VCVRack__Befaco/src/Muxlicer.cpp",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    },
+    {
+      "repo": "stellare-modular/vcv-rack",
+      "commit": "2bdfa2a736306dd7a6722c3b1565704a8027427d",
+      "path": "README.md",
+      "url": "https://raw.githubusercontent.com/stellare-modular/vcv-rack/2bdfa2a736306dd7a6722c3b1565704a8027427d/README.md",
+      "bytes": 1195,
+      "sha256": "d4bb3f3dd46234c67d92fadfbaa7edfc4fd1c1463a201f4be4d50a242d0039db",
+      "local_path": "docs/references/sequencer_research_20261117/stellare-modular__vcv-rack/README.md",
+      "collection_status": "downloaded_and_hash_verified; see repository inspection_scope, not a full review claim"
+    }
+  ]
+}

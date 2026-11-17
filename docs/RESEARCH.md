@@ -118,13 +118,24 @@ potential uses and remaining pre-use review. None has been adopted in this build
 
 ## Sequencer models and independent arpeggiator
 
-[SEQUENCERS_AND_ARPEGGIATORS.md](SEQUENCERS_AND_ARPEGGIATORS.md) compares primary
-VCV/Impromptu/Bogaudio/Music Thing documentation with local Optiseq source and
-engineering history. It proposes distinct step, phrase, Euclidean, addressable
-and evolving-loop models sharing clock/events, plus an independent arp. It records
-Optiseq persistence and variation lessons and the existing Spectral arp's timing
-boundary. The first-party clock/event foundation is now implemented and tested
-offline; event cables and playable sequencer/arp modules are not yet integrated.
+[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md) is the expanded request
+38 source study: 15 families, method taxonomy, primary source cards, licence and
+inspection limits. [SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md)
+synthesises shared Pattern modes/widgets and separate specialist modules, with
+state, capture, agent and performance requirements. Fourteen repository inventories
+and 86 downloaded reference files are indexed with hashes and inspection scope in
+[sequencer_research_sources_20261117.json](sequencer_research_sources_20261117.json).
+Original source/manual/UI copies remain under ignored `references/`.
+
+Corrections verified against source: PER|FORMER software is MIT; Marbles headers
+are MIT but Grids is GPLv3-or-later; a current freeware Stellare listing does not
+establish reusable source. Tidal's collected GitHub snapshot is historical after
+its move to Codeberg. No sequencer candidate has been adopted or run.
+
+[SEQUENCERS_AND_ARPEGGIATORS.md](SEQUENCERS_AND_ARPEGGIATORS.md) retains the earlier
+VCV/local Optiseq findings and tested, isolated timing prototype. Request 38
+supersedes its old implementation order. No new engine code or app build was made
+for this research; event cables and playable sequencer/arp modules remain pending.
 
 ## Delay and reverb modules
 

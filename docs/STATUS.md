@@ -1,5 +1,33 @@
 # Optisynth status — 17 November 2026
 
+## Current delivery — sequencer research and architecture proposal
+
+Request 38 is fulfilled as research and documentation, with no further building.
+[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md) categorises 15 families
+and separates representation, views, traversal, generation, live processes, note
+transformation and arrangement. Fourteen pinned repository inventories, 86 selected
+source/manual/image files (2,157,919 bytes), licences and inspection scope are in
+`sequencer_research_sources_20261117.json`. All collected hashes verified. One
+repository is a negative finding: the current Stellare listing is not verified
+reusable open-source implementation. Selected inspection is not adoption clearance.
+
+[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md) proposes one configurable
+Pattern module plus independent Arp, Stage, Euclidean, Memory, Rhythm Map, Counters
+and Conductor families. It specifies shared widgets, contextual editors, native
+state/capture, agent operations and performance implications. These are proposed
+families, not implemented features or all part of the first release.
+
+Exact next work before a build: make the Pattern lane/event/port contract concrete,
+complete the selected dependency review and compare static Pattern/Arp/Stage/Memory
+wireframes. Existing timing code remains an isolated prototype to reassess against
+that contract. The remaining implementation steps below are queued; the prior
+standing instruction to continue does not override this research-first request.
+
+Research backup: `../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
+and source/docs backup `optisynth-source-20261117-212559.tar.gz` in the same folder,
+both with checksums and verified contents. The source archive also passed a fresh
+directory restore. Source/raw reference copies were not run or installed.
+
 ## Current delivery: complete Spectral and modulation matrix, standalone 0.0.6
 
 23 module types and eight starters. New: complete `spectral.engine`, independent
@@ -47,8 +75,8 @@ shared sample clock, independent grid divisions, ordered bounded note events and
 source-specific held-note ownership. All 47 checks pass normally and under
 ASan/UBSan with zero counted playback allocation. See `SEQUENCERS_AND_ARPEGGIATORS.md`
 and `../build/timing-qualification.log`. It is not yet connected to Runtime/Player;
-no new app build or playable sequencer/arp module is claimed. Next: integrate event
-inputs and rendering at event offsets, then build their contextual module panels.
+no new app build or playable sequencer/arp module is claimed. Event integration
+and panels are deferred until the research-derived design steps above are complete.
 
 ## Existing sample-player and contextual-rack features
 
@@ -118,17 +146,15 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 37 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 38 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
 increment above. It does not complete the subsequent sequencer/effect roadmap.
 
-Requests 33–34: multiple sequencer models and an independent arp are researched in
-`SEQUENCERS_AND_ARPEGGIATORS.md`. Share clock, sample-timestamped note events and
-modulation connections, while step, phrase/generative, Euclidean, addressable and
-evolving-loop models retain distinct state and contextual UI. VCV manuals and
-local Optiseq source/logs inform this design. The clock/event foundation now passes
-offline checks; sequencer/arp algorithms and app integration remain next.
+Requests 33–34 are expanded by request 38's sequencer research above. Shared Pattern
+views/traversal options and separate process modules replace the earlier undetailed
+shortlist. `SEQUENCERS_AND_ARPEGGIATORS.md` retains the local Optiseq lessons and
+isolated clock/event prototype history. Playable sequencers/arps remain pending.
 
 Request 35: `OPEN_SOURCE_DELAY_REVERB.md` records Clouds/Parasites, 4ms DLD,
 Valley Plateau, CHOW Matrix, Airwindows and DaisySP candidates, published licences,
@@ -177,9 +203,8 @@ module/sample/polyphony development order continues.
 
 Request 32's complete engine, stereo/state boundary and first shared matrix are
 implemented in 0.0.6. The older full Spectral editor's structural controls remain
-to adapt. Exact next architecture work is a timestamped event/transport interface,
-then the first independent step sequencer/arp; retain the different-model design
-in `SEQUENCERS_AND_ARPEGGIATORS.md` and the effects review queue. Add broader
+to adapt. Sequencer next steps now follow request 38's research and UI architecture
+above; preserve the effects review queue. Add broader
 whole-engine editing and modulation indicators without splitting Spectral apart.
 Use the Pigments/Vital suggestion for matrix/parameter assignment; keep one stable
 routing representation. Broader bounded polyphony and voice/global boundaries,

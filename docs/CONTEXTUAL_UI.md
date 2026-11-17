@@ -87,3 +87,17 @@ older editor. At minimum size, six knobs occupy one readable row; taller views
 use two rows. Independent LFO has named shapes and a note-reset switch. Explicit
 stereo adapters explain their operation on the panel. Native captures and limits
 are recorded in `../design-qa.md`.
+
+## Sequencer UI research — request 38
+
+[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md) proposes a shared
+Pattern editor for compatible note/drum/control data, with separate contextual
+editors for Arp, Stage, Memory, Rhythm Map, Counters and Conductor. Compact rack
+panels retain characteristic performance controls; Focus supplies the detailed
+editor. Shared transport, lane, inspector, history, routing and capture components
+do not require every module to store the same kind of pattern.
+
+Stochas's grid/chain screenshot and Kria/Meadowphysics manual diagrams were inspected
+and collected under `references/sequencer_research_20261117/manuals/`. The source
+manifest records their URLs/hashes. They are visual references, not app artwork.
+No UI implementation or mockup is claimed for this research milestone.
