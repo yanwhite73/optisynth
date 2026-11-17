@@ -8,6 +8,21 @@ verbatim request text are preserved; no new synth build accompanies the move.
 
 ## Current delivery — sequencer research and architecture proposal
 
+Request 42 adds [OXI ONE MKII](../research/sequencers/OXI_ONE_REFERENCE.md), interpreting
+the user's “ox sequencer” as OXI ONE. Fifteen official diagrams are saved, visually
+inspected and [annotated](../ui/sequencers/oxi.md), with 13 manual chapter snapshots.
+The combined atlas now has 54 images across nine source groups. OXI is a commercial
+UX/model reference; reusable ONE engine source has not been established.
+New design requirements cover typed chord progression editing, explicit trigger-
+driven phrase advancement, stage duration, visible arp input/harmonic relationships
+and persistent performance state. Include these scenarios in the next wireframes.
+No runtime implementation or app build accompanies this research.
+
+OXI backup: `../../../backups/optisynth/optisynth-oxi-references-20261117-220809.tar.gz`
+(46 reference/analysis files verified); updated source/docs archive:
+`optisynth-source-20261117-220809.tar.gz` in the same folder (189 files verified).
+Checksums and validation details are in `ENGINEERING_LOG.md`.
+
 Request 41 is addressed with an expanded [visual atlas](../ui/sequencers/README.md):
 39 publisher images saved and visually inspected across eight source groups
 (20 software screenshots/panel captures; 19 manual diagrams/screen examples).
@@ -174,7 +189,7 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `../research/modules/OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `../research/RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 41 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 42 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
 increment above. It does not complete the subsequent sequencer/effect roadmap.

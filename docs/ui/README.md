@@ -10,8 +10,8 @@
 ## Collected sequencer visuals
 
 **[Open the illustrated sequencer atlas](sequencers/README.md).** It contains
-39 inspected publisher images across eight source groups: 20 software screenshots/
-panel captures and 19 manual diagrams/screen examples. Eight illustrated pages
+54 inspected publisher images across nine source groups: 20 software screenshots/
+panel captures and 34 manual diagrams/screen examples. Nine illustrated pages
 annotate every image; the index shows representative comparisons directly.
 
 - [Workflow comparison and design consequences](sequencers/WORKFLOWS.md): note
@@ -19,6 +19,9 @@ annotate every image; the index shows representative comparisons directly.
   launch, arrangement and the remaining wireframe questions.
 - [Image provenance and inspection catalogue](sequencers/visual_sources_20261117.json):
   URLs, local paths, hashes, observations and proposed adaptations.
+- [OXI ONE MKII comparison](sequencers/oxi.md) and
+  [OXI provenance supplement](sequencers/oxi_sources_20261117.json): 15 additional
+  diagrams covering its contextual modes and performance workflow (request 42).
 
 Request 41 expanded the earlier three-image sample by 36 actual images. This is
 published visual/manual research, not a hands-on audit. Source assets remain local

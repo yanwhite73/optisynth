@@ -349,3 +349,20 @@ Delivered: 39 inspected images, eight illustrated source pages and a cross-sourc
 workflow comparison in `../ui/sequencers/`. Revised the proposal around the visual
 evidence. Static/manual study is complete for this collection; hands-on usability
 and our own wireframe evaluation remain separate next steps. No device was built.
+
+## 42 — Include the OX sequencer
+
+```text
+you should include the ox sequencer
+```
+
+Include the requested sequencer in the research and visual/workflow comparison.
+Identify the intended product from primary sources; OXI ONE is the initial working
+interpretation. Capture actual interface references and model-specific lessons,
+and distinguish a commercial UX reference from verified reusable open-source code.
+
+Delivered under that working identification: OXI ONE MKII model/source assessment,
+15 inspected and illustrated manual diagrams, 13 chapter snapshots and revisions
+to the shared editor/mode proposal. See `../research/sequencers/OXI_ONE_REFERENCE.md`
+and `../ui/sequencers/oxi.md`. Firmware/manual edition and unresolved source/table
+limitations are explicit. No device implementation.

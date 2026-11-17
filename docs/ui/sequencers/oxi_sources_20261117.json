@@ -1,0 +1,353 @@
+{
+  "schema": 1,
+  "collected_on": "2026-11-17",
+  "request": 42,
+  "requested_name": "ox sequencer",
+  "working_identification": "OXI ONE; MKII is the documented reference here",
+  "manual_edition": "HTML pages identify firmware 2.2.10 / manual v2.0a",
+  "scope": "15 original manual diagrams visually inspected; selected manual sections researched. No hands-on hardware test or engine source adoption.",
+  "licence_status": "Commercial UX reference; reusable OXI ONE engine source/licence not established. Artwork remains local research material.",
+  "assets": [
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/mono-mode/mono-mode-002.webp",
+      "id": "OX01",
+      "title": "Mono note entry",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/mono-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX01.webp",
+      "bytes": 45518,
+      "sha256": "9000bc1bb834271ce7fb35baccd2b0ecb8cec149cff0a60e4f510a60de8c1f9c",
+      "group": "OXI ONE MKII",
+      "observed": "Pitch rows and time columns show one active pitch at each step, with scrolling instructions beside the grid.",
+      "optisynth_inference": "Reuse the note editor for mono entry, with a visible voice constraint and a reversible conversion to polyphonic content.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/poly-mode/poly-mode-002.webp",
+      "id": "OX02",
+      "title": "Polyphonic note entry",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/poly-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX02.webp",
+      "bytes": 48022,
+      "sha256": "4d35a986fabb3fa35345f5f4021d0ea93513c35ef07762e815c6c9ce5c7050af",
+      "group": "OXI ONE MKII",
+      "observed": "The same axes now show several pitches per column; the diagram distinguishes the note starts and continuations.",
+      "optisynth_inference": "Share selection and duration editing with Mono. Voice limits must be explicit; do not silently delete earlier notes when a limit is exceeded.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/multitrack-mode/multitrack-mode-001.webp",
+      "id": "OX03",
+      "title": "Multitrack grid and selection",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/multitrack-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX03.webp",
+      "bytes": 49898,
+      "sha256": "b437c038707108179c3b1efafd3fdf1b37e37d56f47d997f874a4ff5942c9e5a",
+      "group": "OXI ONE MKII",
+      "observed": "Rows now mean tracks. The first column also selects a track; held Mute changes the edge columns into mute/solo controls.",
+      "optisynth_inference": "Use separate named track headers on desktop so selecting a track cannot accidentally add its first note.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/chord-mode/chord-mode-002.webp",
+      "id": "OX04",
+      "title": "Chord sequence",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/chord-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX04.webp",
+      "bytes": 57144,
+      "sha256": "13bca11d3c8208b55b30050c60e140d94751fd09b71f8813583ebed3516c6d76",
+      "group": "OXI ONE MKII",
+      "observed": "Rows label scale-related chords with miniature keyboard voicings, while columns still represent musical time.",
+      "optisynth_inference": "A chord progression editor should retain chord identity and expose the resulting notes, rather than storing only a flattened piano roll.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/chord-mode/chord-mode-025.webp",
+      "id": "OX05",
+      "title": "Chord palette",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/chord-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX05.webp",
+      "bytes": 59168,
+      "sha256": "7acf6171c5c3dfd77ec00385146f169e0b3005acd2c721ce9f5ea1dcdd1f87ee",
+      "group": "OXI ONE MKII",
+      "observed": "Three lower rows distinguish basic, extended and altered chord choices. A colour legend identifies qualities; modifier pads occupy a separate area.",
+      "optisynth_inference": "Provide an auditionable chord palette with explicit names and voiced-note previews. Keep colour supplementary to text and interval labels.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/stochastic-mode/stochastic-mode-001.webp",
+      "id": "OX06",
+      "title": "Stochastic probability controls",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/stochastic-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX06.webp",
+      "bytes": 65474,
+      "sha256": "cba3f043e26e0f4181a952181f8f5d16a27eb00744b147360461cdd97b68bdb2",
+      "group": "OXI ONE MKII",
+      "observed": "Columns represent candidate notes and rows their probabilities. Four rightmost columns control octave range, division and pitch/rhythm randomisation.",
+      "optisynth_inference": "Label the axes by model. Display generated phrase history separately; a moving timeline cursor over this probability grid can mislead.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/matriceal-mode/matriceal-mode-004.webp",
+      "id": "OX07",
+      "title": "Matriceal track and parameter layout",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/matriceal-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX07.webp",
+      "bytes": 33370,
+      "sha256": "7b1a54a936696e4370dd77def62bca13e0fd95b2281fdbf6a06463278cf4c0c1",
+      "group": "OXI ONE MKII",
+      "observed": "Four track regions each contain a step area, ten parameter selectors and a track status row.",
+      "optisynth_inference": "Retain independent lane sequencing but use named lane tabs, visible loop lengths and separate phase markers in the larger focus editor.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/domino-mode/domino-mode-001.webp",
+      "id": "OX08",
+      "title": "Domino trigger and note layers",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/domino-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX08.webp",
+      "bytes": 66206,
+      "sha256": "847df7b763ce45840ae6973d9fd2415fcfcc38b8ae3d4c43b2f5b07e84100c3a",
+      "group": "OXI ONE MKII",
+      "observed": "Note steps and trigger steps occupy separate regions with separately labelled cursors; a keyboard sits below.",
+      "optisynth_inference": "Show the causal link between the rhythm lane and note-advance lane. An Advance source selector must distinguish every clock from accepted triggers.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/saga-mode/saga-mode-001.webp",
+      "id": "OX09",
+      "title": "Saga stages",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/saga-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX09.webp",
+      "bytes": 63186,
+      "sha256": "796672724a5c79e053af36a929e2576d4c656094cde2f21cd7955ac64564083c",
+      "group": "OXI ONE MKII",
+      "observed": "Stages run across successive rows; active notes, configured length and current stage use different indications. The keyboard remains below.",
+      "optisynth_inference": "Use stage cards with explicit duration and elapsed sub-position. The equal-size pad layout should not imply equal elapsed time.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/saga-mode/saga-mode-012.webp",
+      "id": "OX10",
+      "title": "Saga duration example",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/saga-mode/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX10.webp",
+      "bytes": 47954,
+      "sha256": "4a792405dfcfedb6f91c7e606fb22ae9e1cd58aafd8387c3b3bfa582a2b821b4",
+      "group": "OXI ONE MKII",
+      "observed": "The example adds three ticks to a 32-stage sequence because one stage lasts four ticks; an offset diagram is shown separately.",
+      "optisynth_inference": "Display total cycle duration alongside stage count. Treat gate length, stage dwell and note timing offset as separate concepts.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/arranger/arranger-003.webp",
+      "id": "OX11",
+      "title": "Arranger slots and states",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/arranger/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX11.webp",
+      "bytes": 55076,
+      "sha256": "349caa7fd9c31d2f1d2d91169fbf63e18c45f5a032ceeddd7c225f9393b04e7a",
+      "group": "OXI ONE MKII",
+      "observed": "The arranger labels instrument rows, section columns and distinct playing, queued, blank-spacer and unused cells.",
+      "optisynth_inference": "Show pending launches explicitly and distinguish an intentional silent slot from an unused slot. Make opening the arrangement and arming playback separate actions.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/performance-tools/performance-tools-062.webp",
+      "id": "OX12",
+      "title": "Performance overview",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/performance-tools/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX12.webp",
+      "bytes": 36312,
+      "sha256": "d5c62bd9bb6211d804afe017637a404489585a26e9263ad1ed0a1f4a9ddf954a",
+      "group": "OXI ONE MKII",
+      "observed": "Rows identify different sequencer models, and their control groupings differ within the shared performance grid.",
+      "optisynth_inference": "A performance dashboard can share placement while adapting available actions to each loaded model. Keep persistent performance mutes visible outside this page.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/modulation/modulation-016.webp",
+      "id": "OX13",
+      "title": "Modulation values and output",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/modulation/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX13.webp",
+      "bytes": 48330,
+      "sha256": "5dc11644fff14b5ca25762cc47a64bb8e5581b37fbd52896f4541fdf61f8b3ca",
+      "group": "OXI ONE MKII",
+      "observed": "The figure separates entered modulation values from resulting output after offset, with independent length/division controls.",
+      "optisynth_inference": "Keep base value, modulation and effective output inspectable. Use an explicit bipolar axis and destination units in the desktop editor.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/harmonizer/harmonizer-002.webp",
+      "id": "OX14",
+      "title": "Harmonic leader and followers",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/harmonizer/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX14.webp",
+      "bytes": 67320,
+      "sha256": "31587ad6671adc8f63d04a9723fe9d3fbe4d871bee75dd780ffa3e47fa2a8ef1",
+      "group": "OXI ONE MKII",
+      "observed": "A leader feeds harmonic information to a follower that retains its own rhythmic pattern. Keyboard and sequencer inputs are shown separately.",
+      "optisynth_inference": "Model harmonic following as an explicit relationship with an inspectable leader, scale/chord state and bypass; do not hide it inside a global transpose knob.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/img/oxi-one-mkii/performance-tools/performance-tools-097.webp",
+      "id": "OX15",
+      "title": "Snapshot status",
+      "source_page": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/performance-tools/",
+      "kind": "manual interaction diagram",
+      "inspection": "visually inspected",
+      "local_path": "docs/references/ui/oxi_20261117/OX15.webp",
+      "bytes": 18854,
+      "sha256": "e26bad617d88a51b4cffb69bdc0f52af8df6ee775b70153e717ebbe570e55d5b",
+      "group": "OXI ONE MKII",
+      "observed": "A camera symbol marks the snapshot state in the main status display.",
+      "optisynth_inference": "Provide a visible performance snapshot with restore and discard actions whose scope is clear. Distinguish it from ordinary edit undo and preset saving.",
+      "analysis_page": "docs/ui/sequencers/oxi.md"
+    }
+  ],
+  "manual_snapshots": [
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/sequencer-modes/",
+      "local_path": "docs/references/ui/oxi_20261117/sequencer-modes.html",
+      "bytes": 36841,
+      "sha256": "385c69c7f3a9a1706697ce7eec0f957330f7c8910797340c310c9e6809562577",
+      "slug": "sequencer-modes",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/mono-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/mono-mode.html",
+      "bytes": 34458,
+      "sha256": "069450651fe73943a07f8eb43bcfa0b3eb74199438e8ec0aec3dd3426896184b",
+      "slug": "mono-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/poly-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/poly-mode.html",
+      "bytes": 43244,
+      "sha256": "f920935765acb3a72e8e4f1f589f20af59a9f9df51b372c41223e4f812c47cff",
+      "slug": "poly-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/multitrack-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/multitrack-mode.html",
+      "bytes": 46335,
+      "sha256": "05f11c4657279af7bc54355caee982ae2b452203f0826afc05920b0bbf216159",
+      "slug": "multitrack-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/chord-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/chord-mode.html",
+      "bytes": 52931,
+      "sha256": "195f7662e334c348d87458df7baca4bda0fafb8ba6bc7d12847f68b468ae3634",
+      "slug": "chord-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/stochastic-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/stochastic-mode.html",
+      "bytes": 36558,
+      "sha256": "d23b9b119e92d6986639fb1741d9930cf896f18046d4f980cf08c50506596cfe",
+      "slug": "stochastic-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/matriceal-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/matriceal-mode.html",
+      "bytes": 61364,
+      "sha256": "8ef20cebff58974eea90933379c164d92ed48d75008423be122bd224b38a0a93",
+      "slug": "matriceal-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/domino-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/domino-mode.html",
+      "bytes": 34380,
+      "sha256": "c93576746750e43f96eb8aa75885bb8e0cddef0f8f37da2c36e43777ce2db92a",
+      "slug": "domino-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/saga-mode/",
+      "local_path": "docs/references/ui/oxi_20261117/saga-mode.html",
+      "bytes": 33894,
+      "sha256": "8197aa39e9ee309cd5167d34f430aca6e628e6458ac8db59c1876a2fc3b8637d",
+      "slug": "saga-mode",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/arranger/",
+      "local_path": "docs/references/ui/oxi_20261117/arranger.html",
+      "bytes": 60314,
+      "sha256": "fbf6b4d1028e60c84be34986e2118ba5320362c6610a4cc32fed5472642d9c1a",
+      "slug": "arranger",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/performance-tools/",
+      "local_path": "docs/references/ui/oxi_20261117/performance-tools.html",
+      "bytes": 95094,
+      "sha256": "f966ea4595837b4dc6c91a6850d6ac1bccede69ad26180890961d8c787edc1fb",
+      "slug": "performance-tools",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/modulation/",
+      "local_path": "docs/references/ui/oxi_20261117/modulation.html",
+      "bytes": 98604,
+      "sha256": "6215f1ebcb5f79353c9b640bbf12fdb15f590a6961df1413a9de5b540367b7b6",
+      "slug": "modulation",
+      "inspection": "selected sections; not a complete adoption review"
+    },
+    {
+      "url": "https://docs.oxiinstruments.com/oxi-one-mkii-manual/harmonizer/",
+      "local_path": "docs/references/ui/oxi_20261117/harmonizer.html",
+      "bytes": 31514,
+      "sha256": "170013524311e4f622391ac314827d9bd6ee91ae0f51204d1b53732e92b2fab9",
+      "slug": "harmonizer",
+      "inspection": "selected sections; not a complete adoption review"
+    }
+  ],
+  "source_review": [
+    {
+      "url": "https://github.com/OXI-Instruments",
+      "finding": "Manufacturer repositories distinguish E16 SDK from OXI ONE releases."
+    },
+    {
+      "url": "https://github.com/OXI-Instruments/OXI-One-MkII-Releases",
+      "finding": "Visible repository lists README and describes beta releases / issue tracking, not a reusable sequencer source tree."
+    }
+  ]
+}

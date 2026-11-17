@@ -503,3 +503,42 @@ Verified source/docs archive:
 `../../../backups/optisynth/optisynth-source-20261117-215438.tar.gz` plus checksum,
 186 files / 2,237,919 bytes. These receipt paragraphs postdate archive creation.
 The managed validation/archive job completed normally; no temporary service remains.
+
+## Request 42: OXI ONE model and interface reference
+
+Recorded “you should include the ox sequencer” verbatim. Interpreted OX as OXI ONE
+and stated that working identification. Studied the official MKII HTML manual,
+labelled firmware 2.2.10 / manual v2.0a, keeping its features distinct from MKI.
+Saved 13 chapter snapshots and 15 original diagrams; visually inspected and
+annotated every selected image. The atlas now holds 54 images across nine source
+groups. Source URLs, byte counts, hashes and selected inspection scope are in
+`../ui/sequencers/oxi_sources_20261117.json`; the illustrated page is `oxi.md` there.
+
+The model assessment in `../research/sequencers/OXI_ONE_REFERENCE.md` distinguishes
+Mono/Poly/Multitrack/Chord, stochastic generation, independently sequenced parameter
+lanes, trigger-driven note advancement, variable-duration stages and file playback.
+It adds explicit chord semantics, advance-source/cursor state, stage duration,
+visible arp input/harmonic following and persistent performance-state indicators
+to the proposal. The current manual's Poly accumulator table/text disagreement is
+recorded rather than silently resolved by assumption.
+
+The manufacturer's ONE release repository does not establish reusable engine source
+or a licence; its public E16 SDK is a different product. OXI is a commercial UX
+reference alongside the open-source survey. No firmware/app was installed or run,
+no MIDI/audio connection or Live action occurred, and no synth implementation changed.
+The first urllib page download received HTTP 403; public curl HEAD checks succeeded,
+and bounded curl downloads saved the same official pages and images successfully.
+All download jobs exited and cleaned up. No browser controller was started.
+
+Verification passed: 54 total image hashes, 15 new WebP signatures and annotations,
+13 manual snapshot hashes, 159 local links, JSON parsing, all 41 prior verbatim
+requests unchanged plus request 42, documentation-only change scope and
+`git diff --check`. No DSP tests repeated for this documentation change.
+
+Verified OXI reference/analysis archive:
+`../../../backups/optisynth/optisynth-oxi-references-20261117-220809.tar.gz` plus
+checksum, 46 files / 1,815,961 bytes; every archived member matched its source.
+SHA-256: `27d87e6a1474e3b7492c1b41f520c7c2ecaecfc008353a5e8ae862486163fad8`.
+Source/docs archive: `../../../backups/optisynth/optisynth-source-20261117-220809.tar.gz`
+plus checksum, 189 files / 2,287,116 bytes verified. These receipts postdate archive
+creation. The validation/archive job completed normally.

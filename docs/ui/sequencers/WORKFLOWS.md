@@ -2,8 +2,9 @@
 
 17 November 2026 · request 41 · [Visual atlas](README.md)
 
-This comparison uses 39 inspected publisher images, plus the previously collected
-primary manuals/source. It corrects the earlier three-image sample. It is a design
+This comparison uses 54 inspected publisher images, plus collected primary manuals/
+source: request 41's 39-image study and request 42's 15 OXI diagrams. It corrects
+the earlier three-image sample. It is a design
 study, not a hands-on usability test. Image IDs below link to illustrated source
 pages; proposed Optisynth behaviour is explicitly our synthesis.
 
@@ -123,6 +124,25 @@ destination, a stopped external clock and muted output in context. Do not label
 every silent source as an error: intentional rests and holds remain valid.
 
 ## Remaining evidence and next design exercise
+
+Request 42 adds the [OXI illustrated study](oxi.md) and
+[model assessment](../../research/sequencers/OXI_ONE_REFERENCE.md). Include these
+additional cases in the proposed wireframes:
+
+| Task | OXI evidence | Our design consequence |
+| --- | --- | --- |
+| Change a chord's quality or inversion | OX04–05 | Keep harmonic intent editable and show the resulting voiced notes |
+| Advance a phrase only when a trigger fires | OX08 | Separate rhythm and note cursors; show the advance source and policy |
+| Lengthen a stage without adding stages | OX09–10 | Show both stage count and total musical duration |
+| Follow another phrase harmonically | OX14 | Expose the leader relationship and effective chord/scale |
+| Locate a mute applied in performance view | OX12, official performance chapter | Persistent performance-state badge in the editor |
+| Plan an arrangement without starting it | OX11 | Separate opening, editing and arming the arrangement |
+
+OXI's shared physical grid changes its axes between models. Reusing the desktop
+frame must not conceal whether a column means time, pitch probability, a stage or
+an arrangement slot. Stochastic output gets its own history display; its control
+grid is not a piano-roll timeline. These are additions to the research proposal,
+not implemented modes or a commitment to copy OXI's complete feature set.
 
 The collection now covers all main proposed editors. It does not establish pointer
 feel, touch targets, keyboard accessibility, minimum window size, live timing,

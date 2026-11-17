@@ -3,7 +3,7 @@
 Start with [current status](project/STATUS.md), [user requests](project/USER_REQUESTS.md)
 and the [engineering log](project/ENGINEERING_LOG.md).
 
-Sequencer UI research: [illustrated atlas with 39 references](ui/sequencers/README.md)
+Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
 
 | Folder | Contents | Start here |

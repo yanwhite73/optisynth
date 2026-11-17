@@ -154,6 +154,34 @@ by Git; tracked analysis links to their original URLs for provenance.
 
 ## A concrete rule for modes versus modules
 
+### OXI ONE supplement — request 42
+
+[Fifteen inspected OXI diagrams](sequencers/oxi.md) and the
+[model assessment](../research/sequencers/OXI_ONE_REFERENCE.md) extend the comparison.
+Its grid supports different models, reinforcing shared navigation with explicit
+model-specific axes and state. It is a commercial UX reference; reusable engine
+source is not established.
+
+- Add a **typed chord progression lane and palette** to the Pattern proposal.
+  Preserve root/quality/voicing and duration; rendering to notes is an explicit
+  conversion. This adds semantic content, not merely another piano-roll colour.
+- Make **advance source** part of the lane contract: every clock, an accepted
+  trigger or another explicitly routed event. A trigger-driven phrase needs
+  separate trigger and note cursors, as the Domino reference illustrates.
+- Stage editors show total duration as well as stage count. Supporting chord
+  stages also requires the pending polyphonic event/voice contract; it is not
+  present in the current monophonic rack.
+- Arp input is explicitly selectable/routable from keyboard or upstream note/
+  chord events. Research harmonic following as a typed relationship or separate
+  harmoniser, with visible leader and effective chord/scale.
+- Keep persistent performance mute/transpose and snapshot status visible in
+  the detailed editor. Opening the arranger must not implicitly arm playback.
+
+These refine the design requirements before implementation. They do not turn every
+OXI mode into a required Optisynth module or imply common native storage for all.
+
+### Boundary rule
+
 Use a shared mode when saved content, input/output types, playback ownership and
 editing gestures are compatible, and switching can preserve the content. A new
 view is not a new mode. A new traversal policy usually stays in the same module.

@@ -7,6 +7,11 @@ The earlier clock prototype is provisional. The proposed product design is in
 
 ## Finding
 
+Request 42 supplement: [OXI ONE MKII model and UI study](OXI_ONE_REFERENCE.md)
+adds a commercial reference alongside this open-source survey. Its 15 inspected
+diagrams are in the [visual atlas](../../ui/sequencers/oxi.md). Do not classify
+its release repository or a different OXI product's SDK as reusable ONE engine code.
+
 Recommend a hybrid: a configurable Pattern sequencer for closely related stored
 patterns, plus independently loadable modules for different musical processes.
 Share timing, routing, capture, editing components and state infrastructure;

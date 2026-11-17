@@ -135,6 +135,13 @@ manual-confirmed behaviour and our adaptations. The image catalogue has direct
 URLs/hashes; the original bytes are separately backed up. This is published
 visual research, not hands-on verification or permission to adopt artwork.
 
+Request 42 adds [OXI ONE MKII](sequencers/OXI_ONE_REFERENCE.md) as a commercial
+model/UX reference, with 15 inspected diagrams and 13 saved chapter snapshots.
+Chord semantics, trigger-driven phrase traversal, stage duration, harmonic following
+and persistent performance state sharpen the proposal. Reusable ONE engine source
+has not been established; this does not change the open-source adoption boundary.
+The combined visual atlas now has 54 images across nine source groups.
+
 Corrections verified against source: PER|FORMER software is MIT; Marbles headers
 are MIT but Grids is GPLv3-or-later; a current freeware Stellare listing does not
 establish reusable source. Tidal's collected GitHub snapshot is historical after

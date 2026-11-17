@@ -1,11 +1,11 @@
 # Sequencer visual atlas
 
-17 November 2026 · request 41 · [UI index](../README.md) · [Workflow comparison](WORKFLOWS.md)
+17 November 2026 · requests 41–42 · [UI index](../README.md) · [Workflow comparison](WORKFLOWS.md)
 
-**39 actual reference images, all saved and visually inspected:** 20 published
-software screenshots/panel captures and 19 manual diagrams or screen examples.
-This replaces the earlier three-image sample with 36 additional images across
-eight source groups. Each illustrated page separates visible observations from
+**54 actual reference images, all saved and visually inspected:** 20 published
+software screenshots/panel captures and 34 manual diagrams or screen examples.
+Request 41 expanded the initial sample to 39 images; request 42 adds 15 OXI ONE
+MKII diagrams, taking coverage to nine source groups. Each illustrated page separates visible observations from
 our proposed Optisynth adaptation. These are publisher images, not our own live
 captures or generated mockups.
 
@@ -21,6 +21,7 @@ captures or generated mockups.
 | Monome | 6 | Kria navigation/parameters/meta-pattern; Meadowphysics counters/reset/rules | [Open interaction diagrams](monome.md) |
 | Stochas | 1 | Probability labels, dependency chains and separate layer/pattern/view controls | [Open screenshot](stochas.md) |
 | Orca | 1 | Spatial program and output/status display | [Open screenshot](orca.md) |
+| OXI ONE MKII | 15 | Mono/Poly/Multitrack/Chord, palette, Stochastic, Matriceal, Domino, Saga, arrangement, performance, modulation and harmony | [Open OXI diagrams](oxi.md) |
 
 The [workflow comparison](WORKFLOWS.md) turns this collection into concrete
 editing tasks, shared components, specialist editors and acceptance questions.
@@ -28,6 +29,16 @@ The [architecture proposal](../SEQUENCER_UI_ARCHITECTURE.md) incorporates those
 findings; no device implementation accompanies this research.
 
 ## Representative comparisons
+
+### One grid, distinct musical models — OXI ONE
+
+[![OX08: Domino trigger and note layers](../../references/ui/oxi_20261117/OX08.webp)](../../references/ui/oxi_20261117/OX08.webp)
+
+OX08 distinguishes the rhythm that advances a phrase from its note sequence.
+Compare the [full OXI set](oxi.md), including chord palette, duration-based stages
+and arrangement/performance states. The [model assessment](../../research/sequencers/OXI_ONE_REFERENCE.md)
+records how these change the Optisynth proposal. OXI is included as a commercial
+UX reference; reusable engine source has not been established.
 
 ### Shared frame with explicit editing scope — Seq
 
@@ -76,13 +87,15 @@ and causal relationships.
 
 ## Provenance, storage and limits
 
-[The catalogue](visual_sources_20261117.json) records every original URL, source
+[The original catalogue](visual_sources_20261117.json) and
+[OXI supplement](oxi_sources_20261117.json) record every original URL, source
 page, pinned commit where available, byte count, SHA-256, local path, inspection
 and analysis link. Mutable/Monome/PER|FORMER/Bespoke/Stochas published sites are
 dated snapshots, not guaranteed to match the separately pinned code revision.
 
 Original image bytes are stored in
-`docs/references/ui/sequencers_20261117/` and kept out of app artwork and Git.
+`docs/references/ui/sequencers_20261117/` and `docs/references/ui/oxi_20261117/`,
+and kept out of app artwork and Git.
 The analysis and catalogue are tracked. A Git checkout alone therefore does not
 contain the illustrations; use the separately verified visual-reference backup
 listed in [the engineering log](../../project/ENGINEERING_LOG.md), or retrieve
