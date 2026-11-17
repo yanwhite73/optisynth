@@ -152,3 +152,7 @@ Independent 0.0.4 archive created and verified:
 `../../backups/optisynth/optisynth-source-20261117-173953.tar.gz` plus `.sha256`;
 150 files, 1,789,797 uncompressed bytes. Includes the contextual interface docs,
 root design review and build receipt. This subsequent archive receipt is in Git.
+
+Request 26: Yan's “thats good” approves the opened contextual UI direction. Logged
+verbatim; retain the layout. UI implementation committed as `6c8ae41`; source backup
+above is independent of Git. Sample/excitation remains the next implementation step.

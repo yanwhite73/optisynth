@@ -54,7 +54,8 @@ reroute downstream destinations/output before removing an active dependency.
   evidence, not a worst-case rack deadline or a new optimisation claim.
 
 Yan auditioned 0.0.2 and reported nice tones, then confirmed the Mutable examples
-in 0.0.3 all seem to work (request 25). The 0.0.4 UI awaits user feedback. No Live verification or new VST3
+in 0.0.3 all seem to work (request 25). Yan approved the 0.0.4 UI direction with
+“thats good” (request 26); this is visual feedback, not a separate audio test. No Live verification or new VST3
 packaging/installation is claimed.
 
 ## Current direction and exact next work
@@ -63,7 +64,7 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 25 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 26 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 25 is implemented: Matriarch-inspired native rack with familiar,
 module-specific panels. References and behaviour are in `CONTEXTUAL_UI.md`.

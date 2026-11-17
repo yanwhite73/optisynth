@@ -165,3 +165,11 @@ yes all seem to be working ok. I'd like a moog matriarch style ui where loading 
 
 User audition confirms the current Mutable examples seem to work. Prioritize the
 Matriarch-inspired contextual rack UI next; sample/excitation work remains queued.
+
+## 26 — Contextual UI feedback
+
+```text
+thats good
+```
+
+Positive feedback on the opened 0.0.4 contextual rack; retain this UI direction.
