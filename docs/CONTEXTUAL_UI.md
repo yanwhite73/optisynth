@@ -70,3 +70,20 @@ request about saved-preset destinations. Shared versus per-voice sources, smooth
 audio-rate modulation and signal scaling still need explicit engine contracts.
 Finish the sample-player milestone first; research the original manuals before
 implementing this interaction. The existing hardware-panel direction remains.
+
+## First matrix and complete engine — 0.0.6
+
+Matrix now opens a shared source/destination/depth editor with add/remove and live
+depth controls. Routes use saved instance/parameter IDs and graph validation.
+Spectral destination choices use effective preset state. The matrix does not yet
+provide drag-to-knob assignment, coloured source strips or depth rings.
+Modulation scope/scaling is defined in `SPECTRAL_ENGINE_INTEGRATION.md`.
+
+The complete Spectral panel has stereo audio plus 17 actual LFO/envelope outputs,
+preset loading, a section selector and six controls per page. Oscillator/filter,
+envelope, LFO, internal matrix depths and matching effects have separate sections.
+Structural spectrum/arp/routing editing is still supplied by preset state or the
+older editor. At minimum size, six knobs occupy one readable row; taller views
+use two rows. Independent LFO has named shapes and a note-reset switch. Explicit
+stereo adapters explain their operation on the panel. Native captures and limits
+are recorded in `../design-qa.md`.

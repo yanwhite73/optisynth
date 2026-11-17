@@ -19,6 +19,10 @@ public:
     std::atomic<float> gain{.25f};
     std::atomic<float> peak{0};
     void render(float* output,int n) noexcept {
+        std::array<float,quantum> right;
+        while(n>0){const int count=std::min(n,quantum);render(output,right.data(),count);output+=count;n-=count;}
+    }
+    void render(float* output,float* right,int n) noexcept {
         while(n>0) {
             const int count=std::min(n,quantum);
             const auto packed=packed_.load(std::memory_order_acquire);
@@ -30,10 +34,11 @@ public:
                 }
             }
             std::fill_n(output,count,0.f);
-            if(active_)active_->render(output,count,note);
+            std::fill_n(right,count,0.f);
+            if(active_)active_->render(output,right,count,note);
             if(fading_) {
                 Note oldNote=note;oldNote.trigger=false;oldNote.gate=false;
-                fading_->render(old_.data(),count,oldNote);
+                fading_->render(old_.data(),oldRight_.data(),count,oldNote);
             }
             float max=0;
             float target=gain.load(std::memory_order_relaxed);
@@ -47,11 +52,13 @@ public:
                 x*=smoothedGain_;
                 // Guard unforeseen extreme resonance, not a model of Mutable's DAC.
                 output[i]=std::isfinite(x)?std::clamp(x,-.95f,.95f):0;
-                max=std::max(max,std::abs(output[i]));
+                x=(right[i]*mix+(fading_?oldRight_[i]*(1-mix):0))*smoothedGain_;
+                right[i]=std::isfinite(x)?std::clamp(x,-.95f,.95f):0;
+                max=std::max(max,std::max(std::abs(output[i]),std::abs(right[i])));
             }
             if(fading_ && fade_>=240) { retired_.store(fading_,std::memory_order_release);fading_=nullptr; }
             peak.store(max,std::memory_order_relaxed);
-            output+=count;n-=count;
+            output+=count;right+=count;n-=count;
         }
     }
 private:
@@ -62,6 +69,7 @@ private:
     int fade_=0;
     float smoothedGain_=0;
     std::array<float,quantum> old_{};
+    std::array<float,quantum> oldRight_{};
 };
 
 // Bounded, causal 32-tap / 256-phase windowed-sinc output conversion. Tables
@@ -72,7 +80,7 @@ public:
     void prepare(double deviceRate) {
         if(!std::isfinite(deviceRate)||deviceRate<8000||deviceRate>384000)
             throw std::invalid_argument("Unsupported device sample rate");
-        ratio_=48000/deviceRate;position_=0;write_=0;index_=quantum;history_.fill(0);
+        ratio_=48000/deviceRate;position_=0;write_=0;index_=quantum;history_.fill(0);historyRight_.fill(0);
         const double cutoff=.46*std::min(1.,deviceRate/48000);
         for(int phase=0;phase<256;++phase) {
             double sum=0;
@@ -87,22 +95,29 @@ public:
         }
     }
     void render(Player& player,float* out,int frames) noexcept {
+        std::array<float,quantum> right;
+        while(frames>0){const int n=std::min(frames,quantum);render(player,out,right.data(),n);out+=n;frames-=n;}
+    }
+    void render(Player& player,float* out,float* right,int frames) noexcept {
         for(int i=0;i<frames;++i) {
             while(position_>=0) {
-                if(index_==quantum) { player.render(block_.data(),quantum);index_=0; }
-                write_=(write_+1)&31;history_[write_]=block_[index_++];position_-=1;
+                if(index_==quantum) { player.render(block_.data(),blockRight_.data(),quantum);index_=0; }
+                write_=(write_+1)&31;history_[write_]=block_[index_];historyRight_[write_]=blockRight_[index_++];position_-=1;
             }
             const int phase=std::clamp(int((position_+1)*256),0,255);
-            float sample=0;
-            for(int k=0;k<32;++k)sample+=table_[phase][k]*history_[(write_-k)&31];
+            float sample=0,sampleRight=0;
+            for(int k=0;k<32;++k){sample+=table_[phase][k]*history_[(write_-k)&31];sampleRight+=table_[phase][k]*historyRight_[(write_-k)&31];}
             out[i]=std::isfinite(sample)?std::clamp(sample,-.95f,.95f):0;
+            right[i]=std::isfinite(sampleRight)?std::clamp(sampleRight,-.95f,.95f):0;
             position_+=ratio_;
         }
     }
 private:
     std::array<std::array<float,32>,256> table_{};
     std::array<float,32> history_{};
+    std::array<float,32> historyRight_{};
     std::array<float,quantum> block_{};
+    std::array<float,quantum> blockRight_{};
     double ratio_=1,position_=0;
     int write_=0,index_=quantum;
 };

@@ -1,11 +1,12 @@
 #pragma once
 #include "graph.h"
 #include "sample.h"
+#include "spectral.h"
 #include <array>
 #include <atomic>
 
 namespace optisynth {
-constexpr int quantum = 24, maxParameters = 16;
+constexpr int quantum = 24, maxParameters = 640;
 struct Parameter {
     std::string id, label, unit;
     float minimum, maximum, initial;
@@ -21,40 +22,59 @@ const Panel& panel(const std::string& type);
 struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
 };
+struct RouteControls { std::array<std::atomic<float>,kMaximumModulations> amounts{}; };
 struct Note { int midi = 48; float velocity = .8f; bool gate = false, trigger = false; };
 struct AudioBlock {
     int frames;
     Note note;
     const float* const* inputs;
     float* const* outputs;
+    const float* const* inputsRight = nullptr;
+    float* const* outputsRight = nullptr;
+    const float* parameters = nullptr;
 };
 class AudioModule : public PreparedModule {
 public:
     std::shared_ptr<Controls> controls = std::make_shared<Controls>();
     virtual void process(const AudioBlock&) noexcept = 0;
+    virtual SpectralPtr spectralState() const { return {}; }
 };
-Registry moduleRegistry(const SampleBank& samples={});
+Registry moduleRegistry(const SampleBank& samples={},const SpectralBank& spectral={});
 
 // Construct and resolve controls on loader/UI only; render has no allocation,
-// ownership changes, locks or string lookup. Mono voice graph at 48 kHz for now.
+// ownership changes, locks or string lookup. Mono/stereo ports at 48 kHz, with
+// shared monophonic note context; Spectral retains its internal voice/arp engine.
 class Runtime {
 public:
-    explicit Runtime(const GraphSpec&,const SampleBank& samples={});
+    explicit Runtime(const GraphSpec&,const SampleBank& samples={},const SpectralBank& spectral={});
     void render(float* out, int frames, Note note) noexcept;
+    void render(float* left,float* right,int frames,Note note) noexcept;
     std::shared_ptr<Controls> controls(const std::string& node) const;
+    SpectralBank spectralBank() const;
+    std::shared_ptr<RouteControls> routeControls() const { return routes_; }
     std::size_t activeModules() const { return nodes_.size(); }
 private:
     struct NodeBuffers {
         AudioModule* module = nullptr;
         std::vector<std::array<float, quantum>> outputs;
+        std::vector<std::array<float, quantum>> right;
         std::vector<const float*> in;
         std::vector<float*> out;
+        std::vector<const float*> inRight;
+        std::vector<float*> outRight;
+        std::vector<Parameter> parameters;
+        std::vector<int> channels;
+        struct Route { const float* source; int parameter,index; };
+        std::vector<Route> routes;
+        std::array<float,maxParameters> effective{},offset{};
     };
     GraphSpec spec_;
     PreparedGraph graph_;
     std::vector<NodeBuffers> nodes_;
     std::array<float, quantum> zero_{};
     std::vector<const float*> roots_;
+    std::vector<const float*> rightRoots_;
+    std::shared_ptr<RouteControls> routes_=std::make_shared<RouteControls>();
 };
 // First playable patch builder; arbitrary graphs also work through Runtime.
 GraphSpec instrumentPatch(const std::string& source, const std::string& envelope,

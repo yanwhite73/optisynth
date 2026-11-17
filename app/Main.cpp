@@ -4,9 +4,10 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.5";}
+    const String getApplicationVersion() override {return "0.0.6";}
     void initialise(const String& args) override {
         window=std::make_unique<Window>(getApplicationName());
+        if(args=="--spectral-demo")window->synth->showSpectralDemo();
         if(args=="--sample-demo")window->synth->showSampleDemo();
         if(args.startsWith("--snapshot ")) {
             const File path(args.fromFirstOccurrenceOf("--snapshot ",false,false).unquoted());

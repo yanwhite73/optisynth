@@ -2,6 +2,7 @@
 #include "Panel.h"
 #include "PatchIO.h"
 #include "SampleLoader.h"
+#include "ModulationEditor.h"
 #include <chrono>
 #include <fstream>
 
@@ -12,15 +13,15 @@ public:
     RackSynth() : keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
         setWantsKeyboardFocus(true);setSize(1440,940);
         for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,
-            &starter,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode})addAndMakeVisible(c);
+            &starter,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton})addAndMakeVisible(c);
         rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(false,true);rackView.setScrollBarThickness(12);
         focusMode.setClickingTogglesState(true);focusMode.onClick=[this]{showSelected();};
         rack.setRowHeight(62);rack.setColour(ListBox::backgroundColourId,Colour(0xff25343a));
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator"};
-        for(i=0;i<6;++i)starter.addItem(names[i],i+1);
+        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator"};
+        for(i=0;i<8;++i)starter.addItem(names[i],i+1);
         starter.setTextWhenNothingSelected("Starter patches");
         starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),"source");};
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
@@ -35,6 +36,7 @@ public:
             auto next=document;next.graph.outputs={outputPorts[size_t(index)]};commit(std::move(next),selected);
         };
         save.onClick=[this]{chooseFile(true);};load.onClick=[this]{chooseFile(false);};
+        matrixButton.onClick=[this]{showMatrix();};
         audio.onClick=[this]{toggleAudio();};silence.onClick=[this]{stopAudio();};
         gain.setSliderStyle(Slider::LinearHorizontal);gain.setRange(0,1,.001);gain.setValue(document.gain);
         gain.setTextBoxStyle(Slider::TextBoxRight,false,55,24);gain.setColour(Slider::trackColourId,teal);
@@ -52,14 +54,16 @@ public:
     void prepareToPlay(int,double rate) override {converter.prepare(rate);}
     void releaseResources() override {}
     void showSampleDemo(){starter.setSelectedId(5,sendNotificationSync);}
+    void showSpectralDemo(){starter.setSelectedId(7,sendNotificationSync);}
     void getNextAudioBlock(const AudioSourceChannelInfo& block) override {
         if(block.buffer->getNumChannels()<1)return;
-        converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.numSamples);
-        for(int c=1;c<block.buffer->getNumChannels();++c)block.buffer->copyFrom(c,block.startSample,*block.buffer,0,block.startSample,block.numSamples);
+        if(block.buffer->getNumChannels()>1)converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.buffer->getWritePointer(1,block.startSample),block.numSamples);
+        else converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.numSamples);
+        for(int c=2;c<block.buffer->getNumChannels();++c)block.buffer->clear(c,block.startSample,block.numSamples);
     }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.5",25,53,300,20,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.6",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
         g.setColour(paper);g.setFont(font(12));
         g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
@@ -72,7 +76,7 @@ public:
         g.setColour(Colour(0xff34464c));g.fillRoundedRectangle(340.f,float(getHeight()-150),160,8,4);
         g.setColour(peak>.9f?orange:teal);g.fillRoundedRectangle(340.f,float(getHeight()-150),160*std::min(1.f,peak),8,4);
         g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
-        g.drawText(String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  mono   |   Click a socket to patch. Yellow outline marks the selected module.",24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
+        g.drawText(String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo output / shared keyboard   |   Click a socket to patch. Use Matrix to assign modulation.",24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
         const int right=getWidth()-324,bottom=bodyBottom();const bool focused=focusMode.getToggleState();
@@ -81,6 +85,7 @@ public:
         status.setBounds(595,76,getWidth()-619,45);
         addChoice.setBounds(24,122,250,30);add.setBounds(286,122,105,30);remove.setBounds(403,122,105,30);
         output.setBounds(602,122,230,30);focusMode.setBounds(getWidth()-180,122,156,30);
+        matrixButton.setBounds(getWidth()-278,122,90,30);
         rack.setBounds(24,169,220,bottom-169);editor.setBounds(260,169,right-276,bottom-169);
         rack.setVisible(focused);editor.setVisible(focused);routes.setVisible(focused);rackView.setVisible(!focused);
         int y=198;for(size_t i=0;i<inputs.size();++i){auto& row=*inputs[i];const bool visible=focused&&!selected.empty()&&i<type(editor.current).inputs.size();row.label.setVisible(visible);row.choice.setVisible(visible);row.label.setBounds(right,y,300,20);row.choice.setBounds(right,y+23,300,32);y+=65;}
@@ -129,9 +134,9 @@ public:
         require(hardware.find("source")->current=="osc.sine"&&hardware.find("source")->knobs.size()==2,"Contextual replacement panel");
         for(const auto& spec:panels()){
             ModulePanel test("all");Values values;test.instance="layout";test.show(spec.type,values,{});test.setSize(panelWidth(spec.type),421);
-            for(size_t i=0;i<test.knobs.size();++i){const auto bounds=test.knobs[i]->getBounds();
+            for(size_t i=0;i<test.knobs.size();++i){if(!test.knobs[i]->isVisible())continue;const auto bounds=test.knobs[i]->getBounds();
                 require(bounds.getY()>=147&&bounds.getBottom()<=384&&bounds.getX()>=12&&bounds.getRight()<=test.getWidth()-12,"Module control bounds");
-                for(size_t j=i+1;j<test.knobs.size();++j)require(!bounds.intersects(test.knobs[j]->getBounds()),"Module controls overlap");
+                for(size_t j=i+1;j<test.knobs.size();++j)if(test.knobs[j]->isVisible())require(!bounds.intersects(test.knobs[j]->getBounds()),"Module controls overlap");
             }
         }
         // Exercise explicit old-format import using the actual 0.0.2 keys.
@@ -183,12 +188,42 @@ public:
         std::optional<SampleLoader::Result> latest;for(int i=0;i<10000&&!latest;++i){latest=newest.take();std::this_thread::sleep_for(std::chrono::milliseconds(1));}
         require(latest&&latest->preferred=="newest"&&latest->runtime&&latest->error.empty(),"Only newest worker result published");
         auto oldRack=rackJSON({rackPreset(0),.25f,{}});oldRack.getDynamicObject()->setProperty("version",1);oldRack.getDynamicObject()->removeProperty("samples");require(render(readRack(oldRack).graph)==render(rackPreset(0)),"Version one rack import unchanged");
-        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 18 panels fit without overlap; legacy instrument and v1 rack audio; background WAV loading; waveform asset; loop toggle; external sample recall audio; missing/changed sample preservation; dormant load pruning; cancellation and newest-result publication; nine native captures. No audio device opened.\n"),"Write UI receipt");
+        auto v2=oldRack;v2.getDynamicObject()->setProperty("version",2);v2.getDynamicObject()->setProperty("samples",juce::var(new juce::DynamicObject));require(render(readRack(v2).graph)==render(rackPreset(0)),"Version two rack import unchanged");
+        setSize(1440,940);require(commit(starterDocument(6,.25f),"spectral")&&loading,"Spectral prepares in worker");drain();
+        require(document.spectral.at("spectral")->tables[0]&&activeCount==2,"Whole Spectral and external LFO active");
+        auto* spectralPanel=hardware.find("spectral");require(spectralPanel&&spectralPanel->jacks.size()==18&&spectralPanel->presetName.getText().contains("Spectral"),"Contextual full-engine panel");
+        spectralPanel->section.setSelectedId(2,sendNotificationSync);capture("spectral-stereo.png");
+        showMatrix();matrixWindow->editor->editDepth(0,.23f);require(document.graph.modulations[0].amount==.23f&&routeHandles->amounts[0].load()==.23f,"Live depth updates stored route");
+        {auto image=matrixWindow->editor->createComponentSnapshot(matrixWindow->editor->getLocalBounds());FileOutputStream stream(directory.getChildFile("spectral-matrix.png"));require(stream.openedOk(),"Matrix snapshot file");stream.setPosition(0);stream.truncate();require(PNGImageFormat().writeImageToStream(image,stream),"Matrix screenshot");}
+        matrixWindow->setVisible(false);
+        spectralPanel->knobs[3]->slider.setValue(2500,sendNotificationSync);
+        require(handles.at("spectral")->values[3].load()==2500&&editor.knobs[3]->slider.getValue()==2500,"Spectral live controls synchronize");
+        auto spectralSerial=JSON::toString(rackJSON(document));auto spectralRecall=readRack(JSON::parse(spectralSerial));
+        require(partials::patchText(spectralRecall.spectral.at("spectral")->patch)==partials::patchText(document.spectral.at("spectral")->patch)&&spectralRecall.graph.modulations.size()==1,"Full embedded patch and routes recalled");
+        auto stereoAudio=[](const RackDocument& d){Runtime r(d.graph,sampleBank(d),d.spectral);std::vector<float> x(4800),y(4800);r.render(x.data(),y.data(),4800,{48,.8f,true,true});x.insert(x.end(),y.begin(),y.end());return x;};
+        require(stereoAudio(document)==stereoAudio(spectralRecall),"Full-engine rack stereo audio recall");
+        auto cycle=document;cycle.graph.modulations.push_back({{"spectral","lfo1"},{"lfo","depth"},.2f});require(!commit(cycle,"spectral")&&JSON::toString(rackJSON(document))==spectralSerial,"Matrix cycle keeps current state");
+        auto broken=JSON::parse(spectralSerial);broken.getDynamicObject()->getProperty("spectral").getDynamicObject()->setProperty("spectral","not a patch");bool failed=false;
+        try{readRack(broken);}catch(const std::exception&){failed=true;}require(failed,"Malformed embedded engine rejected");
+        const auto presetFile=directory.getChildFile("spectral-native-fixture.ptch");auto patch=spectralDemoPatch();patch.name="Native imported preset";std::string error;
+        require(partials::savePatch(presetFile.getFullPathName().toStdString(),patch,error),"Write first-party preset fixture");loadSpectral("spectral",presetFile);drain();
+        require(document.spectral.at("spectral")->patch.name==patch.name,"Worker preset import installed whole state");
+        auto preserved=JSON::toString(rackJSON(document));loadSpectral("spectral",directory.getChildFile("missing.ptch"));drain();require(JSON::toString(rackJSON(document))==preserved&&status.getText().contains("missing"),"Failed preset keeps playing graph");
+        auto pending=starterDocument(6,.25f);commit(pending,"spectral");setParameter("spectral","main_volume",-9);require(!loading,"Spectral load cancelled by scalar edit");
+        commit(starterDocument(7,.25f),"spectral");drain();
+        require(hardware.find("spectral")->knobs[48]->getAlpha()==1.f&&hardware.find("spectral")->jacks[1]->connected,"Exported LFO rate and socket show active routing");
+        capture("spectral-resonator.png");
+        setSize(1120,800);selectNode("spectral");hardware.find("spectral")->section.setSelectedId(2,sendNotificationSync);capture("spectral-minimum.png");
+        require(directory.getChildFile("spectral-check.txt").replaceWithText("PASS: background full-engine load; stereo; active LFO routing; matrix live depth; preset control synchronisation; complete embedded state and stereo audio recall; cycle/malformed-state rejection; imported preset worker; missing-file preservation; cancellation; explicit mono adapter; four native captures. No audio device opened.\n"),"Write Spectral UI receipt");
+        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 23 panels fit without overlap; legacy instrument and v1 rack audio; background WAV loading; waveform asset; loop toggle; external sample recall audio; missing/changed sample preservation; dormant load pruning; cancellation and newest-result publication; nine native captures. No audio device opened.\n"),"Write UI receipt");
     }
 private:
     struct InputRow { Label label;ComboBox choice;std::vector<Endpoint> ports; };
     Player player;OutputConverter converter;RackDocument document{rackPreset(0),.25f};
     SampleLoader sampleLoader;bool loading=false;
+    std::shared_ptr<RouteControls> routeHandles;
+    std::unique_ptr<MatrixWindow> matrixWindow;
+    TextButton matrixButton{"Matrix"};
     Registry registry=moduleRegistry();
     MidiKeyboardState keys;MidiKeyboardComponent keyboard;TypingKeyboard typing;
     ListBox rack;ModulePanel editor{"all"};Values panelValues;
@@ -210,13 +245,36 @@ private:
         for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
         if(auto* p=hardware.find(id)){hardware.values[id][p->current][key]=value;p->setValue(key,value);}
         if(editor.instance==id){panelValues[editor.current][key]=value;editor.setValue(key,value);}
+        auto handle=handles.find(id);if(handle!=handles.end()&&handle->second){
+            auto node=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;});
+            if(node!=document.graph.nodes.end()){const auto& ps=panel(node->type).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==key)handle->second->values[i]=value;}
+        }
+    }
+    void showMatrix(){
+        if(!matrixWindow){matrixWindow=std::make_unique<MatrixWindow>();auto* m=matrixWindow->editor;
+            m->addRoute=[this](const Endpoint& source,const Endpoint& destination,float amount){auto next=document;next.graph.modulations.push_back({source,destination,amount});return commit(std::move(next),selected);};
+            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;}};
+            m->removeRoute=[this](int i){MessageManager::callAsync([safe=SafePointer<RackSynth>(this),i]{if(!safe)return;auto next=safe->document;if(i>=0&&i<int(next.graph.modulations.size())){next.graph.modulations.erase(next.graph.modulations.begin()+i);safe->commit(std::move(next),safe->selected);}});};
+        }
+        matrixWindow->editor->refresh(document);matrixWindow->setVisible(true);matrixWindow->toFront(true);
+    }
+    void loadSpectral(const std::string& id,const File& file){
+        if(std::none_of(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id&&n.type=="spectral.engine";}))return;
+        cancelLoading();sampleLoader.submit(document,id,file.getFullPathName().toStdString());loading=true;message("Loading Spectral preset... current sound stays ready");
+    }
+    void bindSpectralPanel(ModulePanel& p,const std::string& id){
+        if(auto state=effectiveSpectral(document,id))p.setSpectral(state,document.graph);
+        p.choosePreset=[safe=SafePointer<RackSynth>(this),id]{if(!safe)return;
+            safe->chooser=std::make_unique<FileChooser>("Load imported Spectral preset (.ptch)",File::getSpecialLocation(File::userDocumentsDirectory),"*.ptch");
+            safe->chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles,[safe,id](const FileChooser& c){if(safe&&c.getResult()!=File())safe->loadSpectral(id,c.getResult());});
+        };
     }
     void rebuildHardware() {
         hardware.clear();
         for(const auto& node:document.graph.nodes){
             auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;
             auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
-            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);bindSamplePanel(*p,node.id);
+            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);bindSamplePanel(*p,node.id);bindSpectralPanel(*p,node.id);
             p->activated=[this,id=node.id]{if(selected!=id)selectNode(id);};
             p->selectionChanged=[this,id=node.id,p]{
                 const auto nextType=p->selected();
@@ -243,7 +301,7 @@ private:
         else if(port.type==SignalType::Audio)menu.addItem(1,"Use as instrument output");
         menu.addSeparator();
         for(const auto& n:document.graph.nodes)if(n.id!=node){const auto& ports=isOutput?type(n.type).inputs:type(n.type).outputs;
-            for(const auto& p:ports)if(p.type==port.type){endpoints.push_back({n.id,p.id});menu.addItem(int(endpoints.size())+9,String(n.id)+" / "+String(p.id)+"  ("+String(panel(n.type).name)+")");}}
+            for(const auto& p:ports)if(p.type==port.type&&p.channels==port.channels){endpoints.push_back({n.id,p.id});menu.addItem(int(endpoints.size())+9,String(n.id)+" / "+String(p.id)+"  ("+String(panel(n.type).name)+")");}}
         menu.showMenuAsync(PopupMenu::Options().withTargetComponent(target),[safe=SafePointer<RackSynth>(this),node,port,isOutput,endpoints](int result){
             if(safe)safe->applySocketChoice(node,port,isOutput,result,endpoints);
         });
@@ -252,17 +310,17 @@ private:
         cancelLoading();const auto target=preferred;
         try {
             validateRack(next.graph);pruneSampleReferences(next);
-            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;message("Loading sample... current patch stays ready");return true;}
-            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next));install(std::move(next),std::move(runtime),target);return true;
+            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;message("Preparing patch... current sound stays ready");return true;}
+            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target);return true;
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
     }
     void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target) {
         std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
-        document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
+        routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
         player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
-        refresh(target);message("Ready - select a module to edit");
+        refresh(target);if(matrixWindow)matrixWindow->editor->refresh(document);message("Ready - select a module to edit");
     }
-    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;message("Pending sample load cancelled by edit");}}
+    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;message("Pending patch load cancelled by edit");}}
     void collectSamples(){if(auto r=sampleLoader.take()){
         loading=false;if(!r->error.empty())message(String("Patch unchanged: ")+r->error,true);
         else install(std::move(r->document),std::move(r->runtime),r->preferred);
@@ -289,6 +347,7 @@ private:
         if(selected.empty())return;auto next=document;const auto id=selected;
         next.graph.nodes.erase(std::remove_if(next.graph.nodes.begin(),next.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;}),next.graph.nodes.end());
         next.graph.connections.erase(std::remove_if(next.graph.connections.begin(),next.graph.connections.end(),[&](const Connection& c){return c.source.node==id||c.destination.node==id;}),next.graph.connections.end());
+        next.graph.modulations.erase(std::remove_if(next.graph.modulations.begin(),next.graph.modulations.end(),[&](const Modulation& m){return m.source.node==id||m.destination.node==id;}),next.graph.modulations.end());
         if(!commit(std::move(next),""))message("Reroute its destinations/output before removing this module.",true);
     }
     void refresh(const std::string& preferred) {
@@ -315,6 +374,7 @@ private:
         editor.instance=node.id;
         editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});
         bindSamplePanel(editor,node.id);
+        bindSpectralPanel(editor,node.id);
         editor.setConnections(document.graph);editor.portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
         hardware.highlight(selected);
         // Persistent rows avoid destroying the ComboBox inside its own onChange.
@@ -325,7 +385,7 @@ private:
             const auto p=ports[i];row.label.setText(String(p.id).toUpperCase()+"  /  "+(p.type==SignalType::Audio?"audio":"control")+(p.required?" *":""),dontSendNotification);
             row.label.setFont(font(12));row.label.setColour(Label::textColourId,p.type==SignalType::Audio?paper:Colour(0xffe7a775));
             row.choice.clear(dontSendNotification);row.ports={{"",""}};row.choice.addItem("Not connected",1);
-            for(const auto& n:document.graph.nodes)if(n.id!=node.id)for(const auto& out:type(n.type).outputs)if(out.type==p.type){row.ports.push_back({n.id,out.id});row.choice.addItem(String(n.id)+" / "+String(out.id),int(row.ports.size()));}
+            for(const auto& n:document.graph.nodes)if(n.id!=node.id)for(const auto& out:type(n.type).outputs)if(out.type==p.type&&out.channels==p.channels){row.ports.push_back({n.id,out.id});row.choice.addItem(String(n.id)+" / "+String(out.id),int(row.ports.size()));}
             int selection=1;for(const auto& c:document.graph.connections)if(c.destination.node==node.id&&c.destination.port==p.id)for(size_t j=1;j<row.ports.size();++j)if(row.ports[j].node==c.source.node&&row.ports[j].port==c.source.port)selection=int(j)+1;
             row.choice.setSelectedId(selection,dontSendNotification);
             row.choice.onChange=[this,i,id=node.id,port=p.id]{

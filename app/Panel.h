@@ -13,6 +13,8 @@ Font font(float size) { return Font(FontOptions(size)); }
 using Values=std::map<std::string,std::map<std::string,float>>;
 Colour panelColour(const std::string& id) {
     if(id=="sample.player")return Colour(0xffd7ca96);
+    if(id=="spectral.engine")return Colour(0xff8ebecb);
+    if(id=="mod.lfo")return Colour(0xffd7b282);
     if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
     if(id=="drum.analog")return Colour(0xffd7b282);
     if(id.rfind("osc.",0)==0)return Colour(0xff8ebecb);
@@ -21,6 +23,7 @@ Colour panelColour(const std::string& id) {
 }
 Colour panelInk(const std::string& id) {return panelColour(id).getBrightness()>.6f?ink:paper;}
 int panelWidth(const std::string& id) {
+    if(id=="spectral.engine")return 580;
     if(id=="sample.player")return 340;
     if(id=="spectral.ahdsfr")return 330;
     if(id.rfind("spectral.",0)==0&&panel(id).family=="filter")return 290;
@@ -70,11 +73,15 @@ struct Control : juce::Component {
         if(p.logarithmic)slider.setSkewFactorFromMidPoint(p.minimum>0?std::sqrt(p.minimum*p.maximum):.3);
         slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.step>=1?0:p.unit=="Hz"?1:p.unit=="st"?2:3);
         if(p.id=="root_note")slider.setTextValueSuffix(" MIDI");
-        slider.setValue(value,dontSendNotification);slider.setDoubleClickReturnValue(true,p.initial);
+        if(p.id=="wave"){
+            slider.textFromValueFunction=[](double v){const char* names[]={"Sine","Triangle","Ramp","Pulse"};return String(names[std::clamp(int(std::round(v)),0,3)]);};
+            slider.valueFromTextFunction=[](const String& t){return t.equalsIgnoreCase("Triangle")?1.:t.equalsIgnoreCase("Ramp")?2.:t.equalsIgnoreCase("Pulse")?3.:0.;};
+        }
+        slider.setValue(value,dontSendNotification);slider.updateText();slider.setDoubleClickReturnValue(true,p.initial);
         slider.setTooltip(p.label+" / double-click to reset");slider.setLookAndFeel(&look);
         slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
-        if(p.id=="loop"){
-            isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText("Loop while held");
+        if(p.id=="loop"||p.id=="retrigger"){
+            isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(p.id=="loop"?"Loop while held":"Reset on note");
             toggle.setColour(ToggleButton::textColourId,text);toggle.setColour(ToggleButton::tickColourId,text);toggle.setColour(ToggleButton::tickDisabledColourId,text.withAlpha(.5f));
             toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
         }
@@ -103,6 +110,8 @@ struct Jack : Button {
 };
 struct ModulePanel : juce::Component, FileDragAndDropTarget {
     ComboBox choice;KnobLook look;std::vector<std::unique_ptr<Control>> knobs;
+    ComboBox section;TextButton presetButton{"Load Spectral patch..."},more{"More"};Label presetName;int subpage=0;
+    std::function<void()> choosePreset;std::vector<std::vector<int>> pages;
     std::vector<std::unique_ptr<Jack>> jacks;std::vector<std::string> types;
     std::string current,family,instance;bool routed=true,highlighted=false;
     std::function<void()> selectionChanged,activated;
@@ -116,6 +125,10 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         addAndMakeVisible(choice);choice.onChange=[this]{if(selectionChanged)selectionChanged();};addMouseListener(this,true);
         addChildComponent(sampleButton);addChildComponent(sampleName);sampleButton.onClick=[this]{if(chooseSample)chooseSample();};
         sampleName.setFont(font(11));sampleName.setColour(Label::textColourId,ink);
+        addChildComponent(section);addChildComponent(presetButton);addChildComponent(presetName);addChildComponent(more);
+        more.onClick=[this]{++subpage;resized();repaint();};
+        presetButton.onClick=[this]{if(choosePreset)choosePreset();};section.onChange=[this]{subpage=0;resized();repaint();};
+        presetName.setFont(font(12));presetName.setColour(Label::textColourId,ink);
     }
     ~ModulePanel() override {removeMouseListener(this);}
     void mouseDown(const MouseEvent&) override {if(activated)activated();}
@@ -134,10 +147,21 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
         current=type;family=panel(type).family;routed=bool(controls);select(type);knobs.clear();jacks.clear();look.markings=panelInk(type);
         sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");
+        const bool spectral=type=="spectral.engine";section.setVisible(spectral);presetButton.setVisible(spectral);presetName.setVisible(spectral);more.setVisible(spectral);subpage=0;
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
             auto knob=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),(family=="envelope"&&p.id=="sustain")||type=="utility.mix",family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
             addAndMakeVisible(*knob);knobs.push_back(std::move(knob));}
+        if(spectral){
+            pages.clear();section.clear(dontSendNotification);
+            auto page=[&](const String& name,int first,int count){std::vector<int> indices;for(int i=0;i<count;++i)indices.push_back(first+i);pages.push_back(std::move(indices));section.addItem(name,int(pages.size()));};
+            pages.push_back({partials::kLiveMain,partials::kLiveControls,48,49,50,51,52});section.addItem("Main / clock / LFO rates",1);
+            for(int o=0;o<4;++o)page("Oscillator "+String(o+1)+" / filter",o*12,12);
+            for(int e=0;e<12;++e)page(e<4?"Amp envelope "+String(e+1):e<8?"Cutoff envelope "+String(e-3):e<11?"Mod envelope "+String(e-7):"Main envelope",60+e*9,9);
+            for(int i=0;i<3;++i)page("Internal matrix depths "+String(i*8+1)+"-"+String(i*8+8),168+i*8,8);
+            for(int slot=0;slot<6;++slot)page("FX "+String(slot+1),54+slot,1);
+            section.setSelectedId(1,dontSendNotification);
+        }
         for(const auto& t:moduleRegistry())if(t.id==type){
             auto add=[&](Port p,bool output){auto jack=std::make_unique<Jack>(p,output);jack->text=panelInk(type);auto* ptr=jack.get();
                 jack->setTooltip(String(instance)+"."+String(p.id)+(output?" / output":" / choose input source"));
@@ -145,9 +169,28 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             for(const auto& p:t.inputs)add(p,false);for(const auto& p:t.outputs)add(p,true);}
         resized();repaint();
     }
+    void setSpectral(SpectralPtr state,const GraphSpec& graph){
+        if(current!="spectral.engine"||!state)return;
+        presetName.setText(state->patch.name,dontSendNotification);
+        presetName.setTooltip("Whole preset embedded in rack. Modulation sockets follow the newest active Spectral voice, including release.");
+        for(int slot=0;slot<6;++slot){auto& page=pages[size_t(20+slot)];page={54+slot};
+            for(int f=0;f<partials::kEffectControls;++f)if(partials::effectControlSpecs[f].type==state->patch.fx[slot].type)page.push_back(192+slot*partials::kEffectControls+f);
+        }
+        for(size_t i=0;i<knobs.size();++i)if(i<partials::kLiveControls){
+            bool active=spectralParameterActive(state->patch,int(i));
+            if(i>=48&&i<53&&state->patch.lfo[i-48].syncBeats==0){
+                const auto port="lfo"+std::to_string(i-47);
+                for(const auto& route:graph.modulations)if(route.source.node==instance&&route.source.port==port)active=true;
+                for(const auto& route:graph.connections)if(route.source.node==instance&&route.source.port==port)active=true;
+            }
+            knobs[i]->setAlpha(active?1.f:.45f);
+        }
+        resized();
+    }
     void setConnections(const GraphSpec& graph) {
         for(auto& j:jacks){j->connected=false;String links;
             for(const auto& c:graph.connections){const auto& e=j->output?c.source:c.destination;if(e.node==instance&&e.port==j->port.id){j->connected=true;const auto& other=j->output?c.destination:c.source;links+="\n"+String(other.node)+"."+String(other.port);}}
+            if(j->output)for(const auto& c:graph.modulations)if(c.source.node==instance&&c.source.port==j->port.id){j->connected=true;links+="\nModulates "+String(c.destination.node)+"."+String(c.destination.port);}
             if(j->output)for(const auto& e:graph.outputs)if(e.node==instance&&e.port==j->port.id){j->connected=true;links+="\nInstrument output";}
             j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+"\nClick to patch");j->repaint();}
     }
@@ -157,7 +200,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         g.setColour(panelColour(current));g.fillRoundedRectangle(r,3);g.setColour(highlighted?Colour(0xfff0c76c):text.withAlpha(.6f));g.drawRoundedRectangle(r.reduced(1),3,highlighted?2:1);
         g.setFont(font(10));g.setColour(text);g.drawText(String(instance).toUpperCase()+"  /  "+String(family).toUpperCase(),12,10,getWidth()-24,18,Justification::centredLeft);
         g.setColour(routed?Colour(0xffcbe0a8):Colour(0xff7b7b70));g.fillEllipse(float(getWidth()-19),14,6,6);
-        g.setColour(text.withAlpha(.35f));g.drawLine(12,135,float(getWidth()-12),135,.7f);
+        g.setColour(text.withAlpha(.35f));g.drawLine(12,current=="spectral.engine"?184.f:135.f,float(getWidth()-12),current=="spectral.engine"?184.f:135.f,.7f);
         if(current=="sample.player"){
             auto wave=Rectangle<float>(16,204,float(getWidth()-32),40);g.setColour(ink);g.fillRoundedRectangle(wave,2);
             if(sample){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());
@@ -166,16 +209,29 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
                 g.setColour(teal);g.drawVerticalLine(int(wave.getX()+start*wave.getWidth()),204,244);g.drawVerticalLine(int(wave.getX()+end*wave.getWidth()),204,244);
             }else{g.setColour(paper.withAlpha(.6f));g.setFont(font(11));g.drawText(samplePath.empty()?"LOAD OR DROP A WAV":"CONNECT TO LOAD SAMPLE",wave,Justification::centred);}
         }
-        if(knobs.empty()){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
+        if(knobs.empty()){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
         g.setColour(text.withAlpha(.8f));g.setFont(font(10));g.drawFittedText(routed?panel(current).description:"UNROUTED / connect to activate",12,getHeight()-37,getWidth()-24,29,Justification::centred,2);
     }
     void resized() override {
         choice.setBounds(12,35,getWidth()-24,31);
-        for(size_t i=0;i<jacks.size();++i){const int w=(getWidth()-24)/std::max(1,int(jacks.size()));jacks[i]->setBounds(12+int(i)*w,77,w,53);}
+        const int columns=current=="spectral.engine"?9:std::max(1,int(jacks.size()));
+        for(size_t i=0;i<jacks.size();++i){const int w=(getWidth()-24)/columns;jacks[i]->setBounds(12+int(i)%columns*w,77+int(i)/columns*53,w,53);}
         if(current.empty())return;
         const auto& ps=panel(current).parameters;const float w=float(getWidth()-24),h=float(std::max(220,getHeight()-190));
         auto put=[&](const char* id,float x,float y,float width,float height){for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setBounds(12+int(x*w),147+int(y*h),int(width*w),int(height*h));};
-        if(current=="sample.player"){
+        if(current=="spectral.engine"){
+            presetButton.setBounds(14,193,190,28);presetName.setBounds(213,193,getWidth()-227,28);
+            section.setBounds(14,228,getWidth()-124,28);more.setBounds(getWidth()-102,228,88,28);
+            for(auto& knob:knobs)knob->setVisible(false);
+            const int page=section.getSelectedId()-1;
+            if(page>=0&&page<int(pages.size())){
+                const auto& visible=pages[size_t(page)];const int parts=std::max(1,(int(visible.size())+5)/6);subpage%=parts;
+                more.setEnabled(parts>1);more.setButtonText(String(subpage+1)+" / "+String(parts)+" >");
+                const int first=subpage*6,count=std::min(6,int(visible.size())-first),cols=getHeight()<530?6:3,rows=std::max(1,(count+cols-1)/cols);
+                const int cell=std::max(32,(getHeight()-307)/rows);
+                for(int i=0;i<count;++i){auto& knob=*knobs[size_t(visible[size_t(first+i)])];knob.setVisible(true);knob.setBounds(12+i%cols*int(w/cols),266+i/cols*cell,int(w/cols),cell);}
+            }
+        }else if(current=="sample.player"){
             sampleButton.setBounds(16,147,int(w*.48f),28);sampleName.setBounds(12,178,getWidth()-24,23);
             const int row=std::max(80,int((getHeight()-291)*.62f));
             for(size_t i=0;i<ps.size();++i){const auto& id=ps[i].id;

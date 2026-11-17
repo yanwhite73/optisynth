@@ -32,7 +32,9 @@ void wav(const std::string& path,const std::vector<float>& x) {
 }
 }
 #include "sample_checks.h"
+#include "spectral_checks.h"
 int main(){try {
+    spectralChecks();
     sampleChecks();
     for(int i=0;i<4;++i){auto g=rackPreset(i);validateRack(g);auto x=render(g);check(energy(x)>1e-6,"Rack starter audible");check(x==render(g),"Rack starter deterministic");wav("build/rack-"+std::to_string(i)+".wav",x);}
     for(const auto* source:{"osc.variable","osc.sine"})for(const auto* filter:{"mutable.lowpass","mutable.bandpass","mutable.highpass"}){

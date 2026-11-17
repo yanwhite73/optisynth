@@ -66,6 +66,16 @@ const std::vector<Panel>& panels() {
             {"cutoff_hz","Cutoff","Hz",20,20000,2500,true},
             {"resonance","Resonance","Q",.5f,20,.707f,true},
             {"env_octaves","Mod amount","oct",-6,6,2}}});
+        Panel spectral{"spectral.engine","Spectral engine","Complete instrument / stereo / latest-voice modulation outputs","engine",{}};
+        for(const auto& s:partials::liveControlSpecs())spectral.parameters.push_back({s.id,s.name,s.unit,s.minimum,s.maximum,s.initial,s.logarithmic});
+        spectral.parameters.push_back({"tempo","Tempo","BPM",20,300,120,false,.1});p.push_back(std::move(spectral));
+        p.push_back({"utility.downmix","Stereo to mono","Explicit average: (left + right) / 2","utility",{}});
+        p.push_back({"utility.stereo","Stereo pair","Left and right mono inputs to stereo","utility",{}});
+        p.push_back({"utility.stereo_mix","Stereo mixer","Mix two stereo sources without collapsing their image","utility",{
+            {"gain_a","Input A","",0,2,1},{"gain_b","Input B","",0,2,1}}});
+        p.push_back({"mod.lfo","LFO","Independent sine / triangle / ramp / pulse modulation","modulator",{
+            {"rate","Rate","Hz",.01f,30,1,true},{"depth","Depth","",0,1,1},
+            {"wave","Shape","",0,3,0,false,1},{"retrigger","Note reset","",0,1,0,false,1}}});
         return p;
     }();
     return list;
@@ -92,11 +102,11 @@ public:
             controls->values[i].store(pair.second);values[i]=pair.second;
         }
     }
-    void update(int frames) noexcept {
-        const float amount = -std::expm1(-frames/(48000.f*.005f));
+    void update(const AudioBlock& b) noexcept {
+        const float amount = -std::expm1(-b.frames/(48000.f*.005f));
         for (std::size_t i=0;i<definition.parameters.size();++i) {
             const auto& p=definition.parameters[i];
-            float target=controls->values[i].load(std::memory_order_relaxed);
+            float target=b.parameters?b.parameters[i]:controls->values[i].load(std::memory_order_relaxed);
             if (!std::isfinite(target)) target=p.initial;
             target=std::clamp(target,p.minimum,p.maximum);
             if(p.step>=1)values[i]=std::round(target);else values[i] += amount*(target-values[i]);
@@ -114,10 +124,10 @@ public:
         if(sample&&(!std::isfinite(sample->rate)||sample->rate<8000||sample->rate>384000||sample->mono.empty()||sample->mono.size()>maximumSampleFrames))throw std::invalid_argument("Invalid prepared sample");
     }
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);std::fill_n(b.outputs[0],b.frames,0.f);if(!sample||sample->mono.empty())return;
+        update(b);std::fill_n(b.outputs[0],b.frames,0.f);if(!sample||sample->mono.empty())return;
         const auto count=sample->mono.size();
         if(b.note.trigger){
-            auto trim=[&](int i){float v=controls->values[size_t(i)].load();return std::isfinite(v)?std::clamp(v,0.f,1.f):definition.parameters[size_t(i)].initial;};
+            auto trim=[&](int i){float v=b.parameters?b.parameters[size_t(i)]:controls->values[size_t(i)].load();return std::isfinite(v)?std::clamp(v,0.f,1.f):definition.parameters[size_t(i)].initial;};
             first=size_t(trim(2)*double(count-1));last=std::max(first+1,size_t(std::ceil(trim(3)*double(count))));last=std::min(last,count);
             position=double(first);age=0;release=1;playing=true;
         }
@@ -140,7 +150,7 @@ class VariableOsc final : public Module {
 public:
     explicit VariableOsc(const NodeSpec& n):Module(n){osc.Init();}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);const float f=noteFrequency(b,values[0]);
+        update(b);const float f=noteFrequency(b,values[0]);
         if(values[3]<=1.00001f)osc.Render(f,values[2],values[1],b.outputs[0],b.frames);
         else osc.Render(f,std::min(.249f,f*values[3]),values[2],values[1],b.outputs[0],b.frames);
         for(int i=0;i<b.frames;++i)b.outputs[0][i]*=values[4];
@@ -151,7 +161,7 @@ class Sine final : public Module {
 public:
     explicit Sine(const NodeSpec& n):Module(n){osc.Init();}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);osc.Render(noteFrequency(b,values[0]),b.outputs[0],b.frames);
+        update(b);osc.Render(noteFrequency(b,values[0]),b.outputs[0],b.frames);
         for(int i=0;i<b.frames;++i)b.outputs[0][i]*=values[1];
     }
 private:plaits::SineOscillator osc;
@@ -160,7 +170,7 @@ class Resonator final : public Module {
 public:
     explicit Resonator(const NodeSpec& n):Module(n){resonator.Init(.015f,plaits::kMaxNumModes);}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         for(int i=0;i<b.frames;++i)input[i]=b.inputs[0][i]*values[4];
         resonator.Process(noteFrequency(b,values[0]),std::min(values[1],.999999f),values[2],values[3],input.data(),b.outputs[0],b.frames);
     }
@@ -170,7 +180,7 @@ class MutableFilter final : public Module {
 public:
     MutableFilter(const NodeSpec& n,int mode):Module(n),mode_(mode){filter.Init();}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         const float f=std::clamp(values[0]*std::exp2(values[2]*b.inputs[1][0])/48000.f,20.f/48000,.45f);
         filter.set_f_q<stmlib::FREQUENCY_ACCURATE>(f,values[1]);
         if(mode_==0)filter.Process<stmlib::FILTER_MODE_LOW_PASS>(b.inputs[0],b.outputs[0],b.frames);
@@ -183,7 +193,7 @@ class Modal final : public Module {
 public:
     explicit Modal(const NodeSpec& n) : Module(n) { voice.Init(); }
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         float f=440.f*std::exp2((b.note.midi+values[0]-69.f)/12.f)/48000.f;
         // Interpolate reads index+1 even at a zero fractional offset. The source
         // stiffness array has 65 entries, so never pass an exact index of 64.
@@ -199,7 +209,7 @@ class Drum final : public Module {
 public:
     explicit Drum(const NodeSpec& n) : Module(n) { drum.Init(); }
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         float f=440.f*std::exp2((b.note.midi+values[0]-69.f)/12.f)/48000.f;
         drum.Render(false,b.note.trigger,std::clamp(b.note.velocity,0.f,1.f),
             std::clamp(f,8.f/48000,.2f),values[1],values[2],values[3],values[4],b.outputs[0],b.frames);
@@ -211,7 +221,7 @@ class Env final : public Module {
 public:
     explicit Env(const NodeSpec& n) : Module(n), full(n.type=="spectral.ahdsfr") {}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         partials::EnvelopeParams p;
         if (full) {
             p.attack=values[0];p.hold=values[1];p.decay=values[2];p.sustain=values[3];
@@ -233,7 +243,7 @@ public:
         fx->prepare(48000,{{"type",float(mode)}});
     }
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         for (int i=0;i<b.frames;++i) b.outputs[0][i]=right[i]=b.inputs[0][i];
         const float cutoff=std::clamp(values[0]*std::exp2(values[3]*b.inputs[1][0]),20.f,20480.f);
         const float c[]={cutoff,values[1],values[2],values[4],values[5],0};
@@ -248,27 +258,66 @@ class Utility final : public Module {
 public:
     Utility(const NodeSpec& n,int kind):Module(n),kind_(kind){}
     void process(const AudioBlock& b) noexcept override {
-        update(b.frames);
+        update(b);
         for (int i=0;i<b.frames;++i) b.outputs[0][i]=kind_==0?b.inputs[0][i]:
             kind_==1?b.inputs[0][i]*b.inputs[1][i]:b.inputs[0][i]*values[0]+b.inputs[1][i]*values[1];
     }
 private: int kind_;
 };
+class StereoUtility final:public Module {
+public:
+    StereoUtility(const NodeSpec& n,int kind):Module(n),kind_(kind){}
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        for(int i=0;i<b.frames;++i){
+            if(kind_==0)b.outputs[0][i]=.5f*(b.inputs[0][i]+b.inputsRight[0][i]);
+            else if(kind_==1){b.outputs[0][i]=b.inputs[0][i];b.outputsRight[0][i]=b.inputs[1][i];}
+            else{b.outputs[0][i]=values[0]*b.inputs[0][i]+values[1]*b.inputs[1][i];b.outputsRight[0][i]=values[0]*b.inputsRight[0][i]+values[1]*b.inputsRight[1][i];}
+        }
+    }
+private:int kind_;
+};
+class Lfo final:public Module {
+public:
+    explicit Lfo(const NodeSpec& n):Module(n){}
+    void process(const AudioBlock& b) noexcept override {
+        update(b);if(b.note.trigger&&values[3]>=.5f)phase=0;
+        for(int i=0;i<b.frames;++i){
+            const int shape=int(values[2]);
+            const float v=shape==0?float(std::sin(6.283185307179586*phase)):shape==1?float(1-4*std::abs(phase-.5)):shape==2?float(2*phase-1):phase<.5?1.f:-1.f;
+            b.outputs[0][i]=v*values[1];phase+=values[0]/48000.;phase-=std::floor(phase);
+        }
+    }
+private:double phase=0;
+};
 }
-Registry moduleRegistry(const SampleBank& samples) {
+Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) {
     Registry r;
     for (const auto& p : panels()) {
         ModuleType type;type.id=p.type;
         const auto id=p.type;
-        type.outputs={{"out", p.family=="envelope"?SignalType::Control:SignalType::Audio}};
+        type.outputs={{"out", p.family=="envelope"||p.family=="modulator"?SignalType::Control:SignalType::Audio}};
+        for(const auto& parameter:p.parameters)type.parameters.push_back(parameter.id);
+        if(id=="spectral.engine"){
+            type.outputs={{"out",SignalType::Audio,false,2}};
+            for(const auto* name:{"lfo1","lfo2","lfo3","lfo4","lfo5","mainenv","amp1","amp2","amp3","amp4","cut1","cut2","cut3","cut4","mod1","mod2","mod3"})type.outputs.push_back({name,SignalType::Control});
+        }
+        if(id=="utility.downmix")type.inputs={{"in",SignalType::Audio,true,2}};
+        if(id=="utility.stereo"){type.inputs={{"left",SignalType::Audio,true},{"right",SignalType::Audio,true}};type.outputs={{"out",SignalType::Audio,false,2}};}
+        if(id=="utility.stereo_mix"){type.inputs={{"a",SignalType::Audio,true,2},{"b",SignalType::Audio,true,2}};type.outputs={{"out",SignalType::Audio,false,2}};}
         if (id=="modal.voice") type.outputs.push_back({"exciter",SignalType::Audio});
         if (id=="modal.resonator") type.inputs={{"in",SignalType::Audio,true}};
         if (p.family=="filter") type.inputs={{"in",SignalType::Audio,true},{"mod",SignalType::Control,false}};
         if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,true},{"gain",SignalType::Control,true}};
         if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
-        type.create=[id,assets=id=="sample.player"?samples:SampleBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
+        type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
             if(id=="sample.player"){auto it=assets.find(n.id);return std::make_unique<SamplePlayer>(n,it==assets.end()?SamplePtr{}:it->second);}
+            if(id=="spectral.engine"){auto it=engines.find(n.id);return makeSpectral(n,it==engines.end()?SpectralPtr{}:it->second);}
+            if(id=="mod.lfo")return std::make_unique<Lfo>(n);
+            if(id=="utility.downmix")return std::make_unique<StereoUtility>(n,0);
+            if(id=="utility.stereo")return std::make_unique<StereoUtility>(n,1);
+            if(id=="utility.stereo_mix")return std::make_unique<StereoUtility>(n,2);
             if(id=="modal.voice")return std::make_unique<Modal>(n);
             if(id=="modal.resonator")return std::make_unique<Resonator>(n);
             if(id=="osc.variable")return std::make_unique<VariableOsc>(n);

@@ -1,10 +1,14 @@
 #include "runtime.h"
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace optisynth {
-Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples) : spec_(spec) {
-    auto registry = moduleRegistry(samples);
+Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralBank& spectral) : spec_(spec) {
+    auto registry = moduleRegistry(samples,spectral);
+    const auto plan=compileGraph(spec,registry);int engines=0;
+    for(int i:plan.nodes)if(spec.nodes[i].type=="spectral.engine")++engines;
+    if(engines>maximumSpectralEngines)throw std::invalid_argument("Maximum two active Spectral engines per rack");
     graph_ = prepareGraph(spec, registry, {48000, quantum, Scope::Voice});
     nodes_.resize(graph_.modules.size());
     for (std::size_t i = 0; i < nodes_.size(); ++i) {
@@ -14,33 +18,73 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples) : spec_(spec) 
         n.module = dynamic_cast<AudioModule*>(graph_.modules[i].get());
         if (!n.module) throw std::invalid_argument("Module has no audio implementation");
         n.outputs.resize(r->outputs.size());
+        n.right.resize(r->outputs.size());
         n.in.resize(r->inputs.size(), zero_.data());
+        n.inRight.resize(r->inputs.size(),zero_.data());
         for (auto& output : n.outputs) n.out.push_back(output.data());
+        for(auto& output:n.right)n.outRight.push_back(output.data());
+        for(const auto& p:r->outputs)n.channels.push_back(p.channels);
+        n.parameters=panel(type).parameters;
+        if(n.parameters.size()>maxParameters)throw std::invalid_argument("Too many module parameters");
         for (const auto& p : r->inputs) if (p.type == SignalType::Event)
             throw std::invalid_argument("Event cables are not implemented yet");
     }
-    for (const auto& c : graph_.plan.connections)
+    for (const auto& c : graph_.plan.connections) {
         nodes_[c.destination.node].in[c.destination.port] = nodes_[c.source.node].out[c.source.port];
+        nodes_[c.destination.node].inRight[c.destination.port] = nodes_[c.source.node].outRight[c.source.port];
+    }
+    for(size_t i=0;i<spec.modulations.size();++i)routes_->amounts[i]=spec.modulations[i].amount;
+    for(const auto& m:graph_.plan.modulations)nodes_[m.destination.node].routes.push_back(
+        {nodes_[m.source.node].out[m.source.port],m.destination.port,m.index});
     for (const auto& o : graph_.plan.outputs) {
         const auto& type = spec.nodes[graph_.plan.nodes[o.node]].type;
         auto r = std::find_if(registry.begin(), registry.end(), [&](const auto& t) { return t.id == type; });
         if (r->outputs[o.port].type != SignalType::Audio)
             throw std::invalid_argument("Instrument output must be audio");
         roots_.push_back(nodes_[o.node].out[o.port]);
+        rightRoots_.push_back(nodes_[o.node].outRight[o.port]);
     }
 }
 void Runtime::render(float* out, int frames, Note note) noexcept {
+    std::array<float,quantum> right;
+    while(frames>0){const int n=std::min(frames,quantum);render(out,right.data(),n,note);note.trigger=false;out+=n;frames-=n;}
+}
+void Runtime::render(float* out,float* right,int frames,Note note) noexcept {
     while (frames > 0) {
         const int n = std::min(frames, quantum);
         for (auto& node : nodes_) {
             for (auto* p : node.out) std::fill_n(p, n, 0.f);
-            node.module->process({n, note, node.in.data(), node.out.data()});
+            for (auto* p : node.outRight) std::fill_n(p,n,0.f);
+            std::fill_n(node.offset.data(),node.parameters.size(),0.f);
+            for(const auto& m:node.routes){
+                const float source=std::isfinite(m.source[0])?std::clamp(m.source[0],-1.f,1.f):0.f;
+                const float depth=routes_->amounts[m.index].load(std::memory_order_relaxed);
+                if(std::isfinite(depth))node.offset[m.parameter]+=source*std::clamp(depth,-1.f,1.f);
+            }
+            for(size_t i=0;i<node.parameters.size();++i){
+                const auto& p=node.parameters[i];float base=node.module->controls->values[i].load(std::memory_order_relaxed);
+                base=std::isfinite(base)?std::clamp(base,p.minimum,p.maximum):p.initial;
+                const float offset=std::clamp(node.offset[i],-1.f,1.f);
+                float value=base;
+                if(offset!=0)value=p.logarithmic&&p.minimum>0?
+                    base*std::exp(offset*std::log(p.maximum/p.minimum)):base+offset*(p.maximum-p.minimum);
+                node.effective[i]=std::clamp(value,p.minimum,p.maximum);
+            }
+            node.module->process({n,note,node.in.data(),node.out.data(),node.inRight.data(),node.outRight.data(),node.effective.data()});
+            for(size_t p=0;p<node.out.size();++p)if(node.channels[p]==1)std::copy_n(node.out[p],n,node.outRight[p]);
         }
         std::fill_n(out, n, 0.f);
+        std::fill_n(right,n,0.f);
         for (const auto* root : roots_) for (int i = 0; i < n; ++i) out[i] += root[i];
+        for (const auto* root : rightRoots_) for (int i=0;i<n;++i)right[i]+=root[i];
         note.trigger = false;
-        out += n; frames -= n;
+        out += n;right+=n; frames -= n;
     }
+}
+SpectralBank Runtime::spectralBank() const {
+    SpectralBank bank;
+    for(size_t i=0;i<nodes_.size();++i)if(auto state=nodes_[i].module->spectralState())bank.emplace(spec_.nodes[graph_.plan.nodes[i]].id,std::move(state));
+    return bank;
 }
 std::shared_ptr<Controls> Runtime::controls(const std::string& node) const {
     for (std::size_t i = 0; i < nodes_.size(); ++i)

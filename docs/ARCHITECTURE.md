@@ -24,11 +24,12 @@ the editor, automation and agent interface must address the same stable identiti
 - Structural edits prepare a replacement plan off-thread. Scalar edits use stable
   resolved handles and appropriate smoothing. State retirement stays off-thread.
 
-## Proposed sequencer and effect interfaces
+## Sequencer and effect interfaces
 
 Requests 33–35 add requirements for independent sequencer/arp models and modular
 delay/reverb. Detailed proposals and evidence: `SEQUENCERS_AND_ARPEGGIATORS.md`
-and `OPEN_SOURCE_DELAY_REVERB.md`. These interfaces are not implemented yet:
+and `OPEN_SOURCE_DELAY_REVERB.md`. Transport/event interfaces remain proposed;
+0.0.6 implements stereo ports and control-rate parameter assignments:
 
 - Shared transport includes tempo, beat/sample position, meter and discontinuities;
   individual modules retain explicit run/reset and clock-rate policies.
@@ -41,8 +42,9 @@ and `OPEN_SOURCE_DELAY_REVERB.md`. These interfaces are not implemented yet:
 - Delay buffers, reverb tails and frozen sound remain active after input silence.
   Tail continuity and captured-audio persistence need explicit contracts.
 
-Complete Spectral integration remains the immediate implementation priority;
-its new boundaries should accommodate these contracts.
+The complete Spectral engine now runs in the rack with embedded state, stereo
+output and actual modulation exports. The note context remains monophonic; shared
+transport, event cables, global voice groups and tail transfer remain to implement.
 
 ## Performance contract
 
@@ -91,7 +93,7 @@ playable modular instrument, and an offline pass is not Live verification.
 Milestones 1–2 are implemented at foundation level. The planner validates dormant
 graph structure too, but never invokes dormant module factories. It traverses
 control/event dependencies as well as audio. `PreparedGraph` owns module lifetimes;
-`Runtime` now adds mono audio/control execution with preallocated 24-frame buffers,
+`Runtime` now adds mono/stereo audio/control execution with preallocated 24-frame buffers,
 resolved numeric connections and active module construction. Event cables are not
 executed yet; one monophonic note context reaches source and envelope nodes.
 The first extracted Spectral sampling primitives preserve existing audio exactly
@@ -107,8 +109,9 @@ marked as unrouted; routing activates their DSP. The rack now exposes typed inpu
 selectors, multiple instances and an audio output selector. Each node has independent
 parameter values and DSP state; same-algorithm copies do not share knobs.
 
-`RackDocument` persists the full graph as `optisynth.rack` version 2. Version 1
-racks remain readable. Version 2 adds per-node sample paths/fingerprints, while
+`RackDocument` persists the full graph as `optisynth.rack` version 3. Version 1/2
+racks remain readable. Version 3 embeds full Spectral state and parameter routes;
+version 2 added per-node sample paths/fingerprints, while
 immutable decoded assets live outside GraphSpec. An explicit
 import path converts 0.0.2 `optisynth.instrument` patches. All nodes, including
 dormant ones, have their saved parameters validated. A candidate graph is compiled
@@ -128,7 +131,10 @@ The sample player receives an immutable bank prepared from reachable references.
 Each player owns its playhead and articulation state. The native app's single
 background loader reads/decodes assets and builds the candidate runtime; generation
 tokens reject superseded requests. UI polling publishes only the current result.
-Routine cached graph edits still prepare on the UI thread, never the audio thread.
+Routine cached graph edits without whole engines prepare on the UI thread, never
+the audio thread. Reachable Spectral engines always prepare on the same worker,
+reusing compatible immutable tables. `SPECTRAL_ENGINE_INTEGRATION.md` records the
+instance/memory boundary, snapshot voice policy and control-rate matrix mapping.
 Sample-free graphs keep their existing parameter/schema behaviour. Full contract
 and resource bounds: `SAMPLE_PLAYER.md`. This does not yet add event cables or
 per-voice sample triggering; the current monophonic note context is retained.

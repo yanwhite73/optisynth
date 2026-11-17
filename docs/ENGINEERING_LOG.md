@@ -280,3 +280,61 @@ Documentation diff check passed. Independent source/research archive:
 160 files, 1,898,938 bytes, archive checksum and every manifest entry verified.
 This receipt is recorded after the archive was created. No DSP tests were rerun
 for this documentation-only change.
+
+## Request 36: whole Spectral, stereo rack and modulation matrix — 0.0.6
+
+Captured “ok start building” verbatim on arrival. Implemented the already ordered
+whole-Spectral milestone while retaining the later sequencer/arp/effect requests.
+The full first-party engine is one module; its patch state, internal matrix, arp
+and effects remain intact. Added explicit channel counts, stereo runtime/player/
+conversion, downmix/pair/mixer adapters and control-output-to-parameter routes.
+There are 23 module types and eight starters. One new starter uses an external LFO
+on Spectral cutoff; the other passes Spectral audio and an actual internal LFO to
+the Mutable resonator. Read-only modulation exports follow the newest active
+voice, including release; the core synthesis path itself is unchanged.
+
+Every reachable whole-engine preparation uses the existing single worker, even
+when tables are cached. Dormant engines have no DSP/tables. At most two are active
+per plan; independent state and compatible immutable tables are separate. Preset
+import and v3 rack state preserve the full patch plus scalar overrides. Existing
+rack formats remain readable. Missing, malformed and superseded preparations
+preserve the playing patch. Controls/depth use atomics; structural route changes
+validate and crossfade prepared plans. The shared keyboard remains monophonic;
+timestamped modular events and sample-accurate independent arp are not implied.
+
+Qualification: 1,194 inherited core checks, 28 graph checks, 151 modular checks
+normally and under ASan/UBSan, four importer tests and one renderer test pass.
+Exact adapter/direct L/R equality includes filtered three-unison, internal arp,
+delay and release. Stereo conversion at 44.1/48/96/192 kHz, route reachability,
+cycles/invalid targets, state independence and zero render allocations are covered.
+Simple cold preparation measured 1.61 ms; two seconds each of filtered adapter and
+direct reference rendered in 0.129 s combined. These are small fixtures, not a
+dense-polyphony or transition-memory qualification. Log: spectral-qualification.log
+under build/. Existing importer ResourceWarnings are unchanged, not test failures.
+
+Native checks cover all 23 panel bounds, older rack/sample regressions, complete
+stereo recall, actual live depth sliders, knob/state synchronisation, preset worker
+loading, missing-file preservation and cancellation. UI review found oversized
+control counts made tiny Spectral knobs at 1120x800; six-control pages fixed it.
+Review also exposed an appended matrix PNG (the snapshot stream did not truncate)
+and an initial zero-valued LFO shape label that needed a text refresh. Corrected
+both and rebuilt/rechecked the native app. Details and captures: design-qa.md and
+build/spectral-ui-review/. No audio device was opened by checks.
+
+The final resonator screenshot also exposed an incorrectly dimmed exported LFO
+rate and unlit modulation socket. Included external assignments in panel/socket
+state, added a native assertion and rebuilt/rechecked. All final captures passed
+visual review. Verified all 83 parent source hashes and all 23 pinned Mutable
+files unchanged; source/binary/test/capture hashes are in spectral_build_receipt.json.
+
+Remaining boundaries: contextual live controls are available; full structural
+spectrum/arp/routing editing is not yet ported. No new sequencer or third-party FX
+code, VST3 packaging/install, or Live interaction. Next: define timestamped event/
+transport ownership and implement the first independent step sequencer/arp.
+
+Delivery: signature verification passed and 0.0.6 opened with `--spectral-demo`,
+audio off (PID 20285); prior user instances were preserved. Independent archive:
+`../../backups/optisynth/optisynth-source-20261117-191513.tar.gz` plus `.sha256`,
+165 source files, 1,978,641 bytes. Checksum and every manifest entry verified, then
+restored into a fresh directory successfully. This subsequent delivery receipt is
+recorded in Git after creating the archive. Temporary build/test jobs completed.

@@ -16,6 +16,9 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Other open-source module makers](docs/OPEN_SOURCE_MODULE_MAKERS.md)
 - [Contextual rack interface](docs/CONTEXTUAL_UI.md)
 - [Sample player and asset loading](docs/SAMPLE_PLAYER.md)
+- [Complete Spectral engine and modulation matrix](docs/SPECTRAL_ENGINE_INTEGRATION.md)
+- [Sequencer models and arpeggiators](docs/SEQUENCERS_AND_ARPEGGIATORS.md)
+- [Open-source delay/reverb candidates](docs/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/source_snapshot_20261117.json)
 
 ## Current implementation
@@ -23,8 +26,8 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
 modal percussion, externally excited resonator and bass-drum DSP, plus Mutable's
 digital SVF filters. Spectral AHDSFR/ADSR envelopes and LP/HP/BP/notch filters remain
-interchangeable options. There are 18 module types, including a WAV sample player,
-mixer and VCA.
+interchangeable options. There are 23 module types, including a WAV sample player,
+mixer, VCA, complete Spectral engine, independent LFO and stereo utilities.
 Only output-reachable modules are constructed. Audio/control buffers and numeric
 bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
 the core also accepts multiple sources and an explicit mixer.
@@ -39,7 +42,11 @@ output and save the complete rack. Older instrument patches import automatically
 This first voice is monophonic; polyphony, granular engines, hardware MIDI
 and an agent API remain upcoming. Samples can excite a resonator or form its
 parallel attack layer. Their decoded assets are shared; playheads are independent.
-The inherited Spectral engine remains a separate compatibility reference.
+The complete Spectral engine now runs as one stereo module with its internal
+matrix, arp and effects intact. Its own voice engine remains internal; the rack
+keyboard still supplies a shared monophonic note context. Load imported `.ptch`
+presets and adjust paged live controls. The matrix connects module control outputs
+to parameter destinations and saves their signed depths separately from base values.
 
 ## Offline development
 
@@ -63,7 +70,7 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the six starter patches; edit their panels directly or select a panel
+octave. Try the eight starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a
@@ -79,6 +86,14 @@ WAVs are loaded in the background, only for connected modules. Mono/stereo PCM o
 float is supported up to 32 MiB per file; stereo is mixed to mono. Saved patches
 refer to the original files, so keep those files in place. Missing/changed files
 leave the playing patch intact. See the sample document for remaining limits.
+
+Choose **Spectral stereo + external LFO**, then **Matrix**, to change the cutoff
+assignment or add another route. **Spectral audio + LFO into resonator** shows
+audio and actual internal modulation feeding another module. The Spectral panel
+offers a section selector and a next-page button; **Load Spectral patch...** reads
+the existing imported `.ptch` format. Whole presets are embedded when saving a rack.
+Structural waveform/arp/internal-routing editing is not yet ported from the older
+Spectral editor. Use **Stereo to mono** explicitly before mono processors.
 
 `plugin/Optisynth.jucer` has a separate product/bundle/plugin identity and disables
 automatic installation. It still wraps the compatibility engine; no new VST3 has

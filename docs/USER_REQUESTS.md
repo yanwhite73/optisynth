@@ -272,3 +272,14 @@ Research original delay/reverb DSP and modular implementations, their published
 licences and likely adaptation work. Record a practical shortlist with source links;
 this adds effects to the module roadmap without silently replacing the complete
 Spectral engine or independent sequencer/arpeggiator requirements.
+
+## 36 — Start building
+
+```text
+ok start building
+```
+
+Proceed with the next implementation milestone: integrate the complete Spectral
+engine into the standalone rack with stereo/state preservation and shared routing
+controls. Retain the sequencer and open-source effects requirements in the plan.
+Build and qualify a usable standalone increment, then commit, push and back it up.

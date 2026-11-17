@@ -1,8 +1,47 @@
 # Optisynth status — 17 November 2026
 
-## Current delivery: sample player and contextual rack, standalone 0.0.5
+## Current delivery: complete Spectral and modulation matrix, standalone 0.0.6
 
-The app now exposes **18 module types** in a rack with multiple independent
+23 module types and eight starters. New: complete `spectral.engine`, independent
+LFO, Stereo to mono, Stereo pair and Stereo mixer. Full Spectral preset state,
+internal synthesis/matrix/arp/effects and stereo output are retained. Existing
+imported `.ptch` presets load on the preparation worker and become embedded rack
+state. The contextual panel has paged live controls; structural spectrum, arp and
+internal-routing editing is not yet a replacement for the old full plugin editor.
+
+The Matrix window adds/removes control-output-to-parameter assignments and changes
+depth live. Assignments keep base knob values separate and use the saved graph's
+dependency/cycle validation. Spectral exports its actual five LFOs and twelve
+envelopes from the newest active voice, including release. The independent LFO
+offers sine, triangle, ramp and pulse, depth and optional note reset. Two new
+starters demonstrate external LFO -> Spectral cutoff and Spectral audio/LFO ->
+Mutable resonator. Stereo remains separate through device output; mono conversion
+requires the explicit adapter. The shared rack keyboard is still monophonic.
+
+Rack v3 adds embedded Spectral state and modulation routes, preserving older rack
+and instrument imports. At most two whole engines may be active per plan; their
+compatible tables can be shared. Only reachable engines prepare, always on the
+worker. Scalar edits and matrix depth changes use atomics. Full contract and
+remaining limits: `SPECTRAL_ENGINE_INTEGRATION.md`.
+
+Offline qualification: 151 modular checks pass normally and under ASan/UBSan;
+1,194 core checks, 28 graph checks, four importer tests and one renderer test pass.
+Wrapped/direct stereo renders match exactly, including a filtered/unison patch
+with internal arp, delay and note release. Tested rendering allocates nothing.
+Log: `../build/spectral-qualification.log`. The simple unfiltered cold-load probe
+took 1.61 ms; two seconds each of the filtered adapter and reference took 0.129 s
+combined. These are limited fixtures, not dense-polyphony performance claims.
+
+Native checks cover v1/v2/v3 and full stereo recall, live depth/knob synchronisation,
+preset import, missing/invalid-state preservation and cancellation. Screenshots
+and receipts are in `../build/spectral-ui-review/`; visual findings are in
+`../design-qa.md`. No audio device, Live session or new VST3 was used for checking.
+Final source/binary/test/capture binding: `spectral_build_receipt.json`. All 83
+parent source files and 23 pinned Mutable files remain unchanged.
+
+## Existing sample-player and contextual-rack features
+
+The earlier 18-module rack remains available with multiple independent
 instances, contextual controls, typed input connections and output selection.
 Original Plaits VA/sine oscillators, modal percussion, bass drum and an externally
 excited resonator are available, together with original stmlib digital LP/BP/HP
@@ -22,7 +61,7 @@ and held looping. Load WAV or drop a file onto the panel. Both sample starters u
 an original built-in click, so they work without external files.
 
 App: `../app/Builds/MacOSX/build/Release/Optisynth.app`, Apple Silicon,
-version 0.0.5, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
+version 0.0.6, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
 piano or Caps Lock typing keyboard (A/W/S/E/D/F..., Z/X octave). Silence stops the
 output device. Pitch/octave labels are consistent across the piano and typing help.
 No microphone, hardware MIDI or network listener is opened by this app.
@@ -34,7 +73,7 @@ active sound. Invalid connections, cycles, controls and malformed files are reje
 before replacing the graph. Required inputs may be incomplete only on dormant nodes;
 reroute downstream destinations/output before removing an active dependency.
 
-## Verification
+## Previous 0.0.5 verification
 
 - 120 modular checks pass, including WAV decoding, sample pitch/rate/trim, looping,
   release/retrigger, independent playheads, deterministic sample/resonator starters,
@@ -68,7 +107,10 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 35 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 36 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
+increment above. It does not complete the subsequent sequencer/effect roadmap.
 
 Requests 33–34: multiple sequencer models and an independent arp are researched in
 `SEQUENCERS_AND_ARPEGGIATORS.md`. Share clock, sample-timestamped note events and
@@ -88,15 +130,15 @@ Mechanism, format/resource bounds and acceptance are in `SAMPLE_PLAYER.md`.
 Build/source receipt: `sample_build_receipt.json`; user audition is pending.
 
 Request 31: Pigments/Vital modulation assignment and a matrix overview are logged
-as a UI option alongside module connections. User screenshot is retained locally;
-`CONTEXTUAL_UI.md` records source selection/drag, knob depth indications and one
-shared assignment representation. Research original manuals and define modulation
-scope/rates before implementing. This did not cancel sample work.
+as a UI option alongside module connections. The first shared matrix is now
+implemented; source drag-to-knob assignment and knob depth indications remain
+pending. User screenshot is retained locally; `CONTEXTUAL_UI.md` records both
+the proposal and current behaviour. This did not cancel sample work.
 
 Requests 28–29: VCV performance lessons and the right degree of modularity are
 researched in `VCV_ARCHITECTURE_LESSONS.md`. Current audio/control modules are
-independent, but note/gate context is shared, most parameters lack modulation
-ports, filter modulation is block-rate, and event cables/polyphony/global scope/
+independent. In 0.0.6 parameters also accept shared matrix routes; note/gate context
+remains shared, control modulation is block-rate, and event cables/polyphony/global scope/
 feedback remain unimplemented. Recommend playable voice groups over an editable
 modular graph. Define these interfaces before extending sample/polyphony ownership;
 the sample slice retains the current shared Note context. The VCV research itself
@@ -121,13 +163,12 @@ controller or eventual hardware host for Optisynth. Both roles are recorded in
 `RESEARCH.md`; integration and hosting feasibility remain unverified. The current
 module/sample/polyphony development order continues.
 
-Request 32 is now the next priority: include the complete Spectral synth engine,
-retaining its internal architecture, with a shared routing matrix reaching other
-modules. Inspect its audio, note, parameter and state interfaces before adapting it.
-Inspection complete: `SPECTRAL_ENGINE_INTEGRATION.md` records existing realtime
-controls, private per-voice modulation signals, stereo output and editor coupling.
-Exact next implementation action is the channel-aware output/state schema and
-stereo-preserving whole-engine adapter, before the cross-module matrix UI.
+Request 32's complete engine, stereo/state boundary and first shared matrix are
+implemented in 0.0.6. The older full Spectral editor's structural controls remain
+to adapt. Exact next architecture work is a timestamped event/transport interface,
+then the first independent step sequencer/arp; retain the different-model design
+in `SEQUENCERS_AND_ARPEGGIATORS.md` and the effects review queue. Add broader
+whole-engine editing and modulation indicators without splitting Spectral apart.
 Use the Pigments/Vital suggestion for matrix/parameter assignment; keep one stable
 routing representation. Broader bounded polyphony and voice/global boundaries,
 more Mutable engines, granular playback, envelope/modulator options and undo/direct
@@ -138,12 +179,14 @@ the same note context. Hardware audio input is not implemented.
 
 Source adapters target fixed 48 kHz / 24-sample blocks with device-rate conversion.
 Sample decoding runs on one cancellable worker and only loads reachable assets.
-Cached graph edits prepare on the UI thread; scalar edits use resolved atomics.
+Cached graph edits without full engines prepare on the UI thread; all reachable
+Spectral graph preparation uses the worker. Scalar edits use resolved atomics.
 Playback uses linear interpolation, with antialiasing refinement deferred. WAV
 mono/stereo PCM/float is supported, stereo averaged to mono; 32 MiB per file/decoded
 asset and 128 MiB of unique assets per plan. Crossfades keep more than one plan
 alive, so this is not a process-wide memory cap. External sample files must remain
-available for cold recall. Stereo, portable collection and seamless loops are pending.
+available for cold recall. Stereo WAV playback, portable collection and seamless
+loops are pending; the new rack/Spectral output path already preserves stereo.
 
 ## Deferred sound-quality issue
 

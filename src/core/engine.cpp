@@ -342,6 +342,14 @@ void Voice::updateControl(int i, double& levelTarget) {
     }
 }
 
+ModulationSnapshot Voice::modulationSnapshot() const {
+    ModulationSnapshot result{};
+    for(int i=0;i<5;++i)result[i]=lfo_[i].value;
+    result[5]=main_.level();
+    for(int i=0;i<4;++i){result[6+i]=osc_[i].amp.level();result[10+i]=osc_[i].cut.level();}
+    for(int i=0;i<3;++i)result[14+i]=modEnv_[i].level();
+    return result;
+}
 float Voice::sourceValue(const ModRoute& r) const {
     switch (r.source) {
         case ModSource::Lfo: return lfo_[static_cast<std::size_t>(r.sourceIndex)].value;
@@ -907,6 +915,11 @@ void Engine::reset() {
     output_.reset();
 }
 
+ModulationSnapshot Engine::modulationSnapshot() const {
+    const Slot* latest=nullptr;
+    for(const auto& s:slots_)if(s.voice.active()&&(!latest||s.age>latest->age))latest=&s;
+    return latest?latest->voice.modulationSnapshot():ModulationSnapshot{};
+}
 int Engine::activeVoices() const {
     int n = 0;
     for (const auto& s : slots_) n += s.voice.active() ? 1 : 0;

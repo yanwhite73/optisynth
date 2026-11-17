@@ -17,7 +17,10 @@ int portIndex(const std::vector<Port>& ports, const std::string& id) {
 void checkPorts(const std::vector<Port>& ports) {
     require(ports.size() <= kMaximumPorts, "Port limit exceeded");
     std::set<std::string> names;
-    for (const auto& p : ports) require(!p.id.empty() && names.insert(p.id).second, "Empty/duplicate port ID");
+    for (const auto& p : ports) {
+        require(!p.id.empty() && names.insert(p.id).second, "Empty/duplicate port ID");
+        require(p.channels==1||(p.channels==2&&p.type==SignalType::Audio),"Invalid channel count");
+    }
 }
 }
 
@@ -26,6 +29,7 @@ GraphPlan compileGraph(const GraphSpec& spec, const Registry& registry) {
     require(!spec.nodes.empty() && spec.nodes.size() <= kMaximumNodes, "Node count outside bounds");
     require(!spec.outputs.empty() && spec.outputs.size() <= kMaximumPorts, "Output count outside bounds");
     require(spec.connections.size() <= kMaximumConnections, "Connection limit exceeded");
+    require(spec.modulations.size() <= kMaximumModulations, "Modulation limit exceeded");
     std::map<std::string, const ModuleType*> types;
     for (const auto& type : registry) {
         require(!type.id.empty() && types.emplace(type.id, &type).second, "Empty/duplicate module type");
@@ -58,10 +62,24 @@ GraphPlan compileGraph(const GraphSpec& spec, const Registry& registry) {
         auto from = endpoint(c.source, false), to = endpoint(c.destination, true);
         const auto type = definitions[from.node]->outputs[from.port].type;
         require(type == definitions[to.node]->inputs[to.port].type, "Port type mismatch");
+        require(definitions[from.node]->outputs[from.port].channels==definitions[to.node]->inputs[to.port].channels,
+                "Channel mismatch: use Stereo to mono or Stereo pair");
         require(connectedInputs.emplace(to.node, to.port).second,
                 "Input has multiple sources; use an explicit mixer");
         dependencies[to.node].push_back(from.node);
         links.push_back({from, to, type});
+    }
+    std::vector<ResolvedModulation> modulations;
+    for(size_t i=0;i<spec.modulations.size();++i){
+        const auto& m=spec.modulations[i];const auto from=endpoint(m.source,false);
+        require(definitions[from.node]->outputs[from.port].type==SignalType::Control,"Modulation source must be control");
+        const auto target=names.find(m.destination.node);require(target!=names.end(),"Unknown modulation destination");
+        const auto& params=definitions[target->second]->parameters;
+        const auto param=std::find(params.begin(),params.end(),m.destination.port);
+        require(param!=params.end(),"Unknown modulation parameter: "+m.destination.port);
+        require(std::isfinite(m.amount)&&m.amount>=-1&&m.amount<=1,"Modulation depth outside -1..1");
+        dependencies[target->second].push_back(from.node);
+        modulations.push_back({from,{target->second,int(param-params.begin())},int(i)});
     }
     std::vector<ResolvedEndpoint> outputs;
     for (const auto& e : spec.outputs) outputs.push_back(endpoint(e, false));
@@ -97,6 +115,10 @@ GraphPlan compileGraph(const GraphSpec& spec, const Registry& registry) {
         plan.connections.push_back(c);
     }
     for (auto out : outputs) { out.node = runtimeIndex[out.node]; plan.outputs.push_back(out); }
+    for(auto m:modulations)if(active[m.destination.node]){
+        m.source.node=runtimeIndex[m.source.node];m.destination.node=runtimeIndex[m.destination.node];
+        plan.modulations.push_back(m);
+    }
     return plan;
 }
 

@@ -1,0 +1,276 @@
+{
+  "created_utc": "2026-11-17T19:14:37.067011+00:00",
+  "version": "0.0.6",
+  "verification": {
+    "core_checks": 1194,
+    "graph_checks": 28,
+    "modular_checks": 151,
+    "asan_ubsan_modular_checks": 151,
+    "importer_tests": 4,
+    "renderer_tests": 1,
+    "native_checks": "PASS: background full-engine load; stereo; active LFO routing; matrix live depth; preset control synchronisation; complete embedded state and stereo audio recall; cycle/malformed-state rejection; imported preset worker; missing-file preservation; cancellation; explicit mono adapter; four native captures. No audio device opened.",
+    "native_previous_rack_checks": "PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 23 panels fit without overlap; legacy instrument and v1 rack audio; background WAV loading; waveform asset; loop toggle; external sample recall audio; missing/changed sample preservation; dormant load pruning; cancellation and newest-result publication; nine native captures. No audio device opened.",
+    "visual_review": "passed; design-qa.md",
+    "parent_files_unchanged": 83,
+    "mutable_files_verified": 23,
+    "audio_device_opened_by_checks": false,
+    "user_audition": "pending",
+    "vst3_built": false,
+    "live_driven": false,
+    "benchmark_scope": "Small cold-load and filtered three-unison/arp/delay fixtures; not dense polyphony or transition peaks."
+  },
+  "artifacts": {
+    "Makefile": {
+      "sha256": "d4482ffc561fb69c534228cdacd625f351a23c9b5d6cac50d94f66b0cd492ac5",
+      "bytes": 3101
+    },
+    "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth": {
+      "sha256": "86a6ccdad87596ce0b90fad1f08b8290228ee2d36357abd01860787512a6c383",
+      "bytes": 4869488
+    },
+    "app/Main.cpp": {
+      "sha256": "d94827dedfe6a004e4a11d69a35bc596492257da087db0117f6cc35be130ea27",
+      "bytes": 1539
+    },
+    "app/ModulationEditor.h": {
+      "sha256": "74461e1c11e152790d40e4dd472ade91a120a812b579d633ae43ecd35f2c496e",
+      "bytes": 5912
+    },
+    "app/OptisynthApp.jucer": {
+      "sha256": "6e96feefa213ffad2b59ce3d25ed1e08f0449872f814357f9d26a6796c625fe3",
+      "bytes": 4777
+    },
+    "app/Panel.h": {
+      "sha256": "414bd1d85e717af5969c398db273650989c55a1cec6ce1e43538e33130bb1b16",
+      "bytes": 24743
+    },
+    "app/PatchIO.h": {
+      "sha256": "d20a80cc131f6300b06759140aecd1ebce49b82c426711e1b69268e267a82544",
+      "bytes": 13379
+    },
+    "app/RackEditor.h": {
+      "sha256": "2849c8fb6431439f06c7d60d97428f2e639dd8cedb1e25966ea4030bd7833a63",
+      "bytes": 44565
+    },
+    "app/SampleLoader.h": {
+      "sha256": "0e639ed02c02ca97f5656a167eeade014f214911afa785f8d4ff8f97a9790add",
+      "bytes": 2831
+    },
+    "build/spectral-native-final.log": {
+      "sha256": "c3444948cc79cbb70ff4987deabed0eb179ab3b95773babc9d6ff6905a926fac",
+      "bytes": 359
+    },
+    "build/spectral-qualification.log": {
+      "sha256": "275f51603df901e8afd9ceb1d8be743c9fb7e74cd5d4860e88789ef7d9caea37",
+      "bytes": 3812
+    },
+    "build/spectral-ui-review/hardware-filter-focus.png": {
+      "sha256": "cc963d9d53fda6c9de6e80520220b54e47c50b5baa2a63ae973b5c4facfadb0b",
+      "bytes": 117843
+    },
+    "build/spectral-ui-review/hardware-minimum.png": {
+      "sha256": "eba624dcd2e0d7ee4c28be2a366e19f0b3333d81eebb2edd527a8d3a6f27930e",
+      "bytes": 117179
+    },
+    "build/spectral-ui-review/hardware-rack.png": {
+      "sha256": "e7be508c2421aebcf63491e442755e660de276edc08d492ae0f11f5a3e6e8ce2",
+      "bytes": 145379
+    },
+    "build/spectral-ui-review/hardware-resonator.png": {
+      "sha256": "e091c8557dcbc994de96d0dca7b8ffc517cc78a58d7ca41194878d4bec16c89b",
+      "bytes": 178254
+    },
+    "build/spectral-ui-review/hardware-spectral-minimum.png": {
+      "sha256": "2d970b843cd9a0f8ca81906079567dff724a69d5f56a45801074b6d87d93d090",
+      "bytes": 131323
+    },
+    "build/spectral-ui-review/hardware-two-oscillators.png": {
+      "sha256": "05457479bc0952d827abb6b3c0ecbcf37d50767e54b608486e9d9c52c543be6d",
+      "bytes": 159207
+    },
+    "build/spectral-ui-review/sample-minimum.png": {
+      "sha256": "d66859df9b647073b2807a24641364fdb5d42855bdf9cc7cec4f2e73d2432bc3",
+      "bytes": 115457
+    },
+    "build/spectral-ui-review/sample-parallel.png": {
+      "sha256": "c4fe6b2aaff32350b482e54489786f54f586709b1f6b671cf7cd4a37e82a146e",
+      "bytes": 129711
+    },
+    "build/spectral-ui-review/sample-resonator.png": {
+      "sha256": "42787f5ced421e0e985fdc726b799168f73cd13860245be87a47aa50b264c437",
+      "bytes": 120845
+    },
+    "build/spectral-ui-review/spectral-check.txt": {
+      "sha256": "9ca6439abef74f422d067a21e0589335cccdaad65590e59e5e7452cf65de313c",
+      "bytes": 331
+    },
+    "build/spectral-ui-review/spectral-matrix.png": {
+      "sha256": "0715f0eed081bfbe990486fa9f0cd61bb42136349817fa8170f17598db1acf41",
+      "bytes": 29545
+    },
+    "build/spectral-ui-review/spectral-minimum.png": {
+      "sha256": "c0fab1734063c480be773e40db88f92394c753ad33e1a9798a80817a6ed72de1",
+      "bytes": 124333
+    },
+    "build/spectral-ui-review/spectral-resonator.png": {
+      "sha256": "0c14d1e08df03be0c76eb49667fd68eb9648cfbf3bd7c0fb81418d332b3084b0",
+      "bytes": 141516
+    },
+    "build/spectral-ui-review/spectral-stereo.png": {
+      "sha256": "08ccb9fd7dd044486f9b9203cfe354417482f4b7b89f41f61024891b154d9b7c",
+      "bytes": 134080
+    },
+    "build/spectral-ui-review/ui-check.txt": {
+      "sha256": "0fe3d1f5592ad2b7d2e5c3334331b17decb05d828fb84d7e408e31d95fb1e258",
+      "bytes": 571
+    },
+    "src/cli/render.cpp": {
+      "sha256": "c6c826cca722e447ab2eb2a2a5b79e007682beba3a82b769320673f5f2b03fc7",
+      "bytes": 6455
+    },
+    "src/core/arp.cpp": {
+      "sha256": "1da074c5b2deacc2962f7bbdae6d100917c83a4c566e8f81b2e876375ca63c8a",
+      "bytes": 7106
+    },
+    "src/core/arp.h": {
+      "sha256": "440586c32480f10e104e47a7e5d5b32127b73cfc4e6b3749ee4d5808463bffdd",
+      "bytes": 2450
+    },
+    "src/core/effect_controls.h": {
+      "sha256": "c68adbb2f2f8c7472d331f3893b2d2d0ab921b4eb61e2d6c575bef75976e0838",
+      "bytes": 8506
+    },
+    "src/core/effects.cpp": {
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+      "bytes": 52594
+    },
+    "src/core/effects.h": {
+      "sha256": "b57de8bc2173ea57d8b525c675fdf36aae212cbb13abfc52216880bd78d96741",
+      "bytes": 4128
+    },
+    "src/core/engine.cpp": {
+      "sha256": "a26de72e986094fd16a6e0cde264a6a5b0a6b98499d4f9229aa611db5e1fac96",
+      "bytes": 48747
+    },
+    "src/core/engine.h": {
+      "sha256": "fa4d9ac32449b1387efadbf18447eb12e7978f013f40503a9a76f47053bb6389",
+      "bytes": 10391
+    },
+    "src/core/envelope.cpp": {
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+      "bytes": 4792
+    },
+    "src/core/envelope.h": {
+      "sha256": "14b2df488dceeadbd46f8d31b35b7c1406b90dccd476b5a9183342f3e5a4d515",
+      "bytes": 1275
+    },
+    "src/core/live_controls.h": {
+      "sha256": "ec4290f699652b1db3922dc3fad42250cb6bcf579e4788830a635bbdbd8b13f4",
+      "bytes": 9103
+    },
+    "src/core/patch.cpp": {
+      "sha256": "a8b9bac44e2fd8977f735d49660f83dd4dd23529c197a1ed30c6b891d97e31e4",
+      "bytes": 17081
+    },
+    "src/core/patch.h": {
+      "sha256": "f89e0ece6a3dcec69f31cf760ae3c4f3c90fe61f361f860e32677c5635c5a3fc",
+      "bytes": 6118
+    },
+    "src/core/spectral_read.h": {
+      "sha256": "4473c77010c24dc0736e7ea2aea67ece97bc53b3d2545efe1b5334aed430cd22",
+      "bytes": 1843
+    },
+    "src/core/spectrum.cpp": {
+      "sha256": "e52d96d5b5a50b9c3b8943d4cb5550d8c104d974b1ae5ed1086dd3adf3a5336f",
+      "bytes": 788
+    },
+    "src/core/spectrum.h": {
+      "sha256": "fdbe81dbf8457d59853679d242d982f47ce1a338a49a85512acd0d99d3099169",
+      "bytes": 1407
+    },
+    "src/core/table_bank.cpp": {
+      "sha256": "b86da25ba52213dd05ff2fe9395fa5be8b2ac85d6fa1f53fda3736aee00f3f7d",
+      "bytes": 5621
+    },
+    "src/core/table_bank.h": {
+      "sha256": "55772cd1214b13a12f3cbeb164c2e7d4e7d64f817cbac7a64787a3eec42ad5be",
+      "bytes": 2187
+    },
+    "src/modular/graph.cpp": {
+      "sha256": "caddd2519954ea6dda13d1784194d4918360cd6cbb550ce05f29f0f0c33a60bf",
+      "bytes": 7579
+    },
+    "src/modular/graph.h": {
+      "sha256": "d204dcd25bc8552c405853ecf319e07e0602ed44cf9f557102695d75eafd323a",
+      "bytes": 3090
+    },
+    "src/modular/modules.cpp": {
+      "sha256": "82a6d40126e9fab9771031c26dbe2b4a50b84f2b8a84552d5ad7c25778f97a82",
+      "bytes": 20249
+    },
+    "src/modular/player.h": {
+      "sha256": "0a2d4c29d8006b28853b2b24375b59b7eb67eac4bb8e0f0782a7ff772c9a32a3",
+      "bytes": 6049
+    },
+    "src/modular/rack.h": {
+      "sha256": "7b72fb1d7d7854304a1f98fefdb3141b8dbe13d222b349f25b2fb7bf20d1a93b",
+      "bytes": 3226
+    },
+    "src/modular/runtime.cpp": {
+      "sha256": "8f80d43e617b12de815dc6eef8a190cc090b5b12cfb65e26d94b69e27d92f170",
+      "bytes": 6179
+    },
+    "src/modular/runtime.h": {
+      "sha256": "ce2978e4694e0b0dd9fea3d52f6d0fba2c41ba80949219626540cee8c67ecb45",
+      "bytes": 3282
+    },
+    "src/modular/sample.cpp": {
+      "sha256": "b3eb3d0fa886a196ade029ae51c88d2942ed24a72e05528a3a180d818d6891bc",
+      "bytes": 5198
+    },
+    "src/modular/sample.h": {
+      "sha256": "3cf21bb6be180c1fee9d32620c8be147cb68696b6db73e2a846bd3219a4722c4",
+      "bytes": 909
+    },
+    "src/modular/spectral.cpp": {
+      "sha256": "c4c26efb1fc04645af14b23b537540f42b08c543d8cb0161e61d982ccff10f02",
+      "bytes": 5970
+    },
+    "src/modular/spectral.h": {
+      "sha256": "30f97d32d82299d47daf9d3d55211479a6c8b35b8c5223c4b4f98b0f2e04e5b5",
+      "bytes": 849
+    },
+    "tests/sample_checks.h": {
+      "sha256": "b1a4b6084f2d0aad7bd4c18a84a8d5ca9afe0a2e9680f8ddc610bc3e7fe2404a",
+      "bytes": 6894
+    },
+    "tests/spectral_checks.h": {
+      "sha256": "89845d17c9873888f55cee139c07db6d07983fdba7960475a3176e340a08c7e0",
+      "bytes": 8068
+    },
+    "tests/test_core.cpp": {
+      "sha256": "87c0e87c19beed2e2ac63231ec789b46cec28774aede355ba250e74f0651c3ba",
+      "bytes": 66272
+    },
+    "tests/test_graph.cpp": {
+      "sha256": "659d44bf7f2667d753d9958f585259aaae20f1506d058ce8cc4d4debd8f16833",
+      "bytes": 5181
+    },
+    "tests/test_host_extension.h": {
+      "sha256": "1cb3837a63942b12666d2ae3c261f147cc4244eee517afeee1086452355dab04",
+      "bytes": 5972
+    },
+    "tests/test_modular.cpp": {
+      "sha256": "7bbd01606c71585bd4b866b7b346edfd444b1d2b0106966bf7d05e1900031319",
+      "bytes": 9007
+    },
+    "tools/backup_source.py": {
+      "sha256": "f1fd0b20825a9af68e4534c4bb3d6e02b0064bdc2e6da0e9a446bb032a2353dc",
+      "bytes": 5408
+    },
+    "tools/make_app_project.py": {
+      "sha256": "20a38d2bfeaf0663ad7c282e6f1e89d3d5ada2e4ff1352febc74b88c9b067173",
+      "bytes": 2334
+    }
+  }
+}

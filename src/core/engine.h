@@ -79,6 +79,8 @@ int resolveMatrix(const Patch& patch, std::array<ModRoute, kMatrixSlots>& out, i
 
 // bus[2*b] and bus[2*b+1] are the left and right channels of bus b, each kControlBlock long.
 using BusArray = std::array<float*, 2 * kBuses>;
+// Read-only end-of-render snapshot: LFO1..5, main env, amp1..4, cut1..4, mod1..3.
+using ModulationSnapshot = std::array<float,17>;
 
 class Voice {
 public:
@@ -91,6 +93,7 @@ public:
     void inheritPlayback(const Voice& previous);  // after start() binds the new patch/tables
     // Adds one control block (up to kControlBlock frames) into the buses.
     void render(const BusArray& bus, int frames);
+    ModulationSnapshot modulationSnapshot() const;
 
 private:
     struct Unison {
@@ -182,6 +185,8 @@ public:
     // Renders frames of stereo audio (overwrites the buffers). Any frame count >= 0.
     void render(float* left, float* right, int frames);
     int activeVoices() const;
+    // Latest-started active voice, including its release; zero after all voices end.
+    ModulationSnapshot modulationSnapshot() const;
 
 private:
     struct Slot {

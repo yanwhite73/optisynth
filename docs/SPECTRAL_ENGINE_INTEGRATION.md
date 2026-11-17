@@ -1,9 +1,61 @@
 # Complete Spectral engine and cross-module routing
 
-Request 32, 17 November 2026, supersedes the previous immediate next step of
-general polyphony work. This is an inspected integration plan, not a claim that
-the whole engine or an environment-wide modulation matrix is already available
-in standalone 0.0.5. Request 31 supplies the Pigments/Vital interaction reference.
+Request 32, 17 November 2026, superseded the previous immediate next step of
+general polyphony work. The first whole-engine/matrix slice is implemented in
+standalone 0.0.6. The original inspected plan is retained below as context.
+Request 31 supplies the Pigments/Vital interaction reference.
+
+## 0.0.6 implemented behaviour
+
+Request 36 started this implementation. The design below remains the acceptance
+reference; the following records the actual first slice, without implying the
+entire older Spectral plugin editor has been ported.
+
+- A `spectral.engine` module owns the full first-party `partials::Engine`, including
+  four oscillator/filter paths, internal matrix, envelopes/LFOs, arp and effects.
+  `.ptch` imports and rack-embedded patch text preserve structural settings and
+  spectra; scalar controls are separate saved per-node overrides. The contextual
+  panel pages expose live oscillator/filter, envelope, LFO, matrix-depth and
+  matching-FX parameters. Structural spectrum/routing/arp editing remains in the
+  older editor or preset file; this panel is not its full UI replacement.
+- Ports declare one or two audio channels. Stereo remains separate through Runtime,
+  Player and device-rate conversion. Stereo-to-mono uses an explicit average
+  module; Stereo pair and Stereo mixer allow intentional stereo construction.
+  Existing mono outputs duplicate exactly to both channels.
+- Whole-engine loads and graph edits with reachable engines always use the single
+  preparation worker, including cached loads. Compatible tables are immutable
+  resources reused by the engine's exact-content check. Dormant nodes have no
+  processor and their table cache is released. At most two full engines may be
+  active in one plan; crossfades/worker/pending plans can coexist, so this is not
+  a process-wide memory cap. Cancellation discards stale results; an in-progress
+  core table build finishes before that worker can take the newest request.
+- The shared matrix stores instance-qualified control-output/parameter routes.
+  It resolves dependencies and indices before audio starts, includes control-only
+  sources in reachability and rejects cycles, invalid targets and audio sources.
+  Depth changes use atomics; structural route changes prepare a new graph.
+  Summed signed offsets act on a normalised parameter range and clamp to bounds;
+  positive logarithmic controls map offsets exponentially. Source values clamp
+  to -1..1. Updates occur once per render chunk, at most 24 internal samples;
+  this is control-rate modulation, not audio-rate or new sample-accurate events.
+  Stored knob values remain unchanged by modulation.
+- A separate sine/triangle/ramp/pulse LFO can modulate eligible parameters.
+  Spectral exposes actual LFO1–5, main, amp1–4, cut1–4 and mod1–3 envelopes.
+  Read-only snapshots select the newest-started active voice, including release;
+  silence gives zero. Downstream modules receive the end-of-chunk snapshot held
+  for that chunk. The internal engine's own modulation path is unchanged.
+- Destination filtering uses saved structural state: disabled oscillator/filter,
+  absent effects, unused internal modulation sources and identical wave mixes
+  are omitted where identifiable. This is conservative metadata, not a measured
+  guarantee that every setting/stage has audible impact. Self-assignment through
+  the external graph is rejected; Spectral's internal matrix handles those routes.
+
+Rack format v3 embeds full engine state and parameter assignments, retaining v1/v2
+and legacy instrument import. Spectral text is bounded to 1 MiB total during rack
+read and external preset import to 1 MiB/file; rack files to 2 MiB. Ordinary
+parameter state is recalled, not in-flight voices or effect-buffer contents.
+Structural replacement uses the existing 5 ms plan crossfade and retriggers the
+held shared keyboard note. Long-tail transfer and polyphonic event cables remain
+pending. No VST3 installation, DAW control or external code adoption is involved.
 
 ## Intended result
 
@@ -19,7 +71,7 @@ eligible Spectral parameter; expose selected actual Spectral modulation signals
 for external destinations. Matrix and direct assignment must share one saved
 representation. Preserve internal matrix rows when adding external assignments.
 
-## Code evidence inspected
+## Code evidence inspected before implementation
 
 - `src/core/engine.h/.cpp`: `partials::Engine` already owns complete instrument
   playback. `load()` builds tables/effects off audio, reuses compatible `TableCache`,
@@ -51,7 +103,7 @@ representation. Preserve internal matrix rows when adding external assignments.
   parameters. Cycles are rejected and dormant nodes are pruned. Stereo and
   parameter-route dependencies need explicit extensions, not hidden UI wiring.
 
-## Implementation order and acceptance
+## Original implementation order and acceptance
 
 1. Define a complete-engine state/resource record outside GraphSpec, with embedded
    patch text and immutable reusable tables. Generalize preparation so every
@@ -83,7 +135,14 @@ audio, failed/cancelled preparation, bounded memory and zero callback allocation
 locks. Benchmark cold loads and graph-transition peaks as well as steady playback.
 No new VST3 packaging or Live operation is implied by this standalone milestone.
 
-Exact next implementation action: specify the channel-aware port/output and
-embedded whole-engine state schemas, then implement a stereo-preserving core
-adapter and qualification render before adding the matrix UI. This document
-records the reason stereo and modulation scope cannot be skipped.
+The above adapter, stereo/state schemas and first matrix are now implemented.
+Qualification: 151 modular checks normally and under ASan/UBSan, 1,194 core checks,
+28 graph checks, importer/renderer compatibility and native state/UI checks pass.
+Direct/wrapped stereo audio matches exactly for simple and filtered/unison/arp/FX
+fixtures; tested render/converter paths allocate nothing. Evidence and limited
+performance measurements are recorded in STATUS and spectral_build_receipt.json.
+Dense polyphony, whole-engine transition peaks and listening remain further work.
+
+Next: define sample-timestamped events and transport for the independent sequencer
+and arp, then implement the first step model. Keep structural Spectral editing,
+modulation indicators/direct assignment and broader effect modules on the queue.

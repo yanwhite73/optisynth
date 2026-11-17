@@ -1,8 +1,10 @@
 # Sequencers and independent arpeggiators
 
 Research/design, 17 November 2026. Requests 33–34 are retained verbatim in
-`USER_REQUESTS.md`. No sequencer runtime is added by this document. Complete
-Spectral integration remains the next implementation priority.
+`USER_REQUESTS.md`. No sequencer runtime is added by this document. The subsequent
+0.0.6 milestone implements complete Spectral, stereo and shared parameter routing.
+Next implementation work is the timestamped event/transport boundary followed by
+the first independent step sequencer and arp; the multi-model design below remains.
 
 ## Direction
 

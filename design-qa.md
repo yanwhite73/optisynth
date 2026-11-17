@@ -99,3 +99,34 @@ Request 31's Pigments/Vital suggestion is a future modulation interaction option
 this review does not claim that a modulation matrix has been implemented.
 
 final result: passed
+
+## Complete Spectral and shared matrix — 0.0.6
+
+Continued the approved hardware-panel direction. Inspected native Spectral/stereo
+and Spectral/resonator captures at 1440x940, Spectral controls at 1120x800 and the
+matrix at 960x560. The first pass found P2 tiny knobs when twelve controls shared
+the shorter panel. Six controls per page, arranged in one or two rows according
+to available height, restore readable knobs, labels and values. Page count and
+section selection remain visible above the controls.
+
+Follow-up review caught stale matrix evidence: its stream appended a second PNG
+instead of replacing the first. Added truncation, rebuilt and recaptured; the
+matrix now visibly shows the current friendly parameter label and tested 0.230
+depth. The initial LFO shape value required an explicit text refresh to display
+Sine rather than 0. Both corrections are visible in the final images.
+
+Exported Spectral LFO rates must remain visibly active when routed outside the
+engine. Updated panel eligibility and socket indicators/tooltips to include
+matrix assignments; the final resonator capture shows the lit LFO1 socket and
+undimmed rate. The native check asserts both. Matrix source/destination selectors,
+depth controls and Remove are readable with separate hit regions.
+
+Final files: `build/spectral-ui-review/spectral-stereo.png`,
+`spectral-resonator.png`, `spectral-minimum.png` and `spectral-matrix.png`.
+Nine existing hardware/sample captures are regenerated there too. All 23 panels
+pass bounds/overlap checks, and native state/load/modulation checks pass on the
+final build. No audio device is opened by captures. Physical pointer audition and
+listening are pending. Drag-to-parameter assignment, modulation rings and cable
+overlays remain later work; this first matrix uses explicit selections.
+
+No actionable P0/P1/P2 remains in the reviewed surfaces. Final result: passed.

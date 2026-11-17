@@ -132,7 +132,10 @@ boundary. Research only; event cables and these modules are not implemented.
 licences. It distinguishes original DSP from firmware/plugin wrappers and calls
 out rate assumptions, stereo, tail ownership and causal feedback requirements.
 No source from these candidates was adopted; full module-specific review remains
-required before use. Complete Spectral integration remains the next milestone.
+required before use. Standalone 0.0.6 now includes the complete first-party Spectral
+engine, stereo routing and the first shared matrix; see
+[SPECTRAL_ENGINE_INTEGRATION.md](SPECTRAL_ENGINE_INTEGRATION.md). The next interface
+work is sequencer/arp clock and timestamped events. New effect modules remain queued.
 
 ## Parallel project: repurposed Korg Wavestate
 
