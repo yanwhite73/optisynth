@@ -3,7 +3,7 @@
 Research collected 17 November 2026 for request 38. **Research only: no sequencer
 implementation, third-party execution, installation or app rebuild in this task.**
 The earlier clock prototype is provisional. The proposed product design is in
-[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md).
+[SEQUENCER_UI_ARCHITECTURE.md](../../ui/SEQUENCER_UI_ARCHITECTURE.md).
 
 ## Finding
 
@@ -25,7 +25,7 @@ Fourteen repository inventories were pinned. Thirteen contain source candidates;
 the current Stellare repository is a negative finding, not a usable source port.
 Selected original source, README/licence files, plaintext manuals, six HTML manual
 snapshots and three UI reference images are saved under
-`references/sequencer_research_20261117/`. These reference copies are git-ignored.
+`../../references/sequencer_research_20261117`. These reference copies are git-ignored.
 [sequencer_research_sources_20261117.json](sequencer_research_sources_20261117.json)
 records exact commits, URLs, file hashes, sizes and inspection scope. A downloaded
 file is not automatically marked reviewed. The cards below identify the actual
@@ -71,11 +71,11 @@ view alone is not a different algorithm.
 | Addressed table | Clock and/or control signal selects stored values | Bogaudio `nextStep` | Read-position indicator and clocked/immediate selection; Pattern traversal |
 | Variable-duration stages | Stage persists for N pulses; once/repeat/hold/rest behaviour | Bespoke M185 `StepBy`, `FindNextStep` | Stage cards with pulse counters; separate Stage module initially |
 | Probabilistic grid | Independent firing or weighted selection, with dependencies | Stochas `getRandomSingle`, `getRandomMulti`, `isMandatory` | Probability overlay and condition inspector in Pattern |
-| Evenly distributed rhythm | Hits over a cycle, rotation, independent lane lengths | PER|FORMER `EuclideanGenerator::update`; Bespoke Euclidean rings | Pattern fill plus independent live Euclidean module |
+| Evenly distributed rhythm | Hits over a cycle, rotation, independent lane lengths | PER\|FORMER `EuclideanGenerator::update`; Bespoke Euclidean rings | Pattern fill plus independent live Euclidean module |
 | Topographic rhythm | Interpolated rhythm tables, density thresholds, controlled perturbation | Grids `ReadDrumMap`, `EvaluateDrums` | XY map and per-voice density; separate Rhythm Map module |
 | Evolving random memory | New/replayed/reordered decisions, distribution and quantisation | Marbles `RandomSequence::NextValue` | Memory strip, lock/mutation/distribution; separate module |
 | Counter/rule system | Countdown expiry modifies or resets other rows | Meadowphysics `clock_mp` | Counter rows and relation matrix; separate module |
-| Curve/control sequence | Time-varying continuous value with segment shapes | PER|FORMER `CurveTrackEngine`; QMidiArp LFO | Curve editor; typed Pattern lane, with control-only module preset |
+| Curve/control sequence | Time-varying continuous value with segment shapes | PER\|FORMER `CurveTrackEngine`; QMidiArp LFO | Curve editor; typed Pattern lane, with control-only module preset |
 | Held-note arpeggiator | Relative note indices resolve against a live chord buffer | QMidiArp manual and `MidiArp`; Bespoke Arpeggiator | Held-note display and order/rhythm; separate note-effect module |
 | Hierarchical phrase/arrangement | Reusable motifs combined serially, in parallel or conditionally | Seq `Motif`, `SeriesClip`, `ParallelClip`, `AutomatonClip` | Phrase list/timeline/branch graph; separate conductor |
 | Procedural pattern language | Operators or time-query functions generate events | Orca `parse/operate`; Tidal `Pattern` | Dedicated advanced editor; defer from first delivery |
@@ -377,7 +377,7 @@ are not the Optisynth runtime. Existing pending Live/recall checks remain pendin
 
 | Priority | Purpose | Next source review before code |
 | --- | --- | --- |
-| 1 | Pattern/curve/traversal contract | PER|FORMER model/builders/queues plus local Optiseq data and conditions |
+| 1 | Pattern/curve/traversal contract | PER\|FORMER model/builders/queues plus local Optiseq data and conditions |
 | 1 | Independent arp contract | QMidiArp note lifecycle and current first-party Spectral arp comparison |
 | 2 | Independent lanes and probability | Kria advancement semantics; complete Stochas random/chain state |
 | 2 | Distinct modular character | Marbles dependency closure; Bespoke stage semantics; live Euclidean instance |

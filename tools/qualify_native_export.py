@@ -22,7 +22,7 @@ def qualify(source, reference, destination, regression=None):
     assert source.is_file() and reference.is_file()
     destination.mkdir(parents=True, exist_ok=False)
     original = reference.read_bytes()
-    expected_count = json.loads((base / 'docs/host_parameters.json').read_text())['processorParameterCount']
+    expected_count = json.loads((base / 'docs/legacy/optispectral/host_parameters.json').read_text())['processorParameterCount']
     cases = []
 
     def run(name, args, expected=0, error=''):

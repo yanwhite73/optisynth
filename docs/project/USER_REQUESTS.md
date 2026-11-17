@@ -2,7 +2,7 @@
 
 Captured 17 November 2026, in conversation order. Wording and spelling are
 preserved. Later additions steer the same project unless explicitly cancelled.
-Implementation status lives in `STATUS.md`; research lives in `RESEARCH.md`.
+Implementation status lives in `STATUS.md`; research lives in `../research/RESEARCH.md`.
 
 ## 1 — Multi-engine instrument and agentic composition
 
@@ -308,3 +308,26 @@ interaction and performance needs. Synthesize a proposed set of modes, shared UI
 components and separate modules, explaining the tradeoffs. Save the research and
 verbatim request. The existing timing prototype remains experimental context,
 not a constraint on the research or authorization to build the chosen design now.
+
+## 39 — Confirm visual/interface research coverage
+
+```text
+are you collecting ui research as well? screenshots and interface?
+```
+
+UI evidence is part of the sequencer research. Distinguish the three collected and
+viewed reference images (Stochas screenshot, Kria navigation diagram, Meadowphysics
+counter diagram) from broader manual/source-derived interaction findings. Expand
+visual coverage of the remaining representative interfaces before wireframes or
+implementation; do not imply a complete screenshot/workflow survey already exists.
+
+## 40 — Organise documentation into folders
+
+```text
+docs needs folders for sorting
+```
+
+Sort project memory, architecture, UI, research, verification evidence and inherited
+Optispectral documents into clear folders. Add a documentation index and update
+current links, agent entry points and helper paths. Preserve original request text
+and immutable provenance/verification records; do not rebuild the synth.

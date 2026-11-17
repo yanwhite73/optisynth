@@ -441,7 +441,7 @@ void phaseE(const juce::Array<juce::File>& presets) {
     auto* root=new juce::DynamicObject;root->setProperty("schema",1);root->setProperty("plugin",p.getName());
     root->setProperty("processorParameterCount",parameters.size());root->setProperty("parameters",rows);
     root->setProperty("identityNote","IDs are JUCE stable string IDs, not Live parameter indices or DeviceParameter IDs. VST3 numeric IDs are wrapper hashes. Match unique host names in Live.");
-    const auto registry=juce::File::getCurrentWorkingDirectory().getChildFile("docs/host_parameters.json");
+    const auto registry=juce::File::getCurrentWorkingDirectory().getChildFile("docs/legacy/optispectral/host_parameters.json");
     if(!registry.replaceWithText(juce::JSON::toString(juce::var(root),true)))fail("could not write host registry");
     std::printf("  %d unique parameters; cutoff energy %.6f -> %.6f; 500 modulation blocks; registry %s\n",
         parameters.size(),low,high,registry.getFullPathName().toRawUTF8());
@@ -561,7 +561,7 @@ void phaseV() {
     report->setProperty("juceDescriptionUID",juce::String::toHexString(types[0]->uniqueId));
     report->setProperty("automatableCount",automatable);report->setProperty("midiProxyCount",midiProxies);
     report->setProperty("parameters",rows);
-    const auto file=juce::File::getCurrentWorkingDirectory().getChildFile("docs/vst3_parameters.json");
+    const auto file=juce::File::getCurrentWorkingDirectory().getChildFile("docs/legacy/optispectral/vst3_parameters.json");
     if(!file.replaceWithText(juce::JSON::toString(juce::var(report),true)))fail("VST3 registry write failed");
     std::printf("  %d automatable (processor controls + bypass), %d non-automatable MIDI proxies; energy %.6f -> %.6f; recall passed\n",automatable,midiProxies,normal,quiet);
 }

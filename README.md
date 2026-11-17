@@ -9,19 +9,20 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 
 ## Project memory
 
-- [User instructions, verbatim](docs/USER_REQUESTS.md)
-- [Current status and next steps](docs/STATUS.md)
-- [Architecture and performance contract](docs/ARCHITECTURE.md)
-- [Research, manuals, schematics and source references](docs/RESEARCH.md)
-- [Other open-source module makers](docs/OPEN_SOURCE_MODULE_MAKERS.md)
-- [Contextual rack interface](docs/CONTEXTUAL_UI.md)
-- [Sample player and asset loading](docs/SAMPLE_PLAYER.md)
-- [Complete Spectral engine and modulation matrix](docs/SPECTRAL_ENGINE_INTEGRATION.md)
-- [Open-source sequencer research and model taxonomy](docs/SEQUENCER_MODELS_RESEARCH.md)
-- [Sequencer modes, shared UI and specialist modules](docs/SEQUENCER_UI_ARCHITECTURE.md)
-- [Earlier sequencer/Optiseq findings and isolated timing prototype](docs/SEQUENCERS_AND_ARPEGGIATORS.md)
-- [Open-source delay/reverb candidates](docs/OPEN_SOURCE_DELAY_REVERB.md)
-- [Source snapshot provenance](docs/source_snapshot_20261117.json)
+- [Documentation folders and index](docs/README.md)
+- [User instructions, verbatim](docs/project/USER_REQUESTS.md)
+- [Current status and next steps](docs/project/STATUS.md)
+- [Architecture and performance contract](docs/architecture/ARCHITECTURE.md)
+- [Research, manuals, schematics and source references](docs/research/RESEARCH.md)
+- [Other open-source module makers](docs/research/modules/OPEN_SOURCE_MODULE_MAKERS.md)
+- [Contextual rack interface](docs/ui/CONTEXTUAL_UI.md)
+- [Sample player and asset loading](docs/architecture/SAMPLE_PLAYER.md)
+- [Complete Spectral engine and modulation matrix](docs/architecture/SPECTRAL_ENGINE_INTEGRATION.md)
+- [Open-source sequencer research and model taxonomy](docs/research/sequencers/SEQUENCER_MODELS_RESEARCH.md)
+- [Sequencer modes, shared UI and specialist modules](docs/ui/SEQUENCER_UI_ARCHITECTURE.md)
+- [Earlier sequencer/Optiseq findings and isolated timing prototype](docs/research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md)
+- [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
+- [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
 ## Current implementation
 
@@ -103,9 +104,9 @@ Spectral editor. Use **Stereo to mono** explicitly before mono processors.
 automatic installation. It still wraps the compatibility engine; no new VST3 has
 been built or installed. Inherited qualification scripts need porting to the new
 identity before use. Historical Optispectral instructions are in
-`docs/optispectral_README.md`, not the current Optisynth build contract.
+`docs/legacy/optispectral/optispectral_README.md`, not the current Optisynth build contract.
 
 Reference PDF/ZIP files are local under `docs/references/` and git-ignored. Source
 links and download hashes remain in docs. Adopted DSP provenance and integration
 review are in `third_party/mutable/PROVENANCE.json` and
-[Mutable first slice](docs/MUTABLE_FIRST_SLICE.md).
+[Mutable first slice](docs/research/modules/MUTABLE_FIRST_SLICE.md).

@@ -78,7 +78,7 @@ def main():
         'limits': 'Presence is not proof of audible impact. RM count excludes zero-base amounts driven by the matrix. '
                   'Envelope counts include unused envelopes. Original backup and imported collections differ; counts are not directly comparable.',
     }
-    destination = ROOT / 'docs/feature_usage.json'
+    destination = ROOT / 'docs/legacy/optispectral/feature_usage.json'
     destination.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({'imported': len(patches), 'imported_counts': dict(counts),
                       'originals': len(originals), 'original_counts': dict(original_counts),

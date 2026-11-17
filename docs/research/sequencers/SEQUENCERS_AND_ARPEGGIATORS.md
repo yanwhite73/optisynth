@@ -1,14 +1,14 @@
 # Sequencers and independent arpeggiators
 
 Research/design history, 17 November 2026. Requests 33–34 are retained verbatim in
-`USER_REQUESTS.md`. Standalone 0.0.6 implements complete Spectral, stereo and shared
+`../../project/USER_REQUESTS.md`. Standalone 0.0.6 implements complete Spectral, stereo and shared
 parameter routing; an isolated timing prototype followed.
 
 **Request 38 supersedes the implementation order below.** Research is now expanded
 in [SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md), with pinned source,
 manual/licence evidence and a model/method taxonomy. The proposed hybrid of shared
 Pattern modes and specialist modules is in
-[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md). No further building in
+[SEQUENCER_UI_ARCHITECTURE.md](../../ui/SEQUENCER_UI_ARCHITECTURE.md). No further building in
 this research task. The earlier shortlist and timing contract remain historical
 context, not a constraint on the revised design or an instruction to resume coding.
 
@@ -67,7 +67,7 @@ does not currently have Rack's one-sample delay on every cable.
 
 ## What local Optiseq teaches us
 
-Read-only inspection of `../../ableton/sequencer`: README, research/start-here
+Read-only inspection of `../../../../ableton/sequencer`: README, research/start-here
 documents, current engineering-log/backlog entries, conditional-trigger design,
 and relevant `src/pattern.js`, `core.js`, `v2_ui.js`, `workspace_adapter.js`,
 `sequence_file.js` and `track_playback.py` sections. No private research evidence

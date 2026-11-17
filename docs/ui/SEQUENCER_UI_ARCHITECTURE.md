@@ -1,7 +1,7 @@
 # Sequencer modes, shared UI and module boundaries
 
 Proposal from request 38, 17 November 2026. Evidence and exact source revisions:
-[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md). **No implementation
+[SEQUENCER_MODELS_RESEARCH.md](../research/sequencers/SEQUENCER_MODELS_RESEARCH.md). **No implementation
 in this research task.** Names below are working product names, not adopted
 third-party module names or a promise of the next release's full scope.
 
@@ -110,6 +110,26 @@ incompatible connection in context instead of accepting a route that has no effe
 
 ## Visual evidence applied
 
+Request 39 explicitly checks that screenshots and interfaces are being collected.
+Current visual coverage is an initial set of three images, not yet a complete
+cross-product UI survey. These originals were saved and viewed:
+
+- [Stochas grid and dependency-chain screenshot](../references/sequencer_research_20261117/manuals/stochas.png).
+- [Kria track/parameter/modifier navigation diagram](../references/sequencer_research_20261117/manuals/kria.png).
+- [Meadowphysics countdown/range/reset diagram](../references/sequencer_research_20261117/manuals/meadowphysics.png).
+
+The manual snapshots and source study add interaction evidence, but do not replace
+screenshots of actual editing and performance states. Next visual collection:
+Foundry/PhraseSeq panels; Bespoke Stage/Euclidean/Arp; PER|FORMER note/curve pages;
+Marbles/Grids control panels; and Seq arrangement editors. For each, record visible
+control hierarchy, editing gestures, playback feedback, navigation, modulation,
+pattern switching and how exceptions/errors are explained. Mark static observations
+separately from behaviour confirmed by manuals; no hands-on testing is claimed.
+
+This visual comparison precedes our wireframes. Preserve the earlier Matriarch and
+Pigments references for the overall rack/modulation interaction. New third-party
+images remain reference assets with source attribution, not copied app artwork.
+
 The collected **Stochas screenshot** shows probability/velocity/chain views of
 one pitch grid. Use that economy, with selected-cell dependency links and an
 inspector instead of displaying every link at once. Colour must be reinforced by
@@ -122,7 +142,7 @@ lane loops at once; hardware shift-key combinations need not be reproduced.
 The **Meadowphysics diagram** explains a row through countdown, event, range and
 reset. A bank of note knobs would obscure its method. Use explicit counter state
 and a rule matrix alongside it. These three inspected images are available in
-`references/sequencer_research_20261117/manuals/` and linked by the source manifest.
+`../references/sequencer_research_20261117/manuals` and linked by the source manifest.
 
 ## A concrete rule for modes versus modules
 

@@ -1,29 +1,40 @@
 # Optisynth status — 17 November 2026
 
+Request 40: documentation is sorted into project, architecture, UI, research,
+verification and legacy folders. [Documentation index](../README.md) provides the
+entry points; [UI research](../ui/README.md) links the collected interface images.
+Current agent/helper/link paths follow this structure. Historical evidence and
+verbatim request text are preserved; no new synth build accompanies the move.
+
 ## Current delivery — sequencer research and architecture proposal
 
 Request 38 is fulfilled as research and documentation, with no further building.
-[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md) categorises 15 families
+[SEQUENCER_MODELS_RESEARCH.md](../research/sequencers/SEQUENCER_MODELS_RESEARCH.md) categorises 15 families
 and separates representation, views, traversal, generation, live processes, note
 transformation and arrangement. Fourteen pinned repository inventories, 86 selected
 source/manual/image files (2,157,919 bytes), licences and inspection scope are in
-`sequencer_research_sources_20261117.json`. All collected hashes verified. One
+`../research/sequencers/sequencer_research_sources_20261117.json`. All collected hashes verified. One
 repository is a negative finding: the current Stellare listing is not verified
 reusable open-source implementation. Selected inspection is not adoption clearance.
 
-[SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md) proposes one configurable
+[SEQUENCER_UI_ARCHITECTURE.md](../ui/SEQUENCER_UI_ARCHITECTURE.md) proposes one configurable
 Pattern module plus independent Arp, Stage, Euclidean, Memory, Rhythm Map, Counters
 and Conductor families. It specifies shared widgets, contextual editors, native
 state/capture, agent operations and performance implications. These are proposed
 families, not implemented features or all part of the first release.
 
-Exact next work before a build: make the Pattern lane/event/port contract concrete,
-complete the selected dependency review and compare static Pattern/Arp/Stage/Memory
-wireframes. Existing timing code remains an isolated prototype to reassess against
+Request 39 confirms UI/screenshots are part of the research. Three original images
+were collected and viewed; wider interface coverage is still pending. The UI
+proposal records the exact images and the next panel/editor collection. Broaden
+that visual/workflow comparison before our wireframes.
+
+Exact next work before a build: expand visual interface evidence, make the Pattern
+lane/event/port contract concrete, complete the selected dependency review and
+compare static Pattern/Arp/Stage/Memory wireframes. Existing timing code remains an isolated prototype to reassess against
 that contract. The remaining implementation steps below are queued; the prior
 standing instruction to continue does not override this research-first request.
 
-Research backup: `../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
+Research backup: `../../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
 and source/docs backup `optisynth-source-20261117-212559.tar.gz` in the same folder,
 both with checksums and verified contents. The source archive also passed a fresh
 directory restore. Source/raw reference copies were not run or installed.
@@ -50,21 +61,21 @@ Rack v3 adds embedded Spectral state and modulation routes, preserving older rac
 and instrument imports. At most two whole engines may be active per plan; their
 compatible tables can be shared. Only reachable engines prepare, always on the
 worker. Scalar edits and matrix depth changes use atomics. Full contract and
-remaining limits: `SPECTRAL_ENGINE_INTEGRATION.md`.
+remaining limits: `../architecture/SPECTRAL_ENGINE_INTEGRATION.md`.
 
 Offline qualification: 151 modular checks pass normally and under ASan/UBSan;
 1,194 core checks, 28 graph checks, four importer tests and one renderer test pass.
 Wrapped/direct stereo renders match exactly, including a filtered/unison patch
 with internal arp, delay and note release. Tested rendering allocates nothing.
-Log: `../build/spectral-qualification.log`. The simple unfiltered cold-load probe
+Log: `../../build/spectral-qualification.log`. The simple unfiltered cold-load probe
 took 1.61 ms; two seconds each of the filtered adapter and reference took 0.129 s
 combined. These are limited fixtures, not dense-polyphony performance claims.
 
 Native checks cover v1/v2/v3 and full stereo recall, live depth/knob synchronisation,
 preset import, missing/invalid-state preservation and cancellation. Screenshots
-and receipts are in `../build/spectral-ui-review/`; visual findings are in
-`../design-qa.md`. No audio device, Live session or new VST3 was used for checking.
-Final source/binary/test/capture binding: `spectral_build_receipt.json`. All 83
+and receipts are in `../../build/spectral-ui-review`; visual findings are in
+`../../design-qa.md`. No audio device, Live session or new VST3 was used for checking.
+Final source/binary/test/capture binding: `../verification/spectral_build_receipt.json`. All 83
 parent source files and 23 pinned Mutable files remain unchanged.
 Yan reports “all seems to work ok” after trying this delivery (request 37).
 This is successful general standalone audition feedback; no exhaustive preset
@@ -73,8 +84,8 @@ or Live verification is inferred.
 The next timing foundation is implemented offline in `src/modular/timing.h/.cpp`:
 shared sample clock, independent grid divisions, ordered bounded note events and
 source-specific held-note ownership. All 47 checks pass normally and under
-ASan/UBSan with zero counted playback allocation. See `SEQUENCERS_AND_ARPEGGIATORS.md`
-and `../build/timing-qualification.log`. It is not yet connected to Runtime/Player;
+ASan/UBSan with zero counted playback allocation. See `../research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md`
+and `../../build/timing-qualification.log`. It is not yet connected to Runtime/Player;
 no new app build or playable sequencer/arp module is claimed. Event integration
 and panels are deferred until the research-derived design steps above are complete.
 
@@ -99,7 +110,7 @@ The sample player has a gold panel, waveform, pitch/root note, start/end trim, l
 and held looping. Load WAV or drop a file onto the panel. Both sample starters use
 an original built-in click, so they work without external files.
 
-App: `../app/Builds/MacOSX/build/Release/Optisynth.app`, Apple Silicon,
+App: `../../app/Builds/MacOSX/build/Release/Optisynth.app`, Apple Silicon,
 version 0.0.6, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
 piano or Caps Lock typing keyboard (A/W/S/E/D/F..., Z/X octave). Silence stops the
 output device. Pitch/octave labels are consistent across the piano and typing help.
@@ -117,7 +128,7 @@ reroute downstream destinations/output before removing an active dependency.
 - 120 modular checks pass, including WAV decoding, sample pitch/rate/trim, looping,
   release/retrigger, independent playheads, deterministic sample/resonator starters,
   old DSP paths and no render allocation. All 120 also pass under ASan/UBSan.
-  The 28 graph checks pass. Log: `../build/sample-qualification.log`.
+  The 28 graph checks pass. Log: `../../build/sample-qualification.log`.
 - Native 0.0.5 build and functional checks pass: all 18 panels fit without overlaps;
   controls remain independent; v1 rack/instrument and v2 sample recall preserve
   audio. Background loading, stale-result rejection, cancellation, dormant-file
@@ -125,12 +136,12 @@ reroute downstream destinations/output before removing an active dependency.
   cannot reuse a different instance's old cached audio.
 - Nine native captures cover the six previous surfaces plus sample/resonator,
   parallel attack/mixer and the sample panel at 1120x800. Final text-only build,
-  native recheck and visual review pass; see `../design-qa.md`.
+  native recheck and visual review pass; see `../../design-qa.md`.
 - No audio device is opened by automated verification. Finder-driven dragging and
   physical keyboard/audio audition remain user checks; handler paths are covered.
 - At 0.0.3, 1,194 inherited core checks, four importer checks and one renderer timing
   check passed. Those unchanged compatibility-engine tests were not repeated here.
-  Historical receipts: `rack_build_receipt.json`, `hardware_ui_build_receipt.json`.
+  Historical receipts: `../verification/rack_build_receipt.json`, `../verification/hardware_ui_build_receipt.json`.
 - Existing converter coverage includes 44.1/48/96/192 kHz and plan crossfades. The
   benchmark in the modular log still measures the older two-source graph; it is
   not a sample/polyphony worst-case CPU claim. Load varied during this run.
@@ -144,19 +155,19 @@ packaging/installation is claimed.
 
 Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
-in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
+in `../research/modules/OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `../research/RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 38 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 40 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
 increment above. It does not complete the subsequent sequencer/effect roadmap.
 
 Requests 33–34 are expanded by request 38's sequencer research above. Shared Pattern
 views/traversal options and separate process modules replace the earlier undetailed
-shortlist. `SEQUENCERS_AND_ARPEGGIATORS.md` retains the local Optiseq lessons and
+shortlist. `../research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md` retains the local Optiseq lessons and
 isolated clock/event prototype history. Playable sequencers/arps remain pending.
 
-Request 35: `OPEN_SOURCE_DELAY_REVERB.md` records Clouds/Parasites, 4ms DLD,
+Request 35: `../research/modules/OPEN_SOURCE_DELAY_REVERB.md` records Clouds/Parasites, 4ms DLD,
 Valley Plateau, CHOW Matrix, Airwindows and DaisySP candidates, published licences,
 rate/stereo/feedback/tail requirements and outstanding adoption reviews. These
 are research candidates, not new installed modules. Both research tracks inform
@@ -164,17 +175,17 @@ the whole-Spectral boundary and do not replace its implementation priority.
 
 Request 30: sample player, immutable reachable assets, background loading,
 contextual waveform panel and both sample/resonator starters are implemented.
-Mechanism, format/resource bounds and acceptance are in `SAMPLE_PLAYER.md`.
-Build/source receipt: `sample_build_receipt.json`; user audition is pending.
+Mechanism, format/resource bounds and acceptance are in `../architecture/SAMPLE_PLAYER.md`.
+Build/source receipt: `../verification/sample_build_receipt.json`; user audition is pending.
 
 Request 31: Pigments/Vital modulation assignment and a matrix overview are logged
 as a UI option alongside module connections. The first shared matrix is now
 implemented; source drag-to-knob assignment and knob depth indications remain
-pending. User screenshot is retained locally; `CONTEXTUAL_UI.md` records both
+pending. User screenshot is retained locally; `../ui/CONTEXTUAL_UI.md` records both
 the proposal and current behaviour. This did not cancel sample work.
 
 Requests 28–29: VCV performance lessons and the right degree of modularity are
-researched in `VCV_ARCHITECTURE_LESSONS.md`. Current audio/control modules are
+researched in `../research/platforms/VCV_ARCHITECTURE_LESSONS.md`. Current audio/control modules are
 independent. In 0.0.6 parameters also accept shared matrix routes; note/gate context
 remains shared, control modulation is block-rate, and event cables/polyphony/global scope/
 feedback remain unimplemented. Recommend playable voice groups over an editable
@@ -185,11 +196,11 @@ introduced no runtime changes.
 Request 27 asks whether to use direct module/cable manipulation, preset routing or
 both. Recommendation: both on the same saved graph; prewired editable templates,
 drag patching with optional cable visibility, and undoable edits. Proposed behaviour
-and acceptance are in `ARCHITECTURE.md`. No runtime change for this design question;
+and acceptance are in `../architecture/ARCHITECTURE.md`. No runtime change for this design question;
 this interaction sequence remains queued alongside bounded polyphony/modulation work.
 
 Request 25 is implemented: Matriarch-inspired native rack with familiar,
-module-specific panels. References and behaviour are in `CONTEXTUAL_UI.md`.
+module-specific panels. References and behaviour are in `../ui/CONTEXTUAL_UI.md`.
 The sample module extends that approved visual direction.
 
 Requests 23–24: continue implementation across side-note requests. The current
@@ -198,7 +209,7 @@ instruction remains in force after the UI milestone.
 
 Request 22 adds a parallel Korg Wavestate repurposing project: a potential physical
 controller or eventual hardware host for Optisynth. Both roles are recorded in
-`RESEARCH.md`; integration and hosting feasibility remain unverified. The current
+`../research/RESEARCH.md`; integration and hosting feasibility remain unverified. The current
 module/sample/polyphony development order continues.
 
 Request 32's complete engine, stereo/state boundary and first shared matrix are
@@ -238,7 +249,7 @@ all four route combinations before choosing a fix.
 
 This separate project was copied from Optispectral (`../partials`), whose checkout
 had no commits. The 83 copied source/doc/helper hashes are recorded in
-`source_snapshot_20261117.json`. The inherited compatibility engine and its plugin
+`../verification/source_snapshot_20261117.json`. The inherited compatibility engine and its plugin
 source remain separate from the new modular runtime. The Spectral table-reading
 extraction previously produced byte-identical Filth Bass, fn HiHat and Tortured Lead
 2 comparisons. Original software/demo-noise boundaries remain unchanged.
@@ -250,8 +261,8 @@ and the tested render paths allocate nothing. JUCE/OS callback synchronization i
 separate from these core guarantees.
 
 Original Mutable DSP and dependencies are pinned with notices and exact source hashes
-in `third_party/mutable/PROVENANCE.json`; reviews are in `MUTABLE_FIRST_SLICE.md` and
-`RACK_ROUTING.md`. Five classic-synth manuals/schematic archives (~38 MB) are stored
+in `third_party/mutable/PROVENANCE.json`; reviews are in `../research/modules/MUTABLE_FIRST_SLICE.md` and
+`../architecture/RACK_ROUTING.md`. Five classic-synth manuals/schematic archives (~38 MB) are stored
 under ignored `docs/references/`; detailed Xpander/JP-8080 analysis remains pending.
 
 ## Backups and Git
@@ -263,13 +274,13 @@ branch equality. No changes or commits to the parent Optispectral project.
 
 Independent source archives remain enabled via `tools/backup_source.py`. They now
 include all four app headers, sample source/tests and our `.optisynth` patch files. Previous verified
-archives: `../../backups/optisynth/optisynth-source-20261117-163238.tar.gz` (136 files)
+archives: `../../../backups/optisynth/optisynth-source-20261117-163238.tar.gz` (136 files)
 and `optisynth-source-20261117-155932.tar.gz` (98 files). Each has a checksum and an
 internal file manifest. The current delivery's archive and Git receipt are recorded
 in `ENGINEERING_LOG.md` after verification.
 
-0.0.5 backup: `../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
+0.0.5 backup: `../../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
 plus `.sha256`, 157 source files verified by fresh-directory restore. The new app
 is open on Sample into resonator with audio initially off; existing user instance
 preserved. All 83 parent Optispectral source hashes and 23 vendored Mutable files
-remain unchanged. Receipt: `sample_build_receipt.json`.
+remain unchanged. Receipt: `../verification/sample_build_receipt.json`.

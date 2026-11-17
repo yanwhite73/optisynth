@@ -1,11 +1,17 @@
 # Optisynth
 
-Read `docs/USER_REQUESTS.md`, `docs/STATUS.md`, `docs/ARCHITECTURE.md` and
-`docs/RESEARCH.md` before continuing. Append every new user request/correction
+Documentation is sorted by topic; `docs/README.md` is the directory index. Keep
+project memory in `docs/project`, contracts in `docs/architecture`, interface work
+in `docs/ui` and source studies in the appropriate `docs/research` subfolder.
+Historical receipts and inherited Optispectral files retain their original paths
+inside the evidence; `docs/project/document_locations_20261117.json` maps locations.
+
+Read `docs/project/USER_REQUESTS.md`, `docs/project/STATUS.md`, `docs/architecture/ARCHITECTURE.md` and
+`docs/research/RESEARCH.md` before continuing. Append every new user request/correction
 verbatim to USER_REQUESTS when it arrives, then reconcile STATUS and the plan.
 
 This is the separate modular project. `../partials` is Optispectral; do not use it
-as the edit target. `docs/source_snapshot_20261117.json` records the exact copied
+as the edit target. `docs/verification/source_snapshot_20261117.json` records the exact copied
 working source. The starting repository had no commits. On 17 November Yan
 explicitly requested regular commits and pushes (USER_REQUESTS.md request 21).
 Commit and push coherent, checked milestones to origin; this supersedes the

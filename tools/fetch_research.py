@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    index = json.loads((ROOT/'docs/research_sources.json').read_text())
+    index = json.loads((ROOT/'docs/research/research_sources.json').read_text())
     out = ROOT/'docs/references'
     out.mkdir(exist_ok=True)
     receipts = []
@@ -56,7 +56,7 @@ def main():
             receipt.update(status='failed', error=str(error))
             print(name, 'FAILED', str(error), flush=True)
         receipts.append(receipt)
-        (ROOT/'docs/reference_downloads.json').write_text(json.dumps(receipts, indent=2)+'\n')
+        (ROOT/'docs/research/reference_downloads.json').write_text(json.dumps(receipts, indent=2)+'\n')
     if any(r['status'] != 'downloaded' for r in receipts):
         raise SystemExit(1)
 

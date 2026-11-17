@@ -6,10 +6,10 @@ Sample playback remains queued behind this interface step.
 
 ## Visual references inspected
 
-- [Moog Matriarch top-panel photograph](https://www.altomusic.com/cdn/shop/files/d1948-top.jpg?v=1702400243), local ignored `references/matriarch-panel.jpg`.
+- [Moog Matriarch top-panel photograph](https://www.altomusic.com/cdn/shop/files/d1948-top.jpg?v=1702400243), local ignored `../references/matriarch-panel.jpg`.
   Adjacent functional sections, blue oscillator block, green filter, dark mixer/
   envelopes/utilities, purple delay, black/silver knobs, pale labels and patch points.
-- [Original Plaits manual/panel](https://pichenettes.github.io/mutable-instruments-documentation/modules/plaits/manual/), local `references/mutable_review/plaits-panel.png`.
+- [Original Plaits manual/panel](https://pichenettes.github.io/mutable-instruments-documentation/modules/plaits/manual/), local `../references/mutable_review/plaits-panel.png`.
   Clear control hierarchy, distinct pitch/tone controls and labelled input/output
   sockets. Our modules expose individual original DSP algorithms, not the entire
   Plaits instrument, so retain accurate controls rather than inventing absent modes.
@@ -53,7 +53,7 @@ rebuilding DSP. Module replacement is deferred out of the source selector callba
 before rebuilding the visible rack, avoiding deletion of a widget handling an event.
 
 The sound engine, parameter identities/ranges and patch format are unchanged.
-Visual review evidence and limitations are in `../design-qa.md`.
+Visual review evidence and limitations are in `../../design-qa.md`.
 # Modulation UI option — request 31, 17 November 2026
 
 Yan supplied a Pigments screenshot and suggested the Pigments/Vital modulation
@@ -77,7 +77,7 @@ Matrix now opens a shared source/destination/depth editor with add/remove and li
 depth controls. Routes use saved instance/parameter IDs and graph validation.
 Spectral destination choices use effective preset state. The matrix does not yet
 provide drag-to-knob assignment, coloured source strips or depth rings.
-Modulation scope/scaling is defined in `SPECTRAL_ENGINE_INTEGRATION.md`.
+Modulation scope/scaling is defined in `../architecture/SPECTRAL_ENGINE_INTEGRATION.md`.
 
 The complete Spectral panel has stereo audio plus 17 actual LFO/envelope outputs,
 preset loading, a section selector and six controls per page. Oscillator/filter,
@@ -86,7 +86,7 @@ Structural spectrum/arp/routing editing is still supplied by preset state or the
 older editor. At minimum size, six knobs occupy one readable row; taller views
 use two rows. Independent LFO has named shapes and a note-reset switch. Explicit
 stereo adapters explain their operation on the panel. Native captures and limits
-are recorded in `../design-qa.md`.
+are recorded in `../../design-qa.md`.
 
 ## Sequencer UI research — request 38
 
@@ -98,6 +98,6 @@ editor. Shared transport, lane, inspector, history, routing and capture componen
 do not require every module to store the same kind of pattern.
 
 Stochas's grid/chain screenshot and Kria/Meadowphysics manual diagrams were inspected
-and collected under `references/sequencer_research_20261117/manuals/`. The source
+and collected under `../references/sequencer_research_20261117/manuals`. The source
 manifest records their URLs/hashes. They are visual references, not app artwork.
 No UI implementation or mockup is claimed for this research milestone.

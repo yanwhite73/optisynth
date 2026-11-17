@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "date": "2026-11-17",
+  "request": 40,
+  "purpose": "Documentation folder reorganisation; no DSP or app implementation change",
+  "path_basis": "All paths relative to repository root",
+  "historical_evidence": "JSON receipts/manifests and inherited legacy documents retain their original bytes; embedded historical paths identify the old layout",
+  "moves": [
+    {
+      "old": "docs/USER_REQUESTS.md",
+      "new": "docs/project/USER_REQUESTS.md",
+      "original_sha256": "d4a12713200beee4c5234e8e04e3adc8cfa1ba42fdb6f6f4807475c602fb76ef",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/STATUS.md",
+      "new": "docs/project/STATUS.md",
+      "original_sha256": "c45bdc9981d00904745e2defe6248622b60580faf62e282ea67e88f7efabfa80",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/ENGINEERING_LOG.md",
+      "new": "docs/project/ENGINEERING_LOG.md",
+      "original_sha256": "57e102cc3bd68d80c8e0f7b4c013d128fffafb125c8648db587d86d829d88ebe",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/source_backup.md",
+      "new": "docs/project/source_backup.md",
+      "original_sha256": "5baed72c109f867cef8fdc7c85c3130d5822d687066c12b51d8415171a6a1bcf",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/ARCHITECTURE.md",
+      "new": "docs/architecture/ARCHITECTURE.md",
+      "original_sha256": "791a8060460e6405fd765d7ada00141041a78d3546952796a68c25d52082a253",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/RACK_ROUTING.md",
+      "new": "docs/architecture/RACK_ROUTING.md",
+      "original_sha256": "bb609694ed28d79346a7f8ba704183c2cfb10db06620c95dbeec64684332dae8",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/SAMPLE_PLAYER.md",
+      "new": "docs/architecture/SAMPLE_PLAYER.md",
+      "original_sha256": "c4b69d3bd3f49ce5e52d6a690f9f14d88c1f04b7fce60e98345f58cecf18bdd6",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/SPECTRAL_ENGINE_INTEGRATION.md",
+      "new": "docs/architecture/SPECTRAL_ENGINE_INTEGRATION.md",
+      "original_sha256": "5819ae77300a5041da6591f42b21604592cd9cde36b1592ed33e6fb94a7af3c0",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/CONTEXTUAL_UI.md",
+      "new": "docs/ui/CONTEXTUAL_UI.md",
+      "original_sha256": "4f4ad29946a16db00ccb02cce2fce1e159dcc0ad0b5e85a74452b319243dd09c",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/SEQUENCER_UI_ARCHITECTURE.md",
+      "new": "docs/ui/SEQUENCER_UI_ARCHITECTURE.md",
+      "original_sha256": "b6340fb25e6a4b5934451460416179e7654cb45b489ebc3cef9c686403d71f41",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/RESEARCH.md",
+      "new": "docs/research/RESEARCH.md",
+      "original_sha256": "97f8b1905ab0a98d24fabdf90fd1e16d97acd62c5c91e99a6fb957f02ce7bfbb",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/research_sources.json",
+      "new": "docs/research/research_sources.json",
+      "original_sha256": "f92937cebfe079588dd5aa9f2527cd2582d1730db831674f013fd256b9b08e56",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/reference_downloads.json",
+      "new": "docs/research/reference_downloads.json",
+      "original_sha256": "34f1cc77c684cc408f50acacc1eb37b1be3cae195c0c1805f8ed09517478a3da",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/MUTABLE_FIRST_SLICE.md",
+      "new": "docs/research/modules/MUTABLE_FIRST_SLICE.md",
+      "original_sha256": "8b5363d32f44f30c0c531ee48ffc318aafcea5c3a5920678079977cde3e4116b",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/OPEN_SOURCE_MODULE_MAKERS.md",
+      "new": "docs/research/modules/OPEN_SOURCE_MODULE_MAKERS.md",
+      "original_sha256": "38dfa6c3984000ab7a67decba7d0b720a39229004c912e76a6a604b0e06325f3",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/OPEN_SOURCE_DELAY_REVERB.md",
+      "new": "docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md",
+      "original_sha256": "1882ccd081a8f4445fd0fea15d0ee8801731af36c7c94d5e2e628ec200e0b155",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/VCV_ARCHITECTURE_LESSONS.md",
+      "new": "docs/research/platforms/VCV_ARCHITECTURE_LESSONS.md",
+      "original_sha256": "94a17f6b9deef19cb1f781b07c953118852c8d78e50098d3a061da2ba341057f",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/SEQUENCERS_AND_ARPEGGIATORS.md",
+      "new": "docs/research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md",
+      "original_sha256": "8fe1e599fdb4254491f4db588b34b4a94401ec2a7c21fafcb36f918971098e12",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/SEQUENCER_MODELS_RESEARCH.md",
+      "new": "docs/research/sequencers/SEQUENCER_MODELS_RESEARCH.md",
+      "original_sha256": "da2196458f8b037dee57d060c9127f3a8720a70a8f9c226ca8453208f8bfec2f",
+      "content_preserved": false
+    },
+    {
+      "old": "docs/sequencer_research_sources_20261117.json",
+      "new": "docs/research/sequencers/sequencer_research_sources_20261117.json",
+      "original_sha256": "6e3a5b41c64ef9918bc4114042085ce2f990a0c7a5d9f7147513159a94c86511",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/first_voice_build_receipt.json",
+      "new": "docs/verification/first_voice_build_receipt.json",
+      "original_sha256": "fbe742bb8049d128b1ce098e369750f45c4b29661ef2f92b848cabcd2218d259",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/sample_build_receipt.json",
+      "new": "docs/verification/sample_build_receipt.json",
+      "original_sha256": "8332c54b94fee4e55447b72af0b2ba0c2ab040e29bb3c0e7a793522b753aef07",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/spectral_build_receipt.json",
+      "new": "docs/verification/spectral_build_receipt.json",
+      "original_sha256": "2ea16c5e77b98728a9eefd384b23cc04d6754e5dba89e5cef1a00ef798797bd1",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/rack_build_receipt.json",
+      "new": "docs/verification/rack_build_receipt.json",
+      "original_sha256": "be0623c0a75c228ee6601a00f1c661180bf055e337d37d1ada690875d8bd049b",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/hardware_ui_build_receipt.json",
+      "new": "docs/verification/hardware_ui_build_receipt.json",
+      "original_sha256": "d142e736a0905cb76f36adcbbae81dc00a54c6d8bbc2b61ade6f91dbd8210742",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/source_snapshot_20261117.json",
+      "new": "docs/verification/source_snapshot_20261117.json",
+      "original_sha256": "fef97a67935b6e198a7c4e0345f4504babb0197e06ec154dcce55a350306128b",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/feature_usage.json",
+      "new": "docs/legacy/optispectral/feature_usage.json",
+      "original_sha256": "4a09bee182013047eaf6a40ad2b7b2acb878d90833eec36aa3cdb6b274e32508",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/handoff_claude_to_codex_2026-11-09.md",
+      "new": "docs/legacy/optispectral/handoff_claude_to_codex_2026-11-09.md",
+      "original_sha256": "39f8a1ebbff6848cd64dc71e0e49be842590db29e166e6555ec1c4e33c601b8b",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/design.md",
+      "new": "docs/legacy/optispectral/design.md",
+      "original_sha256": "c9a263bd47746e3ffb0bb7603e784fc140fc3bd0809066918935ca878dbf4338",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/feature_priorities.md",
+      "new": "docs/legacy/optispectral/feature_priorities.md",
+      "original_sha256": "1a382aec61e91674a171db6214241c0da64d622022a971c1a6b655135ce5b20b",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/host_parameter_extension_proposal.md",
+      "new": "docs/legacy/optispectral/host_parameter_extension_proposal.md",
+      "original_sha256": "7065d571c9de2cd73bbab53570a54ce00725c0203abe553d58a383dfc3f074fc",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/host_parameter_extension.md",
+      "new": "docs/legacy/optispectral/host_parameter_extension.md",
+      "original_sha256": "7ed7eb1acc67f2e9d15e340602dd999caf144d4f2e5f028386442b5b5edf873f",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/optimystery_parameter_handoff.md",
+      "new": "docs/legacy/optispectral/optimystery_parameter_handoff.md",
+      "original_sha256": "2faacf9abe0a711b607a47e0e9ed8c2bdba35e83f3662bd2dc5ca949909d786a",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/native_preset_export.md",
+      "new": "docs/legacy/optispectral/native_preset_export.md",
+      "original_sha256": "3085aeabc92740a5440d72d8830e8a4cbb9d0156107c6d12eebb80b56c542bd3",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/optispectral_README.md",
+      "new": "docs/legacy/optispectral/optispectral_README.md",
+      "original_sha256": "4ab16d0e8a31f60926615a238c076df00017857b0ddc2b120b013efbc8625ea8",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/vst3_parameters.json",
+      "new": "docs/legacy/optispectral/vst3_parameters.json",
+      "original_sha256": "181bf0470c20dab32da54c45e65a9f08360a69f24c9c25e1c8d6b639de4e21bf",
+      "content_preserved": true
+    },
+    {
+      "old": "docs/host_parameters.json",
+      "new": "docs/legacy/optispectral/host_parameters.json",
+      "original_sha256": "4425c7567f9e3528e05af90087d9c16211db73e8ef60921191b61326780efe7a",
+      "content_preserved": true
+    }
+  ],
+  "helper_path_updates": [
+    "tools/fetch_research.py",
+    "tools/verify_spectral_extraction.py",
+    "tools/qualify_native_export.py",
+    "tools/audit_feature_usage.py",
+    "plugin/Tests/StressTest.cpp",
+    "plugin/Tests/PresetExport.h"
+  ],
+  "verbatim_request_blocks_preserved": 40
+}

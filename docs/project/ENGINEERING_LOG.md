@@ -5,7 +5,7 @@
 Requests 12–14 steer the ongoing build: Mutable-first, Spectral envelope/filter
 choices, contextual module panels, and whether digital modules need new circuit
 models. The answer is no for the selected DSP; original code supplies it.
-Source review and intended mechanism are in `MUTABLE_FIRST_SLICE.md`.
+Source review and intended mechanism are in `../research/modules/MUTABLE_FIRST_SLICE.md`.
 
 Normal and ASan/UBSan modular runs passed: both sources, min/max control sweeps,
 single shared envelope, two-source sum, release, deterministic recall, active-only
@@ -41,7 +41,7 @@ an artifact capture issue; the updated UI code was present in the built app.
 Final captures inspected after the exporter fix: bass-drum controls are enlarged,
 labels are readable, minimum-size modal layout fits. Each file has one PNG header.
 The native check exits successfully and reproduces its audio after state recall.
-`first_voice_build_receipt.json` binds source, binary and evidence hashes. The
+`../verification/first_voice_build_receipt.json` binds source, binary and evidence hashes. The
 original 83 Optispectral source files and all 20 vendored source hashes reverified.
 No original checkout edits, plugin installation, Live actions, commits or pushes.
 
@@ -81,7 +81,7 @@ blank keyboard width. Adjusted drawing proportions and keyboard key width/octave
 labels; rebuilt and repeated native checks/captures successfully. DSP unchanged
 since the full normal/sanitizer run. Deferred roughness investigation untouched.
 
-`rack_build_receipt.json` binds final binary/source/evidence hashes. All 83 parent
+`../verification/rack_build_receipt.json` binds final binary/source/evidence hashes. All 83 parent
 Optispectral source files and 23 vendored Mutable file hashes reverified. No Live
 interaction, VST installation or parent edits. User audition of 0.0.3 is pending.
 
@@ -94,7 +94,7 @@ SDKs and downloaded manuals remain ignored. Future work should commit and push a
 coherent tested milestones under the standing request 21 authorization.
 
 Independent archive created and verified:
-`../../backups/optisynth/optisynth-source-20261117-170823.tar.gz` plus `.sha256`;
+`../../../backups/optisynth/optisynth-source-20261117-170823.tar.gz` plus `.sha256`;
 147 files, 1,754,729 uncompressed bytes, including the app headers and saved patch.
 This archive represents the implementation milestone; this subsequent receipt is
 also saved in Git. All temporary build/test jobs exited; user services preserved.
@@ -133,11 +133,11 @@ changed it to a 1e-5 tolerance (one tenth of the slider's step) with value diagn
 Native checks pass: separate copies, synchronized views, graph/audio recall, legacy
 import, dormant add/remove, typed routing, socket indicators/tooltips and cycle
 rejection, contextual replacement and all 17 panels' bounds/non-overlap. Six final
-captures and the Product Design review are recorded in `../design-qa.md`. Review
+captures and the Product Design review are recorded in `../../design-qa.md`. Review
 caught cramped minimum-height controls and generic fader handles; both were fixed,
 rebuilt and visually rechecked. No audio device opened by the checks.
 
-`hardware_ui_build_receipt.json` binds the final native binary, app source, logs and
+`../verification/hardware_ui_build_receipt.json` binds the final native binary, app source, logs and
 captures. Sources underlying the 0.0.3 DSP qualification, all 23 vendored Mutable
 files and all 83 parent Optispectral files match their previous hashes. The full
 DSP/sanitizer suite was not rerun for this UI-only change. New 0.0.4 process opened
@@ -149,7 +149,7 @@ and patch persistence, then sample playback into/alongside the resonator. Existi
 roughness/aliasing work remains deferred as requested.
 
 Independent 0.0.4 archive created and verified:
-`../../backups/optisynth/optisynth-source-20261117-173953.tar.gz` plus `.sha256`;
+`../../../backups/optisynth/optisynth-source-20261117-173953.tar.gz` plus `.sha256`;
 150 files, 1,789,797 uncompressed bytes. Includes the contextual interface docs,
 root design review and build receipt. This subsequent archive receipt is in Git.
 
@@ -184,7 +184,7 @@ event routing, voice/global execution, polyphony and feedback are future work.
 Recommend editable voice groups with default note routing plus a shared global
 rack. Do not describe the current wrappers as complete VCV/hardware modules.
 Full findings, implementation implications and qualification matrix are in
-`VCV_ARCHITECTURE_LESSONS.md`. No source adoption, benchmark, DSP change or Live
+`../research/platforms/VCV_ARCHITECTURE_LESSONS.md`. No source adoption, benchmark, DSP change or Live
 interaction occurred. Sample work remains queued with these boundaries to define.
 
 ## Request 30: sample player and resonator starters — standalone 0.0.5
@@ -203,7 +203,7 @@ stereo is averaged to mono. The sample panel exposes file load/drop, waveform,
 pitch/root note, trims, level and held looping. Two built-in generated click
 starters demonstrate excitation and a parallel attack. External WAV files remain
 external; portable collection/stereo/seamless loops/antialias refinement are queued.
-Resource and persistence contracts: `SAMPLE_PLAYER.md`.
+Resource and persistence contracts: `../architecture/SAMPLE_PLAYER.md`.
 
 120 modular checks pass normally and under AddressSanitizer/UBSan; 28 graph checks
 pass. Native tests cover 18 panels, previous independent/routing/recall paths,
@@ -218,23 +218,23 @@ Two corrections found during qualification: float storage of the new slider step
 perturbed existing exact control values; changed the step metadata to double,
 matching JUCE's API, and reran DSP/sanitizer/native tests. Visual QA found a narrow
 string/UTF-8 ellipsis mismatch; used ASCII UI copy, clarified the MIDI root-note
-display and reran native checks/captures. Final review passes in `../design-qa.md`.
-New test log: `../build/sample-qualification.log`; native evidence:
-`../build/ui-review/`; artifact/source binding: `sample_build_receipt.json`.
+display and reran native checks/captures. Final review passes in `../../design-qa.md`.
+New test log: `../../build/sample-qualification.log`; native evidence:
+`../../build/ui-review`; artifact/source binding: `../verification/sample_build_receipt.json`.
 
 ## Request 31: Pigments/Vital modulation option
 
 Logged the user's wording verbatim and retained their screenshot locally under
 `docs/references/pigments-modulation-user-20261117.png`. Proposed source selection/
 drag-to-control assignment, knob depth indication and matrix overview can share
-stable node/parameter identities with module routing. `CONTEXTUAL_UI.md` records
+stable node/parameter identities with module routing. `../ui/CONTEXTUAL_UI.md` records
 the proposal and outstanding scope/rate/scaling contracts. No modulation matrix
 implementation or product-internals claim is made. The sample milestone continued.
 
 Delivery: new 0.0.5 app opened with `--sample-demo` and audio off (PID 85896);
 existing user instance preserved. Signature/version and all 83 original parent
 source hashes plus 23 vendored Mutable files verified. Independent archive created
-and restore-verified: `../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
+and restore-verified: `../../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
 with `.sha256`, 157 source files, 1,866,238 uncompressed bytes. This subsequent
 backup receipt is retained in Git. No temporary build/test jobs remain after cleanup.
 
@@ -246,7 +246,7 @@ and modular execution/graph interfaces. The core already supplies full stereo
 instrument playback and realtime scalar controls; actual LFO/envelope values are
 private per-voice state. Existing modular output is mono and routes target ports,
 so complete integration requires stereo/state boundaries and explicit modulation
-scope. `SPECTRAL_ENGINE_INTEGRATION.md` records the concrete next implementation
+scope. `../architecture/SPECTRAL_ENGINE_INTEGRATION.md` records the concrete next implementation
 order and acceptance. No whole-engine/matrix runtime change is claimed yet.
 
 ## Requests 33–35: sequencer models, independent arp, delay/reverb research
@@ -255,7 +255,7 @@ Captured all three requests verbatim on arrival. Read VCV SEQ 3/timing, Imprompt
 Foundry/reset/interchange, Bogaudio addressing and Music Thing evolving-loop
 documentation. Inspected local Optiseq docs, current engineering/backlog entries
 and relevant state/generation/playback sections read-only. Saved the comparison
-and proposed event/clock contracts in `SEQUENCERS_AND_ARPEGGIATORS.md`.
+and proposed event/clock contracts in `../research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md`.
 
 Optiseq offers useful musical state, non-destructive performance transforms and
 prepared playback banks; its host truncation fix still needs actual Live recall
@@ -266,7 +266,7 @@ event routing. No changes to Optiseq or the compatibility engine were made.
 
 Checked primary author repositories, manuals and licence/source excerpts for
 Clouds/Parasites, 4ms DLD, Plateau, CHOW Matrix, Airwindows and DaisySP. Recorded
-licences, source links and outstanding review in `OPEN_SOURCE_DELAY_REVERB.md`.
+licences, source links and outstanding review in `../research/modules/OPEN_SOURCE_DELAY_REVERB.md`.
 Useful corrections: CHOW Matrix's main code is BSD-3-Clause; ReverbSc is in the
 LGPL-2.1 DaisySP collection; Clouds reverb contains 32 kHz assumptions; Parasites'
 current manual uses Miverb while its source still names Oliverb.
@@ -276,7 +276,7 @@ no new DSP qualification, no audio device or Live interaction. Updated STATUS,
 ARCHITECTURE and RESEARCH without changing the whole-Spectral next priority.
 
 Documentation diff check passed. Independent source/research archive:
-`../../backups/optisynth/optisynth-source-20261117-184511.tar.gz` plus `.sha256`;
+`../../../backups/optisynth/optisynth-source-20261117-184511.tar.gz` plus `.sha256`;
 160 files, 1,898,938 bytes, archive checksum and every manifest entry verified.
 This receipt is recorded after the archive was created. No DSP tests were rerun
 for this documentation-only change.
@@ -334,7 +334,7 @@ transport ownership and implement the first independent step sequencer/arp.
 
 Delivery: signature verification passed and 0.0.6 opened with `--spectral-demo`,
 audio off (PID 20285); prior user instances were preserved. Independent archive:
-`../../backups/optisynth/optisynth-source-20261117-191513.tar.gz` plus `.sha256`,
+`../../../backups/optisynth/optisynth-source-20261117-191513.tar.gz` plus `.sha256`,
 165 source files, 1,978,641 bytes. Checksum and every manifest entry verified, then
 restored into a fresh directory successfully. This subsequent delivery receipt is
 recorded in Git after creating the archive. Temporary build/test jobs completed.
@@ -366,7 +366,7 @@ Remaining work is explicit: wire event inputs into Runtime/Player, render up to
 each timestamp, prove release on stop/removal/rerouting, then expose step/control
 sequencer and independent arp modules. No new audible feature is claimed yet.
 
-Independent backup: `../../backups/optisynth/optisynth-source-20261117-205148.tar.gz`
+Independent backup: `../../../backups/optisynth/optisynth-source-20261117-205148.tar.gz`
 plus `.sha256`; 168 files, 2,006,332 bytes, archive checksum and every manifest
 entry verified. This later receipt is recorded in Git. No app restart/installation,
 audio device, Live action or third-party dependency was used for this milestone.
@@ -413,9 +413,47 @@ Verification: documentation links resolve locally, JSON parses, all repository
 inventories report complete trees, every collected file matches its recorded hash,
 and `git diff --check` passes. No DSP tests were repeated for documentation-only
 changes. Independent source archive:
-`../../backups/optisynth/optisynth-source-20261117-212559.tar.gz` plus checksum,
+`../../../backups/optisynth/optisynth-source-20261117-212559.tar.gz` plus checksum,
 171 files / 2,117,334 bytes, verified and restored into a fresh directory. The
 git-ignored research collection is also preserved independently in
-`../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
+`../../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
 plus checksum; all 103 archived reference/manifest files verified. These receipts
 postdate archive creation. Temporary collection and archive jobs finished normally.
+
+## Request 39: explicit UI research coverage
+
+Recorded the question verbatim. Verified the saved three visual references and
+existing interface analysis. Clarified that the screenshot collection is currently
+an initial sample; the broader algorithm/source catalogue is not a completed visual
+survey. Added direct image links and a concrete remaining panel/editor shortlist
+to SEQUENCER_UI_ARCHITECTURE. Visual workflow comparison now explicitly precedes
+wireframes in STATUS. No implementation, third-party execution or new build.
+
+## Request 40: documentation folders and navigation
+
+Moved 37 flat documentation files into project, architecture, UI, topic-based
+research, verification and inherited Optispectral folders. Added a central index,
+a visual-research index with direct screenshot/diagram links and an archive note.
+Updated current Markdown links, relative reference paths, AGENTS and six helper/
+qualification path consumers. Historical JSON and inherited document contents
+remain byte-identical; all 40 verbatim request blocks were preserved. The move map
+and original hashes are in document_locations_20261117.json. Raw reference assets
+remain in their existing ignored collections so their provenance paths stay valid.
+
+No sequencer/DSP feature, plugin installation or app rebuild. Wider screenshot/
+interaction research remains next before the proposed wireframes and implementation.
+
+Verification passed: 62 local links across 22 current Markdown files resolve;
+37 old locations are gone and their new locations exist; all historical JSON and
+legacy contents match the pre-move hashes; 40 verbatim request blocks are intact;
+updated Python helpers parse and their JSON/document paths resolve; all current
+JSON parses and all 86 collected reference hashes still match. `git diff --check`
+passes. Qualification C++ edits only change two registry paths and one doc comment;
+no DSP test/build was needed for these path-only changes.
+
+Independent source/docs backup:
+`../../../backups/optisynth/optisynth-source-20261117-213956.tar.gz` plus checksum;
+175 files / 2,140,615 bytes, archive and every manifest entry verified. This receipt
+postdates archive creation. The raw reference collection remains covered by the
+separate reference archive recorded for request 38. Temporary validation/backup
+jobs completed normally.

@@ -48,7 +48,7 @@ def main():
         if not equal:
             raise RuntimeError('Spectral extraction changed compatibility audio')
     # The source-copy manifest also binds every original source file.
-    snapshot = json.loads((ROOT/'docs/source_snapshot_20261117.json').read_text())
+    snapshot = json.loads((ROOT/'docs/verification/source_snapshot_20261117.json').read_text())
     for row in snapshot['files'].values():
         if sha(ROOT.parent/row['source']) != row['sha256']:
             raise RuntimeError('Original source changed: '+row['source'])

@@ -1,7 +1,7 @@
 # Open-source delay and reverb candidates
 
 Research shortlist, 17 November 2026; request 35 is logged verbatim in
-`USER_REQUESTS.md`. These are candidates, not installed or adopted modules.
+`../../project/USER_REQUESTS.md`. These are candidates, not installed or adopted modules.
 Published capabilities/licences below come from author documentation and source.
 Porting effort and ordering are our assessment; no CPU or fidelity measurements
 have been made for these candidates in Optisynth.

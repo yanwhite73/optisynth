@@ -1,4 +1,4 @@
-// Offline-only helper. Pinned JUCE host bridge: see docs/native_preset_export.md.
+// Offline-only helper. Pinned JUCE host bridge: see docs/legacy/optispectral/native_preset_export.md.
 // Included by StressTest.cpp; no production processor or installed bundle changes.
 #pragma once
 #include <stdexcept>

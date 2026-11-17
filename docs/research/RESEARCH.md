@@ -4,10 +4,10 @@ Research and implementation are parallel parts of Optisynth. Record what was
 actually inspected, the source edition/page or code revision, the inferred DSP
 mechanism, uncertainty and the test that could disprove it. A link found is not
 a document analysed. The first reviewed Mutable DSP subset is now adopted; see
-`MUTABLE_FIRST_SLICE.md` and `../third_party/mutable/PROVENANCE.json`.
+`modules/MUTABLE_FIRST_SLICE.md` and `../../third_party/mutable/PROVENANCE.json`.
 
 `research_sources.json` is the source catalogue. Local manual/schematic copies go
-under `references/`; `reference_downloads.json` records their URLs and SHA-256.
+under `../references`; `reference_downloads.json` records their URLs and SHA-256.
 Reference PDFs/ZIPs are git-ignored; the catalogue, receipts and research notes are
 kept with project source. ZIP contents are not executed or automatically extracted.
 
@@ -53,7 +53,7 @@ modules; do not claim an exact JP emulation from feature names or schematics alo
 
 ## Mutable Instruments and VCV Rack references
 
-[VCV architecture and performance lessons](VCV_ARCHITECTURE_LESSONS.md) compares
+[VCV architecture and performance lessons](platforms/VCV_ARCHITECTURE_LESSONS.md) compares
 primary engine/oscillator sources with our current modules, notes SIMD, scheduling,
 UI/asset costs and proposes voice groups with explicit modulation/event interfaces.
 It includes pinned revisions, current limitations and a future benchmark matrix.
@@ -96,57 +96,57 @@ Digital source runs at 48 kHz. A bounded windowed-sinc converter adapts output t
 the device rate. The rack adds the original variable-shape/sine oscillators, an
 externally excited Plaits resonator and stmlib digital SVF variants. This is the
 library's digital filter, not an analogue Ripples circuit recreation. Review and
-acceptance: [RACK_ROUTING.md](RACK_ROUTING.md). Free-running dust remains disabled.
+acceptance: [RACK_ROUTING.md](../architecture/RACK_ROUTING.md). Free-running dust remains disabled.
 Next: more original engines, then granular processing.
 Continue the same module-specific review before adoption.
 
 Sample excitation is implemented in standalone 0.0.5 with a first-party WAV player.
-[SAMPLE_PLAYER.md](SAMPLE_PLAYER.md) records the inspected RIFF/WAVE specifications,
+[SAMPLE_PLAYER.md](../architecture/SAMPLE_PLAYER.md) records the inspected RIFF/WAVE specifications,
 file/asset/worker contracts, tests and remaining interpolation/stereo limits.
 
 Request 31 adds Pigments/Vital-style parameter assignment and matrix overview as
 a UI option alongside typed module patching. The user-provided screenshot is stored
-locally as `references/pigments-modulation-user-20261117.png`; design implications
-are in `CONTEXTUAL_UI.md`. Original product manuals and modulation runtime semantics
+locally as `../references/pigments-modulation-user-20261117.png`; design implications
+are in `../ui/CONTEXTUAL_UI.md`. Original product manuals and modulation runtime semantics
 still need research before implementation; no product code is adopted.
 
 ## Other open-source digital-module makers
 
-[OPEN_SOURCE_MODULE_MAKERS.md](OPEN_SOURCE_MODULE_MAKERS.md) records the checked
+[OPEN_SOURCE_MODULE_MAKERS.md](modules/OPEN_SOURCE_MODULE_MAKERS.md) records the checked
 4ms, DaisySP, Rebel/OWL, Befaco VCV and Music Thing sources, published licences,
 potential uses and remaining pre-use review. None has been adopted in this build.
 
 ## Sequencer models and independent arpeggiator
 
-[SEQUENCER_MODELS_RESEARCH.md](SEQUENCER_MODELS_RESEARCH.md) is the expanded request
+[SEQUENCER_MODELS_RESEARCH.md](sequencers/SEQUENCER_MODELS_RESEARCH.md) is the expanded request
 38 source study: 15 families, method taxonomy, primary source cards, licence and
-inspection limits. [SEQUENCER_UI_ARCHITECTURE.md](SEQUENCER_UI_ARCHITECTURE.md)
+inspection limits. [SEQUENCER_UI_ARCHITECTURE.md](../ui/SEQUENCER_UI_ARCHITECTURE.md)
 synthesises shared Pattern modes/widgets and separate specialist modules, with
 state, capture, agent and performance requirements. Fourteen repository inventories
 and 86 downloaded reference files are indexed with hashes and inspection scope in
-[sequencer_research_sources_20261117.json](sequencer_research_sources_20261117.json).
-Original source/manual/UI copies remain under ignored `references/`.
+[sequencer_research_sources_20261117.json](sequencers/sequencer_research_sources_20261117.json).
+Original source/manual/UI copies remain under ignored `../references`.
 
 Corrections verified against source: PER|FORMER software is MIT; Marbles headers
 are MIT but Grids is GPLv3-or-later; a current freeware Stellare listing does not
 establish reusable source. Tidal's collected GitHub snapshot is historical after
 its move to Codeberg. No sequencer candidate has been adopted or run.
 
-[SEQUENCERS_AND_ARPEGGIATORS.md](SEQUENCERS_AND_ARPEGGIATORS.md) retains the earlier
+[SEQUENCERS_AND_ARPEGGIATORS.md](sequencers/SEQUENCERS_AND_ARPEGGIATORS.md) retains the earlier
 VCV/local Optiseq findings and tested, isolated timing prototype. Request 38
 supersedes its old implementation order. No new engine code or app build was made
 for this research; event cables and playable sequencer/arp modules remain pending.
 
 ## Delay and reverb modules
 
-[OPEN_SOURCE_DELAY_REVERB.md](OPEN_SOURCE_DELAY_REVERB.md) records Clouds/Parasites,
+[OPEN_SOURCE_DELAY_REVERB.md](modules/OPEN_SOURCE_DELAY_REVERB.md) records Clouds/Parasites,
 4ms DLD, Valley Plateau, CHOW Matrix, Airwindows Galactic and DaisySP sources and
 licences. It distinguishes original DSP from firmware/plugin wrappers and calls
 out rate assumptions, stereo, tail ownership and causal feedback requirements.
 No source from these candidates was adopted; full module-specific review remains
 required before use. Standalone 0.0.6 now includes the complete first-party Spectral
 engine, stereo routing and the first shared matrix; see
-[SPECTRAL_ENGINE_INTEGRATION.md](SPECTRAL_ENGINE_INTEGRATION.md). The next interface
+[SPECTRAL_ENGINE_INTEGRATION.md](../architecture/SPECTRAL_ENGINE_INTEGRATION.md). The next interface
 work is sequencer/arp clock and timestamped events. New effect modules remain queued.
 
 ## Parallel project: repurposed Korg Wavestate
@@ -174,6 +174,6 @@ MIDI or audio device by itself.
 
 The copied Spectral engine is our independent implementation, not LinPlug source.
 Its observed architecture and known approximations are retained in
-`../reference/docs/spectral_architecture.md` and the inherited `design.md` history.
-Source provenance is `source_snapshot_20261117.json`. Legacy fidelity limitations
+`../../reference/docs/spectral_architecture.md` and the inherited `../legacy/optispectral/design.md` history.
+Source provenance is `../verification/source_snapshot_20261117.json`. Legacy fidelity limitations
 remain explicit while the reusable components are extracted.
