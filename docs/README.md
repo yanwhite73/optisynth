@@ -3,6 +3,9 @@
 Start with [current status](project/STATUS.md), [user requests](project/USER_REQUESTS.md)
 and the [engineering log](project/ENGINEERING_LOG.md).
 
+Sequencer UI research: [illustrated atlas with 39 references](ui/sequencers/README.md)
+and [workflow comparison](ui/sequencers/WORKFLOWS.md).
+
 | Folder | Contents | Start here |
 | --- | --- | --- |
 | `project/` | Status, verbatim requests, engineering history, backups and document relocation record | [Status](project/STATUS.md) |

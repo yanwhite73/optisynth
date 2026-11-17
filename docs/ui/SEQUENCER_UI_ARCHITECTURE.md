@@ -108,41 +108,49 @@ rules need prepared transactions. Clock pulses and note streams need event route
 they cannot be treated as ordinary scalar matrix assignments. Warn about an
 incompatible connection in context instead of accepting a route that has no effect.
 
-## Visual evidence applied
+## Visual evidence applied — revised after request 41
 
-Request 39 explicitly checks that screenshots and interfaces are being collected.
-Current visual coverage is an initial set of three images, not yet a complete
-cross-product UI survey. These originals were saved and viewed:
+The earlier three-image sample did not sufficiently support the proposal.
+[The illustrated atlas](sequencers/README.md) now contains 39 inspected images:
+20 software screenshots/panel captures and 19 manual diagrams/screen examples,
+across PER|FORMER, Bespoke, Seq, Impromptu, Mutable, Monome, Stochas and Orca.
+Every image has an observation, proposed adaptation, source URL and hash.
 
-- [Stochas grid and dependency-chain screenshot](../references/sequencer_research_20261117/manuals/stochas.png).
-- [Kria track/parameter/modifier navigation diagram](../references/sequencer_research_20261117/manuals/kria.png).
-- [Meadowphysics countdown/range/reset diagram](../references/sequencer_research_20261117/manuals/meadowphysics.png).
+[The workflow study](sequencers/WORKFLOWS.md) connects this evidence to concrete
+editing and performance tasks. It sharpens the proposal in six places:
 
-The manual snapshots and source study add interaction evidence, but do not replace
-screenshots of actual editing and performance states. Next visual collection:
-Foundry/PhraseSeq panels; Bespoke Stage/Euclidean/Arp; PER|FORMER note/curve pages;
-Marbles/Grids control panels; and Seq arrangement editors. For each, record visible
-control hierarchy, editing gestures, playback feedback, navigation, modulation,
-pattern switching and how exceptions/errors are explained. Mark static observations
-separately from behaviour confirmed by manuals; no hands-on testing is claimed.
+1. **Stable frame, different central editors.** Seq S01–S06 show an especially
+   useful desktop precedent: persistent browser/inspector with step, piano-roll,
+   serial, parallel and branching editors. Keep that economy in Focus while
+   retaining characteristic compact rack panels.
+2. **Explicit editing scope.** S01's sequence/track/step inspectors motivate a
+   visible scope breadcrumb, inherited versus overridden values and named bulk
+   actions. Switching compatible views preserves selection.
+3. **Separate playback, selection and pending changes.** PER|FORMER P06–P09 and
+   Impromptu I01 motivate distinct markers plus optional Follow. Queued launches
+   need boundary feedback and cancellation. An edit must not silently launch.
+4. **A performance surface alongside detailed editing.** P09 and I04 favour
+   immediate mute/fill/capture actions. Edit/Perform changes the task surface,
+   not the underlying musical model or stored content.
+5. **Specialist process feedback.** B04 needs dwell/sub-pulse visibility; M01/M03
+   need memory/distribution/history; C00–C02 need counter state and causal rules.
+   B05/S06 motivate an input-chord display alongside the arp's generated preview.
+   A captured piano roll cannot replace those native controls.
+6. **Visible desktop actions.** Monome's annotated diagrams demonstrate how much
+   meaning hardware button combinations carry. Retain the musical organisation
+   while exposing labels, lane loops and selected-item controls. Use text/shape
+   alongside colour; protect text entry from the Caps Lock note keyboard.
 
-This visual comparison precedes our wireframes. Preserve the earlier Matriarch and
-Pigments references for the overall rack/modulation interaction. New third-party
-images remain reference assets with source attribution, not copied app artwork.
+These are design inferences, not implemented or usability-tested behaviour.
+The atlas distinguishes static observations from manual-confirmed interaction.
+Most images are single published states; P07/P08 supply a useful before/during
+playback comparison, not a complete interactive audit. Exact gestures, minimum
+size, accessibility and queued/error states still need our wireframe evaluation.
 
-The collected **Stochas screenshot** shows probability/velocity/chain views of
-one pitch grid. Use that economy, with selected-cell dependency links and an
-inspector instead of displaying every link at once. Colour must be reinforced by
-numbers, symbols and text. Do not copy its artwork.
-
-The **Kria navigation diagram** separates track, parameter and modifier choices.
-Retain those conceptual layers, but the larger desktop display can show multiple
-lane loops at once; hardware shift-key combinations need not be reproduced.
-
-The **Meadowphysics diagram** explains a row through countdown, event, range and
-reset. A bank of note knobs would obscure its method. Use explicit counter state
-and a rule matrix alongside it. These three inspected images are available in
-`../references/sequencer_research_20261117/manuals` and linked by the source manifest.
+Preserve Matriarch-inspired contextual panels and the Pigments/Vital modulation
+direction. All new images remain attributed research references; no artwork is
+copied into the app. Raw images are separately backed up because they are ignored
+by Git; tracked analysis links to their original URLs for provenance.
 
 ## A concrete rule for modes versus modules
 

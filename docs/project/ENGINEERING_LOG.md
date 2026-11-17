@@ -457,3 +457,49 @@ Independent source/docs backup:
 postdates archive creation. The raw reference collection remains covered by the
 separate reference archive recorded for request 38. Temporary validation/backup
 jobs completed normally.
+
+## Request 41: substantive sequencer visual and workflow evidence
+
+Yan identified that the three-image sample was insufficient to establish a useful
+UX paradigm. Recorded the correction verbatim and expanded the collection now.
+The Product Design research workflow was applied to published reference material;
+this is not a live application audit. No third-party executable or build script
+was run, and no audio/MIDI device or Live session was used.
+
+Collected 36 additional publisher assets and retained the previous three, yielding
+39 images across eight source groups. Visually inspected every image: 20 software
+screenshots/panel captures and 19 manual screen examples/diagrams. The originals
+are under `../references/ui/sequencers_20261117/`; provenance, hashes, per-image
+observations and proposed adaptations are in
+`../ui/sequencers/visual_sources_20261117.json`. The eight illustrated source pages
+and atlas show the actual images beside their annotations, not just external links.
+
+`../ui/sequencers/WORKFLOWS.md` compares note entry, chords, property overlays,
+independent loops, control curves, stages, Euclidean/map generation, evolving memory,
+counters, arp input, queued launch and composition. It separates image observations
+from manual-confirmed behaviour and our proposed desktop interactions. Expanded
+screens support a shared frame with specialised central editors, explicit
+sequence/track/step scope, separate selected/playing/pending markers, dedicated
+performance controls and native process feedback. The architecture proposal and
+current status now incorporate those findings.
+
+Limits remain explicit: these are published stills rather than complete recorded
+workflows. Exact pointer feel, keyboard accessibility, minimum size and queued/error
+states need our own wireframe evaluation. No synth implementation, test changes,
+plugin installation or new build. Raw images remain separate from app assets/Git;
+documentation and the provenance catalogue are tracked.
+
+Verification passed: all 39 image byte counts, file signatures and SHA-256 hashes;
+all per-image annotation/source links; 201 local Markdown links; current JSON;
+all 40 prior verbatim requests unchanged plus the exact new request; documentation-
+only change scope; and `git diff --check`. No DSP tests were repeated.
+
+Verified independent visual archive:
+`../../../backups/optisynth/optisynth-sequencer-ui-references-20261117-215438.tar.gz`
+plus checksum, containing 50 image/analysis/catalogue files (9,983,753 bytes).
+Every archived member was compared with its source bytes; archive SHA-256 is
+`65cb0786a4fed1b09256436bd43f6f563c468b8f6e21fa5da0d6a9d0bce082f5`.
+Verified source/docs archive:
+`../../../backups/optisynth/optisynth-source-20261117-215438.tar.gz` plus checksum,
+186 files / 2,237,919 bytes. These receipt paragraphs postdate archive creation.
+The managed validation/archive job completed normally; no temporary service remains.

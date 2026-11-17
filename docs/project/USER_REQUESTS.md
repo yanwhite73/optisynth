@@ -331,3 +331,21 @@ Sort project memory, architecture, UI, research, verification evidence and inher
 Optispectral documents into clear folders. Add a documentation index and update
 current links, agent entry points and helper paths. Preserve original request text
 and immutable provenance/verification records; do not rebuild the synth.
+
+## 41 — Insufficient sequencer screenshots and UX evidence
+
+```text
+in sequencer research you have not added sufficient ui screenshots, so when you come to build the device you probably wont have a good paradigm for the ux
+```
+
+Correction accepted: the three-image sample does not sufficiently ground the UX
+proposal. Collect and inspect a substantial set of actual sequencer interfaces and
+editing/performance states; document workflows, shared interaction patterns and
+model-specific controls alongside the images. Revise the proposal from that visual
+evidence before any device implementation. Do the collection now, not just log it
+as another future task. Preserve the organised documentation folders.
+
+Delivered: 39 inspected images, eight illustrated source pages and a cross-source
+workflow comparison in `../ui/sequencers/`. Revised the proposal around the visual
+evidence. Static/manual study is complete for this collection; hands-on usability
+and our own wireframe evaluation remain separate next steps. No device was built.

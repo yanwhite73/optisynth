@@ -31,6 +31,12 @@ records exact commits, URLs, file hashes, sizes and inspection scope. A download
 file is not automatically marked reviewed. The cards below identify the actual
 source sections supporting the conclusions.
 
+Request 41 adds a separate [illustrated UI atlas](../../ui/sequencers/README.md)
+with 39 inspected images (36 new, three retained) and a
+[workflow comparison](../../ui/sequencers/WORKFLOWS.md). The original source-study
+manifest remains unchanged; the expanded visual collection has its own catalogue
+and backup. Static images and manual evidence do not constitute hands-on testing.
+
 Manual pages can lag firmware: PER|FORMER's inspected manual identifies 0.1.40;
 Stochas says its older commercial manual is mostly applicable, not fully current.
 Code observations are tied to the pinned files. Tidal's GitHub README says active

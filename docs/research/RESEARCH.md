@@ -127,6 +127,14 @@ and 86 downloaded reference files are indexed with hashes and inspection scope i
 [sequencer_research_sources_20261117.json](sequencers/sequencer_research_sources_20261117.json).
 Original source/manual/UI copies remain under ignored `../references`.
 
+Request 41 corrects the earlier insufficient visual sample. The
+[sequencer visual atlas](../ui/sequencers/README.md) adds 36 images to the previous
+three, with all 39 visually inspected and annotated across eight source groups.
+[Workflow analysis](../ui/sequencers/WORKFLOWS.md) distinguishes image observations,
+manual-confirmed behaviour and our adaptations. The image catalogue has direct
+URLs/hashes; the original bytes are separately backed up. This is published
+visual research, not hands-on verification or permission to adopt artwork.
+
 Corrections verified against source: PER|FORMER software is MIT; Marbles headers
 are MIT but Grids is GPLv3-or-later; a current freeware Stellare listing does not
 establish reusable source. Tidal's collected GitHub snapshot is historical after

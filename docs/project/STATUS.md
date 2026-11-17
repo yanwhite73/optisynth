@@ -8,6 +8,15 @@ verbatim request text are preserved; no new synth build accompanies the move.
 
 ## Current delivery — sequencer research and architecture proposal
 
+Request 41 is addressed with an expanded [visual atlas](../ui/sequencers/README.md):
+39 publisher images saved and visually inspected across eight source groups
+(20 software screenshots/panel captures; 19 manual diagrams/screen examples).
+Every image has an annotation, original source URL and hash. The
+[workflow comparison](../ui/sequencers/WORKFLOWS.md) links them to concrete editing,
+performance and arrangement tasks, with explicit observations versus inferences.
+This corrects the insufficient three-image sample. No hands-on audit is claimed;
+device implementation remains paused while the proposed UI/contract is refined.
+
 Request 38 is fulfilled as research and documentation, with no further building.
 [SEQUENCER_MODELS_RESEARCH.md](../research/sequencers/SEQUENCER_MODELS_RESEARCH.md) categorises 15 families
 and separates representation, views, traversal, generation, live processes, note
@@ -23,14 +32,16 @@ and Conductor families. It specifies shared widgets, contextual editors, native
 state/capture, agent operations and performance implications. These are proposed
 families, not implemented features or all part of the first release.
 
-Request 39 confirms UI/screenshots are part of the research. Three original images
-were collected and viewed; wider interface coverage is still pending. The UI
-proposal records the exact images and the next panel/editor collection. Broaden
-that visual/workflow comparison before our wireframes.
+Requests 39 and 41 make visual/interface evidence a required part of this research.
+The expanded comparison supports a stable workspace with specialised editors,
+explicit editing scope, separate playing/selected/queued states, and visible
+process state for Stage, Memory, Counters and Arp. Raw visuals remain local with
+a separate backup; analysis and provenance are tracked in Git.
 
-Exact next work before a build: expand visual interface evidence, make the Pattern
-lane/event/port contract concrete, complete the selected dependency review and
-compare static Pattern/Arp/Stage/Memory wireframes. Existing timing code remains an isolated prototype to reassess against
+Exact next work before a build: compare static Pattern/Arp/Stage/Memory wireframes
+against the documented tasks and empty/selected/playing/queued states; make the
+Pattern lane/event/port contract concrete and complete the selected dependency
+review. Existing timing code remains an isolated prototype to reassess against
 that contract. The remaining implementation steps below are queued; the prior
 standing instruction to continue does not override this research-first request.
 
@@ -38,6 +49,12 @@ Research backup: `../../../backups/optisynth/optisynth-sequencer-references-2026
 and source/docs backup `optisynth-source-20261117-212559.tar.gz` in the same folder,
 both with checksums and verified contents. The source archive also passed a fresh
 directory restore. Source/raw reference copies were not run or installed.
+
+Request 41 visual backup:
+`../../../backups/optisynth/optisynth-sequencer-ui-references-20261117-215438.tar.gz`
+contains all 39 images plus the illustrated analysis/catalogue (50 files verified).
+Updated source/docs backup: `optisynth-source-20261117-215438.tar.gz` in the same
+folder, 186 files verified. Checksums and details are in `ENGINEERING_LOG.md`.
 
 ## Current delivery: complete Spectral and modulation matrix, standalone 0.0.6
 
@@ -157,7 +174,7 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `../research/modules/OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `../research/RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 40 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 41 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
 increment above. It does not complete the subsequent sequencer/effect roadmap.

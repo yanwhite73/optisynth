@@ -9,20 +9,17 @@
 
 ## Collected sequencer visuals
 
-| Reference | What was inspected | Saved image |
-| --- | --- | --- |
-| Stochas | Note grid, probability/velocity/chain views and dependency links | [Screenshot](../references/sequencer_research_20261117/manuals/stochas.png) |
-| Kria | Track selection, parameter pages and loop/time/probability modifiers | [Navigation diagram](../references/sequencer_research_20261117/manuals/kria.png) |
-| Meadowphysics | Countdown, current position, event, range and reset relationships | [Counter diagram](../references/sequencer_research_20261117/manuals/meadowphysics.png) |
+**[Open the illustrated sequencer atlas](sequencers/README.md).** It contains
+39 inspected publisher images across eight source groups: 20 software screenshots/
+panel captures and 19 manual diagrams/screen examples. Eight illustrated pages
+annotate every image; the index shows representative comparisons directly.
 
-These three images have been saved and viewed; this is an initial visual sample.
-Source URLs/hashes are in the
-[sequencer collection manifest](../research/sequencers/sequencer_research_sources_20261117.json).
-The images are local research references and are not committed app artwork.
+- [Workflow comparison and design consequences](sequencers/WORKFLOWS.md): note
+  entry, scoped editing, independent lanes, stages, generative processes, pattern
+  launch, arrangement and the remaining wireframe questions.
+- [Image provenance and inspection catalogue](sequencers/visual_sources_20261117.json):
+  URLs, local paths, hashes, observations and proposed adaptations.
 
-Next coverage: Foundry/PhraseSeq panels; Bespoke Stage/Euclidean/Arp; PER|FORMER
-note/curve pages; Marbles/Grids panels; Seq arrangement editors. Compare actual
-editing and performance states, control hierarchy, gestures, navigation, playback
-feedback, modulation and pattern switching before drawing our wireframes. Separate
-what a screenshot shows from behaviour established by the manual; hands-on testing
-has not been performed for these applications.
+Request 41 expanded the earlier three-image sample by 36 actual images. This is
+published visual/manual research, not a hands-on audit. Source assets remain local
+references with a separate backup; the analysis and catalogue are committed.
