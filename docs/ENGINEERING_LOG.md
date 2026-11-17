@@ -98,3 +98,10 @@ Independent archive created and verified:
 147 files, 1,754,729 uncompressed bytes, including the app headers and saved patch.
 This archive represents the implementation milestone; this subsequent receipt is
 also saved in Git. All temporary build/test jobs exited; user services preserved.
+
+## Request 22: parallel Wavestate project
+
+Recorded Yan's input verbatim and added the Wavestate repurposing project to the
+research index/status as a potential controller or hardware host. These remain
+possibilities to assess using that project's hardware/interface findings. This
+update records the connection between projects; no hardware or DSP work performed.

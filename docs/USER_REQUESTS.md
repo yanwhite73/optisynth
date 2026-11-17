@@ -135,3 +135,9 @@ great log all this and make sure to commit and push regularly
 This explicitly supersedes the inherited no-commit/no-push restriction for
 Optisynth. Commit and push coherent, checked milestones to the supplied origin;
 retain local source archives as an independent backup.
+
+## 22 — Parallel Wavestate repurposing project
+
+```text
+add another note, a parallel project to repurpose a korg wavestate might become a useful controller or even host
+```

@@ -100,6 +100,18 @@ Continue the same module-specific review before adoption.
 4ms, DaisySP, Rebel/OWL, Befaco VCV and Music Thing sources, published licences,
 potential uses and remaining pre-use review. None has been adopted in this build.
 
+## Parallel project: repurposed Korg Wavestate
+
+Yan noted a parallel Wavestate repurposing project as a possible physical controller
+for Optisynth, or potentially a hardware host for its engine. Track both possibilities
+alongside the desktop project. Controller mapping and running DSP on the instrument
+are separate research questions; neither integration has been established here.
+
+When that project's findings are available, record its location, exact hardware
+revision, accessible controls/interfaces and hosting constraints. Use that evidence
+to assess integration with Optisynth's stable module/parameter identities. Hosting
+feasibility remains open; this note does not change the current implementation order.
+
 ## Required evidence per module
 
 For each candidate, keep a small record: intended musical role; primary source

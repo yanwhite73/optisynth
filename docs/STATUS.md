@@ -57,7 +57,12 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 21 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 22 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Request 22 adds a parallel Korg Wavestate repurposing project: a potential physical
+controller or eventual hardware host for Optisynth. Both roles are recorded in
+`RESEARCH.md`; integration and hosting feasibility remain unverified. The current
+module/sample/polyphony development order continues.
 
 Next: a sample player that can feed the resonator or mix an attack alongside it,
 then bounded polyphony and an explicit voice/global boundary for shared effects.
