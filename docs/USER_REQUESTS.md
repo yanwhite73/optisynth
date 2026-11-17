@@ -237,3 +237,38 @@ architecture. Expose it to the environment's shared routing matrix so it can
 interact with other modules. Inspect audio and modulation boundaries and existing
 parameter/state handling first. Existing extracted envelope/filter options remain
 available; further decomposition of Spectral is not the requested next step.
+
+## 33 — Independent sequencer/arpeggiator and VCV/Optiseq lessons
+
+```text
+we will need a sequencer too, as well as independent arp, though spectral has one.
+What can we learn from vcv sequencers and optiseq?
+```
+
+Add reusable sequencer and arpeggiator modules to the environment's requirements,
+separate from Spectral's retained internal arp. Research primary VCV sequencer
+manuals/source and the local Optiseq implementation; document useful interaction,
+musical, timing and routing lessons. This research steers the shared event/clock
+architecture while preserving the whole-Spectral integration priority.
+
+## 34 — Different sequencer models
+
+```text
+having different seuqncer models would be great, thats one of the strengths of modular
+```
+
+Require multiple independently loadable sequencer models, each with contextual
+controls and characteristic behaviour, sharing clock/note/modulation interfaces.
+Allow several models to run and interact in one patch. Preserve the distinction
+between changing a sequencer's algorithm and displaying the same pattern differently.
+
+## 35 — Open-source delay and reverb modules
+
+```text
+what open source delay and reverb modules are there? these would be good for a modular system
+```
+
+Research original delay/reverb DSP and modular implementations, their published
+licences and likely adaptation work. Record a practical shortlist with source links;
+this adds effects to the module roadmap without silently replacing the complete
+Spectral engine or independent sequencer/arpeggiator requirements.

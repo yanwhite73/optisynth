@@ -248,3 +248,35 @@ private per-voice state. Existing modular output is mono and routes target ports
 so complete integration requires stereo/state boundaries and explicit modulation
 scope. `SPECTRAL_ENGINE_INTEGRATION.md` records the concrete next implementation
 order and acceptance. No whole-engine/matrix runtime change is claimed yet.
+
+## Requests 33–35: sequencer models, independent arp, delay/reverb research
+
+Captured all three requests verbatim on arrival. Read VCV SEQ 3/timing, Impromptu
+Foundry/reset/interchange, Bogaudio addressing and Music Thing evolving-loop
+documentation. Inspected local Optiseq docs, current engineering/backlog entries
+and relevant state/generation/playback sections read-only. Saved the comparison
+and proposed event/clock contracts in `SEQUENCERS_AND_ARPEGGIATORS.md`.
+
+Optiseq offers useful musical state, non-destructive performance transforms and
+prepared playback banks; its host truncation fix still needs actual Live recall
+verification. Apply versus New Variation must be explicit, and a Turing model is
+not already implemented there. The inherited Spectral arp emits event batches
+without sample offsets; it cannot be exposed unchanged as sample-accurate modular
+event routing. No changes to Optiseq or the compatibility engine were made.
+
+Checked primary author repositories, manuals and licence/source excerpts for
+Clouds/Parasites, 4ms DLD, Plateau, CHOW Matrix, Airwindows and DaisySP. Recorded
+licences, source links and outstanding review in `OPEN_SOURCE_DELAY_REVERB.md`.
+Useful corrections: CHOW Matrix's main code is BSD-3-Clause; ReverbSc is in the
+LGPL-2.1 DaisySP collection; Clouds reverb contains 32 kHz assumptions; Parasites'
+current manual uses Miverb while its source still names Oliverb.
+
+This is a documentation milestone only: no third-party installation/build/use,
+no new DSP qualification, no audio device or Live interaction. Updated STATUS,
+ARCHITECTURE and RESEARCH without changing the whole-Spectral next priority.
+
+Documentation diff check passed. Independent source/research archive:
+`../../backups/optisynth/optisynth-source-20261117-184511.tar.gz` plus `.sha256`;
+160 files, 1,898,938 bytes, archive checksum and every manifest entry verified.
+This receipt is recorded after the archive was created. No DSP tests were rerun
+for this documentation-only change.

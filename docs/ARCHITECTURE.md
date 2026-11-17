@@ -24,6 +24,26 @@ the editor, automation and agent interface must address the same stable identiti
 - Structural edits prepare a replacement plan off-thread. Scalar edits use stable
   resolved handles and appropriate smoothing. State retirement stays off-thread.
 
+## Proposed sequencer and effect interfaces
+
+Requests 33–35 add requirements for independent sequencer/arp models and modular
+delay/reverb. Detailed proposals and evidence: `SEQUENCERS_AND_ARPEGGIATORS.md`
+and `OPEN_SOURCE_DELAY_REVERB.md`. These interfaces are not implemented yet:
+
+- Shared transport includes tempo, beat/sample position, meter and discontinuities;
+  individual modules retain explicit run/reset and clock-rate policies.
+- Note events carry sample offsets and source/note identities; release ownership
+  survives conditions, routing changes and module removal. UI timers do not clock notes.
+- Different sequencer algorithms retain native state and contextual panels while
+  sharing typed ports and stable parameter identities. Several may run together.
+- Stereo effects can serve shared sends or inserts. Encapsulated feedback remains
+  inside the processor; external feedback needs an explicit causal boundary.
+- Delay buffers, reverb tails and frozen sound remain active after input silence.
+  Tail continuity and captured-audio persistence need explicit contracts.
+
+Complete Spectral integration remains the immediate implementation priority;
+its new boundaries should accommodate these contracts.
+
 ## Performance contract
 
 Determine output reachability before constructing processors. Follow both audio

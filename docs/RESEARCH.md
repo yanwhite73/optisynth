@@ -116,6 +116,24 @@ still need research before implementation; no product code is adopted.
 4ms, DaisySP, Rebel/OWL, Befaco VCV and Music Thing sources, published licences,
 potential uses and remaining pre-use review. None has been adopted in this build.
 
+## Sequencer models and independent arpeggiator
+
+[SEQUENCERS_AND_ARPEGGIATORS.md](SEQUENCERS_AND_ARPEGGIATORS.md) compares primary
+VCV/Impromptu/Bogaudio/Music Thing documentation with local Optiseq source and
+engineering history. It proposes distinct step, phrase, Euclidean, addressable
+and evolving-loop models sharing clock/events, plus an independent arp. It records
+Optiseq persistence and variation lessons and the existing Spectral arp's timing
+boundary. Research only; event cables and these modules are not implemented.
+
+## Delay and reverb modules
+
+[OPEN_SOURCE_DELAY_REVERB.md](OPEN_SOURCE_DELAY_REVERB.md) records Clouds/Parasites,
+4ms DLD, Valley Plateau, CHOW Matrix, Airwindows Galactic and DaisySP sources and
+licences. It distinguishes original DSP from firmware/plugin wrappers and calls
+out rate assumptions, stereo, tail ownership and causal feedback requirements.
+No source from these candidates was adopted; full module-specific review remains
+required before use. Complete Spectral integration remains the next milestone.
+
 ## Parallel project: repurposed Korg Wavestate
 
 Yan noted a parallel Wavestate repurposing project as a possible physical controller

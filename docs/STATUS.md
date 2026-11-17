@@ -68,7 +68,19 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 32 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 35 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Requests 33–34: multiple sequencer models and an independent arp are researched in
+`SEQUENCERS_AND_ARPEGGIATORS.md`. Share clock, sample-timestamped note events and
+modulation connections, while step, phrase/generative, Euclidean, addressable and
+evolving-loop models retain distinct state and contextual UI. VCV manuals and
+local Optiseq source/logs inform this design; no sequencer code is added yet.
+
+Request 35: `OPEN_SOURCE_DELAY_REVERB.md` records Clouds/Parasites, 4ms DLD,
+Valley Plateau, CHOW Matrix, Airwindows and DaisySP candidates, published licences,
+rate/stereo/feedback/tail requirements and outstanding adoption reviews. These
+are research candidates, not new installed modules. Both research tracks inform
+the whole-Spectral boundary and do not replace its implementation priority.
 
 Request 30: sample player, immutable reachable assets, background loading,
 contextual waveform panel and both sample/resonator starters are implemented.
