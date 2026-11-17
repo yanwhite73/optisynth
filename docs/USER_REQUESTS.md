@@ -173,3 +173,13 @@ thats good
 ```
 
 Positive feedback on the opened 0.0.4 contextual rack; retain this UI direction.
+
+## 27 — Direct patching versus preset routing
+
+```text
+drag and drop / remove / patch cables? or a more preset-based routing architecture? or both?
+```
+
+Design question: recommend both as interfaces to the existing routing graph.
+Editable, prewired instrument templates plus direct module/cable manipulation.
+This is a recommendation, not a claim that drag cables or undo are implemented.

@@ -64,7 +64,13 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 26 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 27 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Request 27 asks whether to use direct module/cable manipulation, preset routing or
+both. Recommendation: both on the same saved graph; prewired editable templates,
+drag patching with optional cable visibility, and undoable edits. Proposed behaviour
+and acceptance are in `ARCHITECTURE.md`. No runtime change for this design question;
+sample playback remains queued, with this interaction sequence recorded alongside it.
 
 Request 25 is implemented: Matriarch-inspired native rack with familiar,
 module-specific panels. References and behaviour are in `CONTEXTUAL_UI.md`.

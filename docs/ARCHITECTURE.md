@@ -113,3 +113,48 @@ audio output only when Start audio is clicked. The UI provides typing/piano note
 hardware MIDI, polyphony and an agent API remain unimplemented. Core render is
 allocation/lock free in the tested paths; JUCE's outer device manager has its own
 callback synchronization, so this is not a claim about every OS/framework layer.
+
+## Proposed preset and direct-patching workflow — request 27
+
+Use one saved routing graph for both playable instrument presets and direct
+patching. A preset instantiates explicit nodes, values and connections; cables
+show those same connections. Every preset remains editable, and every hand-built
+rack can be saved as a preset. Avoid hidden preset wiring that disagrees with the
+visible graph. The future agent API should edit this same document using stable
+node/port/parameter identities.
+
+Proposed interaction layers:
+
+- Start with a prewired instrument template: subtractive voice, modal percussion,
+  sample into resonator, or layered sources. Offer useful macro controls later.
+- Drag modules from a browser, rearrange panels, replace compatible modules and
+  remove them with undo. Moving a panel changes presentation only, not sound.
+- Drag typed audio/control cables between sockets; highlight valid targets, show
+  the selected module's connections clearly, and allow cable hiding/dimming.
+  Keep click menus as an accessible alternative. Event cables require runtime work.
+- Preview insert/remove consequences. A simple one-input/one-output audio processor
+  may offer an explicit bypass/reconnect operation. Branches, mixers, modulators
+  and output removal need clear disconnection/output choices rather than guessing.
+- Save the complete instrument first; reusable groups of modules can follow with
+  explicit boundary ports. Parameter-only variants must state that routing is retained.
+
+Implementation sequence for this interaction work: undoable graph edits and safe
+removal, visible draggable cables, module drag/reorder and compatible replacement,
+then template browsing and reusable groups. This proposal does not silently cancel
+the sample-player milestone. Prototype acceptance: preset routes match the displayed
+cables; drag editing and menu editing produce the same document; undo restores both
+sound settings and wiring; panel rearrangement preserves rendered sound; save/recall
+preserves the graph; invalid routes leave the playing patch intact. Preparation
+stays off the audio thread, and only reachable DSP is constructed regardless of UI.
+
+Current 0.0.4 already has starter graphs, full-rack save/load, Add/Remove buttons,
+module selectors and socket routing menus. Removal of active dependencies can be
+rejected until rerouted. Cable drawing/dragging, panel rearrangement, undo and group
+presets are proposed additions, not current features.
+
+Interaction references checked 17 November: VCV's [Getting Started manual](https://vcvrack.com/manual/GettingStarted)
+documents dragging cables/plugs and moving modules; its [Menu Bar manual](https://vcvrack.com/manual/MenuBar)
+documents saved template patches, undo/redo and cable opacity. These support the
+familiar interaction vocabulary. Optisynth retains its explicit audio/control types;
+VCV's any-output-to-any-input voltage model is not the current Optisynth contract.
+No VCV code was loaded, built or adopted for this design note.

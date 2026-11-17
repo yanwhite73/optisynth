@@ -156,3 +156,14 @@ root design review and build receipt. This subsequent archive receipt is in Git.
 Request 26: Yan's “thats good” approves the opened contextual UI direction. Logged
 verbatim; retain the layout. UI implementation committed as `6c8ae41`; source backup
 above is independent of Git. Sample/excitation remains the next implementation step.
+
+## Request 27: direct patching and preset architecture
+
+Checked current RackEditor add/remove/socket handlers and rack graph persistence.
+Both interaction styles can share the existing graph. Recommend editable prewired
+templates, direct module/cable actions, optional cable visibility and undo; retain
+the same stable document for future agent access. Record module removal semantics
+explicitly: current active-dependency removal can fail validation; convenient
+reconnection is future work and must not guess through branches. The architecture
+note distinguishes proposed drag/undo/group features from existing 0.0.4 menus and
+starter/save/load features. Sample playback is still queued.
