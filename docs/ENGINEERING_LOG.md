@@ -237,3 +237,14 @@ source hashes plus 23 vendored Mutable files verified. Independent archive creat
 and restore-verified: `../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
 with `.sha256`, 157 source files, 1,866,238 uncompressed bytes. This subsequent
 backup receipt is retained in Git. No temporary build/test jobs remain after cleanup.
+
+## Request 32: next priority is the complete Spectral engine
+
+Captured verbatim while finishing the sample delivery. Sample milestone committed
+and pushed as `d2e1a3a`. Inspected Engine/Patch/live-controls, plugin processor/editor
+and modular execution/graph interfaces. The core already supplies full stereo
+instrument playback and realtime scalar controls; actual LFO/envelope values are
+private per-voice state. Existing modular output is mono and routes target ports,
+so complete integration requires stereo/state boundaries and explicit modulation
+scope. `SPECTRAL_ENGINE_INTEGRATION.md` records the concrete next implementation
+order and acceptance. No whole-engine/matrix runtime change is claimed yet.

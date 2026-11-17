@@ -68,7 +68,7 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 31 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 32 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 30: sample player, immutable reachable assets, background loading,
 contextual waveform panel and both sample/resonator starters are implemented.
@@ -109,11 +109,17 @@ controller or eventual hardware host for Optisynth. Both roles are recorded in
 `RESEARCH.md`; integration and hosting feasibility remain unverified. The current
 module/sample/polyphony development order continues.
 
-Next action: define bounded polyphony and the voice/global boundary, with explicit
-modulation source/destination identity, rate and scaling contracts. Use the
-Pigments/Vital UI suggestion when designing parameter assignment; retain editable
-module graphs and preset templates. More Mutable engines, granular playback,
-envelope/modulator options and undo/direct-cable editing remain queued.
+Request 32 is now the next priority: include the complete Spectral synth engine,
+retaining its internal architecture, with a shared routing matrix reaching other
+modules. Inspect its audio, note, parameter and state interfaces before adapting it.
+Inspection complete: `SPECTRAL_ENGINE_INTEGRATION.md` records existing realtime
+controls, private per-voice modulation signals, stereo output and editor coupling.
+Exact next implementation action is the channel-aware output/state schema and
+stereo-preserving whole-engine adapter, before the cross-module matrix UI.
+Use the Pigments/Vital suggestion for matrix/parameter assignment; keep one stable
+routing representation. Broader bounded polyphony and voice/global boundaries,
+more Mutable engines, granular playback, envelope/modulator options and undo/direct
+cable editing remain queued. Further decomposition of Spectral is not the next step.
 Hardware MIDI, audio-rate parameter modulation, event cables, agent API and a
 modular VST3 wrapper are pending. This is a monophonic rack; all modules receive
 the same note context. Hardware audio input is not implemented.

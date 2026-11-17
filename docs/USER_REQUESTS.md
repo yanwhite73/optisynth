@@ -225,3 +225,15 @@ source strip and envelope/macros section (Screenshot 2026-11-17 at 18.11.23.png)
 Consider source selection or dragging onto parameters, visible modulation depths,
 and a matrix overview alongside module audio/control connections. This steers
 the modulation design; it does not cancel the sample-player milestone in progress.
+
+## 32 — Complete Spectral engine with cross-module matrix routing
+
+```text
+ok i guess next would be including spectral not as individual modules but with a routing matrix that can reach other modules
+```
+
+Next priority: integrate Spectral as a complete engine retaining its internal
+architecture. Expose it to the environment's shared routing matrix so it can
+interact with other modules. Inspect audio and modulation boundaries and existing
+parameter/state handling first. Existing extracted envelope/filter options remain
+available; further decomposition of Spectral is not the requested next step.
