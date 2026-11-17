@@ -142,3 +142,71 @@ timing across audio block sizes; non-4/4 meters; tempo changes/seek/loop/reset;
 stop/removal without stuck notes; predictable overflow; seeded recall; captures;
 large saved states; and no callback allocation. Existing modular playback still
 has shared monophonic Note context: event cables and this scheduler are future work.
+
+## Timing foundation — request 37, implementation contract
+
+Implement and qualify this first-party foundation offline before connecting it to
+Runtime/Player. The user-auditioned 0.0.6 application stays unchanged in this slice.
+This is not yet a playable sequencer module or a VST3 transport adapter.
+
+Evidence refreshed: [VCV timing](https://vcvrack.com/manual/VoltageStandards#timing)
+explains its cable-delay reset workaround. Our typed events instead share explicit
+sample offsets and ordering. [VST3 ProcessContext](https://steinbergmedia.github.io/vst3_doc/vstinterfaces/structSteinberg_1_1Vst_1_1ProcessContext.html)
+separates sample position from quarter-note position and validity-tagged tempo,
+meter and loop data. Hosts need not split a block at every loop jump. A future host
+adapter must check those flags and reconcile discontinuities; do not infer host
+support merely from having a local clock.
+
+Concrete first slice:
+
+- One local sample clock supplies immutable frames to all consumers. Its render
+  sample counter is monotonic, even while stopped; quarter-note position freezes
+  while stopped and may jump on seek/loop. Tempo changes preserve musical phase.
+  Meter gives quarter notes per bar (7/8 is 3.5), including negative preroll.
+  Start/stop/seek/loop generate explicit discontinuity flags and a revision.
+- Grid clocks share those frames but retain independent divisions and traversal
+  indices. Starting/seeking exactly on a grid emits that boundary once; otherwise
+  wait for the next boundary. No invented 1 ms suppression. Swing, generation,
+  ratchets and module-specific reset behaviours are subsequent work.
+- An event block has a bounded 256-event array, sample offsets, source identity and
+  source-local note identity. Same-offset ordering is reset, release, attack; ties
+  use stable source/note IDs. Offsets must be inside the block. Invalid input or
+  capacity overflow fails the entire affected block closed: discard its events,
+  require all held notes on that bus to release, and reject further insertion
+  until the next block. Never silently drop a release and keep attacking.
+- A fixed 64-note ledger distinguishes same-pitch notes from different sources.
+  Source reset/removal releases only that source; global reset/overflow releases
+  the ledger. Unknown releases are harmless. This is note ownership, not an audio
+  voice allocator or the implementation of polyphonic synthesis.
+
+All methods called in playback use fixed storage, no allocation, locks, file or
+network access. Configuration is validated; thread handoff remains the caller's
+responsibility. Success: identical event samples across chunk sizes, tempo change
+phase, negative positions, 3/4 and 7/8, seek/loop/start/stop ordering, overlapping
+source ownership, overflow release and zero allocation; run under ASan/UBSan too.
+Then integrate event ports and split rendering at event offsets, followed by the
+first step/control sequencer and independent chord arpeggiator with contextual UI.
+
+### Foundation result
+
+Implemented in `src/modular/timing.h/.cpp`; `tests/test_timing.cpp` supplies 47
+checks passing normally and under ASan/UBSan. Log: `build/timing-qualification.log`.
+Clock commands reject invalid data without changing state. Grid sequences match
+across sample grouping sizes 1, 17, 24, 64, 511 and 1024; a minute at 123.45 BPM
+has less than one sample of boundary quantisation error. Noninteger loop lengths
+retain fractional overshoot. Meter, negative preroll, tempo phase, start/stop,
+seek and independent divisions are covered.
+
+Event ordering, source-specific release/removal, duplicate identities, invalid
+events and both event/held-note capacity failures are covered. A held-note ledger
+overflow also suppresses subsequent attacks until the next valid block. Normal
+clock/event/ownership playback performs zero counted heap allocations. Note IDs
+must remain unique for the lifetime of an owned note; reuse across retired plans
+must be isolated by the future event adapter or a new source identity.
+
+This code is not yet linked to Runtime/Player or the app, and does not claim
+audible sample-accurate playback. Next concrete change: replace the shared Note
+context at explicit event inputs, preserve legacy keyboard fallback on unconnected
+inputs, and split each receiving processor's render at event offsets. Qualify
+release on removal/rerouting/stop before adding the step and arp panels. The app
+binary, rack format and inherited Spectral arp remain at the auditioned 0.0.6 state.

@@ -283,3 +283,15 @@ Proceed with the next implementation milestone: integrate the complete Spectral
 engine into the standalone rack with stereo/state preservation and shared routing
 controls. Retain the sequencer and open-source effects requirements in the plan.
 Build and qualify a usable standalone increment, then commit, push and back it up.
+
+## 37 — Standalone 0.0.6 audition feedback
+
+```text
+all seems to work ok
+```
+
+Record the user's successful general audition of the delivered standalone. This
+does not establish exhaustive preset, performance or Live/VST3 verification.
+Continue the accepted next milestone: shared sample timing and note-event rules,
+then independent sequencer and arp modules. Preserve the working 0.0.6 app while
+qualifying the timing foundation offline.

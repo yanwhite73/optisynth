@@ -61,6 +61,8 @@ The C++17 modular core includes a reviewed, pinned MIT DSP subset under
 retains the legacy name and `.ptch` format for regression comparisons; it renders
 the compatibility engine. `make test-modular asan-modular` checks the new runtime
 and creates short source/starter audio examples under `build/`.
+`make test-timing asan-timing` checks the next clock/event foundation independently;
+it is not yet connected to the app's monophonic keyboard or module routing.
 
 Build the native Apple Silicon app with the existing JUCE 8.0.8 installation:
 

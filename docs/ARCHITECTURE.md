@@ -28,8 +28,11 @@ the editor, automation and agent interface must address the same stable identiti
 
 Requests 33–35 add requirements for independent sequencer/arp models and modular
 delay/reverb. Detailed proposals and evidence: `SEQUENCERS_AND_ARPEGGIATORS.md`
-and `OPEN_SOURCE_DELAY_REVERB.md`. Transport/event interfaces remain proposed;
-0.0.6 implements stereo ports and control-rate parameter assignments:
+and `OPEN_SOURCE_DELAY_REVERB.md`. The local sample clock, grid divisions, bounded
+event buffers and note-ownership ledger now exist in `timing.h/.cpp`, qualified
+offline. They are not yet integrated into the audio runtime or app. The proposed
+runtime connections below remain; 0.0.6 implements stereo ports and control-rate
+parameter assignments:
 
 - Shared transport includes tempo, beat/sample position, meter and discontinuities;
   individual modules retain explicit run/reset and clock-rate policies.

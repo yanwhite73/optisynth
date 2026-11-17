@@ -338,3 +338,35 @@ audio off (PID 20285); prior user instances were preserved. Independent archive:
 165 source files, 1,978,641 bytes. Checksum and every manifest entry verified, then
 restored into a fresh directory successfully. This subsequent delivery receipt is
 recorded in Git after creating the archive. Temporary build/test jobs completed.
+
+## Request 37: successful general audition; timing foundation
+
+Recorded “all seems to work ok” verbatim for the delivered 0.0.6 standalone.
+Keep the qualified app available and begin the already ordered sequencer/arp
+foundation offline. This feedback is not an exhaustive preset/performance test
+or a VST3/Live result. The timing contract and success criteria are documented in
+SEQUENCERS_AND_ARPEGGIATORS before implementation.
+
+Implemented `timing.h/.cpp`: audio-owned sample clock, musical phase and meter,
+explicit discontinuities, independent grid divisions, fixed ordered event blocks
+and source/note ownership. Rechecked VCV timing and VST3 ProcessContext docs;
+neither their code nor a host adapter was adopted. Timing commands are validated,
+release precedes attack, and invalid/overflowing batches clear the affected bus
+instead of losing note-offs. Held-note overflow remains muted until a fresh block.
+
+47 timing/event checks pass normally and under ASan/UBSan on the first run.
+Coverage includes noninteger tempo/loop boundaries, preroll, 3/4 and 7/8, changing
+tempo, stop/resume/seek, independent divisions, exact event agreement across six
+sample groupings, ownership/removal, capacity failures and zero playback allocation.
+Log: `build/timing-qualification.log`. Added `make test-timing` / `asan-timing` and
+included the timing suite in `make test`. Existing audio sources and the app were
+not changed or rebuilt; their older suites need no repeat for this isolated code.
+
+Remaining work is explicit: wire event inputs into Runtime/Player, render up to
+each timestamp, prove release on stop/removal/rerouting, then expose step/control
+sequencer and independent arp modules. No new audible feature is claimed yet.
+
+Independent backup: `../../backups/optisynth/optisynth-source-20261117-205148.tar.gz`
+plus `.sha256`; 168 files, 2,006,332 bytes, archive checksum and every manifest
+entry verified. This later receipt is recorded in Git. No app restart/installation,
+audio device, Live action or third-party dependency was used for this milestone.

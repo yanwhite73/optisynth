@@ -38,6 +38,17 @@ and receipts are in `../build/spectral-ui-review/`; visual findings are in
 `../design-qa.md`. No audio device, Live session or new VST3 was used for checking.
 Final source/binary/test/capture binding: `spectral_build_receipt.json`. All 83
 parent source files and 23 pinned Mutable files remain unchanged.
+Yan reports “all seems to work ok” after trying this delivery (request 37).
+This is successful general standalone audition feedback; no exhaustive preset
+or Live verification is inferred.
+
+The next timing foundation is implemented offline in `src/modular/timing.h/.cpp`:
+shared sample clock, independent grid divisions, ordered bounded note events and
+source-specific held-note ownership. All 47 checks pass normally and under
+ASan/UBSan with zero counted playback allocation. See `SEQUENCERS_AND_ARPEGGIATORS.md`
+and `../build/timing-qualification.log`. It is not yet connected to Runtime/Player;
+no new app build or playable sequencer/arp module is claimed. Next: integrate event
+inputs and rendering at event offsets, then build their contextual module panels.
 
 ## Existing sample-player and contextual-rack features
 
@@ -107,7 +118,7 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 36 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 37 user requests are retained verbatim in `USER_REQUESTS.md`.
 
 Request 36 produced the 0.0.6 whole-Spectral stereo/state and shared-routing
 increment above. It does not complete the subsequent sequencer/effect roadmap.
@@ -116,7 +127,8 @@ Requests 33–34: multiple sequencer models and an independent arp are researche
 `SEQUENCERS_AND_ARPEGGIATORS.md`. Share clock, sample-timestamped note events and
 modulation connections, while step, phrase/generative, Euclidean, addressable and
 evolving-loop models retain distinct state and contextual UI. VCV manuals and
-local Optiseq source/logs inform this design; no sequencer code is added yet.
+local Optiseq source/logs inform this design. The clock/event foundation now passes
+offline checks; sequencer/arp algorithms and app integration remain next.
 
 Request 35: `OPEN_SOURCE_DELAY_REVERB.md` records Clouds/Parasites, 4ms DLD,
 Valley Plateau, CHOW Matrix, Airwindows and DaisySP candidates, published licences,

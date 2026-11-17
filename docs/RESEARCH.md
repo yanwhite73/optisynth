@@ -123,7 +123,8 @@ VCV/Impromptu/Bogaudio/Music Thing documentation with local Optiseq source and
 engineering history. It proposes distinct step, phrase, Euclidean, addressable
 and evolving-loop models sharing clock/events, plus an independent arp. It records
 Optiseq persistence and variation lessons and the existing Spectral arp's timing
-boundary. Research only; event cables and these modules are not implemented.
+boundary. The first-party clock/event foundation is now implemented and tested
+offline; event cables and playable sequencer/arp modules are not yet integrated.
 
 ## Delay and reverb modules
 

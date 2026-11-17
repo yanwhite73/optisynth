@@ -8,7 +8,7 @@ MODFLAGS := -DTEST -Ithird_party/mutable
 MODHEADERS := $(wildcard src/modular/*.h) $(wildcard src/core/*.h) $(wildcard tests/*.h) $(wildcard third_party/mutable/plaits/dsp/oscillator/*.h) $(wildcard third_party/mutable/stmlib/dsp/*.h)
 HEADERS := $(wildcard src/core/*.h) plugin/Source/TypingKeyboard.h $(wildcard tests/*.h)
 
-all: build/partials-render build/test_core build/test_graph build/test_modular
+all: build/partials-render build/test_core build/test_graph build/test_modular build/test_timing
 
 build:
 	mkdir -p build
@@ -19,10 +19,11 @@ build/partials-render: $(CORE) src/cli/render.cpp $(HEADERS) | build
 build/test_core: $(CORE) tests/test_core.cpp $(HEADERS) | build
 	$(CXX) $(CXXFLAGS) -o $@ $(CORE) tests/test_core.cpp
 
-test: build/test_core build/partials-render build/test_graph build/test_modular
+test: build/test_core build/partials-render build/test_graph build/test_modular build/test_timing
 	./build/test_core
 	./build/test_graph
 	./build/test_modular
+	./build/test_timing
 	python3 -I tests/test_importer.py
 	python3 -I tests/test_renderer.py
 
@@ -53,6 +54,18 @@ build/test_modular_asan: $(MODULAR) $(MODHEADERS) tests/test_modular.cpp tests/s
 asan-modular: build/test_modular_asan
 	./build/test_modular_asan
 
+build/test_timing: src/modular/timing.cpp src/modular/timing.h tests/test_timing.cpp | build
+	$(CXX) $(CXXFLAGS) -o $@ src/modular/timing.cpp tests/test_timing.cpp
+
+test-timing: build/test_timing
+	./build/test_timing
+
+build/test_timing_asan: src/modular/timing.cpp src/modular/timing.h tests/test_timing.cpp | build
+	$(CXX) -std=c++17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -o $@ src/modular/timing.cpp tests/test_timing.cpp
+
+asan-timing: build/test_timing_asan
+	./build/test_timing_asan
+
 # Same tests under AddressSanitizer and UndefinedBehaviorSanitizer.
 build/test_core_asan: $(CORE) tests/test_core.cpp $(HEADERS) | build
 	$(CXX) -std=c++17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -o $@ $(CORE) tests/test_core.cpp
@@ -63,4 +76,4 @@ asan: build/test_core_asan
 clean:
 	rm -rf build
 
-.PHONY: all test test-renderer test-graph test-modular asan-modular asan-graph asan clean
+.PHONY: all test test-renderer test-graph test-modular test-timing asan-timing asan-modular asan-graph asan clean
