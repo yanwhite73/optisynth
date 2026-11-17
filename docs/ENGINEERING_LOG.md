@@ -186,3 +186,54 @@ rack. Do not describe the current wrappers as complete VCV/hardware modules.
 Full findings, implementation implications and qualification matrix are in
 `VCV_ARCHITECTURE_LESSONS.md`. No source adoption, benchmark, DSP change or Live
 interaction occurred. Sample work remains queued with these boundaries to define.
+
+## Request 30: sample player and resonator starters — standalone 0.0.5
+
+Implemented first-party bounded RIFF/WAV decoding, immutable shared assets and
+independent playback state per sample module. Runtime receives a prepared bank;
+GraphSpec keeps its existing structure. Only reachable sample references load.
+The app owns one background worker, a replaceable request/result and generation
+tokens. Failed or superseded loads cannot replace the playing patch. Changed
+source files fail cold recall; explicit Load WAV accepts their replacement. An
+explicit reload must not reuse an older asset held by another instance.
+
+Rack v2 stores per-node paths/fingerprints; v1 rack and instrument imports retain
+their sound. PCM/float, mono/stereo and source-rate conversion are supported;
+stereo is averaged to mono. The sample panel exposes file load/drop, waveform,
+pitch/root note, trims, level and held looping. Two built-in generated click
+starters demonstrate excitation and a parallel attack. External WAV files remain
+external; portable collection/stereo/seamless loops/antialias refinement are queued.
+Resource and persistence contracts: `SAMPLE_PLAYER.md`.
+
+120 modular checks pass normally and under AddressSanitizer/UBSan; 28 graph checks
+pass. Native tests cover 18 panels, previous independent/routing/recall paths,
+background loading, loop control, waveform asset, external audio recall, missing/
+changed file preservation, dormant pruning, cancellation and newest-only results.
+Nine captures were inspected, including minimum-size sample and parallel mixer.
+No audio device opened during verification, no Live actions and no VST3 installation.
+The older inherited full-core/importer/renderer suites were not repeated: their
+sources remain unchanged and the modular regression suite covers the changed adapter.
+
+Two corrections found during qualification: float storage of the new slider step
+perturbed existing exact control values; changed the step metadata to double,
+matching JUCE's API, and reran DSP/sanitizer/native tests. Visual QA found a narrow
+string/UTF-8 ellipsis mismatch; used ASCII UI copy, clarified the MIDI root-note
+display and reran native checks/captures. Final review passes in `../design-qa.md`.
+New test log: `../build/sample-qualification.log`; native evidence:
+`../build/ui-review/`; artifact/source binding: `sample_build_receipt.json`.
+
+## Request 31: Pigments/Vital modulation option
+
+Logged the user's wording verbatim and retained their screenshot locally under
+`docs/references/pigments-modulation-user-20261117.png`. Proposed source selection/
+drag-to-control assignment, knob depth indication and matrix overview can share
+stable node/parameter identities with module routing. `CONTEXTUAL_UI.md` records
+the proposal and outstanding scope/rate/scaling contracts. No modulation matrix
+implementation or product-internals claim is made. The sample milestone continued.
+
+Delivery: new 0.0.5 app opened with `--sample-demo` and audio off (PID 85896);
+existing user instance preserved. Signature/version and all 83 original parent
+source hashes plus 23 vendored Mutable files verified. Independent archive created
+and restore-verified: `../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
+with `.sha256`, 157 source files, 1,866,238 uncompressed bytes. This subsequent
+backup receipt is retained in Git. No temporary build/test jobs remain after cleanup.

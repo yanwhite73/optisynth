@@ -54,3 +54,19 @@ before rebuilding the visible rack, avoiding deletion of a widget handling an ev
 
 The sound engine, parameter identities/ranges and patch format are unchanged.
 Visual review evidence and limitations are in `../design-qa.md`.
+# Modulation UI option — request 31, 17 November 2026
+
+Yan supplied a Pigments screenshot and suggested the Pigments/Vital modulation
+matrix style. Consider a persistent coloured source strip, selection/dragging of a
+source onto a parameter, a depth indication around the knob, and a matrix listing
+source, destination, amount and polarity. These are proposed interactions, not
+implemented features or a claim about either product's internals.
+
+Use the same stable module-instance/parameter IDs for direct assignment and the
+matrix. Keep audio paths and module socket connections legible. A shared modulation
+representation should support both views rather than duplicate routing state.
+Expose useful destinations on active modules, consistent with Yan's earlier
+request about saved-preset destinations. Shared versus per-voice sources, smoothing,
+audio-rate modulation and signal scaling still need explicit engine contracts.
+Finish the sample-player milestone first; research the original manuals before
+implementing this interaction. The existing hardware-panel direction remains.

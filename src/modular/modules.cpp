@@ -11,6 +11,10 @@ namespace optisynth {
 const std::vector<Panel>& panels() {
     static const std::vector<Panel> list = [] {
         std::vector<Panel> p{
+            {"sample.player", "Sample player", "WAV one-shot or held loop / stereo files mixed to mono", "source", {
+                {"transpose","Pitch","st",-36,36,0}, {"root_note","Root note","note",0,127,48,false,1},
+                {"start","Start","",0,1,0}, {"end","End","",0,1,1},
+                {"level","Level","",0,1,.8f}, {"loop","Loop while held","",0,1,0,false,1}}},
             {"osc.variable", "VA oscillator", "Original Plaits DSP: triangle / saw / pulse with hard sync", "source", {
                 {"transpose","Pitch","st",-36,36,0}, {"shape","Shape","",0,1,.5f},
                 {"pulse_width","Pulse width","",.01f,.99f,.5f},
@@ -95,7 +99,7 @@ public:
             float target=controls->values[i].load(std::memory_order_relaxed);
             if (!std::isfinite(target)) target=p.initial;
             target=std::clamp(target,p.minimum,p.maximum);
-            values[i] += amount*(target-values[i]);
+            if(p.step>=1)values[i]=std::round(target);else values[i] += amount*(target-values[i]);
         }
     }
     const Panel& definition;
@@ -104,6 +108,34 @@ public:
 float noteFrequency(const AudioBlock& b,float transpose) {
     return std::clamp(440.f*std::exp2((b.note.midi+transpose-69.f)/12.f)/48000.f,8.f/48000,.24f);
 }
+class SamplePlayer final : public Module {
+public:
+    SamplePlayer(const NodeSpec& n,SamplePtr data):Module(n),sample(std::move(data)){
+        if(sample&&(!std::isfinite(sample->rate)||sample->rate<8000||sample->rate>384000||sample->mono.empty()||sample->mono.size()>maximumSampleFrames))throw std::invalid_argument("Invalid prepared sample");
+    }
+    void process(const AudioBlock& b) noexcept override {
+        update(b.frames);std::fill_n(b.outputs[0],b.frames,0.f);if(!sample||sample->mono.empty())return;
+        const auto count=sample->mono.size();
+        if(b.note.trigger){
+            auto trim=[&](int i){float v=controls->values[size_t(i)].load();return std::isfinite(v)?std::clamp(v,0.f,1.f):definition.parameters[size_t(i)].initial;};
+            first=size_t(trim(2)*double(count-1));last=std::max(first+1,size_t(std::ceil(trim(3)*double(count))));last=std::min(last,count);
+            position=double(first);age=0;release=1;playing=true;
+        }
+        const bool loop=values[5]>=.5f;const double rate=sample->rate/48000.*std::exp2((b.note.midi-values[1]+values[0])/12.);
+        for(int i=0;i<b.frames&&playing;++i){
+            if(position>=double(last)){if(loop&&b.note.gate)position=first+std::fmod(position-first,double(last-first));else{playing=false;break;}}
+            const auto index=size_t(position),next=std::min(index+1,last-1);const float fraction=float(position-index);
+            float value=sample->mono[index]+fraction*(sample->mono[next]-sample->mono[index]);
+            if(loop&&!b.note.gate){release=std::max(0.f,release-1.f/240);if(release==0){playing=false;break;}}
+            const float edge=std::min(1.f,float((double(last)-position)/std::max(1.,rate*16)));
+            const float attack=std::min(1.f,float(++age)/8.f);
+            b.outputs[0][i]=value*values[4]*std::clamp(b.note.velocity,0.f,1.f)*edge*attack*release;
+            position+=rate;
+        }
+    }
+private:
+    SamplePtr sample;double position=0;size_t first=0,last=0;uint64_t age=0;float release=1;bool playing=false;
+};
 class VariableOsc final : public Module {
 public:
     explicit VariableOsc(const NodeSpec& n):Module(n){osc.Init();}
@@ -223,7 +255,7 @@ public:
 private: int kind_;
 };
 }
-Registry moduleRegistry() {
+Registry moduleRegistry(const SampleBank& samples) {
     Registry r;
     for (const auto& p : panels()) {
         ModuleType type;type.id=p.type;
@@ -234,8 +266,9 @@ Registry moduleRegistry() {
         if (p.family=="filter") type.inputs={{"in",SignalType::Audio,true},{"mod",SignalType::Control,false}};
         if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,true},{"gain",SignalType::Control,true}};
         if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
-        type.create=[id](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
+        type.create=[id,assets=id=="sample.player"?samples:SampleBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
+            if(id=="sample.player"){auto it=assets.find(n.id);return std::make_unique<SamplePlayer>(n,it==assets.end()?SamplePtr{}:it->second);}
             if(id=="modal.voice")return std::make_unique<Modal>(n);
             if(id=="modal.resonator")return std::make_unique<Resonator>(n);
             if(id=="osc.variable")return std::make_unique<VariableOsc>(n);

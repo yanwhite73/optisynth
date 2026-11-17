@@ -97,8 +97,18 @@ the device rate. The rack adds the original variable-shape/sine oscillators, an
 externally excited Plaits resonator and stmlib digital SVF variants. This is the
 library's digital filter, not an analogue Ripples circuit recreation. Review and
 acceptance: [RACK_ROUTING.md](RACK_ROUTING.md). Free-running dust remains disabled.
-Next: sample excitation, more original engines, then granular processing.
+Next: more original engines, then granular processing.
 Continue the same module-specific review before adoption.
+
+Sample excitation is implemented in standalone 0.0.5 with a first-party WAV player.
+[SAMPLE_PLAYER.md](SAMPLE_PLAYER.md) records the inspected RIFF/WAVE specifications,
+file/asset/worker contracts, tests and remaining interpolation/stereo limits.
+
+Request 31 adds Pigments/Vital-style parameter assignment and matrix overview as
+a UI option alongside typed module patching. The user-provided screenshot is stored
+locally as `references/pigments-modulation-user-20261117.png`; design implications
+are in `CONTEXTUAL_UI.md`. Original product manuals and modulation runtime semantics
+still need research before implementation; no product code is adopted.
 
 ## Other open-source digital-module makers
 

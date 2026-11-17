@@ -1,5 +1,6 @@
 #pragma once
 #include "graph.h"
+#include "sample.h"
 #include <array>
 #include <atomic>
 
@@ -9,6 +10,7 @@ struct Parameter {
     std::string id, label, unit;
     float minimum, maximum, initial;
     bool logarithmic = false;
+    double step = .0001;
 };
 struct Panel {
     std::string type, name, description, family;
@@ -31,13 +33,13 @@ public:
     std::shared_ptr<Controls> controls = std::make_shared<Controls>();
     virtual void process(const AudioBlock&) noexcept = 0;
 };
-Registry moduleRegistry();
+Registry moduleRegistry(const SampleBank& samples={});
 
 // Construct and resolve controls on loader/UI only; render has no allocation,
 // ownership changes, locks or string lookup. Mono voice graph at 48 kHz for now.
 class Runtime {
 public:
-    explicit Runtime(const GraphSpec&);
+    explicit Runtime(const GraphSpec&,const SampleBank& samples={});
     void render(float* out, int frames, Note note) noexcept;
     std::shared_ptr<Controls> controls(const std::string& node) const;
     std::size_t activeModules() const { return nodes_.size(); }

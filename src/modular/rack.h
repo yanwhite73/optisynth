@@ -29,6 +29,13 @@ inline void setRackConnection(GraphSpec& g,Endpoint destination,Endpoint source)
     if(!source.node.empty())g.connections.push_back({std::move(source),std::move(destination)});
 }
 inline GraphSpec rackPreset(int which) {
+    if(which==4||which==5){
+        GraphSpec g;g.nodes={{"source","sample.player",{}},{"resonator","modal.resonator",{{"input_gain",.65f}}}};
+        g.connections={{{"source","out"},{"resonator","in"}}};g.outputs={{"resonator","out"}};
+        if(which==5){g.nodes.push_back({"mixer","utility.mix",{{"gain_a",.4f},{"gain_b",.8f}}});
+            g.connections.push_back({{"source","out"},{"mixer","a"}});g.connections.push_back({{"resonator","out"},{"mixer","b"}});g.outputs={{"mixer","out"}};}
+        return g;
+    }
     if(which==1)return instrumentPatch("modal.voice","spectral.ahdsfr","filter.bypass",false,false);
     if(which==2){
         auto g=instrumentPatch("drum.analog","spectral.adsr","mutable.bandpass",false,false);

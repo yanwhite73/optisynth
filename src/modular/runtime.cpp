@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 namespace optisynth {
-Runtime::Runtime(const GraphSpec& spec) : spec_(spec) {
-    auto registry = moduleRegistry();
+Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples) : spec_(spec) {
+    auto registry = moduleRegistry(samples);
     graph_ = prepareGraph(spec, registry, {48000, quantum, Scope::Voice});
     nodes_.resize(graph_.modules.size());
     for (std::size_t i = 0; i < nodes_.size(); ++i) {

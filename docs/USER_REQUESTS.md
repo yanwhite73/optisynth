@@ -202,3 +202,26 @@ and also are modules actually modular as they would be in vcv, and do we want th
 Distinguish current DSP/typed graph modularity from VCV's voltage-patching model.
 Assess the shared note context, modulation ports, polyphony and voice/global scope;
 recommend a modular core with playable voice groups without claiming these exist.
+
+## 30 — Continue implementation
+
+```text
+ok continue
+```
+
+Continue with the next playable milestone: immutable sample assets, background
+loading, a contextual sample player and sample/resonator starter routes. Preserve
+the modular boundaries described in the VCV research; keep broader polyphony and
+event routing as subsequent work.
+
+## 31 — Consider Pigments/Vital modulation UI
+
+```text
+[Image #1] another option to consider is the mod matrix style of pigments or vital
+```
+
+Attached screenshot: Pigments harmonic engine, filter panels, coloured modulation
+source strip and envelope/macros section (Screenshot 2026-11-17 at 18.11.23.png).
+Consider source selection or dragging onto parameters, visible modulation depths,
+and a matrix overview alongside module audio/control connections. This steers
+the modulation design; it does not cancel the sample-player milestone in progress.

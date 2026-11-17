@@ -1,6 +1,9 @@
 #pragma once
 #include "Panel.h"
 #include "PatchIO.h"
+#include "SampleLoader.h"
+#include <chrono>
+#include <fstream>
 
 namespace {
 class RackSynth final : public AudioAppComponent, private Timer,
@@ -16,10 +19,10 @@ public:
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter"};
-        for(i=0;i<4;++i)starter.addItem(names[i],i+1);
+        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator"};
+        for(i=0;i<6;++i)starter.addItem(names[i],i+1);
         starter.setTextWhenNothingSelected("Starter patches");
-        starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit({rackPreset(starter.getSelectedId()-1),document.gain},"source");};
+        starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),"source");};
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
         remove.onClick=[this]{removeSelected();};
         editor.selectionChanged=[this]{
@@ -35,7 +38,7 @@ public:
         audio.onClick=[this]{toggleAudio();};silence.onClick=[this]{stopAudio();};
         gain.setSliderStyle(Slider::LinearHorizontal);gain.setRange(0,1,.001);gain.setValue(document.gain);
         gain.setTextBoxStyle(Slider::TextBoxRight,false,55,24);gain.setColour(Slider::trackColourId,teal);
-        gain.onValueChange=[this]{document.gain=float(gain.getValue());player.gain.store(document.gain);};
+        gain.onValueChange=[this]{cancelLoading();document.gain=float(gain.getValue());player.gain.store(document.gain);};
         keyboard.setAvailableRange(24,96);keyboard.setLowestVisibleKey(24);keyboard.setOctaveForMiddleC(4);keyboard.clearKeyMappings();
         keys.addListener(this);
         routes.setMultiLine(true);routes.setReadOnly(true);routes.setScrollbarsShown(true);
@@ -48,6 +51,7 @@ public:
     ~RackSynth() override {stopTimer();shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);rackView.setViewedComponent(nullptr,false);}
     void prepareToPlay(int,double rate) override {converter.prepare(rate);}
     void releaseResources() override {}
+    void showSampleDemo(){starter.setSelectedId(5,sendNotificationSync);}
     void getNextAudioBlock(const AudioSourceChannelInfo& block) override {
         if(block.buffer->getNumChannels()<1)return;
         converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.numSamples);
@@ -55,7 +59,7 @@ public:
     }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.4",25,53,300,20,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.5",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
         g.setColour(paper);g.setFont(font(12));
         g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
@@ -142,11 +146,49 @@ public:
         setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("hardware-minimum.png");
         commit({rackPreset(0),.25f},"filter");replaceModule("filter","spectral.lowpass");capture("hardware-spectral-minimum.png");
         setSize(1440,940);commit({rackPreset(3),.25f},"second");capture("hardware-two-oscillators.png");
-        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 17 panels fit without overlap; legacy import audio; six native captures. No audio device opened.\n"),"Write UI receipt");
+        auto drain=[&]{const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(10);while(loading&&std::chrono::steady_clock::now()<end){collectSamples();std::this_thread::sleep_for(std::chrono::milliseconds(1));}require(!loading,"Sample worker timed out");};
+        auto sampleAudio=[](const RackDocument& d){Runtime r(d.graph,sampleBank(d));std::vector<float> x(48000);r.render(x.data(),24000,{48,.8f,true,true});r.render(x.data()+24000,24000,{48,.8f,false,false});return x;};
+        require(commit(starterDocument(4,.25f),"source"),"Sample starter queued");drain();
+        require(document.samples.at("source").data&&hardware.find("source")->sample,"Loaded waveform asset");capture("sample-resonator.png");
+        require(commit(starterDocument(5,.25f),"source"),"Parallel starter queued");drain();capture("sample-parallel.png");
+        const File fixture=directory.getChildFile("sample-native-fixture.wav");
+        auto writeFixture=[&](float scale){std::ofstream stream(fixture.getFullPathName().toStdString(),std::ios::binary);require(bool(stream),"Native fixture write");
+            auto u16=[&](uint16_t v){stream.put(char(v&255));stream.put(char(v>>8));};auto u32=[&](uint32_t v){u16(v&65535);u16(v>>16);};
+            auto sample=demoSample();stream.write("RIFF",4);u32(36+uint32_t(sample->mono.size())*2);stream.write("WAVEfmt ",8);u32(16);u16(1);u16(1);u32(48000);u32(96000);u16(2);u16(16);stream.write("data",4);u32(uint32_t(sample->mono.size())*2);for(float f:sample->mono)u16(uint16_t(int16_t(f*scale*32767)));
+        };
+        writeFixture(.7f);auto* samplePanel=hardware.find("source");
+        require(samplePanel->isInterestedInFileDrag({fixture.getFullPathName()})&&!samplePanel->isInterestedInFileDrag({"not-a-wave.txt"}),"WAV drag interest");
+        auto drop=samplePanel->sampleDropped;drop(fixture);drain();
+        require(document.samples.at("source").path==fixture.getFullPathName().toStdString(),"WAV drop callback loading");
+        editor.knobs[5]->toggle.setToggleState(true,dontSendNotification);editor.knobs[5]->toggle.onClick();
+        require(handles.at("source")->values[5].load()==1&&hardware.find("source")->knobs[5]->toggle.getToggleState(),"Loop toggle synchronization");
+        setParameter("source","start",.05f); // saved parameter change; UI callbacks tested above
+        auto sampleSerial=JSON::toString(rackJSON(document));auto before=sampleAudio(document);
+        require(commit(readRack(JSON::parse(sampleSerial)),"source"),"Sample recall queued");drain();
+        require(before==sampleAudio(document)&&JSON::toString(rackJSON(document))==sampleSerial,"External sample recall audio/metadata");
+        setSize(1120,800);capture("sample-minimum.png");
+        writeFixture(.5f);commit(readRack(JSON::parse(sampleSerial)),"source");drain();
+        require(status.getText().contains("changed")&&JSON::toString(rackJSON(document))==sampleSerial,"Changed sample preserves playing patch");
+        auto mixed=document;mixed.graph.nodes.push_back({"another","sample.player",{}});mixed.graph.outputs.push_back({"another","out"});mixed.samples["another"]=document.samples.at("source");
+        mixed.samples["source"]={fixture.getFullPathName().toStdString(),{}, {}};prepareSamples(mixed);
+        require(mixed.samples["source"].fingerprint!=mixed.samples["another"].fingerprint,"Explicit reload cannot reuse another instance's cached audio");
+        auto missing=document;missing.samples["source"]={directory.getChildFile("does-not-exist.wav").getFullPathName().toStdString(),{}, {}};
+        commit(missing,"source");drain();require(status.getText().contains("Cannot open")&&JSON::toString(rackJSON(document))==sampleSerial,"Missing sample preserves playing patch");
+        auto dormant=document;dormant.graph.nodes.push_back({"dormant","sample.player",{}});dormant.samples["dormant"]=missing.samples["source"];
+        require(commit(dormant,"source")&&!loading&&!document.samples["dormant"].data,"Dormant missing file does not load");
+        auto activated=document;activated.graph.outputs={{"dormant","out"}};commit(activated,"dormant");drain();require(document.graph.outputs[0].node!="dormant","Failed activation keeps previous output");
+        commit(missing,"source");setParameter("source","level",.6f);require(!loading,"Editing cancels pending load");
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));collectSamples();require(document.samples.at("source").data!=nullptr,"Cancelled load cannot replace patch");
+        SampleLoader newest;newest.submit(missing,"obsolete");newest.submit(starterDocument(4,.25f),"newest");
+        std::optional<SampleLoader::Result> latest;for(int i=0;i<10000&&!latest;++i){latest=newest.take();std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+        require(latest&&latest->preferred=="newest"&&latest->runtime&&latest->error.empty(),"Only newest worker result published");
+        auto oldRack=rackJSON({rackPreset(0),.25f,{}});oldRack.getDynamicObject()->setProperty("version",1);oldRack.getDynamicObject()->removeProperty("samples");require(render(readRack(oldRack).graph)==render(rackPreset(0)),"Version one rack import unchanged");
+        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 18 panels fit without overlap; legacy instrument and v1 rack audio; background WAV loading; waveform asset; loop toggle; external sample recall audio; missing/changed sample preservation; dormant load pruning; cancellation and newest-result publication; nine native captures. No audio device opened.\n"),"Write UI receipt");
     }
 private:
     struct InputRow { Label label;ComboBox choice;std::vector<Endpoint> ports; };
     Player player;OutputConverter converter;RackDocument document{rackPreset(0),.25f};
+    SampleLoader sampleLoader;bool loading=false;
     Registry registry=moduleRegistry();
     MidiKeyboardState keys;MidiKeyboardComponent keyboard;TypingKeyboard typing;
     ListBox rack;ModulePanel editor{"all"};Values panelValues;
@@ -164,6 +206,7 @@ private:
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
     void setParameter(const std::string& id,const std::string& key,float value) {
+        cancelLoading();
         for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
         if(auto* p=hardware.find(id)){hardware.values[id][p->current][key]=value;p->setValue(key,value);}
         if(editor.instance==id){panelValues[editor.current][key]=value;editor.setValue(key,value);}
@@ -173,7 +216,7 @@ private:
         for(const auto& node:document.graph.nodes){
             auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;
             auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
-            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);
+            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);bindSamplePanel(*p,node.id);
             p->activated=[this,id=node.id]{if(selected!=id)selectNode(id);};
             p->selectionChanged=[this,id=node.id,p]{
                 const auto nextType=p->selected();
@@ -206,15 +249,36 @@ private:
         });
     }
     bool commit(RackDocument next,const std::string& preferred) {
+        cancelLoading();const auto target=preferred;
         try {
-            validateRack(next.graph);auto runtime=std::make_unique<Runtime>(next.graph);
-            std::map<std::string,std::shared_ptr<Controls>> controls;
-            for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
-            const auto target=preferred; // may alias selected, which refresh mutates
-            document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
-            player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
-            refresh(target);message("Ready - select a module to edit");return true;
+            validateRack(next.graph);pruneSampleReferences(next);
+            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;message("Loading sample... current patch stays ready");return true;}
+            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next));install(std::move(next),std::move(runtime),target);return true;
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
+    }
+    void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target) {
+        std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
+        document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
+        player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
+        refresh(target);message("Ready - select a module to edit");
+    }
+    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;message("Pending sample load cancelled by edit");}}
+    void collectSamples(){if(auto r=sampleLoader.take()){
+        loading=false;if(!r->error.empty())message(String("Patch unchanged: ")+r->error,true);
+        else install(std::move(r->document),std::move(r->runtime),r->preferred);
+    }}
+    void loadSample(const std::string& id,const File& file){
+        auto next=document;
+        if(std::none_of(next.graph.nodes.begin(),next.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id&&n.type=="sample.player";}))return;
+        next.samples[id]={file.getFullPathName().toStdString(),{},{}};commit(std::move(next),id);
+    }
+    void bindSamplePanel(ModulePanel& p,const std::string& id){
+        auto it=document.samples.find(id);p.setSample(it==document.samples.end()?"":it->second.path,it==document.samples.end()?SamplePtr{}:it->second.data);
+        p.sampleDropped=[safe=SafePointer<RackSynth>(this),id](const File& f){if(safe)safe->loadSample(id,f);};
+        p.chooseSample=[safe=SafePointer<RackSynth>(this),id]{if(!safe)return;
+            safe->chooser=std::make_unique<FileChooser>("Load WAV (32 MiB maximum)",File::getSpecialLocation(File::userMusicDirectory),"*.wav");
+            safe->chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles,[safe,id](const FileChooser& c){if(safe&&c.getResult()!=File())safe->loadSample(id,c.getResult());});
+        };
     }
     void addModule(const std::string& moduleType) {
         auto next=document;int count=1;std::string id;
@@ -250,6 +314,7 @@ private:
         const auto node=*it;panelValues.clear();for(const auto& p:node.parameters)panelValues[node.type][p.first]=p.second;
         editor.instance=node.id;
         editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});
+        bindSamplePanel(editor,node.id);
         editor.setConnections(document.graph);editor.portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
         hardware.highlight(selected);
         // Persistent rows avoid destroying the ComboBox inside its own onChange.
@@ -283,8 +348,8 @@ private:
         const int flags=writing?FileBrowserComponent::saveMode|FileBrowserComponent::canSelectFiles|FileBrowserComponent::warnAboutOverwriting:FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles;
         chooser->launchAsync(flags,[safe=SafePointer<RackSynth>(this),writing](const FileChooser& c){
             if(!safe)return;auto f=c.getResult();if(f==File())return;
-            try{if(writing){f=f.withFileExtension("optisynth");if(!f.replaceWithText(JSON::toString(rackJSON(safe->document))))throw std::runtime_error("Could not save file");safe->message("Saved "+f.getFileName());}
-                else{if(f.getSize()>2*1024*1024)throw std::runtime_error("Patch file too large");if(safe->commit(readRack(JSON::parse(f)),""))safe->message("Opened "+f.getFileName());}}
+            try{if(writing){f=f.withFileExtension("optisynth");if(!f.replaceWithText(JSON::toString(rackJSON(safe->document))))throw std::runtime_error("Could not save file");safe->message("Saved "+f.getFileName()+(safe->document.samples.empty()?"":" - WAV files remain external"));}
+                else{if(f.getSize()>2*1024*1024)throw std::runtime_error("Patch file too large");if(safe->commit(readRack(JSON::parse(f)),"")&&!safe->loading)safe->message("Opened "+f.getFileName());}}
             catch(const std::exception& e){safe->message(e.what(),true);}
         });
     }
@@ -297,7 +362,7 @@ private:
     void handleNoteOn(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());held.push_back(note);player.note(note,true);}
     void handleNoteOff(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());player.note(held.empty()?note:held.back(),!held.empty());}
     void timerCallback() override {
-        player.collect();
+        player.collect();collectSamples();
         auto* focus=juce::Component::getCurrentlyFocusedComponent();
         bool textEditing=false;for(auto* c=focus;c;c=c->getParentComponent())if(dynamic_cast<TextEditor*>(c)||dynamic_cast<ComboBox*>(c))textEditing=true;
         const auto mods=ModifierKeys::getCurrentModifiersRealtime();

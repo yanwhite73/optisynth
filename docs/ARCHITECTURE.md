@@ -87,7 +87,9 @@ marked as unrouted; routing activates their DSP. The rack now exposes typed inpu
 selectors, multiple instances and an audio output selector. Each node has independent
 parameter values and DSP state; same-algorithm copies do not share knobs.
 
-`RackDocument` persists the full graph as `optisynth.rack` version 1. An explicit
+`RackDocument` persists the full graph as `optisynth.rack` version 2. Version 1
+racks remain readable. Version 2 adds per-node sample paths/fingerprints, while
+immutable decoded assets live outside GraphSpec. An explicit
 import path converts 0.0.2 `optisynth.instrument` patches. All nodes, including
 dormant ones, have their saved parameters validated. A candidate graph is compiled
 and prepared before publication; invalid edits retain the current graph. Only
@@ -101,6 +103,15 @@ atomic mailbox. The callback crossfades old/new plans for 240 internal samples a
 passes the retired pointer back for UI-thread deletion. Rapid UI changes replace
 only an unconsumed pending plan. Scalar changes use atomic values and 5 ms smoothing.
 No shared-pointer reference counting or graph ownership destruction in render.
+
+The sample player receives an immutable bank prepared from reachable references.
+Each player owns its playhead and articulation state. The native app's single
+background loader reads/decodes assets and builds the candidate runtime; generation
+tokens reject superseded requests. UI polling publishes only the current result.
+Routine cached graph edits still prepare on the UI thread, never the audio thread.
+Sample-free graphs keep their existing parameter/schema behaviour. Full contract
+and resource bounds: `SAMPLE_PLAYER.md`. This does not yet add event cables or
+per-voice sample triggering; the current monophonic note context is retained.
 
 Mutable DSP keeps a 48 kHz internal rate; `OutputConverter` uses precomputed
 32-tap/256-phase windowed-sinc coefficients and bounded history. The wrapper adds

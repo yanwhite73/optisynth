@@ -31,7 +31,9 @@ void wav(const std::string& path,const std::vector<float>& x) {
     o.write("data",4);u32(x.size()*2);for(float v:x)u16(uint16_t(int16_t(std::clamp(v*.25f,-.95f,.95f)*32767)));
 }
 }
+#include "sample_checks.h"
 int main(){try {
+    sampleChecks();
     for(int i=0;i<4;++i){auto g=rackPreset(i);validateRack(g);auto x=render(g);check(energy(x)>1e-6,"Rack starter audible");check(x==render(g),"Rack starter deterministic");wav("build/rack-"+std::to_string(i)+".wav",x);}
     for(const auto* source:{"osc.variable","osc.sine"})for(const auto* filter:{"mutable.lowpass","mutable.bandpass","mutable.highpass"}){
         auto g=instrumentPatch(source,"spectral.adsr",filter,true,true);Runtime r(g);

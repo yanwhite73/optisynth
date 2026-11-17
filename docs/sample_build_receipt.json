@@ -1,0 +1,211 @@
+{
+  "created_utc": "2026-11-17T18:27:53.797093+00:00",
+  "version": "0.0.5",
+  "verification": {
+    "modular_checks": 120,
+    "asan_ubsan_checks": 120,
+    "graph_checks": 28,
+    "native_checks": "PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 18 panels fit without overlap; legacy instrument and v1 rack audio; background WAV loading; waveform asset; loop toggle; external sample recall audio; missing/changed sample preservation; dormant load pruning; cancellation and newest-result publication; nine native captures. No audio device opened.",
+    "visual_review": "passed; design-qa.md",
+    "audio_device_opened_by_checks": false,
+    "external_drag_gesture": "handler tested; Finder gesture not automated",
+    "user_audition": "pending",
+    "app_launch": "opened with --sample-demo and audio off",
+    "vst3_built": false,
+    "live_driven": false,
+    "parent_files_unchanged": 83,
+    "mutable_files_verified": 23,
+    "historical_compatibility_checks": "0.0.3 receipt retained; not rerun for unchanged compatibility sources",
+    "benchmark_scope": "existing two-source case only, not a sample/polyphony worst-case claim"
+  },
+  "artifacts": {
+    "Makefile": {
+      "sha256": "6ed6a482366178b3285ff05e3eb2cc66f7307a54d3682a9eb9e8bf631238f1dd",
+      "bytes": 3064
+    },
+    "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth": {
+      "sha256": "b53e796e9c2d069e07576e754d9e7eabaca7a5de52d91cdaddded125aac0987c",
+      "bytes": 4503840
+    },
+    "app/Main.cpp": {
+      "sha256": "6d3c222f71e5fc94ea257f066c5278ab559a100a2196a509e7c727692122211d",
+      "bytes": 1469
+    },
+    "app/OptisynthApp.jucer": {
+      "sha256": "ea867d6ad8ed6445854fc55ca0fb3f217d4c0492dde839f6e7cbff5750ab4511",
+      "bytes": 4154
+    },
+    "app/Panel.h": {
+      "sha256": "d3daa787f7f96bab2150192a8a8c103488804c0b499f33b4684cfb65dc510b0a",
+      "bytes": 19704
+    },
+    "app/PatchIO.h": {
+      "sha256": "7edbdc8e7ebad5ce0ed296574024d69ac68180318c769b4668982ad0fa23ad0d",
+      "bytes": 8947
+    },
+    "app/RackEditor.h": {
+      "sha256": "117c491f8c333fe8b201ba66bff2540bc35a76999c95ecc924a8c532d98f37a3",
+      "bytes": 36416
+    },
+    "app/SampleLoader.h": {
+      "sha256": "a3c7ff41afbc2b4572e617ebe4055bc82a0ff589c7ab8e109dbf9e00760f9264",
+      "bytes": 1842
+    },
+    "build/app-build.log": {
+      "sha256": "c2aa954fd0f9d3b16baa1f49ee0cc1a001b5daaf95a8bc56c8c3a8ce0cb3d4cc",
+      "bytes": 11503
+    },
+    "build/rack-4.wav": {
+      "sha256": "be596677cbf24348b71122af2f46160a5434ce5804799974786aec85385ba6e3",
+      "bytes": 96044
+    },
+    "build/rack-5.wav": {
+      "sha256": "9df078192515f11c02ef612a62c5d2583fc6e66f8179de85cac28e9514a29041",
+      "bytes": 96044
+    },
+    "build/sample-qualification.log": {
+      "sha256": "3be58aa2cce9ac71b41db4584554d8af821562cfca37b4b17cc4afd3c0c0c15f",
+      "bytes": 1323
+    },
+    "build/ui-review/bass-drum.png": {
+      "sha256": "4c8f021e8930f87d52c4a22c3bc361f3ea3fc55097ec941093fba9ad93b49225",
+      "bytes": 125726
+    },
+    "build/ui-review/hardware-filter-focus.png": {
+      "sha256": "13fb565b3f0708236e9802e2591f351a5c11fd977125ccf3581984c393f1411b",
+      "bytes": 116103
+    },
+    "build/ui-review/hardware-minimum.png": {
+      "sha256": "66feaa98e270dccf2cfec072fae3e9a25fd1f0d14dc5a37e317b51261fd572ae",
+      "bytes": 115179
+    },
+    "build/ui-review/hardware-rack.png": {
+      "sha256": "0465bbdb56b16076468639e2975178112e10c7ca989abfca8504b8e10ac2e729",
+      "bytes": 143557
+    },
+    "build/ui-review/hardware-resonator.png": {
+      "sha256": "204db9bf7d805be07cefcf88a06909240be60ce2315bab30fbdf312187921447",
+      "bytes": 176254
+    },
+    "build/ui-review/hardware-spectral-minimum.png": {
+      "sha256": "983f49a7da6d576dee9429cceb40ff3aad26139b2418a9613b0a8c88a0af7634",
+      "bytes": 129479
+    },
+    "build/ui-review/hardware-two-oscillators.png": {
+      "sha256": "351a19281f20fb2701fd5e3180674f2e545442628019e420791c093c2b33fb5d",
+      "bytes": 157240
+    },
+    "build/ui-review/modal-small.png": {
+      "sha256": "2d2842ea778b30a99cc71f893e42e04f791180b738b39d7348553354de36a367",
+      "bytes": 98645
+    },
+    "build/ui-review/modal.png": {
+      "sha256": "556718e3bb9ad3d8b444941032b13b358264ddbf56dec534b314b84ab31f83b1",
+      "bytes": 107298
+    },
+    "build/ui-review/rack-filter.png": {
+      "sha256": "d1bef650ff19d9c92590707226d7dc2ef444f1dc124f9bc184961e583d95e167",
+      "bytes": 130702
+    },
+    "build/ui-review/rack-minimum.png": {
+      "sha256": "c46dc36a62faa98940fd247dfd91d898f7a09dab75a6a068550d66993a19ea29",
+      "bytes": 103148
+    },
+    "build/ui-review/rack-oscillator.png": {
+      "sha256": "cdb15b3e655aafcfcd84c0072293b479eca01bf7770a5f71e1e4cdcd72a947d3",
+      "bytes": 127240
+    },
+    "build/ui-review/rack-resonator.png": {
+      "sha256": "26bde39ed1a88a7bf591a37d6ac7f26cdbce58591bfddbac0847e6b5922ea73f",
+      "bytes": 118325
+    },
+    "build/ui-review/sample-minimum.png": {
+      "sha256": "9940a7b5771a81b16daf7fb58cb2ced139e58aa3b854fb2ffaf42c6f7869bd45",
+      "bytes": 113587
+    },
+    "build/ui-review/sample-parallel.png": {
+      "sha256": "65aabaf7a1ea05075bb00e22ee83857637582c2f2c28eaab3464be8df00ef5ff",
+      "bytes": 127822
+    },
+    "build/ui-review/sample-resonator.png": {
+      "sha256": "225317e922289717ce2bf5ac925099aba4291dfa9727bd090dcd8d4ade04dbca",
+      "bytes": 118911
+    },
+    "build/ui-review/ui-check.txt": {
+      "sha256": "06d28444e82806d5f63131c0a608dbb08148b35745688b9d3dbfc6c3c45e954e",
+      "bytes": 571
+    },
+    "design-qa.md": {
+      "sha256": "da2ad3ef2f36ab68cefa055e5c83389129987b089cb0f4e245e899b40145b090",
+      "bytes": 6264
+    },
+    "docs/SAMPLE_PLAYER.md": {
+      "sha256": "c4b69d3bd3f49ce5e52d6a690f9f14d88c1f04b7fce60e98345f58cecf18bdd6",
+      "bytes": 5698
+    },
+    "src/core/effects.cpp": {
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+      "bytes": 52594
+    },
+    "src/core/envelope.cpp": {
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+      "bytes": 4792
+    },
+    "src/modular/graph.cpp": {
+      "sha256": "a85df6e4365e34a935329cbea5880cc4f4fe57da8c848846703c68fa69c691d4",
+      "bytes": 6052
+    },
+    "src/modular/graph.h": {
+      "sha256": "05c87aad442650bc1865038f367abb697afe6d77dfbdf71a317af011517e5d7e",
+      "bytes": 2518
+    },
+    "src/modular/modules.cpp": {
+      "sha256": "b091e0ee6eee08c6002d13e14e5746009a8f9a4fff2585e8d97321ef6a0b9d89",
+      "bytes": 16579
+    },
+    "src/modular/player.h": {
+      "sha256": "4a41c6fff5973fef80b0fc65c7906c1ef6c4deccb7165a4e3bc5ce965a5de586",
+      "bytes": 4956
+    },
+    "src/modular/rack.h": {
+      "sha256": "7b72fb1d7d7854304a1f98fefdb3141b8dbe13d222b349f25b2fb7bf20d1a93b",
+      "bytes": 3226
+    },
+    "src/modular/runtime.cpp": {
+      "sha256": "0a48dfa5cb4ddf0a7abb5ace34859709726000ae0fb8b52f8dc086e4236425cf",
+      "bytes": 3111
+    },
+    "src/modular/runtime.h": {
+      "sha256": "9f0099bcb7980707d0f8f8cf38d4a981b3d6c4204ccc28661dae9b1bedd70111",
+      "bytes": 2148
+    },
+    "src/modular/sample.cpp": {
+      "sha256": "b3eb3d0fa886a196ade029ae51c88d2942ed24a72e05528a3a180d818d6891bc",
+      "bytes": 5198
+    },
+    "src/modular/sample.h": {
+      "sha256": "3cf21bb6be180c1fee9d32620c8be147cb68696b6db73e2a846bd3219a4722c4",
+      "bytes": 909
+    },
+    "tests/sample_checks.h": {
+      "sha256": "b1a4b6084f2d0aad7bd4c18a84a8d5ca9afe0a2e9680f8ddc610bc3e7fe2404a",
+      "bytes": 6894
+    },
+    "tests/test_modular.cpp": {
+      "sha256": "8b4ecbd701f077671093a6f81410464ab36854d32564ca0bba8913a769ba756b",
+      "bytes": 8956
+    },
+    "third_party/mutable/PROVENANCE.json": {
+      "sha256": "c8dd59c648e948c253c4f817abdd8933a7363d95806a4019e352a4c8056b8a4c",
+      "bytes": 3599
+    },
+    "tools/backup_source.py": {
+      "sha256": "82fe913d37afb1a05f4339e9d03df8174cd307f8e7d9e8b6a9503b85b78a8994",
+      "bytes": 5372
+    },
+    "tools/make_app_project.py": {
+      "sha256": "da3b5ece29a5357d14089e3442a3637940fefa5eb3d24a84f8c3804f14852da0",
+      "bytes": 2189
+    }
+  }
+}

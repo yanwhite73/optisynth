@@ -1,4 +1,4 @@
-# Contextual rack UI review — 0.0.4
+# Contextual rack UI review — 0.0.5 (retaining the 0.0.4 review)
 
 Source visual truth: `docs/references/matriarch-panel.jpg` (1920×1920 photograph),
 plus `docs/references/mutable_review/plaits-panel.png` (324×604 manual panel).
@@ -72,5 +72,30 @@ equality is claimed. Native release log has no build errors; browser console N/A
 
 Follow-up polish (P3): richer knob surface shading and cable overlays. These are
 not required for the functional contextual-panel milestone.
+
+## Sample-player extension — 0.0.5
+
+Compared Matriarch reference, new sample/resonator normal view and 1120x800 sample
+view together. Gold sample panel retains the established muted hardware palette;
+top output socket, file/loop row, filename, waveform, three main controls and trim
+faders have separate readable areas. The parallel mixer view follows the same
+panel hierarchy. All 18 panels pass minimum-size bounds and overlap checks.
+
+First visual pass found P2 garbled ellipsis text on Load WAV (UTF-8 bytes passed to
+a narrow JUCE string constructor). Replaced new narrow UI literals with ASCII and
+clarified root-note value as MIDI. Rebuilt and reran native checks; final sample
+minimum, parallel and original VA rack captures were opened together. Button copy
+is readable, loop state is visible, controls/values remain separate and the original
+rack is preserved. No actionable P0/P1/P2 remains.
+
+New captures: `build/ui-review/sample-resonator.png`, `sample-parallel.png` at
+1440x940; `sample-minimum.png` at 1120x800. The latter shows a loaded external WAV,
+nonzero start trim and held looping. Six previous captures are regenerated too.
+Native checks additionally cover loaded waveform ownership, loop/focus sync,
+external WAV recall audio, failed-load preservation and background cancellation.
+No audio device was opened. Actual Finder dragging and audio audition are pending.
+
+Request 31's Pigments/Vital suggestion is a future modulation interaction option;
+this review does not claim that a modulation matrix has been implemented.
 
 final result: passed

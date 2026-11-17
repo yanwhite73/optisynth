@@ -3,7 +3,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 CORE := src/core/spectrum.cpp src/core/table_bank.cpp src/core/envelope.cpp src/core/patch.cpp src/core/engine.cpp src/core/effects.cpp src/core/arp.cpp
 MUTABLE := third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc third_party/mutable/plaits/dsp/physical_modelling/resonator.cc third_party/mutable/plaits/resources_selected.cc third_party/mutable/stmlib/dsp/units.cc third_party/mutable/stmlib/utils/random.cc
-MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/core/envelope.cpp src/core/effects.cpp $(MUTABLE)
+MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/modular/sample.cpp src/core/envelope.cpp src/core/effects.cpp $(MUTABLE)
 MODFLAGS := -DTEST -Ithird_party/mutable
 MODHEADERS := $(wildcard src/modular/*.h) $(wildcard third_party/mutable/plaits/dsp/oscillator/*.h) $(wildcard third_party/mutable/stmlib/dsp/*.h)
 HEADERS := $(wildcard src/core/*.h) plugin/Source/TypingKeyboard.h $(wildcard tests/*.h)
@@ -41,13 +41,13 @@ build/test_graph_asan: src/modular/graph.cpp src/modular/graph.h tests/test_grap
 asan-graph: build/test_graph_asan
 	./build/test_graph_asan
 
-build/test_modular: $(MODULAR) $(MODHEADERS) tests/test_modular.cpp | build
+build/test_modular: $(MODULAR) $(MODHEADERS) tests/test_modular.cpp tests/sample_checks.h | build
 	$(CXX) $(CXXFLAGS) $(MODFLAGS) -o $@ $(MODULAR) tests/test_modular.cpp
 
 test-modular: build/test_modular
 	./build/test_modular
 
-build/test_modular_asan: $(MODULAR) $(MODHEADERS) tests/test_modular.cpp | build
+build/test_modular_asan: $(MODULAR) $(MODHEADERS) tests/test_modular.cpp tests/sample_checks.h | build
 	$(CXX) -std=c++17 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer $(MODFLAGS) -o $@ $(MODULAR) tests/test_modular.cpp
 
 asan-modular: build/test_modular_asan

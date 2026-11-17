@@ -15,6 +15,7 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Research, manuals, schematics and source references](docs/RESEARCH.md)
 - [Other open-source module makers](docs/OPEN_SOURCE_MODULE_MAKERS.md)
 - [Contextual rack interface](docs/CONTEXTUAL_UI.md)
+- [Sample player and asset loading](docs/SAMPLE_PLAYER.md)
 - [Source snapshot provenance](docs/source_snapshot_20261117.json)
 
 ## Current implementation
@@ -22,7 +23,8 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
 modal percussion, externally excited resonator and bass-drum DSP, plus Mutable's
 digital SVF filters. Spectral AHDSFR/ADSR envelopes and LP/HP/BP/notch filters remain
-interchangeable options. There are 17 module types, including mixer and VCA.
+interchangeable options. There are 18 module types, including a WAV sample player,
+mixer and VCA.
 Only output-reachable modules are constructed. Audio/control buffers and numeric
 bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
 the core also accepts multiple sources and an explicit mixer.
@@ -34,8 +36,9 @@ It supports Caps Lock typing notes, a piano keyboard, patch save/open,
 typed input routing and device-rate conversion around the 48 kHz DSP core.
 Add independent module instances, connect their audio/control ports, select the
 output and save the complete rack. Older instrument patches import automatically.
-This first voice is monophonic; polyphony, samples/granular engines, hardware MIDI
-and an agent API remain upcoming. Excitation currently comes from another module.
+This first voice is monophonic; polyphony, granular engines, hardware MIDI
+and an agent API remain upcoming. Samples can excite a resonator or form its
+parallel attack layer. Their decoded assets are shared; playheads are independent.
 The inherited Spectral engine remains a separate compatibility reference.
 
 ## Offline development
@@ -60,7 +63,7 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the four starter patches; edit their panels directly or select a panel
+octave. Try the six starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a
@@ -68,6 +71,14 @@ Mixer to combine audio and a VCA with an envelope to articulate continuous sourc
 Required inputs must be connected before a module can become part of the audible
 output. Unrouted modules remain editable without consuming DSP. Patches use
 `.optisynth` JSON files. No audio input or hardware MIDI port is opened.
+
+Choose **Sample into resonator** or **Sample attack + resonator** for built-in
+examples. **Load WAV…** or drop a WAV onto the sample panel, then adjust pitch,
+root note, start/end and level. **Loop while held** repeats until note release.
+WAVs are loaded in the background, only for connected modules. Mono/stereo PCM or
+float is supported up to 32 MiB per file; stereo is mixed to mono. Saved patches
+refer to the original files, so keep those files in place. Missing/changed files
+leave the playing patch intact. See the sample document for remaining limits.
 
 `plugin/Optisynth.jucer` has a separate product/bundle/plugin identity and disables
 automatic installation. It still wraps the compatibility engine; no new VST3 has

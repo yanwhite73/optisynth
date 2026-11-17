@@ -12,6 +12,7 @@ const Colour ink(0xff202224), paper(0xffe8e5d8), teal(0xff86b9c7), orange(0xffd7
 Font font(float size) { return Font(FontOptions(size)); }
 using Values=std::map<std::string,std::map<std::string,float>>;
 Colour panelColour(const std::string& id) {
+    if(id=="sample.player")return Colour(0xffd7ca96);
     if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
     if(id=="drum.analog")return Colour(0xffd7b282);
     if(id.rfind("osc.",0)==0)return Colour(0xff8ebecb);
@@ -20,6 +21,7 @@ Colour panelColour(const std::string& id) {
 }
 Colour panelInk(const std::string& id) {return panelColour(id).getBrightness()>.6f?ink:paper;}
 int panelWidth(const std::string& id) {
+    if(id=="sample.player")return 340;
     if(id=="spectral.ahdsfr")return 330;
     if(id.rfind("spectral.",0)==0&&panel(id).family=="filter")return 290;
     if(id=="utility.vca"||id=="filter.bypass")return 155;
@@ -55,24 +57,32 @@ struct KnobLook : LookAndFeel_V4 {
     }
 };
 struct Control : juce::Component {
-    Label label;Slider slider;
+    Label label;Slider slider;ToggleButton toggle;bool isSwitch=false;
     Control(const Parameter& p,float value,std::function<void(float)> changed,KnobLook& look,Colour text,bool fader=false,bool compactTrim=false) {
         label.setText(String(p.label).toUpperCase(),dontSendNotification);label.setFont(font(11));label.setColour(Label::textColourId,text);label.setJustificationType(Justification::centred);
-        const bool trim=compactTrim||p.id.find("_curve")!=std::string::npos||p.id=="fade"||p.id=="mod_rate_hz"||p.id=="mod_depth";
+        const bool trim=compactTrim||p.id.find("_curve")!=std::string::npos||p.id=="fade"||p.id=="mod_rate_hz"||p.id=="mod_depth"||p.id=="start"||p.id=="end";
         slider.setSliderStyle(fader?Slider::LinearVertical:trim?Slider::LinearHorizontal:Slider::RotaryHorizontalVerticalDrag);
         slider.setTextBoxStyle(Slider::TextBoxBelow,false,88,20);
         slider.setColour(Slider::textBoxTextColourId,text);slider.setColour(Slider::textBoxBackgroundColourId,Colours::transparentBlack);
         slider.setColour(Slider::textBoxOutlineColourId,Colours::transparentBlack);slider.setColour(Slider::trackColourId,teal);
         slider.setColour(Slider::thumbColourId,paper);slider.setColour(Slider::backgroundColourId,Colour(0xff151718));
-        slider.setRange(p.minimum,p.maximum,.0001);
+        slider.setRange(p.minimum,p.maximum,p.step);
         if(p.logarithmic)slider.setSkewFactorFromMidPoint(p.minimum>0?std::sqrt(p.minimum*p.maximum):.3);
-        slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.unit=="Hz"?1:p.unit=="st"?2:3);
+        slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.step>=1?0:p.unit=="Hz"?1:p.unit=="st"?2:3);
+        if(p.id=="root_note")slider.setTextValueSuffix(" MIDI");
         slider.setValue(value,dontSendNotification);slider.setDoubleClickReturnValue(true,p.initial);
         slider.setTooltip(p.label+" / double-click to reset");slider.setLookAndFeel(&look);
-        slider.onValueChange=[this,changed]{changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
+        slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
+        if(p.id=="loop"){
+            isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText("Loop while held");
+            toggle.setColour(ToggleButton::textColourId,text);toggle.setColour(ToggleButton::tickColourId,text);toggle.setColour(ToggleButton::tickDisabledColourId,text.withAlpha(.5f));
+            toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
+        }
     }
+    void setValue(float v){slider.setValue(v,dontSendNotification);toggle.setToggleState(v>=.5f,dontSendNotification);}
     ~Control() override {slider.setLookAndFeel(nullptr);}
     void resized() override {
+        if(isSwitch){toggle.setBounds(getLocalBounds());return;}
         const bool compact=slider.isRotary()&&getHeight()<90&&getWidth()>=105;
         const auto position=compact?Slider::TextBoxRight:Slider::TextBoxBelow;
         if(slider.getTextBoxPosition()!=position)slider.setTextBoxStyle(position,false,compact?64:88,20);
@@ -91,24 +101,39 @@ struct Jack : Button {
         if(output){g.setColour(text.withAlpha(.6f));g.drawLine(cx-10,48,cx+10,48,1);}
     }
 };
-struct ModulePanel : juce::Component {
+struct ModulePanel : juce::Component, FileDragAndDropTarget {
     ComboBox choice;KnobLook look;std::vector<std::unique_ptr<Control>> knobs;
     std::vector<std::unique_ptr<Jack>> jacks;std::vector<std::string> types;
     std::string current,family,instance;bool routed=true,highlighted=false;
     std::function<void()> selectionChanged,activated;
     std::function<void(const Port&,bool,juce::Component*)> portClicked;
+    TextButton sampleButton{"Load WAV..."};Label sampleName;SamplePtr sample;std::string samplePath;
+    std::function<void()> chooseSample;std::function<void(const File&)> sampleDropped;
     ModulePanel(std::string group):family(std::move(group)) {
         choice.setColour(ComboBox::backgroundColourId,Colour(0xff232527));choice.setColour(ComboBox::textColourId,paper);
         choice.setColour(ComboBox::outlineColourId,Colours::transparentBlack);
         for(const auto& p:panels())if(family=="all"||p.family==family){types.push_back(p.type);choice.addItem(p.name,int(types.size()));}
         addAndMakeVisible(choice);choice.onChange=[this]{if(selectionChanged)selectionChanged();};addMouseListener(this,true);
+        addChildComponent(sampleButton);addChildComponent(sampleName);sampleButton.onClick=[this]{if(chooseSample)chooseSample();};
+        sampleName.setFont(font(11));sampleName.setColour(Label::textColourId,ink);
     }
     ~ModulePanel() override {removeMouseListener(this);}
     void mouseDown(const MouseEvent&) override {if(activated)activated();}
+    bool isInterestedInFileDrag(const StringArray& files) override {return current=="sample.player"&&files.size()==1&&files[0].endsWithIgnoreCase(".wav");}
+    void filesDropped(const StringArray& files,int,int) override {
+        if(!isInterestedInFileDrag(files))return;
+        // Loading can replace this panel. Dispatch after the drag callback returns.
+        auto callback=sampleDropped;auto file=File(files[0]);MessageManager::callAsync([safe=SafePointer<ModulePanel>(this),callback,file]{if(safe&&callback)callback(file);});
+    }
+    void setSample(const std::string& path,SamplePtr data){samplePath=path;sample=std::move(data);
+        const String name=path.empty()?"Drop a WAV here":path=="builtin:click"?"Built-in percussive click":File(String(path)).getFileName();
+        sampleName.setText(name,dontSendNotification);sampleName.setTooltip(String(path)+(sample?"\n"+String(sample->mono.size()/sample->rate,2)+" s / "+String(sample->sourceChannels)+" channel(s) to mono\nWAV files stay external to the saved patch.":"\nSample loads when this module is connected."));repaint();
+    }
     std::string selected() const {int i=choice.getSelectedId()-1;return i>=0&&i<int(types.size())?types[size_t(i)]:types.front();}
     void select(const std::string& type) {auto it=std::find(types.begin(),types.end(),type);if(it==types.end())throw std::invalid_argument("Wrong module family: "+type);choice.setSelectedId(int(it-types.begin())+1,dontSendNotification);}
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
         current=type;family=panel(type).family;routed=bool(controls);select(type);knobs.clear();jacks.clear();look.markings=panelInk(type);
+        sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
             auto knob=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),(family=="envelope"&&p.id=="sustain")||type=="utility.mix",family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
@@ -126,13 +151,21 @@ struct ModulePanel : juce::Component {
             if(j->output)for(const auto& e:graph.outputs)if(e.node==instance&&e.port==j->port.id){j->connected=true;links+="\nInstrument output";}
             j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+"\nClick to patch");j->repaint();}
     }
-    void setValue(const std::string& id,float value){const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->slider.setValue(value,dontSendNotification);}
+    void setValue(const std::string& id,float value){const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setValue(value);if(current=="sample.player")repaint();}
     void paint(Graphics& g) override {
         if(current.empty())return;auto r=getLocalBounds().toFloat();const auto text=panelInk(current);
         g.setColour(panelColour(current));g.fillRoundedRectangle(r,3);g.setColour(highlighted?Colour(0xfff0c76c):text.withAlpha(.6f));g.drawRoundedRectangle(r.reduced(1),3,highlighted?2:1);
         g.setFont(font(10));g.setColour(text);g.drawText(String(instance).toUpperCase()+"  /  "+String(family).toUpperCase(),12,10,getWidth()-24,18,Justification::centredLeft);
         g.setColour(routed?Colour(0xffcbe0a8):Colour(0xff7b7b70));g.fillEllipse(float(getWidth()-19),14,6,6);
         g.setColour(text.withAlpha(.35f));g.drawLine(12,135,float(getWidth()-12),135,.7f);
+        if(current=="sample.player"){
+            auto wave=Rectangle<float>(16,204,float(getWidth()-32),40);g.setColour(ink);g.fillRoundedRectangle(wave,2);
+            if(sample){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());
+                g.setColour(Colour(0xffd7ca96).withAlpha(.18f));g.fillRect(wave.withX(wave.getX()+start*wave.getWidth()).withWidth(std::max(0.f,end-start)*wave.getWidth()));
+                g.setColour(Colour(0xffd7ca96));for(size_t i=0;i<sample->peaks.size();++i){float x=wave.getX()+(i+.5f)*wave.getWidth()/128,amplitude=std::min(1.f,sample->peaks[i])*18;g.drawLine(x,224-amplitude,x,224+amplitude,1);}
+                g.setColour(teal);g.drawVerticalLine(int(wave.getX()+start*wave.getWidth()),204,244);g.drawVerticalLine(int(wave.getX()+end*wave.getWidth()),204,244);
+            }else{g.setColour(paper.withAlpha(.6f));g.setFont(font(11));g.drawText(samplePath.empty()?"LOAD OR DROP A WAV":"CONNECT TO LOAD SAMPLE",wave,Justification::centred);}
+        }
         if(knobs.empty()){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
         g.setColour(text.withAlpha(.8f));g.setFont(font(10));g.drawFittedText(routed?panel(current).description:"UNROUTED / connect to activate",12,getHeight()-37,getWidth()-24,29,Justification::centred,2);
     }
@@ -142,7 +175,15 @@ struct ModulePanel : juce::Component {
         if(current.empty())return;
         const auto& ps=panel(current).parameters;const float w=float(getWidth()-24),h=float(std::max(220,getHeight()-190));
         auto put=[&](const char* id,float x,float y,float width,float height){for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setBounds(12+int(x*w),147+int(y*h),int(width*w),int(height*h));};
-        if(current=="spectral.adsr"){
+        if(current=="sample.player"){
+            sampleButton.setBounds(16,147,int(w*.48f),28);sampleName.setBounds(12,178,getWidth()-24,23);
+            const int row=std::max(80,int((getHeight()-291)*.62f));
+            for(size_t i=0;i<ps.size();++i){const auto& id=ps[i].id;
+                if(id=="loop")knobs[i]->setBounds(12+int(w*.51f),147,int(w*.49f),28);
+                else if(id=="start"||id=="end")knobs[i]->setBounds(12+(id=="end"?int(w*.5f):0),252+row,int(w*.5f),getHeight()-289-row);
+                else {int col=id=="transpose"?0:id=="root_note"?1:2;knobs[i]->setBounds(12+int(col*w/3),252,int(w/3),row);}
+            }
+        }else if(current=="spectral.adsr"){
             put("attack",0,0,.5f,.33f);put("decay",0,.33f,.5f,.33f);put("release",0,.66f,.5f,.33f);put("sustain",.55f,0,.4f,.99f);
         }else if(current=="spectral.ahdsfr"){
             put("attack",0,0,.34f,.39f);put("hold",.34f,0,.34f,.39f);put("decay",0,.40f,.34f,.39f);put("release",.34f,.40f,.34f,.39f);

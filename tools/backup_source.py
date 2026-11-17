@@ -24,7 +24,7 @@ FILES = (
     'optisynth/plugin/Optisynth.jucer', 'optisynth/plugin/Tests/StressTest.jucer',
     'optisynth/plugin/Tests/StressTest.cpp', 'optisynth/plugin/Tests/PresetExport.h',
     'optisynth/app/Main.cpp', 'optisynth/app/OptisynthApp.jucer',
-    'optisynth/app/Panel.h', 'optisynth/app/PatchIO.h', 'optisynth/app/RackEditor.h',
+    'optisynth/app/Panel.h', 'optisynth/app/PatchIO.h', 'optisynth/app/RackEditor.h', 'optisynth/app/SampleLoader.h',
     'optisynth/third_party/mutable/LICENSE-stmlib',
 )
 SUFFIXES = {'.h', '.cpp', '.cc', '.py', '.sh', '.md', '.json', '.optisynth'}

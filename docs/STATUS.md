@@ -1,57 +1,61 @@
 # Optisynth status — 17 November 2026
 
-## Current delivery: contextual hardware rack, standalone 0.0.4
+## Current delivery: sample player and contextual rack, standalone 0.0.5
 
-The app now exposes **17 module types** in a rack with multiple independent
+The app now exposes **18 module types** in a rack with multiple independent
 instances, contextual controls, typed input connections and output selection.
 Original Plaits VA/sine oscillators, modal percussion, bass drum and an externally
 excited resonator are available, together with original stmlib digital LP/BP/HP
 filters. These filters are the digital library algorithm, not a Ripples circuit
 emulation. Spectral ADSR/AHDSFR, Spectral LP/HP/BP/notch, bypass, VCA and mixer remain.
 
-Four starter patches: VA + digital filter, modal percussion, drum into resonator,
-and two differently tuned oscillators sharing a filter/envelope. Mixer inputs have
+Six starter patches: VA + digital filter, modal percussion, drum into resonator,
+two differently tuned oscillators sharing a filter/envelope, sample into resonator,
+and sample attack mixed alongside the resonator. Mixer inputs have
 independent level controls. All loaded panels appear side by side, with blue
 oscillators, green filters, dark envelopes/utilities and purple resonators. Module
 type determines the knob/fader arrangement. Click sockets to patch; hover to see
 connections. Focus module opens the enlarged panel and connection list.
 Only reachable modules are constructed; dormant nodes keep editable parameter state.
+The sample player has a gold panel, waveform, pitch/root note, start/end trim, level
+and held looping. Load WAV or drop a file onto the panel. Both sample starters use
+an original built-in click, so they work without external files.
 
 App: `../app/Builds/MacOSX/build/Release/Optisynth.app`, Apple Silicon,
-version 0.0.4, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
+version 0.0.5, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
 piano or Caps Lock typing keyboard (A/W/S/E/D/F..., Z/X octave). Silence stops the
 output device. Pitch/octave labels are consistent across the piano and typing help.
 No microphone, hardware MIDI or network listener is opened by this app.
 
 Full `.optisynth` rack JSON preserves node IDs, separate instance parameters,
-connections, outputs and gain. Old 0.0.2 instrument patches import with the same
+connections, outputs and gain. Rack v2 adds absolute sample paths/fingerprints;
+WAV files remain external. v1 racks and old 0.0.2 instrument patches import with the same
 active sound. Invalid connections, cycles, controls and malformed files are rejected
 before replacing the graph. Required inputs may be incomplete only on dormant nodes;
 reroute downstream destinations/output before removing an active dependency.
 
 ## Verification
 
-- Native 0.0.4 release build succeeds. At 0.0.3, 1,194 inherited core checks, 28 graph checks,
-  74 modular checks, four importer checks and one renderer timing check pass.
-- All 74 modular checks also passed under AddressSanitizer/UBSan at 0.0.3. Coverage:
-  oscillator/filter/resonator extremes, no render allocation, independent same-type
-  instances, dormant nodes, audio-only roots, filter response and hard sync.
-- Existing sample-rate conversion checks cover 44.1/48/96/192 kHz, finite bounded
-  output, plan crossfades and no allocation in the tested core render paths.
-- Native UI checks: independent knob bindings, graph JSON and byte-identical audio
-  recall, failed-edit preservation, dormant add/remove, typed disconnect/reconnect,
-  and byte-identical old-format import. At 0.0.4 these checks were rerun, with new
-  rack/focus synchronization, socket action/indicator/tooltip, contextual replacement
-  and all-17-panel bounds/overlap checks. No audio device was opened for these checks.
-- Six native captures cover rack/focus, resonator, two oscillators/mixer and two
-  1120x800 layouts. Cramped controls were corrected and the final visual review passes:
-  `../design-qa.md`. Receipt: `hardware_ui_build_receipt.json`. The earlier DSP
-  receipt remains `rack_build_receipt.json`; its sound-engine sources are unchanged.
-- DSP qualification: `../build/modular-qualification.log`; native receipt and PNGs:
-  `../build/ui-review/`. Importer ResourceWarnings are inherited file-handle warnings.
-- Core benchmark remains the existing two-source case: 104.17 s of audio in
-  0.506 s (~0.49% of one core), excluding device converter/UI. This is regression
-  evidence, not a worst-case rack deadline or a new optimisation claim.
+- 120 modular checks pass, including WAV decoding, sample pitch/rate/trim, looping,
+  release/retrigger, independent playheads, deterministic sample/resonator starters,
+  old DSP paths and no render allocation. All 120 also pass under ASan/UBSan.
+  The 28 graph checks pass. Log: `../build/sample-qualification.log`.
+- Native 0.0.5 build and functional checks pass: all 18 panels fit without overlaps;
+  controls remain independent; v1 rack/instrument and v2 sample recall preserve
+  audio. Background loading, stale-result rejection, cancellation, dormant-file
+  pruning and missing/changed-file preservation are exercised. Explicit reload
+  cannot reuse a different instance's old cached audio.
+- Nine native captures cover the six previous surfaces plus sample/resonator,
+  parallel attack/mixer and the sample panel at 1120x800. Final text-only build,
+  native recheck and visual review pass; see `../design-qa.md`.
+- No audio device is opened by automated verification. Finder-driven dragging and
+  physical keyboard/audio audition remain user checks; handler paths are covered.
+- At 0.0.3, 1,194 inherited core checks, four importer checks and one renderer timing
+  check passed. Those unchanged compatibility-engine tests were not repeated here.
+  Historical receipts: `rack_build_receipt.json`, `hardware_ui_build_receipt.json`.
+- Existing converter coverage includes 44.1/48/96/192 kHz and plan crossfades. The
+  benchmark in the modular log still measures the older two-source graph; it is
+  not a sample/polyphony worst-case CPU claim. Load varied during this run.
 
 Yan auditioned 0.0.2 and reported nice tones, then confirmed the Mutable examples
 in 0.0.3 all seem to work (request 25). Yan approved the 0.0.4 UI direction with
@@ -64,7 +68,18 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 29 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 31 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Request 30: sample player, immutable reachable assets, background loading,
+contextual waveform panel and both sample/resonator starters are implemented.
+Mechanism, format/resource bounds and acceptance are in `SAMPLE_PLAYER.md`.
+Build/source receipt: `sample_build_receipt.json`; user audition is pending.
+
+Request 31: Pigments/Vital modulation assignment and a matrix overview are logged
+as a UI option alongside module connections. User screenshot is retained locally;
+`CONTEXTUAL_UI.md` records source selection/drag, knob depth indications and one
+shared assignment representation. Research original manuals and define modulation
+scope/rates before implementing. This did not cancel sample work.
 
 Requests 28–29: VCV performance lessons and the right degree of modularity are
 researched in `VCV_ARCHITECTURE_LESSONS.md`. Current audio/control modules are
@@ -72,17 +87,18 @@ independent, but note/gate context is shared, most parameters lack modulation
 ports, filter modulation is block-rate, and event cables/polyphony/global scope/
 feedback remain unimplemented. Recommend playable voice groups over an editable
 modular graph. Define these interfaces before extending sample/polyphony ownership;
-retain sample playback as the next playable milestone. No runtime changed here.
+the sample slice retains the current shared Note context. The VCV research itself
+introduced no runtime changes.
 
 Request 27 asks whether to use direct module/cable manipulation, preset routing or
 both. Recommendation: both on the same saved graph; prewired editable templates,
 drag patching with optional cable visibility, and undoable edits. Proposed behaviour
 and acceptance are in `ARCHITECTURE.md`. No runtime change for this design question;
-sample playback remains queued, with this interaction sequence recorded alongside it.
+this interaction sequence remains queued alongside bounded polyphony/modulation work.
 
 Request 25 is implemented: Matriarch-inspired native rack with familiar,
 module-specific panels. References and behaviour are in `CONTEXTUAL_UI.md`.
-DSP/patch format remain unchanged; sample playback is next.
+The sample module extends that approved visual direction.
 
 Requests 23–24: continue implementation across side-note requests. The current
 Mutable rack was opened and auditioned successfully; this standing continuity
@@ -93,19 +109,23 @@ controller or eventual hardware host for Optisynth. Both roles are recorded in
 `RESEARCH.md`; integration and hosting feasibility remain unverified. The current
 module/sample/polyphony development order continues.
 
-Next action: define immutable sample assets and loader/patch persistence, then
-implement a sample player that can feed the resonator or mix an attack alongside it,
-then bounded polyphony and an explicit voice/global boundary for shared effects.
-Further Mutable engines, granular playback and additional envelope/modulator
-options follow. Preserve the current typed graph and stable parameter identities.
-Hardware MIDI, audio-rate parameter modulation, event cables, drag-cable interaction,
-agent API and a modular VST3 wrapper are still pending. This is a monophonic rack;
-all modules receive the same note context. Hardware audio input is not implemented.
+Next action: define bounded polyphony and the voice/global boundary, with explicit
+modulation source/destination identity, rate and scaling contracts. Use the
+Pigments/Vital UI suggestion when designing parameter assignment; retain editable
+module graphs and preset templates. More Mutable engines, granular playback,
+envelope/modulator options and undo/direct-cable editing remain queued.
+Hardware MIDI, audio-rate parameter modulation, event cables, agent API and a
+modular VST3 wrapper are pending. This is a monophonic rack; all modules receive
+the same note context. Hardware audio input is not implemented.
 
-Source adapters currently target fixed 48 kHz / 24-sample blocks. The bounded output
-converter handles other device rates. Structural edits prepare on the UI thread
-and crossfade between plans; scalar edits use resolved atomics. Expensive future
-sample preparation should move to a dedicated loader before adding large assets.
+Source adapters target fixed 48 kHz / 24-sample blocks with device-rate conversion.
+Sample decoding runs on one cancellable worker and only loads reachable assets.
+Cached graph edits prepare on the UI thread; scalar edits use resolved atomics.
+Playback uses linear interpolation, with antialiasing refinement deferred. WAV
+mono/stereo PCM/float is supported, stereo averaged to mono; 32 MiB per file/decoded
+asset and 128 MiB of unique assets per plan. Crossfades keep more than one plan
+alive, so this is not a process-wide memory cap. External sample files must remain
+available for cold recall. Stereo, portable collection and seamless loops are pending.
 
 ## Deferred sound-quality issue
 
@@ -144,8 +164,14 @@ https://github.com/yanwhite73/optisynth.git. Push checked milestones and verify 
 branch equality. No changes or commits to the parent Optispectral project.
 
 Independent source archives remain enabled via `tools/backup_source.py`. They now
-include all three app headers and our `.optisynth` patch files. Previous verified
+include all four app headers, sample source/tests and our `.optisynth` patch files. Previous verified
 archives: `../../backups/optisynth/optisynth-source-20261117-163238.tar.gz` (136 files)
 and `optisynth-source-20261117-155932.tar.gz` (98 files). Each has a checksum and an
 internal file manifest. The current delivery's archive and Git receipt are recorded
 in `ENGINEERING_LOG.md` after verification.
+
+0.0.5 backup: `../../backups/optisynth/optisynth-source-20261117-182753.tar.gz`
+plus `.sha256`, 157 source files verified by fresh-directory restore. The new app
+is open on Sample into resonator with audio initially off; existing user instance
+preserved. All 83 parent Optispectral source hashes and 23 vendored Mutable files
+remain unchanged. Receipt: `sample_build_receipt.json`.
