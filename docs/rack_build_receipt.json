@@ -1,0 +1,119 @@
+{
+  "created_utc": "2026-11-17T17:07:52.739892+00:00",
+  "version": "0.0.3",
+  "verification": {
+    "core_checks": 1194,
+    "graph_checks": 28,
+    "modular_checks": 74,
+    "modular_asan_ubsan_checks": 74,
+    "importer_checks": 4,
+    "renderer_checks": 1,
+    "native_ui_checks": "PASS; see hashed ui-check.txt",
+    "native_visual_review": "four contexts; minimum size 1120x800; final keyboard and compact knobs inspected",
+    "audio_device_opened": false,
+    "user_audition_pending": true,
+    "vst3_built": false,
+    "parent_files_unchanged": 83,
+    "mutable_files_verified": 23
+  },
+  "artifacts": {
+    "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth": {
+      "sha256": "bfe06096ffe9a2205e332bf8b1562448e0690ed2179f51951434e7ccf1015cd0",
+      "bytes": 4301424
+    },
+    "build/modular-qualification.log": {
+      "sha256": "e41b84c4d27ebeba5e7ad4598b2c702346c5606149cbb91be242c57789be8296",
+      "bytes": 2746
+    },
+    "build/app-build.log": {
+      "sha256": "d3b4af7ff15e65320160272eadac31a1e5941a844feecb3ad9513c844b768cd3",
+      "bytes": 11503
+    },
+    "build/ui-review/ui-check.txt": {
+      "sha256": "0515db2495de4c3f06e674934ff16a168490e5ed2db17e77eff006b0293f467e",
+      "bytes": 210
+    },
+    "build/ui-review/rack-oscillator.png": {
+      "sha256": "cdb15b3e655aafcfcd84c0072293b479eca01bf7770a5f71e1e4cdcd72a947d3",
+      "bytes": 127240
+    },
+    "build/ui-review/rack-filter.png": {
+      "sha256": "d1bef650ff19d9c92590707226d7dc2ef444f1dc124f9bc184961e583d95e167",
+      "bytes": 130702
+    },
+    "build/ui-review/rack-resonator.png": {
+      "sha256": "26bde39ed1a88a7bf591a37d6ac7f26cdbce58591bfddbac0847e6b5922ea73f",
+      "bytes": 118325
+    },
+    "build/ui-review/rack-minimum.png": {
+      "sha256": "c46dc36a62faa98940fd247dfd91d898f7a09dab75a6a068550d66993a19ea29",
+      "bytes": 103148
+    }
+  },
+  "sources": {
+    "src/modular/graph.cpp": {
+      "sha256": "a85df6e4365e34a935329cbea5880cc4f4fe57da8c848846703c68fa69c691d4",
+      "bytes": 6052
+    },
+    "src/modular/player.h": {
+      "sha256": "4a41c6fff5973fef80b0fc65c7906c1ef6c4deccb7165a4e3bc5ce965a5de586",
+      "bytes": 4956
+    },
+    "src/modular/modules.cpp": {
+      "sha256": "68e5619465bb0cd73c176890ce528ab657b0b7f94e270b3e19a6b22569500dd8",
+      "bytes": 13886
+    },
+    "src/modular/graph.h": {
+      "sha256": "05c87aad442650bc1865038f367abb697afe6d77dfbdf71a317af011517e5d7e",
+      "bytes": 2518
+    },
+    "src/modular/runtime.h": {
+      "sha256": "0a2eaaf3c51e2703cfd1718349b18960ae92855033d79b2367daebd530f1d78e",
+      "bytes": 2046
+    },
+    "src/modular/rack.h": {
+      "sha256": "180e57f9734ec6e300952d81e703a5c79573444969fff8c48084b2b93b5b7d07",
+      "bytes": 2706
+    },
+    "src/modular/runtime.cpp": {
+      "sha256": "f369a326841400335570a552bd06c9aa9a173104f7a29f216613b1562821c0d7",
+      "bytes": 3078
+    },
+    "app/RackEditor.h": {
+      "sha256": "6326e95761b2618e9dc4f7cb8adf32f99574514eda437c4c28db3ffa4aeb5518",
+      "bytes": 21706
+    },
+    "app/PatchIO.h": {
+      "sha256": "41f17fa57aa71f016f7afaa5999608e21db67644b7642a0c2b64974df05928f1",
+      "bytes": 4996
+    },
+    "app/Panel.h": {
+      "sha256": "b6a1ed6322e08838f30dfaac364ed1f25ed5ab26e7a92b16978767ac8811c684",
+      "bytes": 8198
+    },
+    "app/Main.cpp": {
+      "sha256": "c626974989d8e9d6969d7f6b83493075ebe390b44577fe07c7348a8e3391f801",
+      "bytes": 1403
+    },
+    "app/OptisynthApp.jucer": {
+      "sha256": "57b72f10477094be2b70dc33d8b44df2b68546911a9f0d46b196863dacfb1dfa",
+      "bytes": 4049
+    },
+    "src/core/envelope.cpp": {
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+      "bytes": 4792
+    },
+    "src/core/effects.cpp": {
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+      "bytes": 52594
+    },
+    "tests/test_modular.cpp": {
+      "sha256": "2fcfd7bec1b4ea451d2f76e300ae7d66a689f202ee0000173acc361c90a03784",
+      "bytes": 8909
+    },
+    "third_party/mutable/PROVENANCE.json": {
+      "sha256": "c8dd59c648e948c253c4f817abdd8933a7363d95806a4019e352a4c8056b8a4c",
+      "bytes": 3599
+    }
+  }
+}

@@ -1,0 +1,118 @@
+# Research index and evidence
+
+Research and implementation are parallel parts of Optisynth. Record what was
+actually inspected, the source edition/page or code revision, the inferred DSP
+mechanism, uncertainty and the test that could disprove it. A link found is not
+a document analysed. The first reviewed Mutable DSP subset is now adopted; see
+`MUTABLE_FIRST_SLICE.md` and `../third_party/mutable/PROVENANCE.json`.
+
+`research_sources.json` is the source catalogue. Local manual/schematic copies go
+under `references/`; `reference_downloads.json` records their URLs and SHA-256.
+Reference PDFs/ZIPs are git-ignored; the catalogue, receipts and research notes are
+kept with project source. ZIP contents are not executed or automatically extracted.
+
+Initial collection complete: all five indexed documents/archives are stored
+locally (37,952,171 bytes total), header-checked and hashed. Download success does
+not change the per-source inspection status: detailed schematic reading remains
+pending. A pinned subset of the original Mutable DSP is vendored; VCV remains
+reference only, and no upstream firmware build scripts were executed.
+
+## Oberheim Xpander
+
+- [Owner manual](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Owners_Manual.pdf).
+- [Service manual](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Service_Manual.pdf), 39-page scanned edition.
+- [Separate schematic archive](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/xpander_schematics.zip).
+- [Alternate combined service manual](https://www.synfo.nl/servicemanuals/Oberheim/OBERHEIM_XPANDER_SERVICE_MANUAL.pdf).
+- [Manufacturer manual filter page, readable mirror](https://www.manualslib.com/manual/3534905/Oberheim-Xpander.html?page=26).
+
+Read evidence: the owner manual describes 15 filter modes, including different
+slopes, band-pass/notch, phase and combined responses. This supports a reusable
+multimode filter as a research target. It does not yet establish coefficients,
+nonlinear drive, resonance gain or sample-rate behavior for an implementation.
+
+Next: verify schematic sheet revision/completeness; trace the voice/filter circuit,
+control scaling, mode switching and gain staging. Separate documented topology
+from measured component/voice variation. Derive transfer responses, then test
+frequency response, resonance and driven behavior before full-preset comparisons.
+
+## Roland JP-8080
+
+- [Official owner manual](https://static.roland.com/assets/media/pdf/JP-8080_OM.pdf).
+- [Roland service notes, July 1998, archive mirror](https://www.synfo.nl/servicemanuals/Roland/JP-8080_SERVICE_NOTES.pdf).
+
+Service-note index verified: block diagram page 13, circuit diagrams pages 17–27.
+The specification lists Super Saw, Triangle Mod and Feedback OSC among the source
+types. This is a digital/virtual-analogue research track: circuit diagrams can
+explain converters, routing and surrounding electronics, but do not reveal the
+internal oscillator/filter algorithms running inside the DSP chips.
+
+Next: map owner-manual controls and modes; inspect the signal path and sample-rate
+domains; identify independent measurements for detune/mix laws, phase behavior,
+aliasing, filter responses and feedback. Start with useful character-inspired
+modules; do not claim an exact JP emulation from feature names or schematics alone.
+
+## Mutable Instruments and VCV Rack references
+
+- [Original Mutable source](https://github.com/pichenettes/eurorack).
+- [Rings manual](https://pichenettes.github.io/mutable-instruments-documentation/modules/rings/manual/).
+- [Plaits modal engine interface](https://github.com/pichenettes/eurorack/blob/master/plaits/dsp/engine/modal_engine.h).
+- [VCV Audible Instruments](https://github.com/VCVRack/AudibleInstruments/tree/v2).
+- [VCV Rings adapter](https://github.com/VCVRack/AudibleInstruments/blob/v2/src/Rings.cpp).
+
+The original README marks STM32F code MIT and AVR code GPL3; the inspected Plaits
+modal header contains an MIT notice. Original naming guidance is separate. Inspect
+each selected module, resources and dependencies and pin its revision before
+adoption. The VCV port's own licence is a separate check; do not infer it from
+the embedded DSP's licence.
+
+Rings documents modal, sympathetic-string and string resonators with either
+external audio excitation or an internal pulse/noise burst. Damping, spectral
+structure and excitation position are useful independently addressable controls
+for percussion. This supports samples both as exciters and as parallel attacks.
+
+The inspected VCV Rings adapter uses input/output resamplers around a 48 kHz,
+24-frame internal DSP block. This is evidence that desktop adaptation involves
+rate/block conversion, buffer sizing and event timing, not merely copying a render
+function. It is a design pointer, not an adopted implementation or measured CPU result.
+
+First selection implemented: Plaits ModalVoice/Resonator and AnalogBassDrum,
+reviewed with their dependency closure, manual, licence and documentation index.
+The original panel guides control hierarchy; our own contextual panels name each
+algorithm's controls explicitly. The exact DSP needs no further circuit model to
+be useful: AnalogBassDrum already includes a circuit-derived behavioural model.
+Analogue-only Mutable modules are a separate research track. Desktop adaptation
+still requires rate, event timing, gain, control-range and resource-bound tests.
+
+The wrapper clamps the stiffness table index below its last entry because the
+upstream interpolator always reads index+1. Only the sine and stiffness resource
+arrays are retained, with a reproducible extraction and original notices.
+Digital source runs at 48 kHz. A bounded windowed-sinc converter adapts output to
+the device rate. The rack adds the original variable-shape/sine oscillators, an
+externally excited Plaits resonator and stmlib digital SVF variants. This is the
+library's digital filter, not an analogue Ripples circuit recreation. Review and
+acceptance: [RACK_ROUTING.md](RACK_ROUTING.md). Free-running dust remains disabled.
+Next: sample excitation, more original engines, then granular processing.
+Continue the same module-specific review before adoption.
+
+## Other open-source digital-module makers
+
+[OPEN_SOURCE_MODULE_MAKERS.md](OPEN_SOURCE_MODULE_MAKERS.md) records the checked
+4ms, DaisySP, Rebel/OWL, Befaco VCV and Music Thing sources, published licences,
+potential uses and remaining pre-use review. None has been adopted in this build.
+
+## Required evidence per module
+
+For each candidate, keep a small record: intended musical role; primary source
+pages/code revision; control units and useful ranges; input/output and voice scope;
+state/assets required; CPU/memory measurements; implementation status; remaining
+uncertainties. For external code also record dependencies, side effects, ports,
+licences and disable/removal path before use. Offline DSP should open no network,
+MIDI or audio device by itself.
+
+## First-party source boundary
+
+The copied Spectral engine is our independent implementation, not LinPlug source.
+Its observed architecture and known approximations are retained in
+`../reference/docs/spectral_architecture.md` and the inherited `design.md` history.
+Source provenance is `source_snapshot_20261117.json`. Legacy fidelity limitations
+remain explicit while the reusable components are extracted.

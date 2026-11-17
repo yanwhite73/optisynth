@@ -1,0 +1,58 @@
+{
+  "format": "optisynth.instrument",
+  "version": 1,
+  "source": "modal.voice",
+  "envelope": "spectral.adsr",
+  "filter": "spectral.lowpass",
+  "amplitudeEnvelope": true,
+  "filterEnvelope": true,
+  "gain": 0.25,
+  "parameters": {
+    "drum.analog": {
+      "attack_fm": 0.449999988079071,
+      "decay": 0.349999994039536,
+      "self_fm": 0.150000005960464,
+      "tone": 0.349999994039536,
+      "transpose": -12.0
+    },
+    "modal.voice": {
+      "brightness": 0.5,
+      "decay": 0.449999988079071,
+      "structure": 0.349999994039536,
+      "transpose": 0.0
+    },
+    "spectral.adsr": {
+      "attack": 0.004999999888241,
+      "decay": 0.340400010347366,
+      "release": 1.5,
+      "sustain": 0.54559999704361
+    },
+    "spectral.ahdsfr": {
+      "attack": 0.004999999888241,
+      "attack_curve": 1.0,
+      "decay": 0.600000023841858,
+      "decay_curve": 1.0,
+      "fade": 0.0,
+      "hold": 0.0,
+      "release": 1.5,
+      "release_curve": 1.0,
+      "sustain": 0.5
+    },
+    "spectral.highpass": {
+      "cutoff_hz": 10000.0,
+      "env_octaves": 2.0,
+      "mod_depth": 0.0,
+      "mod_rate_hz": 0.5,
+      "resonance": 0.200000002980232,
+      "saturation": 0.0
+    },
+    "spectral.lowpass": {
+      "cutoff_hz": 1218.6171875,
+      "env_octaves": 2.0,
+      "mod_depth": 0.0,
+      "mod_rate_hz": 0.5,
+      "resonance": 1.0,
+      "saturation": 1.0
+    }
+  }
+}

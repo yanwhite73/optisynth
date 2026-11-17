@@ -1,0 +1,6189 @@
+{
+ "_about": "Named fields per Spectral (LSP1) section, in saved order after the instance index. Ints are fixed-point with `decimals` places.",
+ "sections": {
+  "CMM1": {
+   "class": "ChordMem_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Op.Mode",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "Off  LearnPlay ",
+     "width": 5
+    },
+    {
+     "name": "Polyphony",
+     "kind": "Num",
+     "min": 0,
+     "max": 8,
+     "decimals": 0,
+     "default": 1
+    },
+    {
+     "name": "Note 0",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 0",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 1",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 64
+    },
+    {
+     "name": "Velo 1",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 2",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 67
+    },
+    {
+     "name": "Velo 2",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 3",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 3",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 4",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 4",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 5",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 5",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 6",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 6",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Note 7",
+     "kind": "Note",
+     "min": 0,
+     "max": 127,
+     "default": 60
+    },
+    {
+     "name": "Velo 7",
+     "kind": "Num",
+     "min": 0,
+     "max": 127,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VCP5": {
+   "class": "Compressor6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Unused",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Ratio",
+     "kind": "Num",
+     "unit": ":1",
+     "min": 100,
+     "max": 4000,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Threshold",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -360,
+     "max": 0,
+     "decimals": 1,
+     "default": -150
+    },
+    {
+     "name": "Release",
+     "kind": "Num",
+     "unit": "s",
+     "min": 1,
+     "max": 4000,
+     "decimals": 0,
+     "default": 500
+    },
+    {
+     "name": "Attack",
+     "kind": "Num",
+     "unit": "s",
+     "min": 0,
+     "max": 4000,
+     "decimals": 1,
+     "default": 500
+    },
+    {
+     "name": "Out Vol.",
+     "kind": "Volume"
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VCX5": {
+   "class": "Crush6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Verson 6 indicator",
+     "kind": "Num",
+     "min": 0,
+     "max": 2,
+     "decimals": 0,
+     "default": 2
+    },
+    {
+     "name": "Resolution",
+     "kind": "Num",
+     "unit": "bit",
+     "min": 100,
+     "max": 1601,
+     "decimals": 2,
+     "default": 400
+    },
+    {
+     "name": "Dither On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Unused",
+     "kind": "Num",
+     "min": 1,
+     "max": 32,
+     "decimals": 0,
+     "default": 1
+    },
+    {
+     "name": "Divider Mode",
+     "kind": "Enu",
+     "min": 1,
+     "max": 3,
+     "default": 3,
+     "options": "AVGSTPSLD",
+     "width": 3
+    },
+    {
+     "name": "Filter Type ",
+     "kind": "Enu",
+     "min": 1,
+     "max": 4,
+     "default": 1,
+     "options": "LP12HP12BP12BR12",
+     "width": 4
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 20480
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "FilterPostDiv On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Auto Volume compensation",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Divider",
+     "kind": "Num",
+     "unit": "Samples",
+     "min": 10,
+     "max": 320,
+     "decimals": 1,
+     "default": 10
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VDM5": {
+   "class": "DelayMd6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Time",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 2,
+     "max": 13000,
+     "decimals": 1,
+     "default": 1250
+    },
+    {
+     "name": "Feed",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "ModRate",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "max": 1000,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "ModDept",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "Delay Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 20,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16",
+     "width": 5
+    },
+    {
+     "name": "Fil ",
+     "kind": "Num",
+     "min": -101,
+     "max": 100,
+     "decimals": 2,
+     "default": -101
+    },
+    {
+     "name": "Mod Speed Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "CutLo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 20480
+    },
+    {
+     "name": "CutHi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 10,
+     "max": 2750,
+     "decimals": 0,
+     "default": 10
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VDP5": {
+   "class": "DelayPP6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Time Center",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 0,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Center",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Time Left",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Left",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 7,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Pan Left",
+     "kind": "Pan",
+     "default": -100
+    },
+    {
+     "name": "Time Right",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Right",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 10,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Pan Right",
+     "kind": "Pan",
+     "default": 100
+    },
+    {
+     "name": "Feedback L+R",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 40
+    },
+    {
+     "name": "Balance Pre/LR",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Feedback Intermediate",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VDS5": {
+   "class": "DelaySt6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "TimeL",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "SyncL",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "TimeR",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 250
+    },
+    {
+     "name": "SyncR",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 10,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Feedback",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 40
+    },
+    {
+     "name": "CutLo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 20480
+    },
+    {
+     "name": "CutHi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 8,
+     "max": 11000,
+     "decimals": 0,
+     "default": 8
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Feedback Link",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Crossdelay",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Filters in Feedback",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VEQ4": {
+   "class": "EQ4_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Freq Lo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 0,
+     "max": 640,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Stages Lo",
+     "kind": "Num",
+     "min": 1,
+     "max": 8,
+     "decimals": 0,
+     "default": 4
+    },
+    {
+     "name": "Freq [band 1]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 11000,
+     "decimals": 0,
+     "default": 400
+    },
+    {
+     "name": "Gain [band 1]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 1]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 33,
+     "max": 800,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq [band 2]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 11000,
+     "decimals": 0,
+     "default": 4000
+    },
+    {
+     "name": "Gain [band 2]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 2]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 33,
+     "max": 800,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq Hi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 320,
+     "max": 22050,
+     "decimals": 0,
+     "default": 22050
+    },
+    {
+     "name": "Stages Hi",
+     "kind": "Num",
+     "min": 1,
+     "max": 8,
+     "decimals": 0,
+     "default": 1
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VEQ5": {
+   "class": "EQ6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Freq [band 1]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 400
+    },
+    {
+     "name": "Gain [band 1]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 1]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 8,
+     "max": 1250,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq [band 2]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 4000
+    },
+    {
+     "name": "Gain [band 2]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 2]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 8,
+     "max": 1250,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq Lo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 1000,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Gain Lo [low shelf]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Freq Hi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 440,
+     "max": 11000,
+     "decimals": 0,
+     "default": 2000
+    },
+    {
+     "name": "Gain Lo [high shelf (declared as Gain Lo)]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "ME05": {
+   "class": "EnvAHDSFR_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "A Time",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 0,
+     "max": 15000,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "H Time",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 0,
+     "max": 5000,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "D Time",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 0,
+     "max": 15000,
+     "decimals": 3,
+     "default": 1
+    },
+    {
+     "name": "S Level",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 1000
+    },
+    {
+     "name": "F Time",
+     "kind": "Num",
+     "min": -1000,
+     "max": 1000,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "R Time",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 4,
+     "max": 15000,
+     "decimals": 3,
+     "default": 40
+    },
+    {
+     "name": "Pit Scale",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Vel Scale",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "A c",
+     "kind": "Num",
+     "min": 20,
+     "max": 180,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "D c",
+     "kind": "Num",
+     "min": 20,
+     "max": 180,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "F c",
+     "kind": "Num",
+     "min": 20,
+     "max": 180,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "R c",
+     "kind": "Num",
+     "min": 20,
+     "max": 180,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Sync",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "A Sync",
+     "kind": "Num",
+     "unit": "16th",
+     "min": 0,
+     "max": 3200,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "H Sync",
+     "kind": "Num",
+     "unit": "16th",
+     "min": 0,
+     "max": 3200,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "D Sync",
+     "kind": "Num",
+     "unit": "16th",
+     "min": 0,
+     "max": 3200,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "F Sync",
+     "kind": "Num",
+     "unit": "16th",
+     "min": -6400,
+     "max": 6400,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "R Sync",
+     "kind": "Num",
+     "unit": "16th",
+     "min": 0,
+     "max": 3200,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Ignore MIDI Note Off",
+     "kind": "OnOff",
+     "default": 0
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VFL5": {
+   "class": "Flanger6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Invert Wet Unused",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Time",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 8500,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Feed",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 100
+    },
+    {
+     "name": "Invert Feed+Wet",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 5
+    },
+    {
+     "name": "ModRate",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "max": 5000,
+     "decimals": 3,
+     "default": 400
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": 7,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Time Depth",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 250
+    },
+    {
+     "name": "Pan Depth",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VGT5": {
+   "class": "Gator6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Step On/Off [left]",
+     "kind": "CharPtr",
+     "default": "1010101010101010"
+    },
+    {
+     "name": "Step On/Off [right]",
+     "kind": "CharPtr",
+     "default": "1010101010101010"
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 4,
+     "max": 18,
+     "default": 13,
+     "options": " 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64",
+     "width": 5
+    },
+    {
+     "name": "Smooth",
+     "kind": "Num",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 5
+    },
+    {
+     "name": "Link",
+     "kind": "Enu",
+     "unit": "Mode",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "OFF  LINK XLINK",
+     "width": 5
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VGF5": {
+   "class": "GloFil6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "S0 On/Off",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Filter Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Type ",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 0,
+     "options": "LP12HP12BP12BR12",
+     "width": 4
+    },
+    {
+     "name": "Filter Sat",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 20
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 10000
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Filter Mod Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Filter Mod Depth",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Level (Wet only)",
+     "kind": "Volume"
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Filter Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "ML05": {
+   "class": "LFO5_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Waveform",
+     "kind": "Enu",
+     "min": 0,
+     "max": 8,
+     "default": 1,
+     "options": "Sine       Triangle   Sawtooth   Pulse      Impuls     Peak       Noise      Sample&HoldRandomPulse",
+     "width": 11
+    },
+    {
+     "name": "Frequency",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": "Off  16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Delay",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 0,
+     "max": 8000,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "Attack",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 0,
+     "max": 8000,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "Symmetry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 99,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Phase",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Polar",
+     "kind": "Enu",
+     "min": 0,
+     "max": 4,
+     "default": 0,
+     "options": "NORMALUNI + UNI - CUT + CUT - ",
+     "width": 6
+    },
+    {
+     "name": "Former Free Run",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Smooth",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 50,
+     "decimals": 0,
+     "default": 1
+    },
+    {
+     "name": "FreeRun",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "PhaseFree Pha/M",
+     "width": 5
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VL01": {
+   "class": "Limiter_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VPH5": {
+   "class": "Phaser6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Mode",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Phaser Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 30,
+     "max": 10000,
+     "decimals": 3,
+     "default": 400
+    },
+    {
+     "name": "Phaser Center",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 100,
+     "max": 8000,
+     "decimals": 0,
+     "default": 1000
+    },
+    {
+     "name": "Phaser Depth",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Phaser Feedb",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Phaser FBInv",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Phaser Stages",
+     "kind": "Num",
+     "min": 1,
+     "max": 24,
+     "decimals": 0,
+     "default": 5
+    },
+    {
+     "name": "Phaser Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 11,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T",
+     "width": 5
+    },
+    {
+     "name": "Phaser Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "MRG0": {
+   "class": "RampGlide_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Glide Mode",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 0,
+     "options": "OFF HELD ON BEND",
+     "width": 4
+    },
+    {
+     "name": "Bend",
+     "kind": "Num",
+     "unit": "semi",
+     "min": -48,
+     "max": 48,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Time",
+     "kind": "Num",
+     "unit": "sec",
+     "min": 1,
+     "max": 4000,
+     "decimals": 3,
+     "default": 30
+    },
+    {
+     "name": "Const",
+     "kind": "Enu",
+     "min": 0,
+     "max": 1,
+     "default": 0,
+     "options": "TimeRate",
+     "width": 4
+    },
+    {
+     "name": "Time Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": "Off  16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Curve",
+     "kind": "Num",
+     "min": 10,
+     "max": 190,
+     "decimals": 2,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VR05": {
+   "class": "Reverb6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused",
+     "kind": "Num",
+     "unit": "%",
+     "min": -1,
+     "max": 100,
+     "decimals": 2,
+     "default": -1
+    },
+    {
+     "name": "RevTime",
+     "kind": "Num",
+     "unit": "s",
+     "min": 1,
+     "max": 500,
+     "decimals": 1,
+     "default": 25
+    },
+    {
+     "name": "Damping ",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 95,
+     "decimals": 2,
+     "default": 15
+    },
+    {
+     "name": "Predelay",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 0,
+     "max": 300,
+     "decimals": 0,
+     "default": 25,
+     "unit_note": "declared as \"s\"; range 0-300 and a 0.3 s buffer show milliseconds"
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 9,
+     "max": 18,
+     "default": 9,
+     "options": " Off  1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64",
+     "width": 5
+    },
+    {
+     "name": "Modulation On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Diffusors",
+     "kind": "Num",
+     "min": 2,
+     "max": 6,
+     "decimals": 0,
+     "default": 4
+    },
+    {
+     "name": "Mod Depth",
+     "kind": "Num",
+     "min": 3,
+     "max": 20,
+     "decimals": 0,
+     "default": 10
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 25
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VWW5": {
+   "class": "WahWah6_c",
+   "source": "declarations",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Unused",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 440
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Sensivety",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 1000,
+     "decimals": 3,
+     "default": 100
+    },
+    {
+     "name": "Level (D+W)",
+     "kind": "Volume"
+    },
+    {
+     "name": "Attack",
+     "kind": "Num",
+     "unit": "s",
+     "min": 5,
+     "max": 8000,
+     "decimals": 3,
+     "default": 200
+    },
+    {
+     "name": "Release",
+     "kind": "Num",
+     "unit": "s",
+     "min": 5,
+     "max": 8000,
+     "decimals": 3,
+     "default": 2000
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "GOS0": {
+   "class": "GenSpectral_c",
+   "source": "declarations, loop x4 parameter-major",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Reserved",
+     "kind": "Num",
+     "min": -1,
+     "max": -1,
+     "decimals": 0,
+     "default": -1
+    },
+    {
+     "name": "Reserved",
+     "kind": "Num",
+     "min": -1,
+     "max": -1,
+     "decimals": 0,
+     "default": -1
+    },
+    {
+     "name": "Reserved",
+     "kind": "Num",
+     "min": -1,
+     "max": -1,
+     "decimals": 0,
+     "default": -1
+    },
+    {
+     "name": "Reserved",
+     "kind": "String"
+    },
+    {
+     "name": "Osc On/Off [osc 1]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "Osc On/Off [osc 2]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "Osc On/Off [osc 3]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "Osc On/Off [osc 4]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "Osc Cent [osc 1]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Cent [osc 2]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Cent [osc 3]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Cent [osc 4]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": -100,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Semitone [osc 1]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": -72,
+     "max": 72,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Semitone [osc 2]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": -72,
+     "max": 72,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Semitone [osc 3]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": -72,
+     "max": 72,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Semitone [osc 4]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": -72,
+     "max": 72,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Osc Track [osc 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Osc Track [osc 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Osc Track [osc 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Osc Track [osc 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "osc FreeRun [osc 1]",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "osc FreeRun [osc 2]",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "osc FreeRun [osc 3]",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "osc FreeRun [osc 4]",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Osc Symmetry [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 4,
+     "max": 96,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Symmetry [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 4,
+     "max": 96,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Symmetry [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 4,
+     "max": 96,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Symmetry [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 4,
+     "max": 96,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Phase [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc Phase [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc Phase [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc Phase [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc Spread [osc 1]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": 0,
+     "max": 5000,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Osc Spread [osc 2]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": 0,
+     "max": 5000,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Osc Spread [osc 3]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": 0,
+     "max": 5000,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Osc Spread [osc 4]",
+     "kind": "Num",
+     "unit": "cent",
+     "min": 0,
+     "max": 5000,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Osc Spread Vol [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Osc Spread Vol [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Osc Spread Vol [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Osc Spread Vol [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Osc Stereo [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Stereo [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Stereo [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Stereo [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Osc Voices/Mode [osc 1]",
+     "kind": "Enu",
+     "min": 2,
+     "max": 7,
+     "default": 3,
+     "options": " 2  3  4a 4b 5  6 ",
+     "width": 3
+    },
+    {
+     "name": "Osc Voices/Mode [osc 2]",
+     "kind": "Enu",
+     "min": 2,
+     "max": 7,
+     "default": 3,
+     "options": " 2  3  4a 4b 5  6 ",
+     "width": 3
+    },
+    {
+     "name": "Osc Voices/Mode [osc 3]",
+     "kind": "Enu",
+     "min": 2,
+     "max": 7,
+     "default": 3,
+     "options": " 2  3  4a 4b 5  6 ",
+     "width": 3
+    },
+    {
+     "name": "Osc Voices/Mode [osc 4]",
+     "kind": "Enu",
+     "min": 2,
+     "max": 7,
+     "default": 3,
+     "options": " 2  3  4a 4b 5  6 ",
+     "width": 3
+    },
+    {
+     "name": "Osc Volume [osc 1]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Osc Volume [osc 2]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Osc Volume [osc 3]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Osc Volume [osc 4]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Osc XMod 1 Type [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 1 Type [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 1 Type [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 1 Type [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osx XMod 1 Src [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 1 Src [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 1 Src [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 1 Src [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Osc XMod 1 Amt [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 1 Amt [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 1 Amt [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 1 Amt [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 2 Type [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 1,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 2 Type [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 1,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 2 Type [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 1,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osc XMod 2 Type [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 1,
+     "options": " AM  FM  PM ",
+     "width": 4
+    },
+    {
+     "name": "Osx XMod 2 Src [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 2 Src [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 2 Src [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 5
+    },
+    {
+     "name": "Osx XMod 2 Src [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": " AM  FM  PM ",
+     "width": 5
+    },
+    {
+     "name": "Osc XMod 2 Amt [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 2 Amt [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 2 Amt [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Osc XMod 2 Amt [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil On/Bypass [osc 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Fil On/Bypass [osc 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Fil On/Bypass [osc 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Fil On/Bypass [osc 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Fil Freq [osc 1]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 640
+    },
+    {
+     "name": "Fil Freq [osc 2]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 640
+    },
+    {
+     "name": "Fil Freq [osc 3]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 640
+    },
+    {
+     "name": "Fil Freq [osc 4]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 640
+    },
+    {
+     "name": "Fil Pit Track [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Pit Track [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Pit Track [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Pit Track [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Env Depth [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Env Depth [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Env Depth [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Env Depth [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Vel Track [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Vel Track [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Vel Track [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Vel Track [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Resonance [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Fil Resonance [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Fil Resonance [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Fil Resonance [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 1 Type [osc 1]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 3,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 1 Type [osc 2]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 3,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 1 Type [osc 3]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 3,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 1 Type [osc 4]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 3,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 1 Src [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": "%",
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 1 Src [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": "%",
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 1 Src [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": "%",
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 1 Src [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "options": "%",
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 1 Amt [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 1 Amt [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 1 Amt [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 1 Amt [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 2 Type [osc 1]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 4,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 2 Type [osc 2]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 4,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 2 Type [osc 3]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 4,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 2 Type [osc 4]",
+     "kind": "Enu",
+     "min": 3,
+     "max": 4,
+     "default": 4,
+     "options": " FM  RM ",
+     "width": 4
+    },
+    {
+     "name": "Fil XMod 2 Src [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 2 Src [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 2 Src [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 2 Src [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 7,
+     "default": 0,
+     "width": 5
+    },
+    {
+     "name": "Fil XMod 2 Amt [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 2 Amt [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 2 Amt [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil XMod 2 Amt [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Fil Volume [osc 1]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Fil Volume [osc 2]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Fil Volume [osc 3]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Fil Volume [osc 4]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Fil Pan [osc 1]",
+     "kind": "Pan",
+     "default": 0
+    },
+    {
+     "name": "Fil Pan [osc 2]",
+     "kind": "Pan",
+     "default": 0
+    },
+    {
+     "name": "Fil Pan [osc 3]",
+     "kind": "Pan",
+     "default": 0
+    },
+    {
+     "name": "Fil Pan [osc 4]",
+     "kind": "Pan",
+     "default": 0
+    },
+    {
+     "name": "Fil Route 1 [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 0,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 1 [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 0,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 1 [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 0,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 1 [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 0,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 2 [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 1,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 2 [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 1,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 2 [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 1,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route 2 [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 6,
+     "default": 1,
+     "options": "FX 1FX 2FX 3FX 4FX 5FX 6OUT ",
+     "width": 4
+    },
+    {
+     "name": "Fil Route Balance [osc 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Route Balance [osc 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Route Balance [osc 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Fil Route Balance [osc 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "LP Offset [osc 1]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 61,
+     "decimals": 0,
+     "default": 61
+    },
+    {
+     "name": "LP Offset [osc 2]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 61,
+     "decimals": 0,
+     "default": 61
+    },
+    {
+     "name": "LP Offset [osc 3]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 61,
+     "decimals": 0,
+     "default": 61
+    },
+    {
+     "name": "LP Offset [osc 4]",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 61,
+     "decimals": 0,
+     "default": 61
+    },
+    {
+     "name": "Osc FreeRun [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "PhaseFree Pha/M",
+     "width": 5
+    },
+    {
+     "name": "Osc FreeRun [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "PhaseFree Pha/M",
+     "width": 5
+    },
+    {
+     "name": "Osc FreeRun [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "PhaseFree Pha/M",
+     "width": 5
+    },
+    {
+     "name": "Osc FreeRun [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "PhaseFree Pha/M",
+     "width": 5
+    },
+    {
+     "name": "LP Type [osc 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 2,
+     "options": "LP+ 6LP+12LP+18LP+24",
+     "width": 5
+    },
+    {
+     "name": "LP Type [osc 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 2,
+     "options": "LP+ 6LP+12LP+18LP+24",
+     "width": 5
+    },
+    {
+     "name": "LP Type [osc 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 2,
+     "options": "LP+ 6LP+12LP+18LP+24",
+     "width": 5
+    },
+    {
+     "name": "LP Type [osc 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 2,
+     "options": "LP+ 6LP+12LP+18LP+24",
+     "width": 5
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "SAW1": {
+   "class": "WaveROMSpectral_c",
+   "source": "declarations + decoded level strings",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "decimals": 2
+    },
+    {
+     "name": "Filter",
+     "kind": "String",
+     "encoding": "level string, 241 points, level only"
+    },
+    {
+     "name": "Wave A",
+     "kind": "String",
+     "encoding": "level string, 257 harmonics, level + phase"
+    },
+    {
+     "name": "Wave B",
+     "kind": "String",
+     "encoding": "level string, 257 harmonics, level + phase"
+    },
+    {
+     "name": "reserved (undeclared slot, 0 in all presets)",
+     "kind": "Num"
+    },
+    {
+     "name": "reserved (undeclared slot, 0 in all presets)",
+     "kind": "Num"
+    },
+    {
+     "name": "Wave Mix",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "SYG3": {
+   "class": "SpectralGlo_c",
+   "source": "decompiled order, loops expanded",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Main Vol.",
+     "kind": "Volume"
+    },
+    {
+     "name": "Voices",
+     "kind": "Enu",
+     "min": 0,
+     "max": 13,
+     "default": 10,
+     "options": "mono  1   2   3   4   5   6   8  10  12  16  20  24  32 ",
+     "width": 4
+    },
+    {
+     "name": "Exactness",
+     "kind": "Num",
+     "unit": "%",
+     "min": 90,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "reserved (undeclared slot)",
+     "kind": "Num"
+    },
+    {
+     "name": "reserved (undeclared slot)",
+     "kind": "Num"
+    },
+    {
+     "name": "reserved (undeclared slot)",
+     "kind": "Num"
+    },
+    {
+     "name": "reserved (undeclared slot)",
+     "kind": "Num"
+    },
+    {
+     "name": "Vel->Vol",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 73
+    },
+    {
+     "name": "Vel->Fil Cut [filter 1]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Vel->Fil Cut [filter 2]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Vel->Fil Cut [filter 3]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Vel->Fil Cut [filter 4]",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "DSP Version",
+     "kind": "Num",
+     "min": 0,
+     "max": 99999,
+     "decimals": 3,
+     "default": 1230
+    },
+    {
+     "name": "LFO Mode [LFO 1]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "NrmMonOne",
+     "width": 3
+    },
+    {
+     "name": "LFO Mode [LFO 2]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "NrmMonOne",
+     "width": 3
+    },
+    {
+     "name": "LFO Mode [LFO 3]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "NrmMonOne",
+     "width": 3
+    },
+    {
+     "name": "LFO Mode [LFO 4]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "NrmMonOne",
+     "width": 3
+    },
+    {
+     "name": "LFO Mode [LFO 5]",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "NrmMonOne",
+     "width": 3
+    },
+    {
+     "name": "Fx Type [slot 1]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 1]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 1]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 1]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx Type [slot 2]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 2]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 2]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 2]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx Type [slot 3]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 3]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 3]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 3]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx Type [slot 4]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 4]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 4]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 4]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx Type [slot 5]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 5]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 5]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 5]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx Type [slot 6]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Fx On [slot 6]",
+     "kind": "OnOff"
+    },
+    {
+     "name": "unused, former Fx Wet [slot 6]",
+     "kind": "Num"
+    },
+    {
+     "name": "Fx Route [slot 6]",
+     "kind": "Enu"
+    },
+    {
+     "name": "Glide To Osc Pitch [osc 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Osc Pitch [osc 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Osc Pitch [osc 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Osc Pitch [osc 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Fil Cutoff [filter 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Fil Cutoff [filter 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Fil Cutoff [filter 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide To Fil Cutoff [filter 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend Up Amount",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 48,
+     "decimals": 0,
+     "default": 2
+    },
+    {
+     "name": "Pitch Bend Down Amount",
+     "kind": "Num",
+     "unit": "semitones",
+     "min": 0,
+     "max": 48,
+     "decimals": 0,
+     "default": 2
+    },
+    {
+     "name": "Pitch Bend to Gen [osc 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Gen [osc 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Gen [osc 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Gen [osc 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Filter [filter 1]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Filter [filter 2]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Filter [filter 3]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Pitch Bend to Filter [filter 4]",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Master EQ On",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Glide Key Level",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide Velocity",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide Alteenate",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Glide Random U+B",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Osc FM HP Mode",
+     "kind": "Enu",
+     "min": 0,
+     "max": 2,
+     "default": 1,
+     "options": " OffF100D 40",
+     "width": 4
+    },
+    {
+     "name": "Sound Bank Id",
+     "kind": "String"
+    },
+    {
+     "name": "Sound Id",
+     "kind": "String"
+    },
+    {
+     "name": "unknown (later version)",
+     "kind": "Enu"
+    }
+   ],
+   "pattern_check": "exact after adding 1 trailing unknown field(s)"
+  },
+  "SEQ2": {
+   "class": "StepSeq2_c",
+   "source": "decompiled order, loops expanded",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Op.Mode",
+     "kind": "Enu",
+     "min": 0,
+     "max": 10,
+     "default": 0,
+     "options": "OFF     MOD-ONLYUP      DOWN    UP/DOWN UP/DOWN+DOWN/UP DOWN/UP+RANDOM  CHORD   ASPLAYED",
+     "width": 8
+    },
+    {
+     "name": "Resolution",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 1,
+     "max": 18,
+     "default": 13,
+     "options": " 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64",
+     "width": 5
+    },
+    {
+     "name": "Length",
+     "kind": "Num",
+     "unit": "Steps",
+     "min": 2,
+     "decimals": 0,
+     "default": 16
+    },
+    {
+     "name": "Octaves",
+     "kind": "Num",
+     "unit": "Oct",
+     "min": 1,
+     "max": 4,
+     "decimals": 0,
+     "default": 1
+    },
+    {
+     "name": "Swing",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Velo Blend",
+     "kind": "Num",
+     "unit": "% as Played",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 50
+    },
+    {
+     "name": "Step 1 Data (length word)",
+     "kind": "Num",
+     "step": 1,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 1 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 1,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 1 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 1,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 2 Data (length word)",
+     "kind": "Num",
+     "step": 2,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 2 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 2,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 2 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 2,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 3 Data (length word)",
+     "kind": "Num",
+     "step": 3,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 3 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 3,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 3 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 3,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 4 Data (length word)",
+     "kind": "Num",
+     "step": 4,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 4 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 4,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 4 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 4,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 5 Data (length word)",
+     "kind": "Num",
+     "step": 5,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 5 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 5,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 5 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 5,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 6 Data (length word)",
+     "kind": "Num",
+     "step": 6,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 6 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 6,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 6 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 6,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 7 Data (length word)",
+     "kind": "Num",
+     "step": 7,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 7 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 7,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 7 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 7,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 8 Data (length word)",
+     "kind": "Num",
+     "step": 8,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 8 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 8,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 8 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 8,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 9 Data (length word)",
+     "kind": "Num",
+     "step": 9,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 9 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 9,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 9 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 9,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 10 Data (length word)",
+     "kind": "Num",
+     "step": 10,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 10 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 10,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 10 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 10,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 11 Data (length word)",
+     "kind": "Num",
+     "step": 11,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 11 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 11,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 11 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 11,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 12 Data (length word)",
+     "kind": "Num",
+     "step": 12,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 12 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 12,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 12 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 12,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 13 Data (length word)",
+     "kind": "Num",
+     "step": 13,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 13 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 13,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 13 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 13,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 14 Data (length word)",
+     "kind": "Num",
+     "step": 14,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 14 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 14,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 14 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 14,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 15 Data (length word)",
+     "kind": "Num",
+     "step": 15,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 15 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 15,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 15 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 15,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 16 Data (length word)",
+     "kind": "Num",
+     "step": 16,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 16 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 16,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 16 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 16,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 17 Data (length word)",
+     "kind": "Num",
+     "step": 17,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 17 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 17,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 17 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 17,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 18 Data (length word)",
+     "kind": "Num",
+     "step": 18,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 18 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 18,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 18 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 18,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 19 Data (length word)",
+     "kind": "Num",
+     "step": 19,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 19 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 19,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 19 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 19,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 20 Data (length word)",
+     "kind": "Num",
+     "step": 20,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 20 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 20,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 20 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 20,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 21 Data (length word)",
+     "kind": "Num",
+     "step": 21,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 21 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 21,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 21 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 21,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 22 Data (length word)",
+     "kind": "Num",
+     "step": 22,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 22 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 22,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 22 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 22,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 23 Data (length word)",
+     "kind": "Num",
+     "step": 23,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 23 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 23,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 23 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 23,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 24 Data (length word)",
+     "kind": "Num",
+     "step": 24,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 24 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 24,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 24 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 24,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 25 Data (length word)",
+     "kind": "Num",
+     "step": 25,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 25 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 25,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 25 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 25,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 26 Data (length word)",
+     "kind": "Num",
+     "step": 26,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 26 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 26,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 26 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 26,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 27 Data (length word)",
+     "kind": "Num",
+     "step": 27,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 27 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 27,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 27 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 27,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 28 Data (length word)",
+     "kind": "Num",
+     "step": 28,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 28 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 28,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 28 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 28,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 29 Data (length word)",
+     "kind": "Num",
+     "step": 29,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 29 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 29,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 29 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 29,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 30 Data (length word)",
+     "kind": "Num",
+     "step": 30,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 30 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 30,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 30 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 30,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 31 Data (length word)",
+     "kind": "Num",
+     "step": 31,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 31 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 31,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 31 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 31,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 32 Data (length word)",
+     "kind": "Num",
+     "step": 32,
+     "step_word": 0,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 32 Data (bytes 1-4)",
+     "kind": "Num",
+     "step": 32,
+     "step_word": 1,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Step 32 Data (bytes 5-8)",
+     "kind": "Num",
+     "step": 32,
+     "step_word": 2,
+     "encoding": "step record, decoded by linplug_fxp.decode_step"
+    },
+    {
+     "name": "Note Length",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 50
+    },
+    {
+     "name": "File IO",
+     "kind": "Enu",
+     "min": 0,
+     "max": 4,
+     "default": 0,
+     "options": "Load Save Copy PasteInit ",
+     "width": 5
+    },
+    {
+     "name": "On/Off",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Note Active",
+     "kind": "Num",
+     "min": 0,
+     "max": 31,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "On/Off",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "On/Off",
+     "kind": "OnOff",
+     "default": 1
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VCH5": {
+   "class": "Chorus6_c",
+   "source": "decompiled order, loops expanded",
+   "fields": [
+    {
+     "name": "Chorus Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Time",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 1,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Chorus Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 4000,
+     "decimals": 3,
+     "default": 500
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Unused Mode",
+     "kind": "Num",
+     "min": 0,
+     "max": 1,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Invert Signal",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Chorus Pan",
+     "kind": "Pan",
+     "default": 0
+    },
+    {
+     "name": "unknown (later version)",
+     "kind": "Num"
+    }
+   ],
+   "pattern_check": "exact after adding 1 trailing unknown field(s)"
+  },
+  "PMX0": {
+   "class": "Matrix_c",
+   "source": "corpus data (24 sources, amounts, destinations)",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "decimals": 2
+    },
+    {
+     "name": "Matrix tools menu state",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 1",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 2",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 3",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 4",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 5",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 6",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 7",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 8",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 9",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 10",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 11",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 12",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 13",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 14",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 15",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 16",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 17",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 18",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 19",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 20",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 21",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 22",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 23",
+     "kind": "Enu"
+    },
+    {
+     "name": "Source 24",
+     "kind": "Enu"
+    },
+    {
+     "name": "Amount 1",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 2",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 3",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 4",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 5",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 6",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 7",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 8",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 9",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 10",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 11",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 12",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 13",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 14",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 15",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 16",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 17",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 18",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 19",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 20",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 21",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 22",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 23",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Amount 24",
+     "kind": "Num",
+     "unit": "%",
+     "decimals": 2,
+     "min": -10000,
+     "max": 10000
+    },
+    {
+     "name": "Destination 1",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 2",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 3",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 4",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 5",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 6",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 7",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 8",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 9",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 10",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 11",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 12",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 13",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 14",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 15",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 16",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 17",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 18",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 19",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 20",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 21",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 22",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 23",
+     "kind": "Enu"
+    },
+    {
+     "name": "Destination 24",
+     "kind": "Enu"
+    }
+   ],
+   "pattern_check": "exact"
+  },
+  "VWW1": {
+   "class": "WahWah6_c",
+   "legacy_of": "VWW5",
+   "source": "getCompatibleChunkId maps it to VWW5; first 9 fields of VWW5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Unused",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 440
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Sensivety",
+     "kind": "Num",
+     "unit": "%",
+     "min": 1,
+     "max": 1000,
+     "decimals": 3,
+     "default": 100
+    },
+    {
+     "name": "Level (D+W)",
+     "kind": "Volume"
+    },
+    {
+     "name": "Attack",
+     "kind": "Num",
+     "unit": "s",
+     "min": 5,
+     "max": 8000,
+     "decimals": 3,
+     "default": 200
+    },
+    {
+     "name": "Release",
+     "kind": "Num",
+     "unit": "s",
+     "min": 5,
+     "max": 8000,
+     "decimals": 3,
+     "default": 2000
+    }
+   ],
+   "pattern_check": "legacy version of VWW5: first 9 fields"
+  },
+  "VR01": {
+   "class": "Reverb6_c",
+   "legacy_of": "VR05",
+   "source": "getCompatibleChunkId maps it to VR05; first 11 fields of VR05",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused",
+     "kind": "Num",
+     "unit": "%",
+     "min": -1,
+     "max": 100,
+     "decimals": 2,
+     "default": -1
+    },
+    {
+     "name": "RevTime",
+     "kind": "Num",
+     "unit": "s",
+     "min": 1,
+     "max": 500,
+     "decimals": 1,
+     "default": 25
+    },
+    {
+     "name": "Damping ",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 95,
+     "decimals": 2,
+     "default": 15
+    },
+    {
+     "name": "Predelay",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 0,
+     "max": 300,
+     "decimals": 0,
+     "default": 25,
+     "unit_note": "declared as \"s\"; range 0-300 and a 0.3 s buffer show milliseconds"
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 9,
+     "max": 18,
+     "default": 9,
+     "options": " Off  1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64",
+     "width": 5
+    },
+    {
+     "name": "Modulation On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Diffusors",
+     "kind": "Num",
+     "min": 2,
+     "max": 6,
+     "decimals": 0,
+     "default": 4
+    },
+    {
+     "name": "Mod Depth",
+     "kind": "Num",
+     "min": 3,
+     "max": 20,
+     "decimals": 0,
+     "default": 10
+    }
+   ],
+   "pattern_check": "legacy version of VR05: first 11 fields"
+  },
+  "VPH0": {
+   "class": "Phaser6_c",
+   "legacy_of": "VPH5",
+   "source": "getCompatibleChunkId maps it to VPH5; first 11 fields of VPH5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Mode",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Phaser Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 30,
+     "max": 10000,
+     "decimals": 3,
+     "default": 400
+    },
+    {
+     "name": "Phaser Center",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 100,
+     "max": 8000,
+     "decimals": 0,
+     "default": 1000
+    },
+    {
+     "name": "Phaser Depth",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Phaser Feedb",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Phaser FBInv",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Phaser Stages",
+     "kind": "Num",
+     "min": 1,
+     "max": 24,
+     "decimals": 0,
+     "default": 5
+    },
+    {
+     "name": "Phaser Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 11,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T",
+     "width": 5
+    }
+   ],
+   "pattern_check": "legacy version of VPH5: first 11 fields"
+  },
+  "VGT1": {
+   "class": "Gator6_c",
+   "legacy_of": "VGT5",
+   "source": "getCompatibleChunkId maps it to VGT5; first 7 fields of VGT5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Step On/Off [left]",
+     "kind": "CharPtr",
+     "default": "1010101010101010"
+    },
+    {
+     "name": "Step On/Off [right]",
+     "kind": "CharPtr",
+     "default": "1010101010101010"
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 4,
+     "max": 18,
+     "default": 13,
+     "options": " 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64",
+     "width": 5
+    },
+    {
+     "name": "Smooth",
+     "kind": "Num",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 5
+    },
+    {
+     "name": "Link",
+     "kind": "Enu",
+     "unit": "Mode",
+     "min": 0,
+     "max": 2,
+     "default": 0,
+     "options": "OFF  LINK XLINK",
+     "width": 5
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "legacy version of VGT5: first 7 fields"
+  },
+  "VGF1": {
+   "class": "GloFil6_c",
+   "legacy_of": "VGF5",
+   "source": "getCompatibleChunkId maps it to VGF5; first 11 fields of VGF5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "S0 On/Off",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Filter Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Type ",
+     "kind": "Enu",
+     "min": 0,
+     "max": 3,
+     "default": 0,
+     "options": "LP12HP12BP12BR12",
+     "width": 4
+    },
+    {
+     "name": "Filter Sat",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 20
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 10000
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Filter Mod Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Filter Mod Depth",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Level (Wet only)",
+     "kind": "Volume"
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    }
+   ],
+   "pattern_check": "legacy version of VGF5: first 11 fields"
+  },
+  "VFL1": {
+   "class": "Flanger6_c",
+   "legacy_of": "VFL5",
+   "source": "getCompatibleChunkId maps it to VFL5; first 12 fields of VFL5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Invert Wet Unused",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Time",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 8500,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Feed",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 100
+    },
+    {
+     "name": "Invert Feed+Wet",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 5
+    },
+    {
+     "name": "ModRate",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "max": 5000,
+     "decimals": 3,
+     "default": 400
+    },
+    {
+     "name": "Frequency",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": 7,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    },
+    {
+     "name": "Time Depth",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 250
+    },
+    {
+     "name": "Pan Depth",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 0
+    }
+   ],
+   "pattern_check": "legacy version of VFL5: first 12 fields"
+  },
+  "VEQ3": {
+   "class": "EQ6_c",
+   "legacy_of": "VEQ5",
+   "source": "getCompatibleChunkId maps it to VEQ5; first 11 fields of VEQ5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Freq [band 1]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 400
+    },
+    {
+     "name": "Gain [band 1]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 1]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 8,
+     "max": 1250,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq [band 2]",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 4000
+    },
+    {
+     "name": "Gain [band 2]",
+     "kind": "Num",
+     "unit": "dB",
+     "min": -180,
+     "max": 180,
+     "decimals": 1,
+     "default": 0
+    },
+    {
+     "name": "Q [band 2]",
+     "kind": "Num",
+     "unit": "Q",
+     "min": 8,
+     "max": 1250,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Freq Lo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 1000,
+     "decimals": 0,
+     "default": 100
+    },
+    {
+     "name": "Gain Lo [low shelf]",
+     "kind": "Volume"
+    },
+    {
+     "name": "Freq Hi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 440,
+     "max": 11000,
+     "decimals": 0,
+     "default": 2000
+    },
+    {
+     "name": "Gain Lo [high shelf (declared as Gain Lo)]",
+     "kind": "Volume"
+    }
+   ],
+   "pattern_check": "legacy version of VEQ5: first 11 fields"
+  },
+  "VDS1": {
+   "class": "DelaySt6_c",
+   "legacy_of": "VDS5",
+   "source": "getCompatibleChunkId maps it to VDS5; first 14 fields of VDS5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "OffOn",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "TimeL",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "SyncL",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "TimeR",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 250
+    },
+    {
+     "name": "SyncR",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 10,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Feedback",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 40
+    },
+    {
+     "name": "CutLo",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 20480
+    },
+    {
+     "name": "CutHi",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 8,
+     "max": 11000,
+     "decimals": 0,
+     "default": 8
+    },
+    {
+     "name": "Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": -100,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Feedback Link",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Crossdelay",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Filters in Feedback",
+     "kind": "OnOff",
+     "default": 0
+    }
+   ],
+   "pattern_check": "legacy version of VDS5: first 14 fields"
+  },
+  "VDP1": {
+   "class": "DelayPP6_c",
+   "legacy_of": "VDP5",
+   "source": "getCompatibleChunkId maps it to VDP5; first 13 fields of VDP5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Time Center",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 0,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Center",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Time Left",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Left",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 7,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Pan Left",
+     "kind": "Pan",
+     "default": -100
+    },
+    {
+     "name": "Time Right",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 1,
+     "max": 1300,
+     "decimals": 0,
+     "default": 125
+    },
+    {
+     "name": "Sync Right",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 22,
+     "default": 10,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 ",
+     "width": 5
+    },
+    {
+     "name": "Pan Right",
+     "kind": "Pan",
+     "default": 100
+    },
+    {
+     "name": "Feedback L+R",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 40
+    },
+    {
+     "name": "Balance Pre/LR",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "Feedback Intermediate",
+     "kind": "OnOff",
+     "default": 0
+    }
+   ],
+   "pattern_check": "legacy version of VDP5: first 13 fields"
+  },
+  "VDM3": {
+   "class": "DelayMd6_c",
+   "legacy_of": "VDM5",
+   "source": "getCompatibleChunkId maps it to VDM5; first 9 fields of VDM5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Time",
+     "kind": "Num",
+     "unit": "msec",
+     "min": 2,
+     "max": 13000,
+     "decimals": 1,
+     "default": 1250
+    },
+    {
+     "name": "Feed",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 99,
+     "decimals": 2,
+     "default": 0
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 25
+    },
+    {
+     "name": "ModRate",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 1,
+     "max": 1000,
+     "decimals": 2,
+     "default": 50
+    },
+    {
+     "name": "ModDept",
+     "kind": "Num",
+     "min": 0,
+     "max": 999,
+     "decimals": 3,
+     "default": 0
+    },
+    {
+     "name": "Delay Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": 3,
+     "max": 20,
+     "default": 13,
+     "options": " Off  1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16",
+     "width": 5
+    },
+    {
+     "name": "Fil ",
+     "kind": "Num",
+     "min": -101,
+     "max": 100,
+     "decimals": 2,
+     "default": -101
+    },
+    {
+     "name": "Mod Speed Sync",
+     "kind": "Enu",
+     "unit": "Notes",
+     "min": -13,
+     "max": 26,
+     "default": -13,
+     "options": " Off 16/1*16/1 16/1T 8/1* 8/1  8/1T 4/1* 4/1  4/1T 2/1* 2/1  2/1T 1/1* 1/1  1/1T 1/2* 1/2  1/2T 1/4* 1/4  1/4T 1/8* 1/8  1/8T1/16*1/16 1/16T1/32*1/32 1/32T 1/64 5/16 7/16 9/16 5/8 11/1613/16 7/8 15/16",
+     "width": 5
+    }
+   ],
+   "pattern_check": "legacy version of VDM5: first 9 fields"
+  },
+  "VCX1": {
+   "class": "Crush6_c",
+   "legacy_of": "VCX5",
+   "source": "getCompatibleChunkId maps it to VCX5; first 12 fields of VCX5",
+   "fields": [
+    {
+     "name": "Version",
+     "kind": "Num",
+     "min": 200,
+     "max": 9900,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Verson 6 indicator",
+     "kind": "Num",
+     "min": 0,
+     "max": 2,
+     "decimals": 0,
+     "default": 2
+    },
+    {
+     "name": "Resolution",
+     "kind": "Num",
+     "unit": "bit",
+     "min": 100,
+     "max": 1601,
+     "decimals": 2,
+     "default": 400
+    },
+    {
+     "name": "Dither On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Unused",
+     "kind": "Num",
+     "min": 1,
+     "max": 32,
+     "decimals": 0,
+     "default": 1
+    },
+    {
+     "name": "Divider Mode",
+     "kind": "Enu",
+     "min": 1,
+     "max": 3,
+     "default": 3,
+     "options": "AVGSTPSLD",
+     "width": 3
+    },
+    {
+     "name": "Filter Type ",
+     "kind": "Enu",
+     "min": 1,
+     "max": 4,
+     "default": 1,
+     "options": "LP12HP12BP12BR12",
+     "width": 4
+    },
+    {
+     "name": "Cutoff",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 20480,
+     "decimals": 0,
+     "default": 20480
+    },
+    {
+     "name": "Resonance",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "FilterPostDiv On/Off",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Auto Volume compensation",
+     "kind": "OnOff",
+     "default": 1
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 100
+    }
+   ],
+   "pattern_check": "legacy version of VCX5: first 12 fields"
+  },
+  "VCH0": {
+   "class": "Chorus6_c",
+   "legacy_of": "VCH5",
+   "source": "getCompatibleChunkId maps it to VCH5; first 12 fields of VCH5",
+   "fields": [
+    {
+     "name": "Chorus Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Time",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 1,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Chorus Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 4000,
+     "decimals": 3,
+     "default": 500
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Unused Mode",
+     "kind": "Num",
+     "min": 0,
+     "max": 1,
+     "decimals": 0,
+     "default": 0
+    },
+    {
+     "name": "Invert Signal",
+     "kind": "OnOff",
+     "default": 0
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Chorus Pan",
+     "kind": "Pan",
+     "default": 0
+    }
+   ],
+   "pattern_check": "legacy version of VCH5: first 12 fields"
+  },
+  "VCH2": {
+   "class": "Chorus6_c",
+   "legacy_of": "VCH5",
+   "source": "getCompatibleChunkId maps it to VCH5; first 6 fields of VCH5",
+   "fields": [
+    {
+     "name": "Chorus Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Time",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 1,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Chorus Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 4000,
+     "decimals": 3,
+     "default": 500
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    }
+   ],
+   "pattern_check": "legacy version of VCH5: first 6 fields"
+  },
+  "VCH3": {
+   "class": "Chorus6_c",
+   "legacy_of": "VCH5",
+   "source": "getCompatibleChunkId maps it to VCH5; first 7 fields of VCH5",
+   "fields": [
+    {
+     "name": "Chorus Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Time",
+     "kind": "Num",
+     "unit": "ms",
+     "min": 1,
+     "decimals": 2,
+     "default": 200
+    },
+    {
+     "name": "Chorus Speed",
+     "kind": "Num",
+     "unit": "Hz",
+     "min": 20,
+     "max": 4000,
+     "decimals": 3,
+     "default": 500
+    },
+    {
+     "name": "Unused Dry",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    },
+    {
+     "name": "Chorus Stereo",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 100,
+     "decimals": 2,
+     "default": 100
+    },
+    {
+     "name": "Unused Wet",
+     "kind": "Num",
+     "unit": "%",
+     "min": 0,
+     "max": 200,
+     "decimals": 0,
+     "default": 30
+    }
+   ],
+   "pattern_check": "legacy version of VCH5: first 7 fields"
+  }
+ },
+ "unnamed_tags": []
+}

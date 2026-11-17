@@ -1,0 +1,177 @@
+{
+  "created_utc": "2026-11-17T16:32:03.921426+00:00",
+  "version": "0.0.2",
+  "architecture": "arm64",
+  "qualification": {
+    "core": 1194,
+    "graph": 28,
+    "modular": 46,
+    "modular_asan_ubsan": 46,
+    "importer": 4,
+    "renderer_timing": 1,
+    "converted_samples_finite_bounded": 40000,
+    "native_ui": "Contextual panels and minimum-size layout rendered; control binding, JSON recall, byte-identical audio recall and invalid-patch preservation passed; no audio device opened.",
+    "hardware_audio_tested": false,
+    "vst3_built": false
+  },
+  "artifacts": {
+    "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth": {
+      "sha256": "aa8a94850cf229912b88a68e23039a5cdb3f2f1fe0f47571ec6ccd01796e630f",
+      "bytes": 4237152
+    },
+    "build/modular-qualification.log": {
+      "sha256": "486133981f3fb9a38881cdd87580e89e72c907b0d1255a280172a28740b86035",
+      "bytes": 2746
+    },
+    "build/ui-review/ui-check.txt": {
+      "sha256": "15138d2b062103e3e8f9856e8c6275f887508c4480baa44a72dd120583a177ab",
+      "bytes": 174
+    },
+    "build/ui-review/modal.png": {
+      "sha256": "556718e3bb9ad3d8b444941032b13b358264ddbf56dec534b314b84ab31f83b1",
+      "bytes": 107298
+    },
+    "build/ui-review/bass-drum.png": {
+      "sha256": "4c8f021e8930f87d52c4a22c3bc361f3ea3fc55097ec941093fba9ad93b49225",
+      "bytes": 125726
+    },
+    "build/ui-review/modal-small.png": {
+      "sha256": "2d2842ea778b30a99cc71f893e42e04f791180b738b39d7348553354de36a367",
+      "bytes": 98645
+    }
+  },
+  "sources": {
+    "src/modular/graph.cpp": {
+      "sha256": "a85df6e4365e34a935329cbea5880cc4f4fe57da8c848846703c68fa69c691d4",
+      "bytes": 6052
+    },
+    "src/modular/player.h": {
+      "sha256": "4a41c6fff5973fef80b0fc65c7906c1ef6c4deccb7165a4e3bc5ce965a5de586",
+      "bytes": 4956
+    },
+    "src/modular/modules.cpp": {
+      "sha256": "22570cf8871213ff3b74159aef58e4a15891967be276b1e20dcca0d061e4b9a6",
+      "bytes": 9468
+    },
+    "src/modular/graph.h": {
+      "sha256": "05c87aad442650bc1865038f367abb697afe6d77dfbdf71a317af011517e5d7e",
+      "bytes": 2518
+    },
+    "src/modular/runtime.h": {
+      "sha256": "0a2eaaf3c51e2703cfd1718349b18960ae92855033d79b2367daebd530f1d78e",
+      "bytes": 2046
+    },
+    "src/modular/runtime.cpp": {
+      "sha256": "f369a326841400335570a552bd06c9aa9a173104f7a29f216613b1562821c0d7",
+      "bytes": 3078
+    },
+    "third_party/mutable/PROVENANCE.json": {
+      "sha256": "329ff0a76b811dde5b2b4fbe6923768b56962676ff1fe3a1dba00f2f05bad5eb",
+      "bytes": 3153
+    },
+    "third_party/mutable/README-upstream.md": {
+      "sha256": "437f4a15b7683dafabfbda1c09e0e8055e2d304cfefcb6b58c9c1f66539728c4",
+      "bytes": 2960
+    },
+    "third_party/mutable/LICENSE-stmlib": {
+      "sha256": "6fde7600ac71ff9e4bdc28b642063d1a65e195f28bb07fb52a9b476efb5aa791",
+      "bytes": 2746
+    },
+    "third_party/mutable/stmlib/stmlib.h": {
+      "sha256": "3afc8589a951e882d9eea16b3eda8623dd6fb0079dd11dfbce817e65be6cfba9",
+      "bytes": 3142
+    },
+    "third_party/mutable/stmlib/utils/random.cc": {
+      "sha256": "145c4d7a30e373d001fd664ce6f97a475458f7dc8286252d24ca6f592e0cdb93",
+      "bytes": 1483
+    },
+    "third_party/mutable/stmlib/utils/random.h": {
+      "sha256": "423f01e905fa279864878f34e42136ad1eb37a33dad58739affaaab06b793e5d",
+      "bytes": 2086
+    },
+    "third_party/mutable/stmlib/dsp/parameter_interpolator.h": {
+      "sha256": "4b05028c320e6946418a36e9662a4e5a142e5bfab0423835a77d074d9c7fc217",
+      "bytes": 2391
+    },
+    "third_party/mutable/stmlib/dsp/rsqrt.h": {
+      "sha256": "da1483cd97e0bcfcb3734ff3bfea1c46fdcbd5a282abab7a3a4be9d5adbdeabb",
+      "bytes": 2628
+    },
+    "third_party/mutable/stmlib/dsp/dsp.h": {
+      "sha256": "98b42900c4accbe9fbb2cfe2ec6fada024b57ec9a1becff008b0f35bd4fd8ddb",
+      "bytes": 4641
+    },
+    "third_party/mutable/stmlib/dsp/cosine_oscillator.h": {
+      "sha256": "a7f6429e8bca85aa19ce91e3f1908fd7fb1fdf378a61fe2c87717a94d6f30a97",
+      "bytes": 2940
+    },
+    "third_party/mutable/stmlib/dsp/filter.h": {
+      "sha256": "f4bbf97ac8dfdea255b8a37e179ba0286978c01a12ad8d3362eaa5862cf7c326",
+      "bytes": 19380
+    },
+    "third_party/mutable/stmlib/dsp/units.h": {
+      "sha256": "70cf104c06f0e34ada90416f121417a13d17b6736116f0fc07063c1cd2084877",
+      "bytes": 2289
+    },
+    "third_party/mutable/stmlib/dsp/units.cc": {
+      "sha256": "0acbe230ffaa2d181ba285fce54f2fd0b2339b3ec163a1dd00c946e6bf82ea4a",
+      "bytes": 11336
+    },
+    "third_party/mutable/plaits/resources.h": {
+      "sha256": "a7ee997d0c951e968af91625f43d0876b260cb809d22345703f2656589d95bb3",
+      "bytes": 3656
+    },
+    "third_party/mutable/plaits/resources_selected.cc": {
+      "sha256": "75c9e991a4846dd39997c520c6debf4746968e37809aee1fd24d265e6d02a57d",
+      "bytes": 14648
+    },
+    "third_party/mutable/plaits/dsp/dsp.h": {
+      "sha256": "0ef1f2c2eecfd54fc6da40de0117e68e3804e412c55b575c027eba35f7439625",
+      "bytes": 2041
+    },
+    "third_party/mutable/plaits/dsp/drums/analog_bass_drum.h": {
+      "sha256": "8b45958cd7ae859cccc0cd7f1d6954e66873542da61e290e42531a83a9475717",
+      "bytes": 5775
+    },
+    "third_party/mutable/plaits/dsp/noise/dust.h": {
+      "sha256": "2adb64c7368c5a459db23c71503a63c237b6936a281408a9ca16c7e661626107",
+      "bytes": 1745
+    },
+    "third_party/mutable/plaits/dsp/oscillator/sine_oscillator.h": {
+      "sha256": "7833402c53117fe1325c7959bc2301f92b963a8d80c0e752e80062d2e6dd07e8",
+      "bytes": 7165
+    },
+    "third_party/mutable/plaits/dsp/physical_modelling/resonator.cc": {
+      "sha256": "6b51c987acd069f97b526a53ba431ece3e447981385dc193ebbe4557ff76fc6a",
+      "bytes": 4178
+    },
+    "third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc": {
+      "sha256": "c3e5ab1fd540f92e56ea62150a28304ff401930c1db243b2ebb42a5417660fec",
+      "bytes": 3321
+    },
+    "third_party/mutable/plaits/dsp/physical_modelling/modal_voice.h": {
+      "sha256": "0a068c46c82986ece0b2c178e67eeb3ab9500ef8e40609f1dfc3c1589f7c2e86",
+      "bytes": 2226
+    },
+    "third_party/mutable/plaits/dsp/physical_modelling/resonator.h": {
+      "sha256": "0e674524bc13793d1ade9ff7bc5a4a96945f6bf82f1067b86bba5f95051effd0",
+      "bytes": 3974
+    },
+    "app/Main.cpp": {
+      "sha256": "2f70e7b63324d0165dcdf4726025bfaf869293a9c734bac0023f54f8f07edcbb",
+      "bytes": 23468
+    },
+    "src/core/envelope.cpp": {
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+      "bytes": 4792
+    },
+    "src/core/effects.cpp": {
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+      "bytes": 52594
+    },
+    "app/OptisynthApp.jucer": {
+      "sha256": "00d594f0c5a3e7b1cbe29a96e285f4a946b1657449aab51eb57fd9b176e36d99",
+      "bytes": 4049
+    }
+  }
+}

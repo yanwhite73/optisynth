@@ -1,0 +1,430 @@
+{
+  "created_utc": "2026-11-17T15:42:36.118094+00:00",
+  "source": "/Users/yanwhite/Documents/Music docs/Code/partials",
+  "source_git_head": null,
+  "method": "Local empty Git clone plus verified copy of uncommitted first-party working source. No commits.",
+  "excluded": [
+    "build outputs",
+    "third-party SDKs",
+    "original binaries",
+    "presets",
+    "audio"
+  ],
+  "files": {
+    ".gitignore": {
+      "source": "partials/.gitignore",
+      "bytes": 124,
+      "sha256": "4809342bf0cfeb35750dc67431b749d4e0f046ed6456022363a6f08d83b8b76a"
+    },
+    "Makefile": {
+      "source": "partials/Makefile",
+      "bytes": 1265,
+      "sha256": "e83d66df1ead69e378ad10324163bdbec13561c0321b8ad03c4cfb7e6bf9427f"
+    },
+    "README.md": {
+      "source": "partials/README.md",
+      "bytes": 6160,
+      "sha256": "4ab16d0e8a31f60926615a238c076df00017857b0ddc2b120b013efbc8625ea8"
+    },
+    "docs/design.md": {
+      "source": "partials/docs/design.md",
+      "bytes": 109086,
+      "sha256": "c9a263bd47746e3ffb0bb7603e784fc140fc3bd0809066918935ca878dbf4338"
+    },
+    "docs/feature_priorities.md": {
+      "source": "partials/docs/feature_priorities.md",
+      "bytes": 2342,
+      "sha256": "1a382aec61e91674a171db6214241c0da64d622022a971c1a6b655135ce5b20b"
+    },
+    "docs/feature_usage.json": {
+      "source": "partials/docs/feature_usage.json",
+      "bytes": 18068,
+      "sha256": "4a09bee182013047eaf6a40ad2b7b2acb878d90833eec36aa3cdb6b274e32508"
+    },
+    "docs/handoff_claude_to_codex_2026-11-09.md": {
+      "source": "partials/docs/handoff_claude_to_codex_2026-11-09.md",
+      "bytes": 8953,
+      "sha256": "39f8a1ebbff6848cd64dc71e0e49be842590db29e166e6555ec1c4e33c601b8b"
+    },
+    "docs/host_parameter_extension.md": {
+      "source": "partials/docs/host_parameter_extension.md",
+      "bytes": 12491,
+      "sha256": "7ed7eb1acc67f2e9d15e340602dd999caf144d4f2e5f028386442b5b5edf873f"
+    },
+    "docs/host_parameter_extension_proposal.md": {
+      "source": "partials/docs/host_parameter_extension_proposal.md",
+      "bytes": 16563,
+      "sha256": "7065d571c9de2cd73bbab53570a54ce00725c0203abe553d58a383dfc3f074fc"
+    },
+    "docs/host_parameters.json": {
+      "source": "partials/docs/host_parameters.json",
+      "bytes": 282803,
+      "sha256": "4425c7567f9e3528e05af90087d9c16211db73e8ef60921191b61326780efe7a"
+    },
+    "docs/native_preset_export.md": {
+      "source": "partials/docs/native_preset_export.md",
+      "bytes": 12833,
+      "sha256": "3085aeabc92740a5440d72d8830e8a4cbb9d0156107c6d12eebb80b56c542bd3"
+    },
+    "docs/optimystery_parameter_handoff.md": {
+      "source": "partials/docs/optimystery_parameter_handoff.md",
+      "bytes": 8879,
+      "sha256": "2faacf9abe0a711b607a47e0e9ed8c2bdba35e83f3662bd2dc5ca949909d786a"
+    },
+    "docs/source_backup.md": {
+      "source": "partials/docs/source_backup.md",
+      "bytes": 2568,
+      "sha256": "00068f32d7ab6da02f9020e09d642f58d4e3eb2cf5f33b6cce09b69d33daac3c"
+    },
+    "docs/vst3_parameters.json": {
+      "source": "partials/docs/vst3_parameters.json",
+      "bytes": 42554,
+      "sha256": "181bf0470c20dab32da54c45e65a9f08360a69f24c9c25e1c8d6b639de4e21bf"
+    },
+    "plugin/Partials.jucer": {
+      "source": "partials/plugin/Partials.jucer",
+      "bytes": 5377,
+      "sha256": "b0633e83e0392f3faf4812ff24c4e9b13e25c6d9d4c6eb16c73187881ddf30fb"
+    },
+    "plugin/Source/PluginEditor.cpp": {
+      "source": "partials/plugin/Source/PluginEditor.cpp",
+      "bytes": 51863,
+      "sha256": "6551d78ff67519a99e8d86a272647a12250911d9f91e03da375ba755031f3ee3"
+    },
+    "plugin/Source/PluginEditor.h": {
+      "source": "partials/plugin/Source/PluginEditor.h",
+      "bytes": 625,
+      "sha256": "9df6840ddb1c91d218184538d0eb9f086380a84d30c2e6348cc58c1192b571cf"
+    },
+    "plugin/Source/PluginProcessor.cpp": {
+      "source": "partials/plugin/Source/PluginProcessor.cpp",
+      "bytes": 20427,
+      "sha256": "fd86abbb6c38a5e3226a9e2aed795f8068b7d2bf7d13bd48267f85d28d7f3075"
+    },
+    "plugin/Source/PluginProcessor.h": {
+      "source": "partials/plugin/Source/PluginProcessor.h",
+      "bytes": 5707,
+      "sha256": "dfd2b6f94236b8eb77066e5f361770b6d3cb1340fefb57a6351448196fc3abe1"
+    },
+    "plugin/Source/TypingKeyboard.h": {
+      "source": "partials/plugin/Source/TypingKeyboard.h",
+      "bytes": 1106,
+      "sha256": "2d225719b979433851616cc8867e1158c2e7aa225a220f297d193eca82e848e8"
+    },
+    "plugin/Tests/PresetExport.h": {
+      "source": "partials/plugin/Tests/PresetExport.h",
+      "bytes": 24274,
+      "sha256": "a79d1ff9d0b2a26f7069c6356485e68038c56eaaf817d4d2fda9653f3cc0d310"
+    },
+    "plugin/Tests/StressTest.cpp": {
+      "source": "partials/plugin/Tests/StressTest.cpp",
+      "bytes": 37590,
+      "sha256": "cbd1ed7185c694336a95b012f56d14bd034c16ac5543d50d8e489553a09014fb"
+    },
+    "plugin/Tests/StressTest.jucer": {
+      "source": "partials/plugin/Tests/StressTest.jucer",
+      "bytes": 5063,
+      "sha256": "e3262eabda303a77b9644eb0c567047fedb3b065a7c73b1d77e75bfeff615cf2"
+    },
+    "src/cli/render.cpp": {
+      "source": "partials/src/cli/render.cpp",
+      "bytes": 6455,
+      "sha256": "c6c826cca722e447ab2eb2a2a5b79e007682beba3a82b769320673f5f2b03fc7"
+    },
+    "src/core/arp.cpp": {
+      "source": "partials/src/core/arp.cpp",
+      "bytes": 7106,
+      "sha256": "1da074c5b2deacc2962f7bbdae6d100917c83a4c566e8f81b2e876375ca63c8a"
+    },
+    "src/core/arp.h": {
+      "source": "partials/src/core/arp.h",
+      "bytes": 2450,
+      "sha256": "440586c32480f10e104e47a7e5d5b32127b73cfc4e6b3749ee4d5808463bffdd"
+    },
+    "src/core/effect_controls.h": {
+      "source": "partials/src/core/effect_controls.h",
+      "bytes": 8506,
+      "sha256": "c68adbb2f2f8c7472d331f3893b2d2d0ab921b4eb61e2d6c575bef75976e0838"
+    },
+    "src/core/effects.cpp": {
+      "source": "partials/src/core/effects.cpp",
+      "bytes": 52594,
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf"
+    },
+    "src/core/effects.h": {
+      "source": "partials/src/core/effects.h",
+      "bytes": 4128,
+      "sha256": "b57de8bc2173ea57d8b525c675fdf36aae212cbb13abfc52216880bd78d96741"
+    },
+    "src/core/engine.cpp": {
+      "source": "partials/src/core/engine.cpp",
+      "bytes": 48864,
+      "sha256": "b64eee43dd30061b021061575842c1d7bec98872e199a0d0ea234d4e34a362d9"
+    },
+    "src/core/engine.h": {
+      "source": "partials/src/core/engine.h",
+      "bytes": 10071,
+      "sha256": "baa71221448e1736b7a273743118496354e902967a17e7f57f92a7c6b7cbfc5b"
+    },
+    "src/core/envelope.cpp": {
+      "source": "partials/src/core/envelope.cpp",
+      "bytes": 4792,
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660"
+    },
+    "src/core/envelope.h": {
+      "source": "partials/src/core/envelope.h",
+      "bytes": 1275,
+      "sha256": "14b2df488dceeadbd46f8d31b35b7c1406b90dccd476b5a9183342f3e5a4d515"
+    },
+    "src/core/live_controls.h": {
+      "source": "partials/src/core/live_controls.h",
+      "bytes": 9103,
+      "sha256": "ec4290f699652b1db3922dc3fad42250cb6bcf579e4788830a635bbdbd8b13f4"
+    },
+    "src/core/patch.cpp": {
+      "source": "partials/src/core/patch.cpp",
+      "bytes": 17081,
+      "sha256": "a8b9bac44e2fd8977f735d49660f83dd4dd23529c197a1ed30c6b891d97e31e4"
+    },
+    "src/core/patch.h": {
+      "source": "partials/src/core/patch.h",
+      "bytes": 6118,
+      "sha256": "f89e0ece6a3dcec69f31cf760ae3c4f3c90fe61f361f860e32677c5635c5a3fc"
+    },
+    "src/core/spectrum.cpp": {
+      "source": "partials/src/core/spectrum.cpp",
+      "bytes": 788,
+      "sha256": "e52d96d5b5a50b9c3b8943d4cb5550d8c104d974b1ae5ed1086dd3adf3a5336f"
+    },
+    "src/core/spectrum.h": {
+      "source": "partials/src/core/spectrum.h",
+      "bytes": 1407,
+      "sha256": "fdbe81dbf8457d59853679d242d982f47ce1a338a49a85512acd0d99d3099169"
+    },
+    "src/core/table_bank.cpp": {
+      "source": "partials/src/core/table_bank.cpp",
+      "bytes": 5621,
+      "sha256": "b86da25ba52213dd05ff2fe9395fa5be8b2ac85d6fa1f53fda3736aee00f3f7d"
+    },
+    "src/core/table_bank.h": {
+      "source": "partials/src/core/table_bank.h",
+      "bytes": 2187,
+      "sha256": "55772cd1214b13a12f3cbeb164c2e7d4e7d64f817cbac7a64787a3eec42ad5be"
+    },
+    "tests/fixtures/host_parameters_v1.json": {
+      "source": "partials/tests/fixtures/host_parameters_v1.json",
+      "bytes": 22836,
+      "sha256": "50a7dfcc84d09cfc199f76e2914e5f29b462b996b24ae46a5b399941870103f0"
+    },
+    "tests/fixtures/vst3_parameters_v1.json": {
+      "source": "partials/tests/fixtures/vst3_parameters_v1.json",
+      "bytes": 4433,
+      "sha256": "2b4bbc2ebfac7bfa2bff9b385510b5cbe9b19f7c3bb6141a4d3961da50d1990a"
+    },
+    "tests/test_core.cpp": {
+      "source": "partials/tests/test_core.cpp",
+      "bytes": 66272,
+      "sha256": "87c0e87c19beed2e2ac63231ec789b46cec28774aede355ba250e74f0651c3ba"
+    },
+    "tests/test_host_extension.h": {
+      "source": "partials/tests/test_host_extension.h",
+      "bytes": 5972,
+      "sha256": "1cb3837a63942b12666d2ae3c261f147cc4244eee517afeee1086452355dab04"
+    },
+    "tests/test_importer.py": {
+      "source": "partials/tests/test_importer.py",
+      "bytes": 1551,
+      "sha256": "5f079c0d976235ba622fcb242edd181300f31531cf92afb94b240404ef7724c4"
+    },
+    "tests/test_renderer.py": {
+      "source": "partials/tests/test_renderer.py",
+      "bytes": 2438,
+      "sha256": "731003f5ae0969eb7b9cb59767406d84f2131115f7294d63917a8e392441b8d7"
+    },
+    "tools/ab_levels.py": {
+      "source": "partials/tools/ab_levels.py",
+      "bytes": 5086,
+      "sha256": "d906d9eee4a199e087fd6b3255bd6f51cdcd9740561c5f0f833acf329b6c50c1"
+    },
+    "tools/audit_feature_usage.py": {
+      "source": "partials/tools/audit_feature_usage.py",
+      "bytes": 4763,
+      "sha256": "7e5d35052f2cc38a0d6e7577a8df3f80c80f317872fce6f649d09d69dd9e7dcc"
+    },
+    "tools/backup_source.py": {
+      "source": "partials/tools/backup_source.py",
+      "bytes": 5155,
+      "sha256": "94095b7f498617e2116791584458833ea2962d145c92736633b8764395795444"
+    },
+    "tools/build_host_extension.sh": {
+      "source": "partials/tools/build_host_extension.sh",
+      "bytes": 949,
+      "sha256": "4242ba35cae6a17a8827fb3223e889294b7ca02625aab044a7f6005285335bb6"
+    },
+    "tools/check_character_core.sh": {
+      "source": "partials/tools/check_character_core.sh",
+      "bytes": 618,
+      "sha256": "d011372330b9ace46182fd3a69341d635dea47994932f1dd2ace3100b5f2c320"
+    },
+    "tools/compare_fushigi_phrase.py": {
+      "source": "partials/tools/compare_fushigi_phrase.py",
+      "bytes": 8717,
+      "sha256": "dce6e59270159f073ba96d4f4d55eae442cec8c1f57cff51674e36c6cfbc39da"
+    },
+    "tools/compare_resonator.py": {
+      "source": "partials/tools/compare_resonator.py",
+      "bytes": 2234,
+      "sha256": "c0938b5a25afa6b42210e144fdbb489a5a280261b32025ba8c58502bbd527dc8"
+    },
+    "tools/extract_bitwig_spectral_phrase.py": {
+      "source": "partials/tools/extract_bitwig_spectral_phrase.py",
+      "bytes": 4396,
+      "sha256": "fa7e564c797314d8f02a385c2323dfb2a4900f430ad42d574bf0c648bc11515c"
+    },
+    "tools/extract_fushigi_programs.py": {
+      "source": "partials/tools/extract_fushigi_programs.py",
+      "bytes": 5529,
+      "sha256": "05f722e4b7d9cbac44e8416e8d2a3b380787ee782d02721616c9bf5eeeee6bff"
+    },
+    "tools/fit_resonator.cpp": {
+      "source": "partials/tools/fit_resonator.cpp",
+      "bytes": 4857,
+      "sha256": "f5433b63854f9a200bd7a2cf738c5c15e6edad9c68e75c45576a8bdd4b6f7de6"
+    },
+    "tools/import_linplug.py": {
+      "source": "partials/tools/import_linplug.py",
+      "bytes": 24385,
+      "sha256": "3c36bf2214da04b605ae54df122acea5edd37023641060a7dc9ab2604094b349"
+    },
+    "tools/install_vst3.py": {
+      "source": "partials/tools/install_vst3.py",
+      "bytes": 2854,
+      "sha256": "611090ba12b010cefe0ea85d99651bbebfd6fa89c8b39baa0b9a0fabdaa6b30a"
+    },
+    "tools/inventory_fushigi.py": {
+      "source": "partials/tools/inventory_fushigi.py",
+      "bytes": 9140,
+      "sha256": "8a9f49121863400bacb5137643d3785b6887207cc16cad6127c39f5d804cbcf7"
+    },
+    "tools/measure_character.sh": {
+      "source": "partials/tools/measure_character.sh",
+      "bytes": 468,
+      "sha256": "9b1c4fc07a7456adc3fba5e3e89885a69a63089143bd2501c14c050f8bff0f8e"
+    },
+    "tools/measure_fx3.sh": {
+      "source": "partials/tools/measure_fx3.sh",
+      "bytes": 727,
+      "sha256": "1cc018b0f18a331dc10c28b43c1a6cb6a4aff66c6e6ac39f4dfdb946c8083f7c"
+    },
+    "tools/migrate_env_depth.py": {
+      "source": "partials/tools/migrate_env_depth.py",
+      "bytes": 1183,
+      "sha256": "8cd1f7ee78649932929d9dd086b8cb4fcd6d369b0a6eb1cb122278fce5f5a6c7"
+    },
+    "tools/migrate_matrix_zero.py": {
+      "source": "partials/tools/migrate_matrix_zero.py",
+      "bytes": 3953,
+      "sha256": "e52068378a5d75d09bf1103b1bac4da60db12a3883e8dfd3a0f2a24a2a821c7e"
+    },
+    "tools/prepare_resonator_fit.py": {
+      "source": "partials/tools/prepare_resonator_fit.py",
+      "bytes": 820,
+      "sha256": "74158ed07b658a5621504c2b6d650bff68289322c041268d46ab9aa8c265f008"
+    },
+    "tools/qualify_character.sh": {
+      "source": "partials/tools/qualify_character.sh",
+      "bytes": 2653,
+      "sha256": "9fdcc389c6328efe88b9492e7f5ba9327f036ef77cc154b2625523b310244f95"
+    },
+    "tools/qualify_fx3.sh": {
+      "source": "partials/tools/qualify_fx3.sh",
+      "bytes": 2088,
+      "sha256": "f6f371c18754d995c2dbf439ee94101d84bcc1ce5feca712e2df89bade79a004"
+    },
+    "tools/qualify_manual.sh": {
+      "source": "partials/tools/qualify_manual.sh",
+      "bytes": 2981,
+      "sha256": "d29723114041e043a91ee08255b475015ce7c1e7492775a8413d3eca300a6457"
+    },
+    "tools/qualify_native_export.py": {
+      "source": "partials/tools/qualify_native_export.py",
+      "bytes": 6661,
+      "sha256": "c34f3e2ffd46ca5d2a837fff74b26036f2475ce498d7df016a85b2b7cc743b37"
+    },
+    "tools/qualify_plugin.sh": {
+      "source": "partials/tools/qualify_plugin.sh",
+      "bytes": 1565,
+      "sha256": "c6528b1a293baefc03c50c6fc8aa1ed2f0c1186d9ac1d7ffa3b167853c8b4a15"
+    },
+    "tools/read_bitwig_project.py": {
+      "source": "partials/tools/read_bitwig_project.py",
+      "bytes": 6944,
+      "sha256": "748abac4736357f6991c9af3d8adb17a0a5508f55a5b4aee9f80b67bf4df959b"
+    },
+    "tools/validate_resonator_fit.py": {
+      "source": "partials/tools/validate_resonator_fit.py",
+      "bytes": 1074,
+      "sha256": "8c75093ca7debaf8ed0e8039551e6207bca355b384b685dc2c81ac65dde54f08"
+    },
+    "tools/verify_bass.sh": {
+      "source": "partials/tools/verify_bass.sh",
+      "bytes": 816,
+      "sha256": "3a6668fca82534a659f1bcd7ec27defd139d0bbb3b8ab5f39a3692393a7f8a08"
+    },
+    "tools/verify_character.sh": {
+      "source": "partials/tools/verify_character.sh",
+      "bytes": 728,
+      "sha256": "bfd07887edd55626aa682f59363516575a950623b65a3100e4d2efcd40408fbb"
+    },
+    "tools/verify_fx3.sh": {
+      "source": "partials/tools/verify_fx3.sh",
+      "bytes": 702,
+      "sha256": "95af66a8038dde85d20e418f5229b9d7d5fa15e8ed04d9f45c02c07767d9b4d9"
+    },
+    "tools/verify_lfo.sh": {
+      "source": "partials/tools/verify_lfo.sh",
+      "bytes": 572,
+      "sha256": "e59750e544dcacbe91b8ed51dfa1cc23160b483ec10dddc0748889ee42d59c0d"
+    },
+    "tools/verify_manual.sh": {
+      "source": "partials/tools/verify_manual.sh",
+      "bytes": 702,
+      "sha256": "5dde64070e7fb7d2a6b6db52f961465da1058c573cb76acf0fb9ed7df89bd3a2"
+    },
+    "tools/verify_offline.sh": {
+      "source": "partials/tools/verify_offline.sh",
+      "bytes": 829,
+      "sha256": "b682b2f4e1f9555af066c1e752b29e9a6af4191fd05b74eb30f63328a29c5dd5"
+    },
+    "tools/verify_oversampling.sh": {
+      "source": "partials/tools/verify_oversampling.sh",
+      "bytes": 635,
+      "sha256": "a468625381a315871eee24316b410d6f5e032ae47c40cadf646697a805b83f4e"
+    },
+    "reference/docs/spectral_architecture.md": {
+      "source": "reverse-engineer/docs/spectral_architecture.md",
+      "bytes": 79523,
+      "sha256": "8efa2ee02442d976db6bffb34b7f537510206c8990f0ff176da76fa85a4f1d9f"
+    },
+    "reference/tools/linplug_fxp.py": {
+      "source": "reverse-engineer/tools/linplug_fxp.py",
+      "bytes": 27946,
+      "sha256": "1b6b6aa4c5eae92eae7bed63cc566fd0214b7c6c0d2b3fb1f3e68b0f0c6dceff"
+    },
+    "reference/tools/schemas/LSP1.json": {
+      "source": "reverse-engineer/tools/schemas/LSP1.json",
+      "bytes": 1324,
+      "sha256": "c1b27f97390e01c7c8dc409103c896d5872b2d238363531f9eeed401ba7e5908"
+    },
+    "reference/tools/schemas/LSP1_fields.json": {
+      "source": "reverse-engineer/tools/schemas/LSP1_fields.json",
+      "bytes": 116538,
+      "sha256": "694ba7685df7ae4f506f8ede15d594565d7c0233b32cc638ae447b50536ea5f8"
+    },
+    "reference/tools/schemas/LSP1_params.json": {
+      "source": "reverse-engineer/tools/schemas/LSP1_params.json",
+      "bytes": 124155,
+      "sha256": "3917417a7ea4e041b8180e02c9056b547289d38a6e84043645a986722b7cff3e"
+    }
+  }
+}

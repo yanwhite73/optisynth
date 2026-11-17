@@ -1,0 +1,86 @@
+# Engineering log
+
+## 17 November 2026 — First Mutable voice and contextual native editor
+
+Requests 12–14 steer the ongoing build: Mutable-first, Spectral envelope/filter
+choices, contextual module panels, and whether digital modules need new circuit
+models. The answer is no for the selected DSP; original code supplies it.
+Source review and intended mechanism are in `MUTABLE_FIRST_SLICE.md`.
+
+Normal and ASan/UBSan modular runs passed: both sources, min/max control sweeps,
+single shared envelope, two-source sum, release, deterministic recall, active-only
+construction, finite bounded output and no callback allocations. Tested output
+rates: 44.1/48/96/192 kHz. Offline two-source benchmark rendered 104.17 seconds in
+0.498 seconds (~0.48% of one core) in the initial optimized run. This excludes UI,
+device callback, converter and future polyphony, and is not a worst-case deadline
+guarantee. Original graph tests still pass (28).
+
+Native build correction record: first attempt exposed Projucer's headerPath being
+relative to generated SRCROOT, not the .jucer. Changed our generator to resolve the
+local include path explicitly; arm64-only build avoids unnecessary Intel work.
+Second attempt reached Main.cpp and exposed Apple Component/JUCE Component name
+collision, JUCE String::isEmpty versus STL empty, and explicit String/Identifier
+conversions needed for DynamicObject properties. Paused rebuilds, read compiler
+diagnostics and exact JUCE String/Identifier/var/DynamicObject signatures, then
+qualified Component and made conversions explicit. No DSP changes were indicated.
+Native build subsequently passed. Full regression run: 1,194 inherited core
+checks, 28 graph checks, 46 modular checks, four importer tests and one renderer
+timing test; 46 modular checks also pass under ASan/UBSan. Existing importer file
+handle ResourceWarnings remain, with no new importer edits. Final optimized
+benchmark: 104.17 seconds rendered in 0.508 seconds. Native check exercises slider
+binding, JSON round-trip, byte-identical audio after recall, rejected-patch
+preservation and screenshots at standard/minimum size; it opens no audio device.
+
+Visual inspection found JUCE ASCII-literal handling had garbled arrows/dashes;
+replaced those UI labels with plain wording. Gave the bass-drum panel three columns
+so five controls have usable knob sizes. Repeated screenshots initially appended
+to existing PNG files (JUCE FileOutputStream documented default). Corrected the
+exporter to seek/truncate before writing, then repeat the native check. This was
+an artifact capture issue; the updated UI code was present in the built app.
+
+Final captures inspected after the exporter fix: bass-drum controls are enlarged,
+labels are readable, minimum-size modal layout fits. Each file has one PNG header.
+The native check exits successfully and reproduces its audio after state recall.
+`first_voice_build_receipt.json` binds source, binary and evidence hashes. The
+original 83 Optispectral source files and all 20 vendored source hashes reverified.
+No original checkout edits, plugin installation, Live actions, commits or pushes.
+
+## 17 November 2026 — Listening report deferred at Yan's request
+
+Yan reports nice tones, with some perceived aliasing when both envelope routes
+are selected. Initial source inspection identified 24-sample envelope cutoff
+sampling followed by 16-sample FilterFx coefficient updates as one possible cause;
+clipping/nonlinearity have not been ruled out. No cause has been measured or
+confirmed. Before any DSP edits or reproduction runs, Yan requested that this be
+logged and performance/sound-quality refinement deferred. Investigation stopped.
+Continue module variety and routing first. Requests 15–16 are preserved verbatim.
+
+## Requests 20–21: additional sources and regular Git backups
+
+Recorded the maker/source/licence shortlist in OPEN_SOURCE_MODULE_MAKERS.md.
+Priorities: 4ms Ensemble Oscillator and DaisySP after the current Mutable rack.
+No additional third-party code adopted. Yan explicitly authorized regular commits
+and pushes, superseding Optisynth's inherited restriction. Commit coherent checked
+milestones; retain the independent source archive workflow. Current rack code is
+still being completed and must build before its implementation milestone is pushed.
+
+## Mutable rack 0.0.3 qualified
+
+Requests 17–19 completed: 17 types, independent module instances, actual original
+Plaits oscillators/resonator and stmlib digital SVF, contextual panels, typed input
+routing and output selection. Four starter patches are playable. Full graph JSON
+recalls audio exactly; old instrument import preserves active sound. Invalid edits
+leave the graph intact. CPU construction follows output reachability.
+
+Native build and full regression passed first attempt for this rack step: 1,194
+core, 28 graph, 74 modular, four importer and one renderer check; 74 modular checks
+also passed ASan/UBSan. Native actions checked instance independence, save/recall,
+invalid cycles, dormant add/remove and control disconnection/reconnection. No audio
+device opened. Visual review found small minimum-size envelope knobs and excess
+blank keyboard width. Adjusted drawing proportions and keyboard key width/octave
+labels; rebuilt and repeated native checks/captures successfully. DSP unchanged
+since the full normal/sanitizer run. Deferred roughness investigation untouched.
+
+`rack_build_receipt.json` binds final binary/source/evidence hashes. All 83 parent
+Optispectral source files and 23 vendored Mutable file hashes reverified. No Live
+interaction, VST installation or parent edits. User audition of 0.0.3 is pending.

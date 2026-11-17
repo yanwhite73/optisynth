@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<JUCERPROJECT id="OptiApp2" name="Optisynth" projectType="guiapp" version="0.0.3" companyName="Yan White" bundleIdentifier="com.yanwhite.optisynth.app" useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1" defines="TEST=1" headerPath="/Users/yanwhite/Documents/Music docs/Code/optisynth/third_party/mutable">
+  <MAINGROUP id="optiappsrc" name="Optisynth">
+    <FILE id="optifile0" name="Main.cpp" compile="1" resource="0" file="../app/Main.cpp" />
+    <FILE id="optifile1" name="graph.cpp" compile="1" resource="0" file="../src/modular/graph.cpp" />
+    <FILE id="optifile2" name="runtime.cpp" compile="1" resource="0" file="../src/modular/runtime.cpp" />
+    <FILE id="optifile3" name="modules.cpp" compile="1" resource="0" file="../src/modular/modules.cpp" />
+    <FILE id="optifile4" name="envelope.cpp" compile="1" resource="0" file="../src/core/envelope.cpp" />
+    <FILE id="optifile5" name="effects.cpp" compile="1" resource="0" file="../src/core/effects.cpp" />
+    <FILE id="optifile6" name="modal_voice.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc" />
+    <FILE id="optifile7" name="resonator.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/resonator.cc" />
+    <FILE id="optifile8" name="resources_selected.cc" compile="1" resource="0" file="../third_party/mutable/plaits/resources_selected.cc" />
+    <FILE id="optifile9" name="units.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/dsp/units.cc" />
+    <FILE id="optifile10" name="random.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/utils/random.cc" />
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />
+  </MODULES>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraFrameworks="ApplicationServices">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Optisynth" />
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_audio_devices" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_audio_formats" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_audio_processors" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_audio_utils" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_core" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_data_structures" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_events" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_graphics" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_gui_basics" path="/Users/yanwhite/JUCE/modules" />
+        <MODULEPATH id="juce_gui_extra" path="/Users/yanwhite/JUCE/modules" />
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_WEB_BROWSER="0" JUCE_USE_CURL="0" />
+</JUCERPROJECT>

@@ -1,0 +1,11 @@
+build/
+renders/
+presets-imported/
+plugin/Builds/
+plugin/JuceLibraryCode/
+plugin/Tests/Builds/
+plugin/Tests/JuceLibraryCode/
+docs/references/
+__pycache__/
+app/Builds/
+app/JuceLibraryCode/

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "jp8080-owner",
+    "file": "Roland_JP8080_Owners_Manual.pdf",
+    "url": "https://static.roland.com/assets/media/pdf/JP-8080_OM.pdf",
+    "author": "Roland",
+    "kind": "owner manual",
+    "inspection": "Official manufacturer source; indexed synthesis controls. Full reading pending.",
+    "resolved_url": "https://static.roland.com/assets/media/pdf/JP-8080_OM.pdf",
+    "bytes": 6096595,
+    "sha256": "ee8a92ec118327ded4ca9a32199c3ceef74ed71fd4a3a169f71bdf213ce8119f",
+    "saved_as": "docs/references/Roland_JP8080_Owners_Manual.pdf",
+    "status": "downloaded"
+  },
+  {
+    "id": "jp8080-service",
+    "file": "Roland_JP8080_Service_Notes.pdf",
+    "url": "https://www.synfo.nl/servicemanuals/Roland/JP-8080_SERVICE_NOTES.pdf",
+    "author": "Roland",
+    "kind": "manufacturer service notes, archive mirror",
+    "inspection": "27-page edition: block diagram page 13, circuit diagrams pages 17\u201327. Detailed analysis pending.",
+    "resolved_url": "https://www.synfo.nl/servicemanuals/Roland/JP-8080_SERVICE_NOTES.pdf",
+    "bytes": 4421882,
+    "sha256": "9191be2d79c417ba35c25ed3a0f8d61482e33aa7b72098096ad27e5d186c97bd",
+    "saved_as": "docs/references/Roland_JP8080_Service_Notes.pdf",
+    "status": "downloaded"
+  },
+  {
+    "id": "xpander-owner",
+    "file": "Oberheim_Xpander_Owners_Manual.pdf",
+    "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Owners_Manual.pdf",
+    "author": "Oberheim",
+    "kind": "manufacturer owner manual, archive mirror",
+    "inspection": "Filter-mode description read through a separate manufacturer-manual mirror. Full local PDF reading pending.",
+    "resolved_url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Owners_Manual.pdf",
+    "bytes": 11875874,
+    "sha256": "7d26be9cf320ea1250815fb1eff7542564930866dfc7a3cad904e4bfb4ae7b75",
+    "saved_as": "docs/references/Oberheim_Xpander_Owners_Manual.pdf",
+    "status": "downloaded"
+  },
+  {
+    "id": "xpander-service",
+    "file": "Oberheim_Xpander_Service_Manual.pdf",
+    "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Service_Manual.pdf",
+    "author": "Oberheim",
+    "kind": "manufacturer service manual, archive mirror",
+    "inspection": "39-page scanned edition located; circuit analysis pending.",
+    "resolved_url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Service_Manual.pdf",
+    "bytes": 3710605,
+    "sha256": "65b120dc14a05824dabefc1a0ce18a6d2d100929ebe88a701a7bef06186063f9",
+    "saved_as": "docs/references/Oberheim_Xpander_Service_Manual.pdf",
+    "status": "downloaded"
+  },
+  {
+    "id": "xpander-schematics",
+    "file": "Oberheim_Xpander_Schematics.zip",
+    "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/xpander_schematics.zip",
+    "author": "Oberheim (archive attribution; individual sheets to verify)",
+    "kind": "schematic archive",
+    "inspection": "Archive link located. Sheet identity, completeness and revision verification pending.",
+    "resolved_url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/xpander_schematics.zip",
+    "bytes": 11847215,
+    "sha256": "f3ce6a5b05120cca26c87f8b8db92cdc2738292e05d4a1972cb73bed6b61db3b",
+    "saved_as": "docs/references/Oberheim_Xpander_Schematics.zip",
+    "status": "downloaded"
+  }
+]

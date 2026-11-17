@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="OptiS1" name="Optisynth" projectType="audioplug" version="0.0.1"
+              companyName="Yan White" companyCopyright="Yan White" bundleIdentifier="com.yanwhite.optisynth"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1"
+              pluginFormats="buildVST3,buildStandalone" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn" pluginName="Optisynth" pluginDesc="Optisynth additive synth (prototype)" pluginManufacturer="Yan White" pluginManufacturerCode="Ywht" pluginCode="Osy1" pluginAUExportPrefix="optisynthAU" pluginAUIsSandboxSafe="0">
+  <MAINGROUP id="mgPrtlP1" name="Optisynth">
+    <GROUP id="gsPrtlP1" name="Source">
+      <FILE id="f0001" name="PluginProcessor.cpp" compile="1" resource="0" file="Source/PluginProcessor.cpp"/>
+      <FILE id="f0002" name="PluginProcessor.h" compile="0" resource="0" file="Source/PluginProcessor.h"/>
+      <FILE id="f0003" name="PluginEditor.cpp" compile="1" resource="0" file="Source/PluginEditor.cpp"/>
+      <FILE id="f0004" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+    <GROUP id="gcPrtlP1" name="Core">
+      <FILE id="c0001" name="spectrum.cpp" compile="1" resource="0" file="../src/core/spectrum.cpp"/>
+      <FILE id="c0002" name="spectrum.h" compile="0" resource="0" file="../src/core/spectrum.h"/>
+      <FILE id="c0003" name="table_bank.cpp" compile="1" resource="0" file="../src/core/table_bank.cpp"/>
+      <FILE id="c0004" name="table_bank.h" compile="0" resource="0" file="../src/core/table_bank.h"/>
+      <FILE id="c0005" name="envelope.cpp" compile="1" resource="0" file="../src/core/envelope.cpp"/>
+      <FILE id="c0006" name="envelope.h" compile="0" resource="0" file="../src/core/envelope.h"/>
+      <FILE id="c0007" name="patch.cpp" compile="1" resource="0" file="../src/core/patch.cpp"/>
+      <FILE id="c0008" name="patch.h" compile="0" resource="0" file="../src/core/patch.h"/>
+      <FILE id="c0009" name="engine.cpp" compile="1" resource="0" file="../src/core/engine.cpp"/>
+      <FILE id="c0010" name="engine.h" compile="0" resource="0" file="../src/core/engine.h"/>
+      <FILE id="cfx01" name="effects.cpp" compile="1" resource="0" file="../src/core/effects.cpp"/>
+      <FILE id="cfx02" name="effects.h" compile="0" resource="0" file="../src/core/effects.h"/>
+      <FILE id="cfx03" name="effect_controls.h" compile="0" resource="0" file="../src/core/effect_controls.h"/>
+      <FILE id="carp1" name="arp.cpp" compile="1" resource="0" file="../src/core/arp.cpp"/>
+      <FILE id="carp2" name="arp.h" compile="0" resource="0" file="../src/core/arp.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/OptisynthMacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Optisynth" enablePluginBinaryCopyStep="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Optisynth" enablePluginBinaryCopyStep="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="/Users/yanwhite/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="/Users/yanwhite/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_WEB_BROWSER="0" JUCE_USE_CURL="0" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+</JUCERPROJECT>

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "collected": "2026-11-17",
+  "documents": [
+    {"id": "jp8080-owner", "file": "Roland_JP8080_Owners_Manual.pdf", "url": "https://static.roland.com/assets/media/pdf/JP-8080_OM.pdf", "author": "Roland", "kind": "owner manual", "inspection": "Official manufacturer source; indexed synthesis controls. Full reading pending."},
+    {"id": "jp8080-service", "file": "Roland_JP8080_Service_Notes.pdf", "url": "https://www.synfo.nl/servicemanuals/Roland/JP-8080_SERVICE_NOTES.pdf", "author": "Roland", "kind": "manufacturer service notes, archive mirror", "inspection": "27-page edition: block diagram page 13, circuit diagrams pages 17–27. Detailed analysis pending."},
+    {"id": "xpander-owner", "file": "Oberheim_Xpander_Owners_Manual.pdf", "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Owners_Manual.pdf", "author": "Oberheim", "kind": "manufacturer owner manual, archive mirror", "inspection": "Filter-mode description read through a separate manufacturer-manual mirror. Full local PDF reading pending."},
+    {"id": "xpander-service", "file": "Oberheim_Xpander_Service_Manual.pdf", "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Service_Manual.pdf", "author": "Oberheim", "kind": "manufacturer service manual, archive mirror", "inspection": "39-page scanned edition located; circuit analysis pending."},
+    {"id": "xpander-schematics", "file": "Oberheim_Xpander_Schematics.zip", "url": "https://synthfool.com/docs/Oberheim/Oberheim_Xpander/xpander_schematics.zip", "author": "Oberheim (archive attribution; individual sheets to verify)", "kind": "schematic archive", "inspection": "Archive link located. Sheet identity, completeness and revision verification pending."}
+  ],
+  "code_and_web_references": [
+    {"id": "mutable-original", "url": "https://github.com/pichenettes/eurorack", "inspection": "README licensing and selected Plaits modal header inspected; no code adopted."},
+    {"id": "mutable-rings-manual", "url": "https://pichenettes.github.io/mutable-instruments-documentation/modules/rings/manual/", "inspection": "Exciter/resonator structure and controls read."},
+    {"id": "mutable-plaits-modal", "url": "https://github.com/pichenettes/eurorack/blob/master/plaits/dsp/engine/modal_engine.h", "inspection": "Interface and MIT header read; dependency review pending."},
+    {"id": "vcv-audible", "url": "https://github.com/VCVRack/AudibleInstruments/tree/v2", "inspection": "README and Rings.cpp sample-rate/block adapter inspected; no code adopted. Full licence and source review pending."},
+    {"id": "vcv-rings-adapter", "url": "https://github.com/VCVRack/AudibleInstruments/blob/v2/src/Rings.cpp", "inspection": "Input resampling to 48 kHz, 24-frame inner DSP block, host output resampling; inspect latency and event mapping before reuse."}
+  ]
+}
