@@ -84,3 +84,17 @@ since the full normal/sanitizer run. Deferred roughness investigation untouched.
 `rack_build_receipt.json` binds final binary/source/evidence hashes. All 83 parent
 Optispectral source files and 23 vendored Mutable file hashes reverified. No Live
 interaction, VST installation or parent edits. User audition of 0.0.3 is pending.
+
+## Git and independent backup receipt
+
+Implementation/research milestone `c947f3c` pushed to origin/main successfully;
+remote branch hash was checked against the local commit. It includes all source,
+user requests, maker/licence notes, provenance and qualification receipts. Builds,
+SDKs and downloaded manuals remain ignored. Future work should commit and push at
+coherent tested milestones under the standing request 21 authorization.
+
+Independent archive created and verified:
+`../../backups/optisynth/optisynth-source-20261117-170823.tar.gz` plus `.sha256`;
+147 files, 1,754,729 uncompressed bytes, including the app headers and saved patch.
+This archive represents the implementation milestone; this subsequent receipt is
+also saved in Git. All temporary build/test jobs exited; user services preserved.
