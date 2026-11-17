@@ -4,7 +4,7 @@ import pathlib, xml.etree.ElementTree as ET
 root = pathlib.Path(__file__).resolve().parents[1]
 base = ET.parse(root / 'plugin/Optisynth.jucer').getroot()
 app = ET.Element('JUCERPROJECT', id='OptiApp2', name='Optisynth', projectType='guiapp',
-    version='0.0.3', companyName='Yan White', bundleIdentifier='com.yanwhite.optisynth.app',
+    version='0.0.4', companyName='Yan White', bundleIdentifier='com.yanwhite.optisynth.app',
     useAppConfig='0', addUsingNamespaceToJuceHeader='0', cppLanguageStandard='17',
     jucerFormatVersion='1', defines='TEST=1', headerPath=str(root/'third_party/mutable'))
 group = ET.SubElement(app, 'MAINGROUP', id='optiappsrc', name='Optisynth')

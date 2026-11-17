@@ -1,0 +1,56 @@
+# Contextual hardware-style rack — 17 November 2026
+
+Request 25 follows successful user audition of the Mutable rack. Redesign the
+existing native JUCE instrument; preserve its DSP, patch format and routing engine.
+Sample playback remains queued behind this interface step.
+
+## Visual references inspected
+
+- [Moog Matriarch top-panel photograph](https://www.altomusic.com/cdn/shop/files/d1948-top.jpg?v=1702400243), local ignored `references/matriarch-panel.jpg`.
+  Adjacent functional sections, blue oscillator block, green filter, dark mixer/
+  envelopes/utilities, purple delay, black/silver knobs, pale labels and patch points.
+- [Original Plaits manual/panel](https://pichenettes.github.io/mutable-instruments-documentation/modules/plaits/manual/), local `references/mutable_review/plaits-panel.png`.
+  Clear control hierarchy, distinct pitch/tone controls and labelled input/output
+  sockets. Our modules expose individual original DSP algorithms, not the entire
+  Plaits instrument, so retain accurate controls rather than inventing absent modes.
+- Current 0.0.3 native screenshots in `build/ui-review/` establish the working UI
+  and controls. Product Design context preflight found no saved context. Apply its
+  visual review workflow to the native app; web scaffolding/assets are inapplicable.
+
+## Implementation direction
+
+Show multiple loaded modules side by side in a horizontally scrollable rack, with
+contextual panels and readable controls. Keep a focus view for larger editing.
+Oscillator tuning/tone hierarchy, a dominant filter cutoff knob, envelope stage
+layout and a resonator-specific control grouping replace the generic equal grid.
+Use functional native knobs/sliders/buttons and typography, with our own panel
+styling. Source photographs are reference only, not app artwork or copied branding.
+
+Patch points should operate the existing typed routes. Preserve clear selected-node
+feedback, dormant status, output selection and validation messages. All existing
+save/recall, typing/piano, audio start/stop and independent instance bindings remain.
+
+Acceptance: native screenshots at normal/minimum size and several module types;
+visible controls fit; loading/replacing a module changes its panel; multiple copies
+remain independent; routing and patch recall still pass native checks. Compare the
+reference and native result together, documenting intentional software differences.
+
+## Implemented behaviour
+
+Standalone 0.0.4 shows side-by-side panels, horizontal scrolling for larger racks,
+and a Focus module switch for the enlarged panel and connection list. Each panel's
+selector changes its type; the existing graph validator rejects incompatible edits.
+Add module creates a dormant independent instance. Colours follow module families;
+layout follows the module's actual controls. Filter cutoff, envelope stages, mixer
+faders, oscillator shaping and resonator material each have distinct arrangements.
+
+Click an input socket to connect/disconnect a same-type output. Click an output to
+choose a destination or make an audio port the instrument output. Tooltips list
+existing routes; coloured centres mark connected ports. This step uses native
+route menus; draggable cables remain pending. Invalid edits preserve the live rack.
+Scalar edits synchronize rack/focus views and saved patch parameters without
+rebuilding DSP. Module replacement is deferred out of the source selector callback
+before rebuilding the visible rack, avoiding deletion of a widget handling an event.
+
+The sound engine, parameter identities/ranges and patch format are unchanged.
+Visual review evidence and limitations are in `../design-qa.md`.

@@ -105,3 +105,50 @@ Recorded Yan's input verbatim and added the Wavestate repurposing project to the
 research index/status as a potential controller or hardware host. These remain
 possibilities to assess using that project's hardware/interface findings. This
 update records the connection between projects; no hardware or DSP work performed.
+
+## Requests 23–24: continuity correction and current app preview
+
+Yan corrected the agent for stopping after a side-note update despite the standing
+instruction to keep building. Resume the next planned sample/excitation feature;
+side notes do not replace the implementation objective. Yan then asked to see the
+Mutable work so far: expose the qualified 0.0.3 rack for user inspection now.
+
+## Request 25: user audition and contextual hardware-style UI
+
+Yan reports the Mutable examples all seem to work. Next priority is a Moog
+Matriarch-style interface whose loaded modules have familiar, specific control
+layouts. Research the physical panel references before implementation. Sample
+playback was selected next but has not been implemented; retain it after this UI
+step. The core/routing already works and should stay stable during the redesign.
+
+Implemented standalone 0.0.4: side-by-side coloured panels, per-module layouts,
+native hardware-style knobs and faders, enlarged focus view, clickable typed
+patch sockets and route tooltips. Original DSP and parameter IDs/ranges are unchanged.
+Scalar controls synchronize both views and saved state. Rack selectors defer
+structural replacement until the widget's callback returns. Native menu handlers
+reuse graph validation; rejected connections preserve the prior graph.
+
+Build succeeded. Initial synchronization assertion used exact double equality;
+changed it to a 1e-5 tolerance (one tenth of the slider's step) with value diagnostics.
+Native checks pass: separate copies, synchronized views, graph/audio recall, legacy
+import, dormant add/remove, typed routing, socket indicators/tooltips and cycle
+rejection, contextual replacement and all 17 panels' bounds/non-overlap. Six final
+captures and the Product Design review are recorded in `../design-qa.md`. Review
+caught cramped minimum-height controls and generic fader handles; both were fixed,
+rebuilt and visually rechecked. No audio device opened by the checks.
+
+`hardware_ui_build_receipt.json` binds the final native binary, app source, logs and
+captures. Sources underlying the 0.0.3 DSP qualification, all 23 vendored Mutable
+files and all 83 parent Optispectral files match their previous hashes. The full
+DSP/sanitizer suite was not rerun for this UI-only change. New 0.0.4 process opened
+at 17:38 alongside Yan's existing 0.0.3 process; neither existing patch nor Live
+was touched. New interface audition remains pending; request 25 confirmed 0.0.3.
+
+Next implementation action is immutable sample assets, off-audio-thread loading
+and patch persistence, then sample playback into/alongside the resonator. Existing
+roughness/aliasing work remains deferred as requested.
+
+Independent 0.0.4 archive created and verified:
+`../../backups/optisynth/optisynth-source-20261117-173953.tar.gz` plus `.sha256`;
+150 files, 1,789,797 uncompressed bytes. Includes the contextual interface docs,
+root design review and build receipt. This subsequent archive receipt is in Git.

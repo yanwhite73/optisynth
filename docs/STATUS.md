@@ -1,6 +1,6 @@
 # Optisynth status — 17 November 2026
 
-## Current delivery: Mutable rack, standalone 0.0.3
+## Current delivery: contextual hardware rack, standalone 0.0.4
 
 The app now exposes **17 module types** in a rack with multiple independent
 instances, contextual controls, typed input connections and output selection.
@@ -11,11 +11,14 @@ emulation. Spectral ADSR/AHDSFR, Spectral LP/HP/BP/notch, bypass, VCA and mixer 
 
 Four starter patches: VA + digital filter, modal percussion, drum into resonator,
 and two differently tuned oscillators sharing a filter/envelope. Mixer inputs have
-independent level controls. Select a rack node to edit its controls and input sources.
+independent level controls. All loaded panels appear side by side, with blue
+oscillators, green filters, dark envelopes/utilities and purple resonators. Module
+type determines the knob/fader arrangement. Click sockets to patch; hover to see
+connections. Focus module opens the enlarged panel and connection list.
 Only reachable modules are constructed; dormant nodes keep editable parameter state.
 
 App: `../app/Builds/MacOSX/build/Release/Optisynth.app`, Apple Silicon,
-version 0.0.3, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
+version 0.0.4, bundle `com.yanwhite.optisynth.app`. Click Start audio, then play the
 piano or Caps Lock typing keyboard (A/W/S/E/D/F..., Z/X octave). Silence stops the
 output device. Pitch/octave labels are consistent across the piano and typing help.
 No microphone, hardware MIDI or network listener is opened by this app.
@@ -28,28 +31,31 @@ reroute downstream destinations/output before removing an active dependency.
 
 ## Verification
 
-- Native release build succeeds. 1,194 inherited core checks, 28 graph checks,
+- Native 0.0.4 release build succeeds. At 0.0.3, 1,194 inherited core checks, 28 graph checks,
   74 modular checks, four importer checks and one renderer timing check pass.
-- All 74 modular checks also pass under AddressSanitizer/UBSan. New coverage:
+- All 74 modular checks also passed under AddressSanitizer/UBSan at 0.0.3. Coverage:
   oscillator/filter/resonator extremes, no render allocation, independent same-type
   instances, dormant nodes, audio-only roots, filter response and hard sync.
 - Existing sample-rate conversion checks cover 44.1/48/96/192 kHz, finite bounded
   output, plan crossfades and no allocation in the tested core render paths.
 - Native UI checks: independent knob bindings, graph JSON and byte-identical audio
   recall, failed-edit preservation, dormant add/remove, typed disconnect/reconnect,
-  and byte-identical old-format import. No audio device was opened for these checks.
-- Captures cover oscillator, filter, external resonator and 1120x800 minimum layout.
-  Visual review found small envelope knobs and an unfilled keyboard width; both
-  layouts were corrected and the app rebuilt. Build receipt: `rack_build_receipt.json`.
+  and byte-identical old-format import. At 0.0.4 these checks were rerun, with new
+  rack/focus synchronization, socket action/indicator/tooltip, contextual replacement
+  and all-17-panel bounds/overlap checks. No audio device was opened for these checks.
+- Six native captures cover rack/focus, resonator, two oscillators/mixer and two
+  1120x800 layouts. Cramped controls were corrected and the final visual review passes:
+  `../design-qa.md`. Receipt: `hardware_ui_build_receipt.json`. The earlier DSP
+  receipt remains `rack_build_receipt.json`; its sound-engine sources are unchanged.
 - DSP qualification: `../build/modular-qualification.log`; native receipt and PNGs:
   `../build/ui-review/`. Importer ResourceWarnings are inherited file-handle warnings.
 - Core benchmark remains the existing two-source case: 104.17 s of audio in
   0.506 s (~0.49% of one core), excluding device converter/UI. This is regression
   evidence, not a worst-case rack deadline or a new optimisation claim.
 
-Yan auditioned 0.0.2 and reported nice tones. Agent checks on 0.0.3 are offline/native
-UI checks; user audition of the new rack remains pending. No Live verification or
-new VST3 packaging/installation is claimed.
+Yan auditioned 0.0.2 and reported nice tones, then confirmed the Mutable examples
+in 0.0.3 all seem to work (request 25). The 0.0.4 UI awaits user feedback. No Live verification or new VST3
+packaging/installation is claimed.
 
 ## Current direction and exact next work
 
@@ -57,14 +63,23 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 22 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 25 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Request 25 is implemented: Matriarch-inspired native rack with familiar,
+module-specific panels. References and behaviour are in `CONTEXTUAL_UI.md`.
+DSP/patch format remain unchanged; sample playback is next.
+
+Requests 23–24: continue implementation across side-note requests. The current
+Mutable rack was opened and auditioned successfully; this standing continuity
+instruction remains in force after the UI milestone.
 
 Request 22 adds a parallel Korg Wavestate repurposing project: a potential physical
 controller or eventual hardware host for Optisynth. Both roles are recorded in
 `RESEARCH.md`; integration and hosting feasibility remain unverified. The current
 module/sample/polyphony development order continues.
 
-Next: a sample player that can feed the resonator or mix an attack alongside it,
+Next action: define immutable sample assets and loader/patch persistence, then
+implement a sample player that can feed the resonator or mix an attack alongside it,
 then bounded polyphony and an explicit voice/global boundary for shared effects.
 Further Mutable engines, granular playback and additional envelope/modulator
 options follow. Preserve the current typed graph and stable parameter identities.

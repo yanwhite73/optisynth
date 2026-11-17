@@ -4,7 +4,7 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.3";}
+    const String getApplicationVersion() override {return "0.0.4";}
     void initialise(const String& args) override {
         window=std::make_unique<Window>(getApplicationName());
         if(args.startsWith("--snapshot ")) {

@@ -141,3 +141,27 @@ retain local source archives as an independent backup.
 ```text
 add another note, a parallel project to repurpose a korg wavestate might become a useful controller or even host
 ```
+
+## 23 — Continue the active build across side notes
+
+```text
+why did you stop?
+```
+
+Correction: documentation requests and research questions steer ongoing work;
+they do not cancel the standing instruction to continue implementation.
+
+## 24 — Inspect the current Mutable implementation
+
+```text
+Let me see the mutable work so far
+```
+
+## 25 — Listening confirmation and familiar contextual module UI
+
+```text
+yes all seem to be working ok. I'd like a moog matriarch style ui where loading a module loads familiar ui for that module
+```
+
+User audition confirms the current Mutable examples seem to work. Prioritize the
+Matriarch-inspired contextual rack UI next; sample/excitation work remains queued.

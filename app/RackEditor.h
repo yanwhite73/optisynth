@@ -7,9 +7,11 @@ class RackSynth final : public AudioAppComponent, private Timer,
                         private MidiKeyboardState::Listener, private ListBoxModel {
 public:
     RackSynth() : keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
-        setWantsKeyboardFocus(true);setSize(1320,900);
+        setWantsKeyboardFocus(true);setSize(1440,940);
         for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,
-            &starter,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp})addAndMakeVisible(c);
+            &starter,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode})addAndMakeVisible(c);
+        rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(false,true);rackView.setScrollBarThickness(12);
+        focusMode.setClickingTogglesState(true);focusMode.onClick=[this]{showSelected();};
         rack.setRowHeight(62);rack.setColour(ListBox::backgroundColourId,Colour(0xff25343a));
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
@@ -43,7 +45,7 @@ public:
         keyboardHelp.setFont(font(12));keyboardHelp.setColour(Label::textColourId,paper.withAlpha(.8f));
         commit({rackPreset(0),.25f},"source");startTimerHz(60);
     }
-    ~RackSynth() override {stopTimer();shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);}
+    ~RackSynth() override {stopTimer();shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);rackView.setViewedComponent(nullptr,false);}
     void prepareToPlay(int,double rate) override {converter.prepare(rate);}
     void releaseResources() override {}
     void getNextAudioBlock(const AudioSourceChannelInfo& block) override {
@@ -52,31 +54,34 @@ public:
         for(int c=1;c<block.buffer->getNumChannels();++c)block.buffer->copyFrom(c,block.startSample,*block.buffer,0,block.startSample,block.numSamples);
     }
     void paint(Graphics& g) override {
-        g.fillAll(Colour(0xff1c282d));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(paper.withAlpha(.6f));g.drawText("MODULAR INSTRUMENT  /  0.0.3",25,53,300,20,Justification::centredLeft);
+        g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.4",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
-        g.setColour(paper);g.setFont(font(12));g.drawText("MODULES",24,123,220,20,Justification::centredLeft);
-        g.drawText("INPUTS  /  "+String(selected),right,153,300,20,Justification::centredLeft);
-        g.drawText("INSTRUMENT OUTPUT",right,bodyBottom()-170,300,20,Justification::centredLeft);
-        g.drawText("CONNECTIONS",right,320,300,20,Justification::centredLeft);
+        g.setColour(paper);g.setFont(font(12));
+        g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
+        if(focusMode.getToggleState()){
+            g.drawText("INPUTS  /  "+String(selected),right,169,300,20,Justification::centredLeft);
+            g.drawText("CONNECTIONS",right,337,300,20,Justification::centredLeft);
+        }
         g.drawText("OUTPUT",24,getHeight()-158,75,26,Justification::centredLeft);
         const float peak=player.peak.load(std::memory_order_relaxed);
         g.setColour(Colour(0xff34464c));g.fillRoundedRectangle(340.f,float(getHeight()-150),160,8,4);
         g.setColour(peak>.9f?orange:teal);g.fillRoundedRectangle(340.f,float(getHeight()-150),160*std::min(1.f,peak),8,4);
-        g.setColour(paper.withAlpha(.6f));g.setFont(font(12));g.drawText(String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules   |   mono",right,bodyBottom()-72,300,30,Justification::centredLeft);
-        g.drawFittedText("Choose an input's source to connect. Add a mixer to combine audio. Unrouted modules use no DSP.",right,bodyBottom()-41,300,40,Justification::centredLeft,3);
+        g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
+        g.drawText(String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  mono   |   Click a socket to patch. Yellow outline marks the selected module.",24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
-        const int right=getWidth()-324,bottom=bodyBottom();
+        const int right=getWidth()-324,bottom=bodyBottom();const bool focused=focusMode.getToggleState();
         starter.setBounds(24,82,360,32);save.setBounds(400,82,85,32);load.setBounds(493,82,85,32);
         audio.setBounds(getWidth()-258,24,145,36);silence.setBounds(getWidth()-105,24,81,36);
         status.setBounds(595,76,getWidth()-619,45);
-        addChoice.setBounds(24,150,220,30);add.setBounds(24,189,105,30);remove.setBounds(137,189,107,30);
-        rack.setBounds(24,231,220,bottom-231);
-        editor.setBounds(260,138,right-276,bottom-138);
-        int y=182;for(auto& row:inputs){row->label.setBounds(right,y,300,20);row->choice.setBounds(right,y+23,300,32);y+=65;}
-        routes.setBounds(right,347,300,std::max(40,bottom-527));
-        output.setBounds(right,bottom-145,300,34);
+        addChoice.setBounds(24,122,250,30);add.setBounds(286,122,105,30);remove.setBounds(403,122,105,30);
+        output.setBounds(602,122,230,30);focusMode.setBounds(getWidth()-180,122,156,30);
+        rack.setBounds(24,169,220,bottom-169);editor.setBounds(260,169,right-276,bottom-169);
+        rack.setVisible(focused);editor.setVisible(focused);routes.setVisible(focused);rackView.setVisible(!focused);
+        int y=198;for(size_t i=0;i<inputs.size();++i){auto& row=*inputs[i];const bool visible=focused&&!selected.empty()&&i<type(editor.current).inputs.size();row.label.setVisible(visible);row.choice.setVisible(visible);row.label.setBounds(right,y,300,20);row.choice.setBounds(right,y+23,300,32);y+=65;}
+        routes.setBounds(right,364,300,std::max(40,bottom-364));
+        rackView.setBounds(24,164,getWidth()-48,bottom-164);hardware.arrange(rackView.getWidth(),rackView.getHeight()-14);
         gain.setBounds(98,getHeight()-158,220,27);keyboardHelp.setBounds(525,getHeight()-163,getWidth()-549,38);
         keyboard.setBounds(24,getHeight()-113,getWidth()-48,89);keyboard.setKeyWidth(float(getWidth()-48)/43.f);
     }
@@ -88,6 +93,11 @@ public:
         const auto second=handles.at("second")->values[0].load();
         editor.knobs[0]->slider.setValue(2,sendNotificationSync);
         require(handles.at("source")->values[0].load()==2&&handles.at("second")->values[0].load()==second,"Independent instance controls");
+        auto* visibleSource=hardware.find("source");
+        if(!visibleSource||std::abs(visibleSource->knobs[0]->slider.getValue()-2)>1e-5)
+            throw std::runtime_error("Rack/focus synchronization: rack="+std::to_string(visibleSource?visibleSource->knobs[0]->slider.getValue():-999)+", focus="+std::to_string(editor.knobs[0]->slider.getValue()));
+        visibleSource->knobs[0]->slider.setValue(3,sendNotificationSync);
+        require(handles.at("source")->values[0].load()==3&&handles.at("second")->values[0].load()==second,"Visible rack controls independent");
         auto serial=JSON::toString(rackJSON(document));auto recalled=readRack(JSON::parse(serial));
         auto render=[](const GraphSpec& graph){Runtime r(graph);std::vector<float> out(48000);r.render(out.data(),24000,{48,.8f,true,true});r.render(out.data()+24000,24000,{48,.8f,false,false});return out;};
         require(render(document.graph)==render(recalled.graph),"Rack recall audio differs");
@@ -104,17 +114,35 @@ public:
         for(size_t i=0;i<inputs[1]->ports.size();++i)if(inputs[1]->ports[i].node=="envelope")envelopeId=int(i)+1;
         require(envelopeId>0,"Compatible control output available");inputs[1]->choice.setSelectedId(envelopeId,sendNotificationSync);
         require(std::any_of(document.graph.connections.begin(),document.graph.connections.end(),[](const Connection& c){return c.destination.node=="filter"&&c.destination.port=="mod";}),"Reconnect control");
+        applySocketChoice("filter",{"mod",SignalType::Control,false},false,1,{});
+        require(!hardware.find("filter")->jacks[1]->connected,"Socket disconnect indicator");
+        applySocketChoice("filter",{"mod",SignalType::Control,false},false,10,{{"envelope","out"}});
+        require(hardware.find("filter")->jacks[1]->connected,"Socket reconnect indicator");
+        require(hardware.find("filter")->jacks[1]->getTooltip().contains("envelope.out"),"Socket source tooltip");
+        applySocketChoice("filter",{"out",SignalType::Audio,false},true,10,{{"filter","in"}});
+        require(hardware.find("filter")->jacks[0]->getTooltip().contains("mixer.out"),"Socket cycle retains prior source");
+        require(replaceModule("source","osc.sine"),"Replace module");
+        require(hardware.find("source")->current=="osc.sine"&&hardware.find("source")->knobs.size()==2,"Contextual replacement panel");
+        for(const auto& spec:panels()){
+            ModulePanel test("all");Values values;test.instance="layout";test.show(spec.type,values,{});test.setSize(panelWidth(spec.type),421);
+            for(size_t i=0;i<test.knobs.size();++i){const auto bounds=test.knobs[i]->getBounds();
+                require(bounds.getY()>=147&&bounds.getBottom()<=384&&bounds.getX()>=12&&bounds.getRight()<=test.getWidth()-12,"Module control bounds");
+                for(size_t j=i+1;j<test.knobs.size();++j)require(!bounds.intersects(test.knobs[j]->getBounds()),"Module controls overlap");
+            }
+        }
         // Exercise explicit old-format import using the actual 0.0.2 keys.
         const auto legacy=JSON::parse(R"({"format":"optisynth.instrument","version":1,"source":"modal.voice","envelope":"spectral.ahdsfr","filter":"spectral.lowpass","amplitudeEnvelope":true,"filterEnvelope":true,"gain":0.25,"parameters":{"modal.voice":{"decay":0.7},"spectral.lowpass":{"cutoff_hz":1800}}})");
         auto imported=readRack(legacy);auto expected=instrumentPatch("modal.voice","spectral.ahdsfr","spectral.lowpass",true,true);
         for(auto& n:expected.nodes){if(n.id=="source")n.parameters={{"decay",.7f}};if(n.id=="filter")n.parameters={{"cutoff_hz",1800}};}
         require(render(imported.graph)==render(expected),"Legacy patch sound changed");
         auto capture=[&](const String& name){auto image=createComponentSnapshot(getLocalBounds());FileOutputStream stream(directory.getChildFile(name));require(stream.openedOk(),"Snapshot file");stream.setPosition(0);stream.truncate();require(PNGImageFormat().writeImageToStream(image,stream),"PNG export");};
-        commit({rackPreset(3),.25f},"source");capture("rack-oscillator.png");
-        selectNode("filter");capture("rack-filter.png");
-        commit({rackPreset(2),.25f},"resonator");capture("rack-resonator.png");
-        setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("rack-minimum.png");
-        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; legacy import audio; four native captures. No audio device opened.\n"),"Write UI receipt");
+        commit({rackPreset(0),.25f},"source");capture("hardware-rack.png");
+        selectNode("filter");focusMode.setToggleState(true,dontSendNotification);resized();capture("hardware-filter-focus.png");
+        focusMode.setToggleState(false,dontSendNotification);commit({rackPreset(2),.25f},"resonator");capture("hardware-resonator.png");
+        setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("hardware-minimum.png");
+        commit({rackPreset(0),.25f},"filter");replaceModule("filter","spectral.lowpass");capture("hardware-spectral-minimum.png");
+        setSize(1440,940);commit({rackPreset(3),.25f},"second");capture("hardware-two-oscillators.png");
+        require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 17 panels fit without overlap; legacy import audio; six native captures. No audio device opened.\n"),"Write UI receipt");
     }
 private:
     struct InputRow { Label label;ComboBox choice;std::vector<Endpoint> ports; };
@@ -122,6 +150,7 @@ private:
     Registry registry=moduleRegistry();
     MidiKeyboardState keys;MidiKeyboardComponent keyboard;TypingKeyboard typing;
     ListBox rack;ModulePanel editor{"all"};Values panelValues;
+    HardwareRack hardware;Viewport rackView;TextButton focusMode{"Focus module"};TooltipWindow tips{this,700};
     std::map<std::string,std::shared_ptr<Controls>> handles;
     std::vector<std::unique_ptr<InputRow>> inputs;
     std::vector<std::string> addTypes;std::vector<Endpoint> outputPorts;
@@ -134,6 +163,48 @@ private:
     int bodyBottom() const {return getHeight()-185;}
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
+    void setParameter(const std::string& id,const std::string& key,float value) {
+        for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
+        if(auto* p=hardware.find(id)){hardware.values[id][p->current][key]=value;p->setValue(key,value);}
+        if(editor.instance==id){panelValues[editor.current][key]=value;editor.setValue(key,value);}
+    }
+    void rebuildHardware() {
+        hardware.clear();
+        for(const auto& node:document.graph.nodes){
+            auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;
+            auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
+            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);
+            p->activated=[this,id=node.id]{if(selected!=id)selectNode(id);};
+            p->selectionChanged=[this,id=node.id,p]{
+                const auto nextType=p->selected();
+                MessageManager::callAsync([safe=SafePointer<RackSynth>(this),id,nextType]{if(safe)safe->replaceModule(id,nextType);});
+            };
+            p->portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
+            hardware.addAndMakeVisible(*p);hardware.modules.push_back(std::move(card));
+        }
+    }
+    bool replaceModule(const std::string& id,const std::string& nextType) {
+        auto next=document;for(auto& n:next.graph.nodes)if(n.id==id){n.type=nextType;n.parameters.clear();}return commit(std::move(next),id);
+    }
+    void applySocketChoice(const std::string& node,const Port& port,bool isOutput,int result,const std::vector<Endpoint>& endpoints) {
+        if(result==0)return;auto next=document;
+        if(result==1){if(isOutput)next.graph.outputs={{node,port.id}};else setRackConnection(next.graph,{node,port.id},{});}
+        else {const int i=result-10;if(i<0||i>=int(endpoints.size()))return;
+            if(isOutput)setRackConnection(next.graph,endpoints[size_t(i)],{node,port.id});else setRackConnection(next.graph,{node,port.id},endpoints[size_t(i)]);}
+        commit(std::move(next),node);
+    }
+    void socketMenu(const std::string& node,const Port& port,bool isOutput,juce::Component* target) {
+        PopupMenu menu;std::vector<Endpoint> endpoints;
+        menu.addSectionHeader(String(node)+" / "+String(port.id)+(isOutput?" output":" input"));
+        if(!isOutput)menu.addItem(1,"Disconnect input");
+        else if(port.type==SignalType::Audio)menu.addItem(1,"Use as instrument output");
+        menu.addSeparator();
+        for(const auto& n:document.graph.nodes)if(n.id!=node){const auto& ports=isOutput?type(n.type).inputs:type(n.type).outputs;
+            for(const auto& p:ports)if(p.type==port.type){endpoints.push_back({n.id,p.id});menu.addItem(int(endpoints.size())+9,String(n.id)+" / "+String(p.id)+"  ("+String(panel(n.type).name)+")");}}
+        menu.showMenuAsync(PopupMenu::Options().withTargetComponent(target),[safe=SafePointer<RackSynth>(this),node,port,isOutput,endpoints](int result){
+            if(safe)safe->applySocketChoice(node,port,isOutput,result,endpoints);
+        });
+    }
     bool commit(RackDocument next,const std::string& preferred) {
         try {
             validateRack(next.graph);auto runtime=std::make_unique<Runtime>(next.graph);
@@ -165,21 +236,22 @@ private:
         output.setTextWhenNothingSelected(document.graph.outputs.empty()?"No output":"Multiple outputs (saved rack)");
         String text;for(const auto& c:document.graph.connections)text+=String(c.source.node)+"."+String(c.source.port)+"  >  "+String(c.destination.node)+"."+String(c.destination.port)+"\n";
         routes.setText(text,false);rack.updateContent();refreshing=false;
-        selectNode(preferred);repaint();
+        rebuildHardware();selectNode(preferred);repaint();
     }
     void selectNode(const std::string& id) {
         int row=0;for(size_t i=0;i<document.graph.nodes.size();++i)if(document.graph.nodes[i].id==id)row=int(i);
         refreshing=true;rack.selectRow(row);refreshing=false;
-        if(!document.graph.nodes.empty()){selected=document.graph.nodes[size_t(row)].id;showSelected();}
+        if(!document.graph.nodes.empty()){selected=document.graph.nodes[size_t(row)].id;showSelected();
+            if(auto* p=hardware.find(selected)){const int left=rackView.getViewPositionX();if(p->getX()<left)rackView.setViewPosition(p->getX(),0);else if(p->getRight()>left+rackView.getWidth())rackView.setViewPosition(p->getRight()-rackView.getWidth()+8,0);}}
     }
     void showSelected() {
         auto it=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==selected;});
         if(it==document.graph.nodes.end())return;
         const auto node=*it;panelValues.clear();for(const auto& p:node.parameters)panelValues[node.type][p.first]=p.second;
         editor.instance=node.id;
-        editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){
-            for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
-        });
+        editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});
+        editor.setConnections(document.graph);editor.portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
+        hardware.highlight(selected);
         // Persistent rows avoid destroying the ComboBox inside its own onChange.
         const auto& ports=type(node.type).inputs;
         while(inputs.size()<ports.size()){auto row=std::make_unique<InputRow>();addAndMakeVisible(row->label);addAndMakeVisible(row->choice);inputs.push_back(std::move(row));}

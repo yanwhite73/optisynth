@@ -1,0 +1,76 @@
+# Contextual rack UI review — 0.0.4
+
+Source visual truth: `docs/references/matriarch-panel.jpg` (1920×1920 photograph),
+plus `docs/references/mutable_review/plaits-panel.png` (324×604 manual panel).
+The Matriarch instrument occupies roughly x=10–1910, y=530–1390. Compare its panel
+organisation and control hierarchy, not the white photograph margins or branding.
+This is a native software adaptation of hardware references, not a pixel replica.
+
+Implementation: `build/ui-review/hardware-*.png`, native JUCE component captures
+at 1440×940 and 1120×800, density 1. No CSS/browser viewport applies. All captures
+run with the audio device closed. The reference and implementation images were
+opened together in one comparison input, with focus and dense-rack views inspected
+separately for readable details.
+
+## Comparison history
+
+First pass: 17 November 2026. Default oscillator/filter rack, external resonator,
+minimum-size AHDSFR, enlarged filter, and two-oscillator/mixer states inspected.
+
+- P2: At 1120×800 the AHDSFR attack/hold/decay/release knobs collapse to tiny dots.
+  Give these four knobs two taller rows, place fade below sustain, keep curve trims
+  along the bottom. Check the denser Spectral filter at the same minimum size too.
+- P2: Sustain and mixer use thin generic slider tracks/dots, losing the reference's
+  clear fader handles. Draw rectangular handles, centre lines and vertical ticks.
+- Source/reference grouping is otherwise present: blue oscillators, green filters,
+  dark envelopes/utilities, purple resonators; independent sections and top sockets.
+
+Second pass: envelope/fader fixes confirmed in revised minimum and dense-rack
+captures. The new Spectral minimum capture exposed small VA/ADSR controls too (P2).
+Compact rotary controls now put their values beside the knob, recovering knob area.
+
+Third pass: rebuilt and recaptured the same states. Opened Matriarch, both minimum
+captures, original Plaits panel and final resonator capture together. Larger compact
+knobs, stage labels, values, fader handles and trim rows are visible and separate.
+Normal-size rack/focus proportions are preserved. No actionable P0/P1/P2 remains.
+Current six `hardware-*.png` files are the final captures; earlier iterations were
+inspected live and superseded at these paths.
+
+## Required surfaces
+
+- Typography: native sans serif, uppercase compact control labels, larger module
+  names, editable numerical values. Exact hardware lettering is intentionally not
+  copied. Enlarged focus view supports reading/control without a wider rack.
+- Spacing: adjacent panels and shared socket baseline; per-module control hierarchy.
+  Horizontal scroll handles large racks while global controls remain visible.
+  Minimum envelope density corrected and verified at 1120×800. Compact values move
+  beside their knobs; larger views retain values below.
+- Colours: muted blue/green/purple with dark neutral utilities and pale labels;
+  yellow selection outline and control connection dots distinguish selection/routing.
+- Images: no photo skin or logos in the app. Controls are functional native widgets;
+  the reference is a physical instrument, not image artwork being ported to software.
+- Copy: accurate algorithm/parameter names; no absent Plaits modes or Matriarch DSP
+  claims. Unrouted modules explicitly show their state. Socket tooltips show routes.
+
+## Interaction evidence and limits
+
+Native checks cover independent copies, rack/focus value synchronization, typed
+connections, invalid graph preservation, patch/audio recall and legacy import.
+Added checks cover socket action handlers, route indicators/tooltips, contextual
+replacement and all 17 panel bounds. All pass on the final native run. Menus use native JUCE
+PopupMenu; pointer-driven menu selection is not claimed as automated coverage.
+Sockets open route menus; drag cables and audio-rate parameter patching are pending.
+User audition of 0.0.3 passed; redesigned 0.0.4 audition is pending.
+
+Full-view evidence: `hardware-rack.png`, `hardware-resonator.png`,
+`hardware-two-oscillators.png` (1440×940). Focus evidence: `hardware-filter-focus.png`
+(1440×940); dense-control evidence: `hardware-minimum.png` and
+`hardware-spectral-minimum.png` (1120×800). Controls/labels are readable in these
+1× images, so a separate enlarged crop is unnecessary. Source and rendered density
+differ intentionally because this is hardware-to-software adaptation; no pixel
+equality is claimed. Native release log has no build errors; browser console N/A.
+
+Follow-up polish (P3): richer knob surface shading and cable overlays. These are
+not required for the functional contextual-panel milestone.
+
+final result: passed

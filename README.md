@@ -14,6 +14,7 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Architecture and performance contract](docs/ARCHITECTURE.md)
 - [Research, manuals, schematics and source references](docs/RESEARCH.md)
 - [Other open-source module makers](docs/OPEN_SOURCE_MODULE_MAKERS.md)
+- [Contextual rack interface](docs/CONTEXTUAL_UI.md)
 - [Source snapshot provenance](docs/source_snapshot_20261117.json)
 
 ## Current implementation
@@ -27,7 +28,9 @@ bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
 the core also accepts multiple sources and an explicit mixer.
 
 The native standalone app loads contextual panels from the same parameter schema
-as DSP. It supports Caps Lock typing notes, a piano keyboard, patch save/open,
+as DSP. A Matriarch-inspired rack presents coloured sections, module-specific
+control arrangements and clickable routing sockets, with an enlarged focus view.
+It supports Caps Lock typing notes, a piano keyboard, patch save/open,
 typed input routing and device-rate conversion around the 48 kHz DSP core.
 Add independent module instances, connect their audio/control ports, select the
 output and save the complete rack. Older instrument patches import automatically.
@@ -57,8 +60,10 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the four starter patches; select a module on the left to reveal its
-controls and input connections. Add modules with the menu above the rack. Use a
+octave. Try the four starter patches; edit their panels directly or select a panel
+and click **Focus module** for larger controls and a connection list. Click a socket
+to choose a compatible connection; hover to see existing routes. Add modules with
+the menu above the rack, or use a panel's selector to replace its type. Use a
 Mixer to combine audio and a VCA with an envelope to articulate continuous sources.
 Required inputs must be connected before a module can become part of the audible
 output. Unrouted modules remain editable without consuming DSP. Patches use

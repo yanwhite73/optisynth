@@ -1,0 +1,141 @@
+{
+  "created_utc": "2026-11-17T17:38:18.342024+00:00",
+  "version": "0.0.4",
+  "verification": {
+    "native_checks": "PASS: independent instance controls; rack/focus synchronization; rack JSON/audio recall; invalid edit preservation; dormant add/remove; typed input disconnect/reconnect; socket actions, indicators and source tooltips; socket cycle rejection; contextual replacement; all 17 panels fit without overlap; legacy import audio; six native captures. No audio device opened.",
+    "visual_review": "passed; design-qa.md",
+    "unchanged_qualified_sources": [
+      "src/modular/graph.cpp",
+      "src/modular/player.h",
+      "src/modular/modules.cpp",
+      "src/modular/graph.h",
+      "src/modular/runtime.h",
+      "src/modular/rack.h",
+      "src/modular/runtime.cpp",
+      "app/PatchIO.h",
+      "src/core/envelope.cpp",
+      "src/core/effects.cpp",
+      "tests/test_modular.cpp",
+      "third_party/mutable/PROVENANCE.json"
+    ],
+    "prior_dsp_qualification": "rack_build_receipt.json; not repeated for UI-only change",
+    "mutable_files_verified": 23,
+    "parent_files_unchanged": 83,
+    "audio_device_opened": false,
+    "vst3_built": false,
+    "user_audition_0_0_3": "Confirmed working by request 25",
+    "user_audition_0_0_4": "pending"
+  },
+  "artifacts": {
+    "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth": {
+      "sha256": "daacdf0b1802c49e071eb62e2d972a3f57c510f6c01b188401d2ce79411a8d92",
+      "bytes": 4381520
+    },
+    "build/app-build.log": {
+      "sha256": "7d879b326890534db6ee236e6af4e08613c250ab68cf63ca434bcd75e2b16028",
+      "bytes": 11503
+    },
+    "build/ui-review/ui-check.txt": {
+      "sha256": "5ebb07f090eb4b7904f6be245ab3458654b3a46bbaf80171da125ca021e21ffc",
+      "bytes": 368
+    },
+    "design-qa.md": {
+      "sha256": "3664ed41688cccb96574240fb181bf821bc9d98c01b6daed36a62dd28747bf96",
+      "bytes": 4687
+    },
+    "build/ui-review/hardware-rack.png": {
+      "sha256": "16ca6746f11a79e7daf2a711362bcdb3db5963c8e7b9843ec4c26b4c3a0804b2",
+      "bytes": 143539
+    },
+    "build/ui-review/hardware-filter-focus.png": {
+      "sha256": "d1260a167c0dfb17cf4eca9ff887e7a0b4ed1c2cd3f00ef9a37814db8604251e",
+      "bytes": 116154
+    },
+    "build/ui-review/hardware-resonator.png": {
+      "sha256": "677289b747810a3d58b0078bc0b4e5706c4b3ceebf8caeefa3e7855f1b1d1023",
+      "bytes": 176365
+    },
+    "build/ui-review/hardware-minimum.png": {
+      "sha256": "10157c4ff69651750e4dbbed3e72bcb39b7f6139997663fcf1e5b0c20fbb9e54",
+      "bytes": 115314
+    },
+    "build/ui-review/hardware-spectral-minimum.png": {
+      "sha256": "e6a0a9f6137579e0be4e83658ac83559217bd48616ef6daa3a7348800cc10336",
+      "bytes": 129490
+    },
+    "build/ui-review/hardware-two-oscillators.png": {
+      "sha256": "7e952f9fce8a52f2849381c6d39bb1dd05fe8c6aa998c7a7d6c6d6f69b3ae980",
+      "bytes": 157215
+    }
+  },
+  "sources": {
+    "app/Main.cpp": {
+      "sha256": "0791f95bc9158916e7bafa972b624a72c463c128d6bb18aab2e74ef6ba45688a",
+      "bytes": 1403
+    },
+    "app/OptisynthApp.jucer": {
+      "sha256": "f5b48c02535c3e97fae2dc8003abd0055b266ba9f5803fa493b4a48aeab97d6a",
+      "bytes": 4049
+    },
+    "app/Panel.h": {
+      "sha256": "ab6bd5bfd107a6660d4cd0f31f345b45f1e4df28a4a0c1feaee591112b6c5329",
+      "bytes": 15375
+    },
+    "app/PatchIO.h": {
+      "sha256": "41f17fa57aa71f016f7afaa5999608e21db67644b7642a0c2b64974df05928f1",
+      "bytes": 4996
+    },
+    "app/RackEditor.h": {
+      "sha256": "dfbf20ee4115bbad7b4e6f5cae4d3e485d2631dd166fb27f5475c6c2dec6df53",
+      "bytes": 28759
+    },
+    "src/core/effects.cpp": {
+      "sha256": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+      "bytes": 52594
+    },
+    "src/core/envelope.cpp": {
+      "sha256": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+      "bytes": 4792
+    },
+    "src/modular/graph.cpp": {
+      "sha256": "a85df6e4365e34a935329cbea5880cc4f4fe57da8c848846703c68fa69c691d4",
+      "bytes": 6052
+    },
+    "src/modular/graph.h": {
+      "sha256": "05c87aad442650bc1865038f367abb697afe6d77dfbdf71a317af011517e5d7e",
+      "bytes": 2518
+    },
+    "src/modular/modules.cpp": {
+      "sha256": "68e5619465bb0cd73c176890ce528ab657b0b7f94e270b3e19a6b22569500dd8",
+      "bytes": 13886
+    },
+    "src/modular/player.h": {
+      "sha256": "4a41c6fff5973fef80b0fc65c7906c1ef6c4deccb7165a4e3bc5ce965a5de586",
+      "bytes": 4956
+    },
+    "src/modular/rack.h": {
+      "sha256": "180e57f9734ec6e300952d81e703a5c79573444969fff8c48084b2b93b5b7d07",
+      "bytes": 2706
+    },
+    "src/modular/runtime.cpp": {
+      "sha256": "f369a326841400335570a552bd06c9aa9a173104f7a29f216613b1562821c0d7",
+      "bytes": 3078
+    },
+    "src/modular/runtime.h": {
+      "sha256": "0a2eaaf3c51e2703cfd1718349b18960ae92855033d79b2367daebd530f1d78e",
+      "bytes": 2046
+    },
+    "tests/test_modular.cpp": {
+      "sha256": "2fcfd7bec1b4ea451d2f76e300ae7d66a689f202ee0000173acc361c90a03784",
+      "bytes": 8909
+    },
+    "third_party/mutable/PROVENANCE.json": {
+      "sha256": "c8dd59c648e948c253c4f817abdd8933a7363d95806a4019e352a4c8056b8a4c",
+      "bytes": 3599
+    },
+    "tools/make_app_project.py": {
+      "sha256": "dcad2291204196d3a153d344dfa6abab08a8b17bdcaddca83bf798a9223a894e",
+      "bytes": 2163
+    }
+  }
+}

@@ -20,7 +20,7 @@ DIRECTORIES = (
     'optisynth/patches',
 )
 FILES = (
-    'optisynth/README.md', 'optisynth/Makefile', 'optisynth/.gitignore', 'optisynth/AGENTS.md',
+    'optisynth/README.md', 'optisynth/Makefile', 'optisynth/.gitignore', 'optisynth/AGENTS.md', 'optisynth/design-qa.md',
     'optisynth/plugin/Optisynth.jucer', 'optisynth/plugin/Tests/StressTest.jucer',
     'optisynth/plugin/Tests/StressTest.cpp', 'optisynth/plugin/Tests/PresetExport.h',
     'optisynth/app/Main.cpp', 'optisynth/app/OptisynthApp.jucer',
