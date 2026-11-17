@@ -167,3 +167,22 @@ explicitly: current active-dependency removal can fail validation; convenient
 reconnection is future work and must not guess through branches. The architecture
 note distinguishes proposed drag/undo/group features from existing 0.0.4 menus and
 starter/save/load features. Sample playback is still queued.
+
+## Requests 28–29: VCV performance and actual modularity
+
+Reviewed official VCV manuals, pinned Rack engine/Module sources and Fundamental
+VCO paths, with GitHub revision metadata. Recorded SIMD/polyphony, per-sample
+scheduling and cable transfer, threading costs, selective outputs, graphics caching
+and separate asset loading. Compared our graph compiler, Runtime, Player and native
+UI: existing reachability pruning, pre-resolved pointers and meter-area repaint are
+useful foundations; graph crossfades/output conversion still need peak-load coverage.
+
+The follow-up exposed an important distinction: independent modules and arbitrary
+typed audio routing exist, but a common Note reaches all modules. Pitch/most other
+parameters lack modulation ports; filter mod uses the first sample per block;
+event routing, voice/global execution, polyphony and feedback are future work.
+Recommend editable voice groups with default note routing plus a shared global
+rack. Do not describe the current wrappers as complete VCV/hardware modules.
+Full findings, implementation implications and qualification matrix are in
+`VCV_ARCHITECTURE_LESSONS.md`. No source adoption, benchmark, DSP change or Live
+interaction occurred. Sample work remains queued with these boundaries to define.

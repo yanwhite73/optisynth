@@ -183,3 +183,22 @@ drag and drop / remove / patch cables? or a more preset-based routing architectu
 Design question: recommend both as interfaces to the existing routing graph.
 Editable, prewired instrument templates plus direct module/cable manipulation.
 This is a recommendation, not a claim that drag cables or undo are implemented.
+
+## 28 — VCV performance lessons
+
+```text
+what can we learn from vcv about performance etc?
+```
+
+Inspect primary VCV engine/developer evidence and compare it with Optisynth.
+Record practical architecture lessons, limits and measurements before optimization.
+
+## 29 — How modular are the modules, and how modular should we make them?
+
+```text
+and also are modules actually modular as they would be in vcv, and do we want that for the purposes of this synth / environment?
+```
+
+Distinguish current DSP/typed graph modularity from VCV's voltage-patching model.
+Assess the shared note context, modulation ports, polyphony and voice/global scope;
+recommend a modular core with playable voice groups without claiming these exist.

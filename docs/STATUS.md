@@ -64,7 +64,15 @@ Requests 17–19 (keep building; show available open-source Mutable modules) are
 implemented in this rack milestone. Request 20's other-maker shortlist is recorded
 in `OPEN_SOURCE_MODULE_MAKERS.md`, indexed by `RESEARCH.md`: 4ms Ensemble Oscillator
 and DaisySP are the recommended next sources to review. No code from those projects
-has been adopted. All 27 user requests are retained verbatim in `USER_REQUESTS.md`.
+has been adopted. All 29 user requests are retained verbatim in `USER_REQUESTS.md`.
+
+Requests 28–29: VCV performance lessons and the right degree of modularity are
+researched in `VCV_ARCHITECTURE_LESSONS.md`. Current audio/control modules are
+independent, but note/gate context is shared, most parameters lack modulation
+ports, filter modulation is block-rate, and event cables/polyphony/global scope/
+feedback remain unimplemented. Recommend playable voice groups over an editable
+modular graph. Define these interfaces before extending sample/polyphony ownership;
+retain sample playback as the next playable milestone. No runtime changed here.
 
 Request 27 asks whether to use direct module/cable manipulation, preset routing or
 both. Recommendation: both on the same saved graph; prewired editable templates,

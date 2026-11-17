@@ -53,6 +53,12 @@ modules; do not claim an exact JP emulation from feature names or schematics alo
 
 ## Mutable Instruments and VCV Rack references
 
+[VCV architecture and performance lessons](VCV_ARCHITECTURE_LESSONS.md) compares
+primary engine/oscillator sources with our current modules, notes SIMD, scheduling,
+UI/asset costs and proposes voice groups with explicit modulation/event interfaces.
+It includes pinned revisions, current limitations and a future benchmark matrix.
+No VCV code adopted or comparative performance claim made.
+
 - [Original Mutable source](https://github.com/pichenettes/eurorack).
 - [Rings manual](https://pichenettes.github.io/mutable-instruments-documentation/modules/rings/manual/).
 - [Plaits modal engine interface](https://github.com/pichenettes/eurorack/blob/master/plaits/dsp/engine/modal_engine.h).
