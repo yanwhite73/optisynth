@@ -295,7 +295,8 @@ void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note&
         auto start=[&](int v,int index){
             auto& slot=slots_[size_t(v)];
             if(!slot.awake)woke_[size_t(v)]=true;
-            slot.active=slot.awake=true;slot.quiet=0;slot.source=e.source;slot.noteId=e.noteId;slot.started=++voiceClock_;
+            slot.active=slot.awake=true;slot.quiet=0;slot.level=1.f;   // protected until its level is measured
+            slot.source=e.source;slot.noteId=e.noteId;slot.started=++voiceClock_;
             slot.target=tuned(pitch);
             if(!slot.tuned||glide<=0)slot.pitch=slot.target;
             slot.tuned=true;
@@ -313,8 +314,14 @@ void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note&
         for(int k=0;k<unison;++k){
             int pick=-1;uint64_t oldest=~uint64_t(0);
             for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(!(chosen>>v&1)&&!s.active&&s.released<oldest){oldest=s.released;pick=v;}}
-            if(pick<0&&steal){oldest=~uint64_t(0);
-                for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(!(chosen>>v&1)&&s.started<oldest){oldest=s.started;pick=v;}}}
+            if(pick<0&&steal){
+                // Steal the quietest held voice (level estimate, as Korg's VoicePool sorts
+                // clusters); ties fall back to the oldest. Quiet voices are least missed.
+                float quietest=1e30f;oldest=~uint64_t(0);
+                for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];
+                    if(chosen>>v&1)continue;
+                    const bool quieter=s.level<quietest*.999f,tie=!quieter&&s.level<=quietest*1.001f;
+                    if(quieter||(tie&&s.started<oldest)){quietest=s.level;oldest=s.started;pick=v;}}}
             if(pick<0)break;   // stealing off and no free voice: the note is not played
             chosen|=1u<<pick;start(pick,k);
         }
@@ -349,9 +356,11 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
                 voiceMixer_->mix(liveLeft_.data(),liveRight_.data(),voices,n,node.out[0],node.outRight[0],node.effective.data());
                 for(int v=0;v<voices;++v){
                     auto& slot=slots_[size_t(v)];
-                    if(!slot.awake||slot.active)continue;
+                    if(!slot.awake){slot.level=0;continue;}
                     float peak=0;
                     for(int k=0;k<n;++k)peak=std::max(peak,std::max(std::abs(mixLeft_[size_t(v)][k]),std::abs(mixRight_[size_t(v)][k])));
+                    slot.level+=(peak-slot.level)*.05f;   // ~10 ms level estimate for stealing
+                    if(slot.active)continue;
                     slot.quiet=peak<1e-5f?slot.quiet+n:0;
                     if(slot.quiet>=24000)slot.awake=false;   // 0.5 s below -100 dBFS after release
                 }

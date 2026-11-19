@@ -43,6 +43,16 @@ void voiceFeatureChecks(){
         gated=0;for(int v=0;v<maximumVoices;++v)gated+=r.voiceNote(v).gate;
         check(gated==16,"Sixteen voices hold four unison notes, the fifth steals");
     }
+    // When every voice is held, the quietest one is stolen rather than the oldest.
+    {
+        Runtime r(withVoices(0,{{"voices",2}}));
+        renderKeys(r,{keyEvent(60,true,1.f)},3);
+        renderKeys(r,{keyEvent(64,true,.05f)},3);   // newer but much quieter (velocity scales level)
+        renderKeys(r,{keyEvent(67,true)},.05);
+        bool loudKept=false,quietGone=true;
+        for(int v=0;v<maximumVoices;++v){const auto n=r.voiceNote(v);if(!n.gate)continue;loudKept|=n.midi==60;quietGone&=n.midi!=64;}
+        check(loudKept&&quietGone,"Stealing takes the quietest held voice, not the oldest");
+    }
     // Stealing can be switched off: surplus notes are not played.
     {
         Runtime r(withVoices(0,{{"voices",2},{"steal",0}}));

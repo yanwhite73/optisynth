@@ -104,7 +104,7 @@ private:
         std::vector<float*> sliceOut,sliceOutRight;
     };
     struct VoiceChange { int offset; Note note; };
-    struct VoiceSlot { Note note; bool active=false,awake=false,tuned=false; uint32_t source=0; uint64_t noteId=0, started=0, released=0; float pitch=0,target=0,detune=0; int quiet=0; };
+    struct VoiceSlot { Note note; bool active=false,awake=false,tuned=false; uint32_t source=0; uint64_t noteId=0, started=0, released=0; float pitch=0,target=0,detune=0,level=0; int quiet=0; };
     void prepareBuffers(NodeBuffers&, AudioModule*, const ModuleType&, const std::string& type);
     NodeBuffers& instance(int node,int voice) noexcept { return voice==0?nodes_[size_t(node)]:voiceCopies_[size_t(node)][size_t(voice-1)]; }
     void computeParameters(NodeBuffers&) noexcept;
