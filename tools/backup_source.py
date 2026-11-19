@@ -23,6 +23,7 @@ FILES = (
     'optisynth/README.md', 'optisynth/Makefile', 'optisynth/.gitignore', 'optisynth/AGENTS.md', 'optisynth/design-qa.md',
     'optisynth/plugin/Optisynth.jucer', 'optisynth/plugin/Tests/StressTest.jucer',
     'optisynth/plugin/Tests/StressTest.cpp', 'optisynth/plugin/Tests/PresetExport.h',
+    'optisynth/app/Artwork/Optisynth.icns', 'optisynth/tools/render_app_icon.swift',
     'optisynth/app/Main.cpp', 'optisynth/app/OptisynthApp.jucer',
     'optisynth/app/Panel.h', 'optisynth/app/PatchIO.h', 'optisynth/app/RackEditor.h', 'optisynth/app/SampleLoader.h', 'optisynth/app/ModulationEditor.h', 'optisynth/app/SequencerEditor.h', 'optisynth/app/PatternEditor.h',
     'optisynth/app/ReferenceSequencerEditor.h', 'optisynth/app/PerformanceEditor.h', 'optisynth/app/PerformanceStateIO.h',

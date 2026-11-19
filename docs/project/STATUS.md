@@ -10,6 +10,10 @@ load a whole rack. A rack with multiple sequencers requires an explicit full
 rack change. Rack rebuilds reopen expanded editors for surviving sequencer IDs
 and models. Runtime playhead, editor undo and temporary snapshots can restart.
 
+Yan heard the current sound starting to come together musically and called the sequencer
+options a good start (feedback 61). The saved reference is `patches/lush ambient space.optisynth` (local),
+with the Performance sequencer driving an analog pad at 118 BPM.
+
 ## Previous delivery — Probability and Orbit, request 59, 0.0.12
 
 The single delivery app remains **`app/Builds/MacOSX/build/Release/Optisynth.app`**.

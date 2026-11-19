@@ -9,5 +9,6 @@ if ! xcodebuild -project app/Builds/MacOSX/Optisynth.xcodeproj -configuration Re
     exit 1
 fi
 tail -5 build/app-build.log
+python3 tools/package_app_icon.py build/app-candidate/Optisynth.app --sign
 python3 tools/deliver_app.py build/app-candidate/Optisynth.app \
     --qualification 'Compiled and signature checked. Native UI checks and visual review pending.'

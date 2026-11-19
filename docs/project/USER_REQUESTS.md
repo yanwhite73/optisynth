@@ -640,3 +640,21 @@ full desktop/audio interaction remain open; no whole-source-product parity claim
 ```text
 what happened to the sequencer? I changed sounds and it disappeared
 ```
+
+## 61 — Listening feedback on the current sound and sequencers
+
+```text
+the current sound thats playing is actually starting to sound like music, and the sequencer options are a good start
+```
+
+```text
+ok done
+```
+
+Saved listening reference: `patches/lush ambient space.optisynth` (local), Performance sequencer and analog pad at 118 BPM.
+
+## 62 — Standalone app icon
+
+```text
+use one of my /Users/yanwhite/Documents/Art/2025/code\ based/optimystery/luckydip/screenshots/v2 images for the desktop icon, or a detail so it can be seen, and an O (serif)
+```

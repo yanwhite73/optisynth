@@ -841,3 +841,15 @@ checks its saved note weights, tempo, event routing and rendered output. It also
 covers Orbit and Performance through a pad. The existing offline harness had
 supplied an empty sample bank, which made the sample patch silent in the test.
 It now passes the same decoded sample bank as the standalone.
+
+## Request 62 — standalone icon
+
+The app uses a cropped detail of Yan's Lucky Dip image `lucky-dip_pattern-6.png`
+and an ivory Baskerville SemiBold Italic O. The original is 7600 × 3800 pixels.
+Its SHA-256 is `a23bf3492c7c3f6d1d86cda841d27fc18ec790d9f5a3db96cba7fd99dbb0099c`.
+The renderer uses a 3000-pixel square at (4450, 0) and a larger letter at small
+sizes. [Icon preview](../../app/Artwork/Optisynth-preview.png).
+
+Both standalone build paths embed the ICNS before final signing. The icon was
+decoded into all ten macOS representations and the 256, 32 and 16 pixel versions
+were inspected. The signed 0.0.13 delivery contains the verified icon resource.

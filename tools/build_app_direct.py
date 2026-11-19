@@ -5,6 +5,7 @@ Rebuilds every project source with the last Xcode compile configuration and reus
 only previously built JUCE module objects. Records hashes; does not imply UI QA.
 Uses the same staging/delivery paths as build_app.sh. No dependencies downloaded.
 """
+from package_app_icon import package_icon
 import argparse
 import hashlib
 import json
@@ -74,6 +75,7 @@ command = [compiler, '-target', 'arm64-apple-macos11', '-isysroot', args[args.in
 for framework in frameworks:
     command += ['-framework', framework]
 subprocess.run([*command, '-o', str(binary)], check=True, cwd=root)
+package_icon(bundle)
 subprocess.run(['codesign', '--force', '--sign', '-', str(bundle)], check=True)
 subprocess.run(['codesign', '--verify', '--deep', '--strict', str(bundle)], check=True)
 receipt = {'version': version, 'method': 'Direct Clang; all project sources rebuilt; unchanged JUCE objects reused',
