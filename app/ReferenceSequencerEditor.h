@@ -200,6 +200,7 @@ public:
     }
     void setValue(const std::string& id,float v){values_[id]=v;if(editor_)editor_->setValue(id,v);repaint();}
     void setActive(bool a){active_=a;if(editor_)editor_->setActive(a);repaint();}
+    bool isEditorOpen() const { return window_ && window_->isVisible(); }
     bool hasEditorFocus()const{return editor_&&editor_->hasKeyboardFocus(true);}
     ReferenceSequencerEditor* openEditor(){if(!window_){editor_=new ReferenceSequencerEditor(type_,values_,controls_);editor_->parameterChanged=[this](const std::string& id,float v){values_[id]=v;if(parameterChanged)parameterChanged(id,v);};editor_->onPlay=[this]{if(onPlay)onPlay();};editor_->getTempo=[this]{return getTempo?getTempo():120.;};editor_->changeTempo=[this](double v){if(changeTempo)changeTempo(v);};window_=std::make_unique<ReferenceSequenceWindow>(type_=="seq.orbit"?"Optisynth / Orbit":"Optisynth / Probability",editor_);}editor_->setActive(active_);editor_->setTempo(getTempo?getTempo():120.);window_->setVisible(true);window_->toFront(true);return editor_;}
     void resized()override{open_.setBounds(5,getHeight()-40,getWidth()-10,35);}

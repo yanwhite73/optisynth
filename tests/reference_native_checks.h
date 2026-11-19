@@ -58,3 +58,45 @@ void referenceEditors(){
     std::printf("PASS %d reference editor sliders preserve values and forward all wheel directions\n",sliders);
     require(folder.getChildFile("editor-check.txt").replaceWithText("PASS: actual native Probability and Orbit components; grid paint/select, ring rotation, grouped undo/redo, preview/apply/protection, snapshot restore, capture of actual DSP outcomes, scroll forwarding and five component images. No desktop peer or audio device opened.\n"),"Write reference UI receipt");
 }
+
+
+void soundChangeChecks() {
+    auto edited = starterDocument(17, .31f);
+    edited.tempo = 137;
+    auto& sequencer = edited.graph.nodes.front();
+    sequencer.id = "customGrid";
+    sequencer.parameters.push_back({"step3_weight16", 93});
+    for(int instrument : {0,1,2,3,4,5,6,7,15,16}) {
+        auto changed = chooseStarter(edited,instrument,true);
+        const auto& kept = changed.graph.nodes.front();
+        require(kept.id == sequencer.id && kept.type == sequencer.type &&
+                kept.parameters == sequencer.parameters && changed.tempo == 137,
+                "Changing instrument discarded the edited sequence");
+        bool routed = false;
+        for(const auto& c : changed.graph.connections)
+            routed |= c.source.node == kept.id && c.source.port == "notes" && c.destination.port == "notes";
+        require(routed,"Changing instrument left the sequence disconnected");
+        prepareSamples(changed);
+        const auto sound = render(changed,1);
+        std::printf("Instrument %d peak %.8f\n",instrument,double(*std::max_element(sound.begin(),sound.end())));
+        require(std::all_of(sound.begin(),sound.end(),[](float x){return std::isfinite(x);})
+             && std::any_of(sound.begin(),sound.end(),[](float x){return std::abs(x)>.00001f;}),
+                "Sequencer failed to sound the selected instrument");
+    }
+    for(int id : {13,18}) {
+        auto original = starterDocument(id,.25f);
+        auto changed = chooseStarter(original,15,true);
+        require(changed.graph.nodes.front().performance == original.graph.nodes.front().performance,
+                "Sound change discarded Performance banks");
+        const auto port = id == 18 ? "all_notes" : "t1_notes";
+        require(std::any_of(changed.graph.connections.begin(),changed.graph.connections.end(),
+            [&](const Connection& c){return c.source.port==port && c.destination.node=="voices";}),
+            "Multitrack sequencer failed to drive pad voice mixer");
+        const auto sound=render(changed,1);
+        require(std::any_of(sound.begin(),sound.end(),[](float x){return std::abs(x)>.00001f;}),
+                "Multitrack sound change was silent");
+    }
+    require(chooseStarter(edited,0,false).graph.nodes.front().id!="customGrid","Full instrument reset failed");
+    require(chooseStarter(edited,18,true).graph.nodes.front().type=="seq.orbit","Explicit sequencer starter failed");
+    std::puts("PASS edited grid and tempo through ten instrument sounds, audible note routes, Orbit and Performance pad routing, deliberate full-rack replacement");
+}

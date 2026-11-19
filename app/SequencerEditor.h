@@ -54,6 +54,7 @@ public:
     void selectStep(int step){selected_=std::clamp(step,0,int(get("length"))-1);refreshInspector();repaint();}
     // Exposed to native checks through the same user-facing widgets.
     juce::Slider& pitchControl(){return pitch.slider;}
+    bool isEditorOpen() const { return window_ && window_->isVisible(); }
     bool performanceHasFocus()const{return fullEditor_&&fullEditor_->hasKeyboardFocus(true);}
     PatternEditor* openPerformanceEditor(bool visible=true){
         if(type_!="seq.pattern")return nullptr;

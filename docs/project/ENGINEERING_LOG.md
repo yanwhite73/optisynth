@@ -825,3 +825,19 @@ Git: main began with three concurrent committed pad-voice changes ahead of remot
 was included in build/engine qualification. No publication hold was found. Remote
 access works with the approved network path. Final commit/push and independent
 source-backup details are reported in the task handoff.
+
+## Request 60 — sequencer disappears on sound changes
+
+Instrument choices shared the full-rack loader with sequencer demos. Selecting
+a sound discarded the current pattern. A second path rebuilt all rack cards on
+a structural change, destroying even the open editor for a surviving sequencer.
+Instrument entries now carry the edited generator and tempo by default, with
+a visible Keep sequence control and separate menu headings. Sequencer windows
+reopen after the matching module is rebound. Full rack loads still serve as an
+explicit way to switch models. Temporary window history is session-local.
+
+The regression check plays an edited grid through each instrument starter and
+checks its saved note weights, tempo, event routing and rendered output. It also
+covers Orbit and Performance through a pad. The existing offline harness had
+supplied an empty sample bank, which made the sample patch silent in the test.
+It now passes the same decoded sample bank as the standalone.

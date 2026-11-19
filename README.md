@@ -24,7 +24,7 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
-## Probability and Orbit — 0.0.12
+## Probability and Orbit — 0.0.13
 
 Two separate sequencers now use the collected UI research directly:
 
@@ -36,7 +36,10 @@ Two separate sequencers now use the collected UI research directly:
   ratchets, swing and per-cycle rotation to develop their relationship.
 
 Always open [Optisynth](app/Builds/MacOSX/build/Release/Optisynth.app).
-It opens Probability and its editor with audio off; press **PLAY** to start.
+It opens Probability and its editor with audio off. Press **PLAY** to start.
+With **Keep sequence** enabled, choose an **Instrument sounds** entry to hear
+the current pattern through that instrument. **Sequencer racks** load their own
+sequencers and patterns. Save the rack to keep edits across full rack changes.
 Choose **Orbit / Four satellites** in Starter patches, then **OPEN ORBIT** on its
 rack panel. Both are independent modules that can coexist with the earlier
 Performance, Pattern/Motion, Euclidean and Stage sequencers.

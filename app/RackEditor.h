@@ -13,7 +13,7 @@ public:
     RackSynth() : keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
         setWantsKeyboardFocus(true);setSize(1440,940);
         for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,
-            &starter,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position})addAndMakeVisible(c);
+            &starter,&keepSequence,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position})addAndMakeVisible(c);
         rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(false,true);rackView.setScrollBarThickness(12);
         focusMode.setClickingTogglesState(true);focusMode.onClick=[this]{showSelected();};
         rack.setRowHeight(62);rack.setColour(ListBox::backgroundColourId,Colour(0xff25343a));
@@ -21,9 +21,22 @@ public:
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
         const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden","Pad / OB swell (8 voices)","Pad / Prophet 4-pole (8 voices)","Probability / Glass branches","Orbit / Four satellites"};
-        for(i=0;i<19;++i)starter.addItem(names[i],i+1);
+        for(i=0;i<19;++i){
+            if(i==0 || i==15) starter.addSectionHeading("Instrument sounds");
+            if(i==8 || i==17) starter.addSectionHeading("Sequencer racks");
+            starter.addItem(names[i],i+1);
+        }
+        keepSequence.setToggleState(true,dontSendNotification);
+        keepSequence.setTooltip("Keep the current pattern and tempo when choosing an instrument sound. Sequencer racks load their own patterns.");
         starter.setTextWhenNothingSelected("Starter patches");
-        starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),(starter.getSelectedId()>=16&&starter.getSelectedId()<=17)?"filter":starter.getSelectedId()>=9?"sequence":"source");};
+        starter.onChange=[this]{
+            const int id=starter.getSelectedId();
+            if(refreshing || id<=0) return;
+            try {
+                auto next=chooseStarter(document,id-1,keepSequence.getToggleState());
+                commit(std::move(next),id==16 || id==17 ? "filter" : id>=9 ? "sequence" : "source");
+            } catch(const std::exception& e){message(e.what(),true);}
+        };
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
         remove.onClick=[this]{removeSelected();};
         editor.selectionChanged=[this]{
@@ -71,7 +84,7 @@ public:
     }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.12",25,53,300,20,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.13",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
         g.setColour(paper);g.setFont(font(12));
         g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
@@ -88,7 +101,7 @@ public:
     }
     void resized() override {
         const int right=getWidth()-324,bottom=bodyBottom();const bool focused=focusMode.getToggleState();
-        starter.setBounds(24,82,360,32);save.setBounds(400,82,85,32);load.setBounds(493,82,85,32);
+        starter.setBounds(24,82,235,32);keepSequence.setBounds(263,82,132,32);save.setBounds(400,82,85,32);load.setBounds(493,82,85,32);
         audio.setBounds(getWidth()-258,24,145,36);silence.setBounds(getWidth()-105,24,81,36);
         play.setBounds(315,22,86,34);restart.setBounds(409,22,75,34);tempo.setBounds(494,24,206,30);position.setBounds(710,24,std::max(80,getWidth()-978),30);
         status.setBounds(595,76,getWidth()-619,45);
@@ -290,6 +303,7 @@ private:
     std::vector<std::string> addTypes;std::vector<Endpoint> outputPorts;
     std::vector<int> held;std::set<int> sustained;bool sustain=false;std::string selected;int activeCount=0;
     ComboBox addChoice,starter,output;
+    ToggleButton keepSequence{"Keep sequence"};
     TextButton add{"Add module"},remove{"Remove"},save{"Save"},load{"Open"},audio{"Start audio"},silence{"Silence"};
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
@@ -434,7 +448,17 @@ private:
         output.setTextWhenNothingSelected(document.graph.outputs.empty()?"No output":"Multiple outputs (saved rack)");
         String text;for(const auto& c:document.graph.connections)text+=String(c.source.node)+"."+String(c.source.port)+"  >  "+String(c.destination.node)+"."+String(c.destination.port)+"\n";
         routes.setText(text,false);rack.updateContent();refreshing=false;
-        rebuildHardware();selectNode(preferred);repaint();
+        std::map<std::string,std::string> openEditors;
+        auto remember=[&](const ModulePanel& p){
+            if(p.sequencerWindowOpen())openEditors[p.instance]=p.current;
+        };
+        remember(editor);
+        for(const auto& card:hardware.modules)remember(*card);
+        rebuildHardware();
+        selectNode(preferred);
+        for(const auto& [id,model]:openEditors)
+            if(auto* card=hardware.find(id);card && card->current==model)card->openSequencerWindow();
+        repaint();
     }
     void selectNode(const std::string& id) {
         int row=0;for(size_t i=0;i<document.graph.nodes.size();++i)if(document.graph.nodes[i].id==id)row=int(i);
@@ -446,6 +470,9 @@ private:
         auto it=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==selected;});
         if(it==document.graph.nodes.end())return;
         const auto node=*it;panelValues.clear();for(const auto& p:node.parameters)panelValues[node.type][p.first]=p.second;
+        if(editor.sequencerWindowOpen())
+            if(auto* card=hardware.find(editor.instance);card && card->current==editor.current && !card->sequencerWindowOpen())
+                card->openSequencerWindow();
         editor.instance=node.id;
         editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});bindSequencePanel(editor);
         bindSamplePanel(editor,node.id);

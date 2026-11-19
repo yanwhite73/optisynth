@@ -222,6 +222,15 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             if(j->output)for(const auto& e:graph.outputs)if(e.node==instance&&e.port==j->port.id){j->connected=true;links+="\nInstrument output";}
             j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+"\nClick to patch");j->repaint();}
     }
+    bool sequencerWindowOpen() const {
+        return (referenceSequence && referenceSequence->isEditorOpen())
+            || (performance && performance->isEditorOpen()) || (sequence && sequence->isEditorOpen());
+    }
+    void openSequencerWindow() {
+        if (referenceSequence) referenceSequence->openEditor();
+        else if (performance) performance->openEditor();
+        else if (sequence) sequence->openPerformanceEditor();
+    }
     void setValue(const std::string& id,float value){if(referenceSequence){referenceSequence->setValue(id,value);return;}if(performance){performance->setValue(id,value);return;}if(sequence){sequence->setValue(id,value);return;}const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setValue(value);if(current=="sample.player")repaint();}
     void paint(Graphics& g) override {
         if(current.empty())return;auto r=getLocalBounds().toFloat();const auto text=panelInk(current);

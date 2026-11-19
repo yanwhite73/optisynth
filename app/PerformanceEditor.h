@@ -283,6 +283,7 @@ public:
     void setData(const PerformanceData& data){data_=data;if(editor_)editor_->setData(data);repaint();}
     void setValue(const std::string& key,float value){values_[key]=value;if(editor_)editor_->setValue(key,value);}
     void setActive(bool active){active_=active;if(editor_)editor_->setActive(active);repaint();}
+    bool isEditorOpen() const { return window_ && window_->isVisible(); }
     bool hasEditorFocus()const{return editor_&&editor_->hasKeyboardFocus(true);}
     PerformanceEditor* openEditor(bool visible=true){if(!window_){editor_=new PerformanceEditor(data_,controls_,values_);editor_->dataChanged=[this](const PerformanceData& d){data_=d;if(dataChanged)dataChanged(d);};editor_->parameterChanged=[this](const std::string& key,float value){values_[key]=value;if(parameterChanged)parameterChanged(key,value);};
             editor_->onPlay=[this]{if(onPlay)onPlay();};editor_->onRestart=[this]{if(onRestart)onRestart();};editor_->getTempo=[this]{return getTempo?getTempo():120.;};editor_->changeTempo=[this](double v){if(changeTempo)changeTempo(v);};window_=std::make_unique<PerformanceWindow>(editor_);}

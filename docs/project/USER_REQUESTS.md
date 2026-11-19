@@ -634,3 +634,9 @@ native captures. 307 engine checks, full preset/audio recall and native gesture/
 scroll checks pass. Stable app path retained; the previous 0.0.11 app is archived.
 See STATUS and `../ui/REFERENCE_SEQUENCERS_REVIEW.md`. User musical acceptance and
 full desktop/audio interaction remain open; no whole-source-product parity claim.
+
+## 60 — Sequencer disappears when changing sounds
+
+```text
+what happened to the sequencer? I changed sounds and it disappeared
+```

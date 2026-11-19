@@ -1,6 +1,16 @@
 # Optisynth status — 19 November 2026
 
-## Current delivery — Probability and Orbit, request 59, 0.0.12
+## 0.0.13 sound selection — request 60
+
+**Keep sequence** is on by default. Selecting an instrument starter carries the
+sequencer, its saved edits and tempo into the new instrument graph. Orbit routes
+its combined notes and Performance routes track one to the instrument. For a
+polyphonic pad the notes go to its voice mixer. Sequencer starters and Open still
+load a whole rack. A rack with multiple sequencers requires an explicit full
+rack change. Rack rebuilds reopen expanded editors for surviving sequencer IDs
+and models. Runtime playhead, editor undo and temporary snapshots can restart.
+
+## Previous delivery — Probability and Orbit, request 59, 0.0.12
 
 The single delivery app remains **`app/Builds/MacOSX/build/Release/Optisynth.app`**.
 It opens **Probability / Glass branches** and its editor with audio off. Press

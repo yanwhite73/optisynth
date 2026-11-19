@@ -13,6 +13,7 @@ root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--ui-only', action='store_true', help='Check changed UI without repeating unchanged audio renders')
 parser.add_argument('--references', action='store_true', help='Qualify Probability and Orbit editors and routed presets')
+parser.add_argument('--sound-change', action='store_true', help='Verify sequencer retention while switching instrument sounds')
 options = parser.parse_args()
 old = root / 'app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64'
 responses = [p for p in old.glob('*-common-args.resp') if '-std=c++17' in p.read_text() and '-fobjc-' not in p.read_text()]
@@ -35,7 +36,9 @@ for framework in frameworks:
     command += ['-framework', framework]
 binary = root / 'build/check-performance-native'
 subprocess.run([*command, '-o', str(binary)], check=True, cwd=root)
-if options.references:
+if options.sound_change:
+    subprocess.run([str(binary), '--sound-change'], check=True, cwd=root)
+elif options.references:
     subprocess.run([str(binary), '--references-ui' if options.ui_only else '--references'], check=True, cwd=root)
 elif not options.ui_only:
     subprocess.run([str(binary)], check=True, cwd=root)

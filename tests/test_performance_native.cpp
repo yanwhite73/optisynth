@@ -22,7 +22,7 @@ int checkScrollNavigation(juce::Component& component){
     };visit(component);sink.removeChildComponent(&component);return sliders;
 }
 std::vector<float> render(const RackDocument& document,int seconds){
-    Runtime runtime(document.graph,{},document.spectral);runtime.clock.tempo(document.tempo);runtime.clock.play(true);
+    Runtime runtime(document.graph,sampleBank(document),document.spectral);runtime.clock.tempo(document.tempo);runtime.clock.play(true);
     std::vector<float> left(48000*seconds),right(left.size());runtime.render(left.data(),right.data(),int(left.size()),{});left.insert(left.end(),right.begin(),right.end());return left;
 }
 void presets(){
@@ -77,4 +77,4 @@ void editorChecks(){
 }
 #include "reference_native_checks.h"
 }
-int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="--ui")editorChecks();else if(argc>1&&std::string(argv[1])=="--references-ui")referenceEditors();else if(argc>1&&std::string(argv[1])=="--references"){referencePresets();referenceEditors();}else presets();return 0;}catch(const std::exception& e){std::fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}
+int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="--sound-change")soundChangeChecks();else if(argc>1&&std::string(argv[1])=="--ui")editorChecks();else if(argc>1&&std::string(argv[1])=="--references-ui")referenceEditors();else if(argc>1&&std::string(argv[1])=="--references"){referencePresets();referenceEditors();}else presets();return 0;}catch(const std::exception& e){std::fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}

@@ -89,6 +89,38 @@ inline RackDocument starterDocument(int which,float gain) {
     }
     return d;
 }
+// Instrument starters provide a new sound graph. Carry the edited note generator
+// into that graph when requested. Sequencer starters supply their own patterns.
+inline RackDocument chooseStarter(const RackDocument& current, int index, bool keepSequence) {
+    auto next = starterDocument(index, current.gain);
+    auto isSequence = [](const NodeSpec& n) { return n.type.rfind("seq.", 0) == 0; };
+    if (!keepSequence || std::any_of(next.graph.nodes.begin(), next.graph.nodes.end(), isSequence))
+        return next;
+    const auto& nodes = current.graph.nodes;
+    auto seq = std::find_if(nodes.begin(), nodes.end(), isSequence);
+    if (seq == nodes.end()) return next;
+    if (std::any_of(std::next(seq), nodes.end(), isSequence))
+        throw std::invalid_argument("Multiple sequencers in this rack. Save it and turn off Keep sequence to load a starter.");
+    if (std::any_of(next.graph.nodes.begin(), next.graph.nodes.end(), [&](const NodeSpec& n){ return n.id == seq->id; }))
+        throw std::invalid_argument("Sequencer ID conflicts with this starter. Current rack kept.");
+
+    const bool polyphonic = std::any_of(next.graph.nodes.begin(), next.graph.nodes.end(),
+        [](const NodeSpec& n){ return n.type == "voice.mix"; });
+    const auto registry = moduleRegistry();
+    const auto port = seq->type == "seq.orbit" ? "all_notes" :
+                      seq->type == "seq.performance" ? "t1_notes" : "notes";
+    for (const auto& node : next.graph.nodes) {
+        if (polyphonic && node.type != "voice.mix") continue;
+        const auto type = std::find_if(registry.begin(), registry.end(),
+            [&](const ModuleType& t){ return t.id == node.type; });
+        if (type != registry.end() && std::any_of(type->inputs.begin(), type->inputs.end(),
+            [](const Port& p){ return p.type == SignalType::Event && p.id == "notes"; }))
+            setRackConnection(next.graph, {node.id, "notes"}, {seq->id, port});
+    }
+    next.graph.nodes.insert(next.graph.nodes.begin(), *seq);
+    next.tempo = current.tempo;
+    return next;
+}
 inline void pruneSampleReferences(RackDocument& d) {
     for(auto it=d.samples.begin();it!=d.samples.end();){
         if(std::none_of(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==it->first&&n.type=="sample.player";}))it=d.samples.erase(it);
