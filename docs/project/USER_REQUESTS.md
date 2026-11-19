@@ -565,3 +565,9 @@ native component interactions and normal/minimum-size visual review pass.
 Desktop-window startup is still unverified in this execution context. See
 `../architecture/PERFORMANCE_SEQUENCER.md`, STATUS and the build receipt. The
 feature delivery does not substitute for Yan's assessment of the musical result.
+
+## 52 — Modular mix-and-match of the classic circuits; performance and latency
+
+```text
+is there anything thet awould prevent us from taking a modular approach to these circuits, allowing mix and match? performance? latency?
+```

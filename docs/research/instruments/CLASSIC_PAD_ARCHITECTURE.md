@@ -269,3 +269,75 @@ mono and 4-pole; its movement comes from poly-mod and the shared wheel-mod LFO.
 - **On decompiling Arturia:** not pursued. The schematics, MAME and the
   datasheets are better and freely readable sources, and Arturia's licence
   terms on reverse engineering have not been checked.
+
+## Mix-and-match modularity, performance and latency (request 52)
+
+**Nothing fundamental prevents it.** Each of these synths is already modular
+inside: separate chips (VCO, filter, envelope, VCA) joined by voltages. Software
+modules can be joined the same way.
+
+**What must stay inside one module.** Tight loops and internal taps:
+- the filter resonance loop, including the diode limiting;
+- the Xpander pole taps (pole mixing is a filter feature, or the filter must
+  expose its four stage outputs);
+- OB-8 2-pole/4-pole reconfiguration;
+- the SEM mode crossfade;
+- each oscillator's own waveform mixing.
+
+**What has to cross modules, and the runtime does not support yet:**
+- **Audio-rate modulation inputs:** Prophet poly-mod, oscillator FM, filter FM.
+  The matrix currently samples once per 24-frame block.
+- **Hard sync:** a dedicated port carrying a sub-sample reset time.
+  Band-limited oscillators need the fractional reset position.
+- **Per-voice graphs:** polyphony.
+- **An explicit shared/per-voice split:** for example, the Prophet's single
+  wheel-mod LFO is global, while its poly-mod is per voice.
+- **Explicit causal feedback:** the planner rejects cycles.
+
+**Level convention.** Saturation depends on drive level, so modules from
+different instruments only drive each other correctly with a shared voltage
+convention: for example ±5 V audio and 1 V/oct, as in VCV Rack. Each module
+then scales its own inputs as its schematic does. Without this, an SEM filter
+fed by a Prophet oscillator would be under- or over-driven. Component
+tolerance and drift should be a per-voice seed that every module reads, so
+voices stay individual whatever the combination.
+
+**Performance (measured 19 November 2026).**
+
+Test setup:
+- **Code:** scratch benchmark at
+  `scratchpad/bench/voice_bench.cpp`; not project code.
+- **Voice model:** two PolyBLEP saws, a nonlinear 4-pole OTA cascade or a
+  diode-damped SVF at 2× oversampling with 31-tap halfband resampling,
+  per-sample envelope cutoff modulation, and two envelopes.
+- **Machine and settings:** Apple Silicon, single thread, 48 kHz, `-O2`. The
+  host was under memory pressure, so expect some noise.
+
+| Voices | Ladder, `std::tanh` | Ladder, fast tanh | SVF, `std::tanh` | SVF, fast tanh |
+| --- | --- | --- | --- | --- |
+| 1 | 0.32% of one core | 0.26% | 0.26% | 0.25% |
+| 8 | 2.6% | 2.1% | 2.2% | 1.9% |
+| 16 | 5.3% | 4.1% | 4.3% | 3.9% |
+
+These are cheap explicit nonlinear models, not zero-delay-feedback Newton
+solves or MAME-style component models. Even 10× this cost (about 25% of one
+core for 8 voices) would be workable.
+
+Further gains:
+- Run each module across all voices at once with SIMD, as VCV Rack does.
+- Oversample the whole voice once rather than inside every module.
+
+Calling modules once per 24-sample block costs very little next to the DSP.
+
+**Latency.**
+- **Feed-forward chains** (oscillator → filter → VCA) add none: modules run in
+  dependency order within the same block.
+- **Feedback routed through the graph** would cost a block: 24 samples, 0.5 ms.
+  That is fine for slow modulation, but it changes the sound of audio-rate
+  feedback. Keep such loops inside modules, or process the cycle per sample.
+- **2× oversampling:** a linear-phase 31-tap halfband adds about 15 samples at
+  the high rate (~0.16 ms); IIR halfbands add only a few samples.
+- **The existing output path** adds about 0.8 ms (the 24-sample quantum plus
+  ~16 samples of rate conversion), on top of the audio device buffer.
+- None of this is perceptible for pads; the device buffer dominates playing
+  latency.
