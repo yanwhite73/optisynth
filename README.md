@@ -24,37 +24,42 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
-## Four-track Performance sequencer — 0.0.10
+## Probability and Orbit — 0.0.12
 
-The Performance module has four independent tracks, eight 64-step patterns per
-track, quantized pattern launch and a sixteen-row phrase chain. Each track has
-separate note, gate, pitch-bend and CV outputs. Pattern lengths/rates, ties,
-slides, ratchets, conditions, probability, mute/solo/fill, protected variations
-and scoped undo/redo support editing and performing a multi-part patch.
-[Controls, research mapping and limits](docs/architecture/PERFORMANCE_SEQUENCER.md).
+Two separate sequencers now use the collected UI research directly:
 
-The app opens **Performance / Four currents** and its editor, with audio off.
-Press **PLAY**. Click a bank to edit it; its triangle queues playback. **CHAIN**
-opens the arrangement. **Performance / Clockwork garden** is the second starter.
-The earlier Pattern / Motion, Euclidean and Stage modules remain available.
+- **Probability / Glass branches:** a 16-pitch by 32-step weighted grid. Paint
+  alternate pitches, edit velocity/gate/chance/ratchets, repeat or evolve choices,
+  preview protected variations, and capture the notes actually played.
+- **Orbit / Four satellites:** four independently clocked Euclidean rings with
+  separate note/gate/accent outputs. Drag rings to rotate them; use mute/solo,
+  ratchets, swing and per-cycle rotation to develop their relationship.
 
 Always open [Optisynth](app/Builds/MacOSX/build/Release/Optisynth.app).
-That stable delivery location contains 0.0.10, which disables accidental wheel
-edits across the standalone controls. All 251 modular checks passed normally
-and under ASan/UBSan; full-bank/stereo recall, native component interactions and
-four visual captures pass. The scroll correction has native wheel-event checks;
-unchanged DSP checks were not repeated. Desktop window launch and listening remain unverified
-in the current execution context. The adjacent `Optisynth-build.json` records the
-version, binary hash, checks and previous-app archive. See [STATUS](docs/project/STATUS.md).
+It opens Probability and its editor with audio off; press **PLAY** to start.
+Choose **Orbit / Four satellites** in Starter patches, then **OPEN ORBIT** on its
+rack panel. Both are independent modules that can coexist with the earlier
+Performance, Pattern/Motion, Euclidean and Stage sequencers.
+
+[Controls and limitations](docs/architecture/REFERENCE_SEQUENCERS.md),
+[actual native editor images](docs/ui/REFERENCE_SEQUENCERS_REVIEW.md).
+307 engine checks pass normally and under ASan/UBSan. Both starters reproduce
+identical stereo audio after JSON recall; native gestures and scroll safety are
+checked. Desktop audio/window interaction and musical judgment remain user checks.
+The adjacent `Optisynth-build.json` identifies the delivered binary and archive.
+
+Performance retains its four independent tracks, eight 64-step patterns per track,
+quantized launch and sixteen-row phrase chain.
+[Performance controls](docs/architecture/PERFORMANCE_SEQUENCER.md).
 
 ## Current implementation
 
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
 modal percussion, externally excited resonator and bass-drum DSP, plus Mutable's
 digital SVF filters. Spectral AHDSFR/ADSR envelopes and LP/HP/BP/notch filters remain
-interchangeable options. There are 27 module types, including a WAV sample player,
+interchangeable options. There are 39 module types, including a WAV sample player,
 mixer, VCA, complete Spectral engine, independent LFO and stereo utilities.
-Performance, Pattern, Euclidean and Stage sequencers share an audio clock and route notes to
+Probability, Orbit, Performance, Pattern, Euclidean and Stage sequencers share an audio clock and route notes to
 independent destinations. [Sequencer contract](docs/architecture/FIRST_SEQUENCERS.md).
 Only output-reachable modules are constructed. Audio/control buffers and numeric
 bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
@@ -67,8 +72,9 @@ It supports Caps Lock typing notes, a piano keyboard, patch save/open,
 typed input routing and device-rate conversion around the 48 kHz DSP core.
 Add independent module instances, connect their audio/control/note ports, select the
 output and save the complete rack. Older instrument patches import automatically.
-This first voice is monophonic; polyphony, granular engines, hardware MIDI
-and an agent API remain upcoming. Samples can excite a resonator or form its
+The integrated pad-voice work adds eight-voice groups, analog oscillator/filter/
+envelope/VCA modules, wheel/bend and separate time effects. Other starter voices
+retain their existing scope; granular engines and an agent API remain upcoming. Samples can excite a resonator or form its
 parallel attack layer. Their decoded assets are shared; playheads are independent.
 The complete Spectral engine now runs as one stereo module with its internal
 matrix, arp and effects intact. Its own voice engine remains internal; the rack
@@ -100,14 +106,15 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the fifteen starter patches; edit their panels directly or select a panel
+octave. Try the nineteen starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a
 Mixer to combine audio and a VCA with an envelope to articulate continuous sources.
 Required inputs must be connected before a module can become part of the audible
 output. Unrouted modules remain editable without consuming DSP. Patches use
-`.optisynth` JSON files. No audio input or hardware MIDI port is opened.
+`.optisynth` JSON files. No audio input is opened. Starting audio enables available hardware MIDI inputs;
+no MIDI output is sent.
 
 Builds compile in `build/app-candidate`. `tools/deliver_app.py` verifies and copies
 the result to the same app location above, preserving the previous app under

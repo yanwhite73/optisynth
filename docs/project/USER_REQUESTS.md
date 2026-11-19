@@ -602,3 +602,35 @@ ok
 ```
 
 Approves the request 57 proposal; this Claude session builds it.
+
+## 59 — Bring much more of the collected sequencer references into the product
+
+```text
+I want to see much more of this..
+/Users/yanwhite/Documents/Music\ docs/Code/optisynth/docs/references/ui
+```
+
+19 November 2026: use the supplied local visual/manual evidence as the direct
+source for the next sequencer pass. Preserve the scroll correction and stable
+delivery path. Current interpretation is both richer musical interaction and
+recognisable contextual interfaces, rather than another list of numeric fields.
+The separate-device clarification below establishes the direction. Concurrent pad-voice WIP
+commits and the generated project file belong to the other session and must be
+preserved; inspect their publication/build state before combining deliveries.
+
+```text
+they can be separate sequencers
+```
+
+Clarification: distinct devices are appropriate. Start with a probabilistic
+pitch/time grid informed by Stochas and a four-ring rhythm module informed by
+Bespoke's Euclidean view. Each gets its own editor and routable outputs; retain
+Performance and the other existing sequencers. Use the references for musical
+representation and gestures, with original implementation and artwork.
+
+Delivered response: 0.0.12 adds these two separate modules and routed starters,
+with actual grid/ring editors, source-to-interface mapping and five inspected
+native captures. 307 engine checks, full preset/audio recall and native gesture/
+scroll checks pass. Stable app path retained; the previous 0.0.11 app is archived.
+See STATUS and `../ui/REFERENCE_SEQUENCERS_REVIEW.md`. User musical acceptance and
+full desktop/audio interaction remain open; no whole-source-product parity claim.

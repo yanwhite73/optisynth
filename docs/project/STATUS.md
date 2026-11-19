@@ -1,6 +1,49 @@
 # Optisynth status — 19 November 2026
 
-## Current correction — request 55, 0.0.10
+## Current delivery — Probability and Orbit, request 59, 0.0.12
+
+The single delivery app remains **`app/Builds/MacOSX/build/Release/Optisynth.app`**.
+It opens **Probability / Glass branches** and its editor with audio off. Press
+PLAY. Choose **Orbit / Four satellites** in Starter patches and click OPEN ORBIT
+for the other device. The previous 0.0.11 app is archived by the delivery helper.
+
+- **Probability:** 16 pitch rows ×32 steps; painted relative weights, separate
+  gate chance, scale/root/octave, repeat/fresh decisions, seed, per-step velocity/
+  gate/ratchets/conditions, row mute, protected preview/apply, scoped undo,
+  snapshot/restore and capture of the actual played choices.
+- **Orbit:** four Euclidean rings, independent clock/rhythm lengths, drag rotation,
+  mute/solo, per-ring articulation, accents and signed rotation per cycle. Four
+  separately routable note/gate/accent outputs plus a combined note bus.
+- Two complete routed starters, with identical state and four-second stereo audio
+  after JSON recall. Every Orbit ring is audible alone. No listening claim.
+- **307 engine checks** pass normally and under ASan/UBSan. Actual native editor
+  gestures and five normal/minimum captures pass; **863 sliders** preserve values
+  and forward wheel navigation. Final source/binary hashes match the delivery.
+
+[Controls and boundaries](../architecture/REFERENCE_SEQUENCERS.md),
+[actual editor images and research mapping](../ui/REFERENCE_SEQUENCERS_REVIEW.md),
+[qualification receipt](../verification/reference_sequencers_build_receipt.json).
+The supplied Stochas/Bespoke/OXI references guide original implementations and
+artwork; no new third-party code was adopted. There are now 39 module types and
+19 starters, including the preserved pad-voice work from the concurrent session.
+The pad's desktop MIDI/audio behaviour was not newly qualified here.
+
+Desktop-window launch, audio-device interaction and listening remain user checks;
+no Live action or plugin installation occurred. Existing Performance and the
+other sequencers remain available. This delivery does not close Yan's earlier
+musical-quality complaint by test count. Next product work: assess these distinct
+interfaces in use, then implement remaining specialist models (dependency/memory
+sequencing, independent parameter loops, held-note arp/chord modes) from their
+specific research. Snapshot/undo history remains session-local; save the rack
+for persistent patterns. No named upstream product is claimed fully implemented.
+
+Git preflight: main had the other session's three committed pad-voice changes
+(`ba09c85`, `dcb3673`, `2aea7a4`) ahead of verified remote `82d32f9`; no publication
+hold was found. They are preserved and included in this build/check pass. This
+request's implementation, presets, native evidence and records form one scoped
+commit. The task handoff reports the verified remote commit and independent backup.
+
+## Prior correction — request 55, 0.0.10
 
 Scroll gestures no longer edit standalone faders/knobs: this covers module panels,
 the three sequencer editors, modulation depth rows, tempo and output level.

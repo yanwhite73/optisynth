@@ -20,6 +20,13 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==17){auto d=starterDocument(11,gain);d.tempo=108;for(auto& n:d.graph.nodes)if(n.id=="sequence"){n.type="seq.probability";n.parameters={{"octave",4},{"density",.9f},{"swing",.12f}};n.performance.reset();}
+        for(auto& m:d.graph.modulations)if(m.source.node=="sequence"){m.source.port="pitch";m.amount*=.4f;}return d;}
+    if(which==18){auto d=starterDocument(13,gain);d.tempo=116;for(auto& n:d.graph.nodes)if(n.id=="sequence"){n.type="seq.orbit";n.parameters={{"ring2_drift",1},{"ring4_drift",-1}};n.performance.reset();}
+        d.graph.connections.erase(std::remove_if(d.graph.connections.begin(),d.graph.connections.end(),[](const Connection& c){return c.source.node=="sequence"&&c.source.port=="t1_bend";}),d.graph.connections.end());
+        for(auto& c:d.graph.connections)if(c.source.node=="sequence")c.source.port="r"+c.source.port.substr(1);
+        for(auto& m:d.graph.modulations)if(m.source.node=="sequence")m.source.port="r"+m.source.port.substr(1,1)+"_accent";return d;}
+
     if(which==15||which==16){RackDocument d;d.gain=gain;d.graph=padPatch(which-15);return d;}
     if(which==13||which==14){
         auto d=starterDocument(11,gain);d.tempo=which==13?104:118;

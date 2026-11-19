@@ -2,6 +2,7 @@
 #include "sequencer.h"
 #include "analog.h"
 #include "performance.h"
+#include "reference_sequencers.h"
 #include "../core/envelope.h"
 #include "../core/effects.h"
 #include "plaits/dsp/drums/analog_bass_drum.h"
@@ -70,6 +71,7 @@ const std::vector<Panel>& panels() {
             {"resonance","Resonance","Q",.5f,20,.707f,true},
             {"env_octaves","Mod amount","oct",-6,6,2}}});
         p.push_back(performancePanel());
+        for(auto& model:referenceSequencerPanels())p.push_back(std::move(model));
         Panel spectral{"spectral.engine","Spectral engine","Complete instrument / stereo / latest-voice modulation outputs","engine",{}};
         for(const auto& s:partials::liveControlSpecs())spectral.parameters.push_back({s.id,s.name,s.unit,s.minimum,s.maximum,s.initial,s.logarithmic});
         spectral.parameters.push_back({"tempo","Tempo","BPM",20,300,120,false,.1});p.push_back(std::move(spectral));
@@ -323,10 +325,12 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
         if(isSequencer(id))type.outputs={{"notes",SignalType::Event}};
         if(id=="seq.pattern"){type.outputs.push_back({"cv1",SignalType::Control});type.outputs.push_back({"cv2",SignalType::Control});}
         if(id=="seq.performance"){type.outputs.clear();for(int t=1;t<=4;++t){const auto prefix="t"+std::to_string(t)+"_";type.outputs.push_back({prefix+"notes",SignalType::Event});for(const char* name:{"gate","bend","cv"})type.outputs.push_back({prefix+name,SignalType::Control});}}
+        if(isReferenceSequencer(id))referenceSequencerPorts(id,type);
         type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
             if(isAnalog(id))return makeAnalog(n,c);
             if(isSequencer(id))return makeSequencer(n);
+            if(isReferenceSequencer(id))return makeReferenceSequencer(n);
             if(id=="seq.performance")return makePerformance(n);
             if(id=="sample.player"){auto it=assets.find(n.id);return std::make_unique<SamplePlayer>(n,it==assets.end()?SamplePtr{}:it->second);}
             if(id=="spectral.engine"){auto it=engines.find(n.id);return makeSpectral(n,it==engines.end()?SpectralPtr{}:it->second);}

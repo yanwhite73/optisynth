@@ -1,0 +1,169 @@
+{
+  "version": "0.0.12",
+  "method": "Direct Clang; all project sources rebuilt; unchanged JUCE objects reused",
+  "binary_sha256": "4cd94bf23336411e6c5dbeff9e2d9fd57f180bf8e94a5fde3094878c78075805",
+  "sources": {
+    "app/Main.cpp": "01aedaaf0cc0629eeb1e45502d395f590d3737a17da2fdaacf6dade601fae205",
+    "src/modular/graph.cpp": "caddd2519954ea6dda13d1784194d4918360cd6cbb550ce05f29f0f0c33a60bf",
+    "src/modular/runtime.cpp": "1f0dc53b423f51f7bf923d9c6e97d3f0f546b03c5fcd047233f392675a48f656",
+    "src/modular/timing.cpp": "2516940f290c1d0154bafc4d1356b6642a95873b927db05871951fbfc25b5cfc",
+    "src/modular/sequencer.cpp": "ee02c7d06160313e68354419b39fb296f71bc54629b1f4606b14ae9820d404b9",
+    "src/modular/pattern.cpp": "932d5a0f321004d6de69c318ef406324bc7ceabd4a0ba7777135c8bdbc163475",
+    "src/modular/performance.cpp": "e526a34545a2cabd90b296507ffd733c41b93c88102f64f7661dab75700c586a",
+    "src/modular/reference_sequencers.cpp": "8d5312e1ba7e77711cc84328ada14cc9bb0b7bbaa2b1cd9ab29ec1c273422f70",
+    "src/modular/analog.cpp": "d8d80b6c25ad1b0f073c56e370831ec88aff1820b24e60d484cc9a3fbd08f15a",
+    "src/core/spectrum.cpp": "e52d96d5b5a50b9c3b8943d4cb5550d8c104d974b1ae5ed1086dd3adf3a5336f",
+    "src/core/table_bank.cpp": "b86da25ba52213dd05ff2fe9395fa5be8b2ac85d6fa1f53fda3736aee00f3f7d",
+    "src/core/patch.cpp": "a8b9bac44e2fd8977f735d49660f83dd4dd23529c197a1ed30c6b891d97e31e4",
+    "src/core/engine.cpp": "a26de72e986094fd16a6e0cde264a6a5b0a6b98499d4f9229aa611db5e1fac96",
+    "src/core/arp.cpp": "1da074c5b2deacc2962f7bbdae6d100917c83a4c566e8f81b2e876375ca63c8a",
+    "src/modular/spectral.cpp": "c4c26efb1fc04645af14b23b537540f42b08c543d8cb0161e61d982ccff10f02",
+    "src/modular/modules.cpp": "8bf2e6ea86905911ffa5fe648d8a489d2285813a02e107adaa78c3f4170f13fe",
+    "src/modular/sample.cpp": "b3eb3d0fa886a196ade029ae51c88d2942ed24a72e05528a3a180d818d6891bc",
+    "src/core/envelope.cpp": "b5f147945a3a890e242a0541059b98c0ea997b93ec4658f0f9337ffcae41f660",
+    "src/core/effects.cpp": "9bcf5be39d09cd86365e17d2b037d0ceba06368317f6ccca7de5947d44f17ecf",
+    "third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc": "c3e5ab1fd540f92e56ea62150a28304ff401930c1db243b2ebb42a5417660fec",
+    "third_party/mutable/plaits/dsp/physical_modelling/resonator.cc": "6b51c987acd069f97b526a53ba431ece3e447981385dc193ebbe4557ff76fc6a",
+    "third_party/mutable/plaits/resources_selected.cc": "75c9e991a4846dd39997c520c6debf4746968e37809aee1fd24d265e6d02a57d",
+    "third_party/mutable/stmlib/dsp/units.cc": "0acbe230ffaa2d181ba285fce54f2fd0b2339b3ec163a1dd00c946e6bf82ea4a",
+    "third_party/mutable/stmlib/utils/random.cc": "145c4d7a30e373d001fd664ce6f97a475458f7dc8286252d24ca6f592e0cdb93",
+    "app/PerformanceEditor.h": "7b26016e8ac3147d1cad5b7cceb9bb954def5df28cdc46ff8224f6f16241a061",
+    "app/RackEditor.h": "c65a2819b893eabc58f920ef1aa4d8d944328bb32735fcc779847f56645024e4",
+    "app/SampleLoader.h": "0e639ed02c02ca97f5656a167eeade014f214911afa785f8d4ff8f97a9790add",
+    "app/PatchIO.h": "806866767ac5caa2003c8160b5ef8a41ec929f2cf5dbaa0ab3b20bdcc79ecd8f",
+    "app/ReferenceSequencerEditor.h": "3f3e82029cf716d16f9a3e10be42b58dfe54cd4bdd677398f73870c45052d080",
+    "app/Panel.h": "ba59fc6e6473f55bf6aa639c285121f4a385cc90e05c0e2f5fb7420cb79ca087",
+    "app/SequencerEditor.h": "a30867f5fb1949784bff41342d7cbe681498a5ab5b20ec61fe7d4eaf3e30930e",
+    "app/PatternEditor.h": "db35ff63d32cb2adc9da6aeb2999ae9ba09fa32499c8ba9ce6ac62debaf5fee0",
+    "app/ModulationEditor.h": "3ae8e28d4ba31e19b34b100214631a0b2cb24f2467f881560fefcf7c634406d2",
+    "app/PerformanceStateIO.h": "6eb8b14d00c1da1c535335950441368ecc1693ab02639ebdb1362dcbcf93323a",
+    "src/core/engine.h": "fa4d9ac32449b1387efadbf18447eb12e7978f013f40503a9a76f47053bb6389",
+    "src/core/live_controls.h": "ec4290f699652b1db3922dc3fad42250cb6bcf579e4788830a635bbdbd8b13f4",
+    "src/core/spectral_read.h": "4473c77010c24dc0736e7ea2aea67ece97bc53b3d2545efe1b5334aed430cd22",
+    "src/core/spectrum.h": "fdbe81dbf8457d59853679d242d982f47ce1a338a49a85512acd0d99d3099169",
+    "src/core/effects.h": "b57de8bc2173ea57d8b525c675fdf36aae212cbb13abfc52216880bd78d96741",
+    "src/core/effect_controls.h": "c68adbb2f2f8c7472d331f3893b2d2d0ab921b4eb61e2d6c575bef75976e0838",
+    "src/core/patch.h": "f89e0ece6a3dcec69f31cf760ae3c4f3c90fe61f361f860e32677c5635c5a3fc",
+    "src/core/arp.h": "440586c32480f10e104e47a7e5d5b32127b73cfc4e6b3749ee4d5808463bffdd",
+    "src/core/envelope.h": "14b2df488dceeadbd46f8d31b35b7c1406b90dccd476b5a9183342f3e5a4d515",
+    "src/core/table_bank.h": "55772cd1214b13a12f3cbeb164c2e7d4e7d64f817cbac7a64787a3eec42ad5be",
+    "src/modular/performance.h": "47b89b4e00524608bfe6f14482c20817702d5198fc709dc5a0e2d1158de0aead",
+    "src/modular/reference_sequencers.h": "cb49af596b9585548f0341656185b267503d617d78beda53c5624440b942aa1c",
+    "src/modular/timing.h": "6e051b46a5f9c3ae2c37745e36a956611db08b799306573781f5c6c65ba986f9",
+    "src/modular/player.h": "42aff11d76edf3e5fa243f10ac2ee98cadd21ffa508fb882afc4ccf53575d7e8",
+    "src/modular/pattern.h": "446b24ff3439120af66ddb9ce21094663221068cc7e23804ae6b4e90b05c6093",
+    "src/modular/graph.h": "b119dc4cf601e0a89aa1e26eef5435caf935df7a5a6511507e3873d4b41a6dfa",
+    "src/modular/runtime.h": "89e71bc85f979951af70c69cb338c8807ef3ef8ddbfa40a34882946f1a00de0f",
+    "src/modular/analog.h": "86cb70c17840c7266e86f499eed80add3bd644ad013607d4b1fe909fb3a07538",
+    "src/modular/sequencer.h": "98031817b7dea4ace51e6a510f174ceadd33afc9ab1a2004564a34a95602b0a3",
+    "src/modular/rack.h": "150862f178a9bb9b1463d7dc28d97a16dd3594023ea0038c0a106f91fb5d7db7",
+    "src/modular/spectral.h": "30f97d32d82299d47daf9d3d55211479a6c8b35b8c5223c4b4f98b0f2e04e5b5",
+    "src/modular/sample.h": "3cf21bb6be180c1fee9d32620c8be147cb68696b6db73e2a846bd3219a4722c4"
+  },
+  "juce_objects": [
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_basics.o",
+      "sha256": "b1224034e6f48370b48402a7c05028c0d173b00f27a99b6d96e10d85a764fe52"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_devices.o",
+      "sha256": "d28ef9dce5defc747704801d1209e4b3188202b2c3b9d030343adceb0ff89d5c"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_formats.o",
+      "sha256": "f6c74a99841d01972a5c151f32373e9ced5dc07e5197a6a730fcbf1e42b13bd6"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors.o",
+      "sha256": "e233f44f1e640978487498e8d762294a2c326153509fd9d148847bb4c542b64a"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors_ara.o",
+      "sha256": "03b281c147023a2af3f46c5bb57bd1f239f17201516ae7bfc35fa232ee73a41e"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors_lv2_libs.o",
+      "sha256": "f8eec568f519af3e557e5270dcfed9b99a3c915efca214e5f99f42f49cb66974"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_utils.o",
+      "sha256": "b35eaa7bb3c8b0311526142fcafc0c6477d74b026f0a2fb555e798b88c336db1"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_core.o",
+      "sha256": "4b0b55a1b1ea36c2b9d7c98ed12c1ad8f3608e78cb29a9e76eead268b5a7dc0d"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_core_CompilationTime.o",
+      "sha256": "a5d3909f0fbaa5ff8d117386bad1dac570a810cd399d2ab3cc4836b9a2313999"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_data_structures.o",
+      "sha256": "0fbe1cc01da20ccc51177a3400d52ec545813d2e3bfc239a98960986e18c4ba3"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_events.o",
+      "sha256": "59b4c2a9f431b84a0b5208d4ad5a13a645743145e5fb5501684285944fbbf16c"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics.o",
+      "sha256": "712910985b72721e3c74230013465512cb64b932c221786b7480794a082266f2"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics_Harfbuzz.o",
+      "sha256": "3d18fe6dca9210ca55d7dd695b956fa70e85e337e471eb2fd523e0e35ace47f4"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics_Sheenbidi.o",
+      "sha256": "1072adedd5a6a0f94c5b6c0f90890cf04054a1a7d1bf7086008bf81ba8afbce8"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_gui_basics.o",
+      "sha256": "439c29835e246904ec3e0a2a1d2a23e60441401d4f38d15b49475085ea0224d8"
+    },
+    {
+      "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_gui_extra.o",
+      "sha256": "4572e0af9262f2609af0719491f1a3783de0da7d3006996b74f07a9342a044b8"
+    }
+  ],
+  "ui_verified": false,
+  "native_component_ui_verified": true,
+  "desktop_ui_verified": false,
+  "qualification": {
+    "core": {
+      "normal": 307,
+      "asan_ubsan": 307
+    },
+    "recall": "Both starters identical state and four-second stereo output after JSON recall; every Orbit ring audible soloed",
+    "native": "Paint/select/ring rotation/grouped undo/redo/protected preview/apply/snapshot/capture/new seed and controls within minimum bounds",
+    "wheel_sliders": 863,
+    "images": "Five native component images visually inspected at normal/minimum sizes; no desktop peer",
+    "limits": "No desktop audio/window or listening check; no Live action/plugin installation"
+  },
+  "delivery": {
+    "version": "0.0.12",
+    "binary_sha256": "4cd94bf23336411e6c5dbeff9e2d9fd57f180bf8e94a5fde3094878c78075805",
+    "delivered_utc": "20261119T161523.893963Z",
+    "app": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Release/Optisynth.app",
+    "built_at": "/Users/yanwhite/Documents/Music docs/Code/optisynth/build/app-candidate/Optisynth.app",
+    "qualification": "307 modular checks pass normally and under ASan/UBSan; Probability and Orbit stereo JSON recall and four audible Orbit outputs pass; native grid/ring gestures, undo/preview/capture and 863 slider scroll checks pass; normal/minimum component images inspected. Desktop window, audio-device and listening checks remain user-performed.",
+    "previous_app": "/Users/yanwhite/Documents/Music docs/Code/optisynth/build/app-archive/20261119T161523.893963Z-0.0.11/Optisynth.app"
+  },
+  "images": {
+    "docs/ui/reference-sequencers/orbit-minimum.png": "668aa224725d5f33db7af3ff5efbb3a3eaea87e6c178d6acdc0492d2cdc2cf81",
+    "docs/ui/reference-sequencers/orbit.png": "4baeaee35ebe5a087270edf267ff8b5c04a288622ab5366f048313317c4e5e5f",
+    "docs/ui/reference-sequencers/probability-minimum.png": "2df18a90933da094cc59ecba412c9701d98c99685ecc1f11143cab35fc4e3866",
+    "docs/ui/reference-sequencers/probability-preview.png": "fa1383dc22275ea43384ad9f21a06412e6580d0c38f8ba45ddf49715621f73e1",
+    "docs/ui/reference-sequencers/probability.png": "dbbb221c8ae99fbc27eb49eb1464e3a98c9114ababa0c0bad53dc2bd901e2348"
+  },
+  "presets": {
+    "patches/probability-glass-branches.optisynth": "ad22f6c3e8002cd43647a6219b22fdab9bbd4f3d02ef194bd38dbb7c2f85b3ca",
+    "patches/orbit-four-satellites.optisynth": "00b019133a512ca80d833ceff89b8d3fe634a9274d71017b8315e69fa1c3dc5c"
+  },
+  "managed_jobs": {
+    "build": "6096313782934a008d8e54e2aacb54a7",
+    "core": "5e4abe547f6040e5a7acb1a4be19a728",
+    "state_audio_and_native": "b94ec33e421e43cfa90cc2ae09d158a5",
+    "final_native": "0a0129d88fdf4638b3b27fb1eb1e6438"
+  }
+}

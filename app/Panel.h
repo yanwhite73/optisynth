@@ -6,6 +6,7 @@
 #include <map>
 #include "SequencerEditor.h"
 #include "PerformanceEditor.h"
+#include "ReferenceSequencerEditor.h"
 
 using namespace juce;
 using namespace optisynth;
@@ -29,7 +30,8 @@ Colour panelColour(const std::string& id) {
 }
 Colour panelInk(const std::string& id) {return panelColour(id).getBrightness()>.6f?ink:paper;}
 int panelWidth(const std::string& id) {
-    if(id=="seq.performance")return 800;
+    if(id=="seq.performance"||id=="seq.orbit")return 800;
+    if(id=="seq.probability")return 650;
     if(isSequencer(id))return 560;
     if(id=="spectral.engine")return 580;
     if(id=="sample.player")return 340;
@@ -124,6 +126,7 @@ struct Jack : Button {
 struct ModulePanel : juce::Component, FileDragAndDropTarget {
     std::unique_ptr<optiui::SequencerEditor> sequence;
     std::unique_ptr<optiui::PerformanceLauncher> performance;
+    std::unique_ptr<optiui::ReferenceSequenceLauncher> referenceSequence;
     ComboBox choice;KnobLook look;std::vector<std::unique_ptr<Control>> knobs;
     ComboBox section;TextButton presetButton{"Load Spectral patch..."},more{"More"};Label presetName;int subpage=0;
     std::function<void()> choosePreset;std::vector<std::vector<int>> pages;
@@ -160,14 +163,15 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     std::string selected() const {int i=choice.getSelectedId()-1;return i>=0&&i<int(types.size())?types[size_t(i)]:types.front();}
     void select(const std::string& type) {auto it=std::find(types.begin(),types.end(),type);if(it==types.end())throw std::invalid_argument("Wrong module family: "+type);choice.setSelectedId(int(it-types.begin())+1,dontSendNotification);}
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
-        current=type;family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
+        current=type;family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();referenceSequence.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
         sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");
         const bool spectral=type=="spectral.engine";section.setVisible(spectral);presetButton.setVisible(spectral);presetName.setVisible(spectral);more.setVisible(spectral);subpage=0;
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
-            if(isSequencer(type)||type=="seq.performance")continue;
+            if(isSequencer(type)||type=="seq.performance"||isReferenceSequencer(type))continue;
             auto knob=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),(family=="envelope"&&p.id=="sustain")||type=="utility.mix",family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
             addAndMakeVisible(*knob);knobs.push_back(std::move(knob));}
+        if(isReferenceSequencer(type)){referenceSequence=std::make_unique<optiui::ReferenceSequenceLauncher>(type,state[type],controls);referenceSequence->parameterChanged=changed;addAndMakeVisible(*referenceSequence);}
         if(type=="seq.performance"){performance=std::make_unique<optiui::PerformanceLauncher>(controls,state[type]);performance->parameterChanged=changed;addAndMakeVisible(*performance);}
         if(isSequencer(type)){
             sequence=std::make_unique<optiui::SequencerEditor>(type,state[type],controls,[&,type,controls,changed](const std::string& id,float v){
@@ -218,7 +222,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             if(j->output)for(const auto& e:graph.outputs)if(e.node==instance&&e.port==j->port.id){j->connected=true;links+="\nInstrument output";}
             j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+"\nClick to patch");j->repaint();}
     }
-    void setValue(const std::string& id,float value){if(performance){performance->setValue(id,value);return;}if(sequence){sequence->setValue(id,value);return;}const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setValue(value);if(current=="sample.player")repaint();}
+    void setValue(const std::string& id,float value){if(referenceSequence){referenceSequence->setValue(id,value);return;}if(performance){performance->setValue(id,value);return;}if(sequence){sequence->setValue(id,value);return;}const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setValue(value);if(current=="sample.player")repaint();}
     void paint(Graphics& g) override {
         if(current.empty())return;auto r=getLocalBounds().toFloat();const auto text=panelInk(current);
         g.setColour(panelColour(current));g.fillRoundedRectangle(r,3);g.setColour(highlighted?Colour(0xfff0c76c):text.withAlpha(.6f));g.drawRoundedRectangle(r.reduced(1),3,highlighted?2:1);
@@ -233,7 +237,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
                 g.setColour(teal);g.drawVerticalLine(int(wave.getX()+start*wave.getWidth()),204,244);g.drawVerticalLine(int(wave.getX()+end*wave.getWidth()),204,244);
             }else{g.setColour(paper.withAlpha(.6f));g.setFont(font(11));g.drawText(samplePath.empty()?"LOAD OR DROP A WAV":"CONNECT TO LOAD SAMPLE",wave,Justification::centred);}
         }
-        if(knobs.empty()&&!sequence&&!performance){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
+        if(knobs.empty()&&!sequence&&!performance&&!referenceSequence){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
         g.setColour(text.withAlpha(.8f));g.setFont(font(10));g.drawFittedText(routed?panel(current).description:"UNROUTED / connect to activate",12,getHeight()-37,getWidth()-24,29,Justification::centred,2);
     }
     void resized() override {
@@ -241,6 +245,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         const int columns=current=="spectral.engine"?10:std::max(1,int(jacks.size()));
         for(size_t i=0;i<jacks.size();++i){const int w=(getWidth()-24)/columns;jacks[i]->setBounds(12+int(i)%columns*w,77+int(i)/columns*53,w,53);}
         if(current.empty())return;
+        if(referenceSequence){referenceSequence->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
         if(performance){performance->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
         if(sequence){sequence->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
         const auto& ps=panel(current).parameters;const float w=float(getWidth()-24),h=float(std::max(220,getHeight()-190));

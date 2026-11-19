@@ -8,6 +8,7 @@
 
 namespace optisynth {
 class PerformanceExchange;
+struct ReferenceSequenceState;
 class VoiceMixer;
 constexpr int quantum = 24, maxParameters = 768, maximumVoices = 8;
 struct Parameter {
@@ -31,6 +32,7 @@ struct Controls {
     // UI batches publish an even revision; audio retains the last complete edit.
     std::atomic<uint64_t> editRevision{0};
     std::shared_ptr<PerformanceExchange> performance;
+    std::shared_ptr<ReferenceSequenceState> referenceSequence;
 };
 struct RouteControls { std::array<std::atomic<float>,kMaximumModulations> amounts{}; };
 // bend is in semitones and wheel in 0..1; both are shared performance controls.

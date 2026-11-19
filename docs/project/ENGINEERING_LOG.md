@@ -773,3 +773,55 @@ or swallowing navigation. Existing native editor interactions pass. The signed
 0.0.10 app is delivered at the established Release location, with build/source/
 delivery evidence in `../verification/scroll_fix_build_receipt.json`. No user's
 running app or Live session was stopped, restarted or driven.
+
+
+## Request 59: separate research-led sequencers — 19 November 2026
+
+Yan asked to see much more of the collected UI references and clarified: “they
+can be separate sequencers”. Both messages were captured verbatim on arrival.
+The response is two distinct contextual devices: Probability (Stochas/OXI pitch
+choice grid) and Orbit (Bespoke four Euclidean rings), with original implementation
+and drawings. Contract: `../architecture/REFERENCE_SEQUENCERS.md`; native visual
+mapping: `../ui/REFERENCE_SEQUENCERS_REVIEW.md`.
+
+Each uses existing named scalar storage, clock and typed event/control outputs.
+Probability fits in 736 of the existing 768 parameter slots; no global storage
+increase or patch format change. UI batch edits use the existing transaction
+revision. DSP has instance-local randomness, bounded event work and no callback
+allocation. Orbit preserves phase while muted/soloed and has independently routed
+ring notes/gates/accents. Its pending pitch is separate from its held pitch, so
+editing pitch cannot change the identity of an old note release.
+
+307 modular checks pass normally and with ASan/UBSan, including exact attack/
+ratchet/swing timing, weighted selection, callback-size independence, stops,
+independent ring clocks/outputs and allocation-free rendering. Both starters
+round-trip complete JSON state and reproduce identical four-second stereo audio;
+each Orbit ring is audible in isolation. Native interactions cover paint/select,
+rotation, grouped undo/redo, snapshot, seed, protected preview/apply and capture
+of actual played choices. 863 sliders pass wheel value/propagation checks.
+
+Five actual native component captures were inspected at normal/minimum sizes.
+Garbled dashes, internal numeric clock labels and missing footer controls in the
+first images were corrected. Explicit footer visibility and minimum-bounds checks
+now prevent that omission from passing. No desktop window/audio-device/listening
+claim follows from component or render tests. All project sources were rebuilt;
+unchanged JUCE objects were reused with the existing direct-build workflow.
+
+0.0.12 was copied with the delivery helper to the sole established Release app;
+the previous 0.0.11 app was archived. No user's app was stopped/restarted and no
+Live session was driven. The exact delivery/source/image hashes and managed job
+IDs are in `../verification/reference_sequencers_build_receipt.json`.
+
+Lesson carried forward from the earlier disappointment: the reference must be
+visible in the musical representation and editing operation, not just a research
+citation beside generic controls. Keep incompatible models as separate devices
+when that preserves their interaction. AGENTS' musical-operation/native-review
+requirements remain in force. Dependency chains, memory models and independent
+parameter loops are explicitly still separate work; tests do not settle musical
+appeal. Feedback, implementation, presets and evidence are bundled together.
+
+Git: main began with three concurrent committed pad-voice changes ahead of remote
+82d32f9, plus its generated project-file edit. Those were preserved; their source
+was included in build/engine qualification. No publication hold was found. Remote
+access works with the approved network path. Final commit/push and independent
+source-backup details are reported in the task handoff.

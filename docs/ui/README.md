@@ -1,5 +1,8 @@
 # Interface and visual research
 
+- [Probability and Orbit: native editors](REFERENCE_SEQUENCERS_REVIEW.md): weighted
+  pitch grid and four Euclidean rings, reference mapping and actual captures.
+
 - [Performance sequencer: actual native editor and visual checks](PERFORMANCE_REVIEW.md):
   four-track pattern/chain views, interaction evidence and minimum-size captures.
 - [Contextual rack panels and modulation UI](CONTEXTUAL_UI.md): the approved

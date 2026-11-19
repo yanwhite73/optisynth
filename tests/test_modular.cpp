@@ -37,9 +37,10 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "analog_checks.h"
 #include "pattern_checks.h"
 #include "performance_checks.h"
+#include "reference_sequencer_checks.h"
 int main(){try {
     analogChecks();
-    sequencerChecks();patternChecks();performanceChecks();
+    sequencerChecks();patternChecks();performanceChecks();referenceSequencerChecks();
     spectralChecks();
     sampleChecks();
     for(int i=0;i<4;++i){auto g=rackPreset(i);validateRack(g);auto x=render(g);check(energy(x)>1e-6,"Rack starter audible");check(x==render(g),"Rack starter deterministic");wav("build/rack-"+std::to_string(i)+".wav",x);}

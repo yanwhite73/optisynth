@@ -75,5 +75,6 @@ void editorChecks(){
     require(folder.getChildFile("editor-check.txt").replaceWithText("PASS: native editor without desktop peer; inactive bank editing; scoped undo/redo; chain edits; separate launch/selection; four actual component snapshots. No audio device opened. Desktop window launch remains a separate check.\n"),"Write editor receipt");
     std::puts("PASS native component interaction and screenshots (no desktop peer)");
 }
+#include "reference_native_checks.h"
 }
-int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="--ui")editorChecks();else presets();return 0;}catch(const std::exception& e){std::fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}
+int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="--ui")editorChecks();else if(argc>1&&std::string(argv[1])=="--references-ui")referenceEditors();else if(argc>1&&std::string(argv[1])=="--references"){referencePresets();referenceEditors();}else presets();return 0;}catch(const std::exception& e){std::fprintf(stderr,"FAIL: %s\n",e.what());return 1;}}
