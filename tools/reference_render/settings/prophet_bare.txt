@@ -1,0 +1,16 @@
+# Prophet V3: oscillator A sawtooth only, filter fully open, no modulation or effects
+Osc A Saw=1
+Osc A Square=0
+Pro5 Mixer Osc A=1
+Pro5 Mixer Osc B=0
+Pro5 Mixer Noise=0
+Pad Mixer to Pro5 Filter=0
+Filter CutOff =1
+Filter Resonance=0
+Filter Envelope Amount=0
+Envelope Vca Attack=0
+Envelope Vca Sustain=1
+Unison On-Off=0
+Chorus On-Off=0
+Delay On-Off=0
+Glide On-Off=0

@@ -1,0 +1,20 @@
+# SEM V2: one sawtooth-side oscillator, filter fully open, no modulation or effects
+VCO1 Mix=0
+VCO2 Mix=0.5
+SubOsc/Noise Mix=0.5
+VCO Hard Sync=0
+VCF Freq=1
+VCF Res=0
+VCF Mode=0
+VCF Modulation Amount=0.5
+VCO1 Modulation Amount=0.5
+VCO2 Modulation Amount=0.5
+Portamento On/Off=0
+Overdrive On/Off=0
+Chorus On/Off=0
+Delay On/Off=0
+Clip On/Off=0
+ENV1 Attack=0
+ENV1 Sustain=1
+ENV2 Attack=0
+ENV2 Sustain=1

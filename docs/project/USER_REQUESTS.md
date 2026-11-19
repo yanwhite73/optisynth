@@ -686,3 +686,14 @@ one thing that might be useful, although a different style of synth, is an exe v
 Study only: inspect the captured binary statically for architecture and
 efficiency lessons (threading, block sizes, voice handling, SIMD). Do not run it
 or copy its code.
+
+## 66 — Approve loading Arturia plugins for reference comparison
+
+```text
+yes
+```
+
+Answers the 0.0.15 handoff question: load the installed Arturia instruments in a
+test tool to compare against Optisynth. Workspace rule: read their documentation
+and record what they control, write and open before the first load; offline
+rendering only, no audio/MIDI device, no Live.
