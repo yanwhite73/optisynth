@@ -26,6 +26,7 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
         for(const auto& p:r->outputs)n.channels.push_back(p.channels);
         n.parameters=panel(type).parameters;
         if(n.parameters.size()>maxParameters)throw std::invalid_argument("Too many module parameters");
+        for(size_t k=0;k<n.parameters.size();++k)n.base[k]=n.module->controls->values[k].load();
         n.sliceIn.resize(n.in.size());n.sliceRight.resize(n.in.size());
         n.sliceOut.resize(n.out.size());n.sliceOutRight.resize(n.out.size());
     }
@@ -68,8 +69,13 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
                 const float depth=routes_->amounts[m.index].load(std::memory_order_relaxed);
                 if(std::isfinite(depth))node.offset[m.parameter]+=source*std::clamp(depth,-1.f,1.f);
             }
+            const auto revision=node.module->controls->editRevision.load();
+            if(!(revision&1)){
+                for(size_t i=0;i<node.parameters.size();++i)node.candidate[i]=node.module->controls->values[i].load();
+                if(revision==node.module->controls->editRevision.load())std::copy_n(node.candidate.data(),node.parameters.size(),node.base.data());
+            }
             for(size_t i=0;i<node.parameters.size();++i){
-                const auto& p=node.parameters[i];float base=node.module->controls->values[i].load(std::memory_order_relaxed);
+                const auto& p=node.parameters[i];float base=node.base[i];
                 base=std::isfinite(base)?std::clamp(base,p.minimum,p.maximum):p.initial;
                 const float offset=std::clamp(node.offset[i],-1.f,1.f);
                 float value=base;

@@ -1,11 +1,13 @@
 #include "sequencer.h"
+#include "pattern.h"
 #include "rack.h"
 #include <cmath>
 
 namespace optisynth {
 std::vector<Panel> sequencerPanels(){
     std::vector<Panel> result;
-    for(int model=0;model<3;++model){
+    result.push_back(patternPanel());
+    for(int model=1;model<3;++model){
         const char* ids[]={"seq.pattern","seq.euclidean","seq.stage"};
         const char* names[]={"Pattern sequencer","Euclidean sequencer","Stage sequencer"};
         const char* descriptions[]={"16 notes / per-step velocity and rests","Evenly spaced hits / independent length and rotation","8 stages / pulse duration / Repeat, Hold or Rest"};
@@ -90,7 +92,7 @@ private:
     GridClock grid;uint64_t held=0,identity=0;double offBeat=0;
 };
 }
-std::unique_ptr<AudioModule> makeSequencer(const NodeSpec& n){return std::make_unique<Sequencer>(n);}
+std::unique_ptr<AudioModule> makeSequencer(const NodeSpec& n){return n.type=="seq.pattern"?makePattern(n):std::make_unique<Sequencer>(n);}
 GraphSpec sequencerPatch(int model){
     auto g=model==1?rackPreset(1):instrumentPatch("osc.variable","spectral.adsr","mutable.lowpass",true,true);
     g.nodes.insert(g.nodes.begin(),{"sequence",model==0?"seq.pattern":model==1?"seq.euclidean":"seq.stage",{}});

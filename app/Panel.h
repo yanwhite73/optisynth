@@ -160,7 +160,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         if(isSequencer(type)){
             sequence=std::make_unique<optiui::SequencerEditor>(type,state[type],controls,[&,type,controls,changed](const std::string& id,float v){
                 state[type][id]=v;const auto& ps=panel(type).parameters;
-                for(size_t i=0;i<ps.size();++i)if(ps[i].id==id&&controls)controls->values[i].store(v,std::memory_order_relaxed);
+                for(size_t i=0;i<ps.size();++i)if(ps[i].id==id&&controls)controls->values[i].store(v);
                 if(changed)changed(id,v);
             });addAndMakeVisible(*sequence);
         }

@@ -1,0 +1,136 @@
+{
+  "version": "0.0.8",
+  "date": "2026-11-19T13:47:45.027635+00:00",
+  "request": 49,
+  "native_build": {
+    "method": "Direct clang using inspected existing Xcode response; rebuild all project C++ sources; reuse unchanged JUCE module objects",
+    "reused_juce_objects": [
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_basics.o",
+        "sha256": "6317bbe1336c7ac92cde6e5ba98a0bbb526dc294a9838887d70f5f555204c976"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_devices.o",
+        "sha256": "d28ef9dce5defc747704801d1209e4b3188202b2c3b9d030343adceb0ff89d5c"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_formats.o",
+        "sha256": "f6c74a99841d01972a5c151f32373e9ced5dc07e5197a6a730fcbf1e42b13bd6"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors.o",
+        "sha256": "e233f44f1e640978487498e8d762294a2c326153509fd9d148847bb4c542b64a"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors_ara.o",
+        "sha256": "03b281c147023a2af3f46c5bb57bd1f239f17201516ae7bfc35fa232ee73a41e"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_processors_lv2_libs.o",
+        "sha256": "f8eec568f519af3e557e5270dcfed9b99a3c915efca214e5f99f42f49cb66974"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_audio_utils.o",
+        "sha256": "b35eaa7bb3c8b0311526142fcafc0c6477d74b026f0a2fb555e798b88c336db1"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_core.o",
+        "sha256": "75e41df343237e767e9690bf7203fbbf9f00fc5573bf0de97ffa3d4f6efb3724"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_core_CompilationTime.o",
+        "sha256": "c4be831446c58ebd0781d1ee6e14a0c0b60b207358ffc2e6b7d4192cd6a49afc"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_data_structures.o",
+        "sha256": "0fbe1cc01da20ccc51177a3400d52ec545813d2e3bfc239a98960986e18c4ba3"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_events.o",
+        "sha256": "59b4c2a9f431b84a0b5208d4ad5a13a645743145e5fb5501684285944fbbf16c"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics.o",
+        "sha256": "712910985b72721e3c74230013465512cb64b932c221786b7480794a082266f2"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics_Harfbuzz.o",
+        "sha256": "18974c4f5e5de68071e04a1b6787ebc684894d70d74bc0369ba6e244b1cc9d77"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_graphics_Sheenbidi.o",
+        "sha256": "1072adedd5a6a0f94c5b6c0f90890cf04054a1a7d1bf7086008bf81ba8afbce8"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_gui_basics.o",
+        "sha256": "439c29835e246904ec3e0a2a1d2a23e60441401d4f38d15b49475085ea0224d8"
+      },
+      {
+        "path": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64/include_juce_gui_extra.o",
+        "sha256": "4572e0af9262f2609af0719491f1a3783de0da7d3006996b74f07a9342a044b8"
+      }
+    ],
+    "frameworks": [
+      "Accelerate",
+      "ApplicationServices",
+      "AudioToolbox",
+      "Cocoa",
+      "CoreAudio",
+      "CoreAudioKit",
+      "CoreMIDI",
+      "DiscRecording",
+      "Foundation",
+      "IOKit",
+      "Metal",
+      "MetalKit",
+      "QuartzCore",
+      "Security",
+      "WebKit"
+    ],
+    "binary_sha256": "0f989784c00414dc2b69292751a57bbad7c815092136b494ad29d9c5b4cccedb"
+  },
+  "app": "/Users/yanwhite/Documents/Music docs/Code/optisynth/build/motion-native/Optisynth.app",
+  "normal_release_path_still": "0.0.7",
+  "modular_checks": {
+    "normal": 221,
+    "asan_ubsan": 221,
+    "render_allocations": 0
+  },
+  "preset_checks": {
+    "duration_per_patch_stereo_seconds": 12,
+    "exact_json_audio_recall": true,
+    "night_current_peak": 0.29684,
+    "glass_tide_peak": 0.42764
+  },
+  "ui_runtime_verified": false,
+  "ui_blocker": "New app and Projucer abort during desktop startup. Xcode reports missing file event/cache services; logd and account lookup fail in the execution context. No native editor check receipt or screenshot produced.",
+  "files": {
+    "app/Main.cpp": "0fc6a3d87813f2b42cf7a181e7eca54ffb6fa1d16cab0399b92a201b70e9c307",
+    "app/Panel.h": "7fb08726ed182d21b9d58519cf95511f774236aff35cfb7d979e890f025be5aa",
+    "app/PatternEditor.h": "3f4f51b172163104d04aa2452947be3e0747b6adcfa35c7a7fdf03161b23382c",
+    "app/SequencerEditor.h": "f828ef69473ebde4ea275e860b44790c8f265478768fbef54dba926de5ed07e4",
+    "app/RackEditor.h": "3a9dafb2f529dcde08b96a6e0c198bc66c4fd5876f995dce996617c2261b6965",
+    "app/PatchIO.h": "d4fe5baf0bc7472e621c99d915c3c376cce296db24266419a7fcd8bd0f0a313c",
+    "src/modular/pattern.h": "446b24ff3439120af66ddb9ce21094663221068cc7e23804ae6b4e90b05c6093",
+    "src/modular/pattern.cpp": "932d5a0f321004d6de69c318ef406324bc7ceabd4a0ba7777135c8bdbc163475",
+    "src/modular/runtime.h": "6788fc83e21160c3d4e6c8abf65b4224ededfcbeb753f22cd59f1d42e64072d4",
+    "src/modular/runtime.cpp": "0d3a53c77c2d1f619376378388d7a45b9a8189f21c033fc2d0b0af0a52e1caec",
+    "tests/pattern_checks.h": "a5ffafaf367932bfdf11de90dd0a19f5ad9d7864494341d5784e518b2ec51cf1",
+    "tests/test_motion_presets.cpp": "c975cd144356a3674c632d24f3cbc61cc1ab99a5d30d4f81f6ff3cd5f27aa6f3",
+    "patches/motion-night-current.optisynth": "03a32a8c192eaf9a6b6be89664c3b1ea7c3ef43e1fa335713e8d20bd00699bf0",
+    "patches/motion-glass-tide.optisynth": "61f74aebb9d27fdfe460068c0bc693be61793fd52d267ecffcda3d5403d140dc"
+  },
+  "launch_services_check": {
+    "result": "kLSNoExecutableErr -10827",
+    "executable_present": true,
+    "mode": "0755",
+    "format": "Mach-O arm64",
+    "signature_verify": "passed"
+  },
+  "source_backup": {
+    "path": "../backups/optisynth/optisynth-source-20261119-134854.tar.gz",
+    "verified_files": 215,
+    "verified_bytes": 2570309,
+    "note": "Snapshot before JSON line-ending normalization and this receipt annotation; musical data unchanged."
+  }
+}

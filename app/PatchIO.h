@@ -2,6 +2,7 @@
 #include <JuceHeader.h>
 #include "../src/modular/rack.h"
 #include "../src/modular/sequencer.h"
+#include "../src/modular/pattern.h"
 #include <set>
 
 namespace optisynth {
@@ -17,6 +18,33 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==11||which==12){
+        RackDocument d;d.gain=gain;d.tempo=which==11?96:112;
+        auto sound=spectralDemoPatch();sound.name=which==11?"Motion / Night current":"Motion / Glass tide";
+        sound.mainVolumeDb=-12;sound.osc[0].unisonVoices=2;sound.osc[0].route1=1;sound.osc[0].filter.cutoffHz=which==11?950:2200;
+        sound.ampEnv[0].attack=.003f;sound.ampEnv[0].decay=.24f;sound.ampEnv[0].sustain=.18f;sound.ampEnv[0].release=.28f;
+        sound.mainEnv.release=.3f;
+        sound.fx[0]={"delay_stereo",true,2,{{"wet",.32f},{"time_l_ms",float(45000/d.tempo)},{"time_r_ms",float(60000/d.tempo)},{"feedback",.42f},{"highpass_hz",180},{"lowpass_hz",5200},{"cross",1}}};
+        sound.fx[1]={"reverb",true,0,{{"wet",.24f},{"time_s",4.8f},{"damping",.4f}}};
+        if(which==12){sound.osc[0].waveMix=.85f;sound.osc[0].unisonDetune=4;}
+        d.spectral["spectral"]=spectralPreset(sound);
+        NodeSpec sequence{"sequence","seq.pattern",{{"length",32},{"pitch_length",which==11?7.f:11.f},{"velocity_length",5},{"cv1_length",11},{"cv2_length",7},{"scale",2},{"gate",.68f},{"swing",.08f},{"cv_slew",.035f},{"seed",713},{"keyboard_transpose",1}}};
+        constexpr int notes[]={48,55,60,58,51,63,55,67,60,58,51};
+        for(int i=0;i<64;++i){
+            sequence.parameters.push_back({patternKey(i,Pitch),float(notes[i%11]+(which==12?12:0))});
+            sequence.parameters.push_back({patternKey(i,Velocity),i%4==0?1.f:.65f});
+            sequence.parameters.push_back({patternKey(i,On),i%8==6?0.f:1.f});
+            sequence.parameters.push_back({patternKey(i,Chance),i%4==3?.72f:1.f});
+            sequence.parameters.push_back({patternKey(i,Ratchet),i%16==15?3.f:1.f});
+            sequence.parameters.push_back({patternKey(i,Condition),i%16==14?8.f:0.f});
+            sequence.parameters.push_back({patternKey(i,CV1),float(std::sin(i*1.7)*.65)});
+            sequence.parameters.push_back({patternKey(i,CV2),float(std::cos(i*.77)*.7)});
+        }
+        d.graph.nodes={std::move(sequence),{"spectral","spectral.engine",{}}};
+        d.graph.connections={{{"sequence","notes"},{"spectral","notes"}}};d.graph.outputs={{"spectral","out"}};
+        d.graph.modulations={{{"sequence","cv1"},{"spectral","osc1_filter_cutoff"},.10f},{{"sequence","cv2"},{"spectral","osc1_wave_mix"},.18f}};
+        return d;
+    }
     if(which>=8&&which<=10)return {sequencerPatch(which-8),gain};
     RackDocument d{rackPreset(which),gain,{}};
     if(which==4||which==5)d.samples["source"]={"builtin:click","builtin-click-v1",{}};

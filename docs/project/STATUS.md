@@ -1,6 +1,49 @@
 # Optisynth status — 19 November 2026
 
-## Current delivery — standalone 0.0.7 sequencers
+## Request 49 — Pattern / Motion, standalone 0.0.8
+
+Implemented: a 64-step Pattern engine and large native performance editor with
+independent pitch/velocity/CV loops, six traversals, conditions, chance, ratchets,
+swing, scale/keyboard transposition, drawing, undo/redo, clipboard, protected
+generation and temporary snapshots. Night current and Glass tide are original
+Spectral delay/reverb starters with both CV lanes assigned. 26 modules, 13 starters.
+[Feature contract](../architecture/PATTERN_MOTION.md),
+[source decision](../research/sequencers/PATTERN_MOTION_SOURCE_STUDY.md).
+
+Passed: 221 modular checks normally and under ASan/UBSan, including exact event
+offsets, block-size independence, stop ownership, separate CV loops and coherent
+parameter transactions. Both new presets render 12 seconds of finite stereo audio
+and reproduce exactly after JSON save/reload. Presets are in `patches/motion-*`.
+
+Native compilation succeeded through direct Clang using the existing Xcode
+configuration and unchanged JUCE module objects. All project C++ sources were
+rebuilt and the separate app was ad-hoc signed. App: `build/motion-native/Optisynth.app`.
+The previous app in `app/Builds/MacOSX/build/Release` remains 0.0.7.
+
+**Outstanding:** native runtime/UI checks and visual inspection. The new app and
+Projucer both abort during startup with no application log. Xcode also fails
+before compilation, reporting file-event/cache service errors; the execution
+context cannot resolve the macOS account name and cannot access logd. This is an
+environment obstacle, not proof that the new interface is correct. No screenshots
+or native editor PASS receipt were produced. Next: once desktop services are
+available, run the new app's `--snapshot` checks, inspect all Motion captures,
+correct any issues, then promote the qualified app to the normal release path.
+Launch Services also returned -10827 despite the executable being present,
+0755, arm64 and signature-valid. No audio device or Live session was opened.
+
+The full firmware adoption was declined after remaining hardware docs could not
+be retrieved (DNS failure). Pattern / Motion is an independent implementation of
+the researched behaviours, with no newly adopted upstream firmware code.
+
+
+Delivery bookkeeping: implementation/tests/presets/docs are bundled into one
+local commit. Push to `origin/main` failed because `github.com` could not resolve
+from this execution context; retry the existing push when connectivity returns.
+A verified local snapshot is `../backups/optisynth/optisynth-source-20261119-134854.tar.gz`
+(215 files, 2,570,309 bytes; before JSON line-ending normalization). The normal
+release app remains intact. Native qualification and remote push are still open.
+
+## Prior delivery — standalone 0.0.7 sequencers
 
 User feedback, request 46: the first pass works but feels underwhelming. The
 current technical slice is not yet the desired musical/editor experience. Next

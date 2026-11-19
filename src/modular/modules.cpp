@@ -314,6 +314,7 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
         if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
         if(p.family=="source"||p.family=="envelope"||p.family=="engine"||p.family=="resonator"||id=="mod.lfo")type.inputs.push_back({"notes",SignalType::Event,false});
         if(isSequencer(id))type.outputs={{"notes",SignalType::Event}};
+        if(id=="seq.pattern"){type.outputs.push_back({"cv1",SignalType::Control});type.outputs.push_back({"cv2",SignalType::Control});}
         type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
             if(isSequencer(id))return makeSequencer(n);

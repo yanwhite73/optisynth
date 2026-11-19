@@ -36,3 +36,5 @@ retain their original contents; paths inside them describe the layout at the tim
 Current links, agent instructions and helper file paths use this folder structure.
 
 No synth implementation or build accompanies this documentation reorganisation.
+
+- [Pattern / Motion performance sequencer](architecture/PATTERN_MOTION.md) — request 49 implementation and playback contract.

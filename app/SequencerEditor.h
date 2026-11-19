@@ -2,6 +2,7 @@
 #include <JuceHeader.h>
 #include "../src/modular/sequencer.h"
 #include <map>
+#include "PatternEditor.h"
 
 namespace optiui {
 // Same parameter document as the DSP. Selection is local UI state; the playhead
@@ -16,6 +17,8 @@ class SequencerEditor final:public juce::Component,private juce::Timer {
         void resized()override{label.setBounds(0,0,getWidth(),18);slider.setBounds(0,18,getWidth(),getHeight()-18);}
     };
 public:
+    std::function<void()> onPlay,onRestart;
+    std::function<double()> getTempo;std::function<void(double)> changeTempo;
     SequencerEditor(const std::string& type,const std::map<std::string,float>& values,
                     std::shared_ptr<optisynth::Controls> handle,std::function<void(const std::string&,float)> changed)
         :type_(type),values_(values),handle_(std::move(handle)),changed_(std::move(changed)){
@@ -31,9 +34,10 @@ public:
         mode.addItemList({"Repeat","Hold","Rest"},1);mode.onChange=[this]{change(stepKey("mode"),float(mode.getSelectedId()-1));};
         mode.setTooltip("Repeat: every pulse. Hold: one sustained note. Rest: no note.");
         on.setButtonText("Note on");on.setColour(juce::ToggleButton::textColourId,juce::Colour(0xff202224));on.onClick=[this]{change(stepKey("on"),on.getToggleState()?1:0);};
+        if(type_=="seq.pattern"){addAndMakeVisible(expand_);expand_.setButtonText("Open performance editor / 64 steps");expand_.onClick=[this]{openPerformanceEditor();};}
         refreshInspector();startTimerHz(30);
     }
-    void setValue(const std::string& id,float value){values_[id]=value;refreshing_=true;
+    void setValue(const std::string& id,float value){values_[id]=value;if(fullEditor_)fullEditor_->setValue(id,value);refreshing_=true;
         if(id=="enabled")enabled.setToggleState(value>=.5f,juce::dontSendNotification);
         if(id=="division")division.setSelectedId(int(value)+1,juce::dontSendNotification);
         for(auto* f:{&length,&gate,&velocity,&hits,&rotation,&pitch,&detail})if(f->getComponentID()==juce::String(id))f->slider.setValue(value,juce::dontSendNotification);
@@ -46,22 +50,29 @@ public:
     int selectedStep()const{return selected_;}
     int displayedStep()const{return playing_;}
     void pollPlayhead(){const int p=handle_&&transportActive_?handle_->playhead.load(std::memory_order_relaxed):-1;if(p!=playing_){playing_=p;repaint();}}
-    void setTransportActive(bool active){transportActive_=active;pollPlayhead();}
+    void setTransportActive(bool active){transportActive_=active;if(fullEditor_)fullEditor_->setTransportActive(active);pollPlayhead();}
     void selectStep(int step){selected_=std::clamp(step,0,int(get("length"))-1);refreshInspector();repaint();}
     // Exposed to native checks through the same user-facing widgets.
     juce::Slider& pitchControl(){return pitch.slider;}
+    bool performanceHasFocus()const{return fullEditor_&&fullEditor_->hasKeyboardFocus(true);}
+    PatternEditor* openPerformanceEditor(bool visible=true){
+        if(type_!="seq.pattern")return nullptr;
+        if(!window_){fullEditor_=new PatternEditor(values_,handle_,[this](const std::string& id,float value){change(id,value);});fullEditor_->getTempo=[this]{return getTempo?getTempo():120.;};fullEditor_->changeTempo=[this](double v){if(changeTempo)changeTempo(v);};fullEditor_->onPlay=[this]{if(onPlay)onPlay();};fullEditor_->onRestart=[this]{if(onRestart)onRestart();};window_=std::make_unique<PatternWindow>(fullEditor_);}
+        fullEditor_->setTempoDisplay(getTempo?getTempo():120.);fullEditor_->setTransportActive(transportActive_);window_->setVisible(visible);if(visible)window_->toFront(true);return fullEditor_;
+    }
     void resized()override{
         const int w=getWidth(),cell=(w-168)/3;
         enabled.setBounds(0,10,82,30);division.setBounds(84,15,80,28);
         length.setBounds(168,0,cell,61);gate.setBounds(168+cell,0,cell,61);velocity.setBounds(168+2*cell,0,cell,61);
-        canvas_={4,68,w-8,std::max(64,getHeight()-169)};
+        canvas_={4,68,w-8,std::max(type_=="seq.pattern"?48:64,getHeight()-169-(type_=="seq.pattern"?36:0))};
         const int y=canvas_.getBottom()+25;
+        expand_.setBounds(4,getHeight()-32,w-8,28);
         if(euclidean()){
             canvas_={4,68,std::min(220,w*44/100),std::max(128,getHeight()-96)};
             const int x=canvas_.getRight()+16,field=std::min(65,(getHeight()-96)/3);
             hits.setBounds(x,68,w-x,field);rotation.setBounds(x,68+field,w-x,field);pitch.setBounds(x,68+2*field,w-x,field);
         }
-        else {pitch.setBounds(0,y,w/3,65);detail.setBounds(w/3,y,w/3,65);on.setBounds(2*w/3+10,y+19,w/3-10,30);mode.setBounds(2*w/3+10,y+22,w/3-14,28);}
+        else {pitch.setBounds(0,y,w/3,type_=="seq.pattern"?56:65);detail.setBounds(w/3,y,w/3,type_=="seq.pattern"?56:65);on.setBounds(2*w/3+10,y+19,w/3-10,30);mode.setBounds(2*w/3+10,y+22,w/3-14,28);}
     }
     void paint(juce::Graphics& g)override{
         const juce::Colour ink(0xff202224),paper(0xfff0e9d8),accent(0xfff1ca73);
@@ -74,7 +85,7 @@ public:
                 const float diameter=length>24?7:10;auto r=juce::Rectangle<float>(diameter,diameter).withCentre(c);
                 g.setColour(hit?paper:juce::Colour(0xff506063));g.fillEllipse(r);if(i==playing_){g.setColour(accent);g.drawEllipse(r.expanded(3),2);}}
             g.setFont(juce::Font(juce::FontOptions(15)));g.setColour(paper);g.drawText(juce::String(std::min(int(get("hits")),length))+" / "+juce::String(length),canvas_,juce::Justification::centred);
-        }else for(int i=0;i<length;++i){auto r=cellBounds(i).reduced(2);const auto key="step"+std::to_string(i+1)+"_";
+        }else for(int i=0;i<(stage()?length:std::min(length,16));++i){auto r=cellBounds(i).reduced(2);const auto key="step"+std::to_string(i+1)+"_";
             const bool active=stage()?get(key+"mode")<2:get(key+"on")>=.5f;
             g.setColour(active?juce::Colour(0xff4d6262):juce::Colour(0xff313d3f));g.fillRoundedRectangle(r.toFloat(),3);
             if(selected_==i){g.setColour(paper);g.drawRoundedRectangle(r.toFloat().reduced(1),3,1.5f);}
@@ -101,7 +112,7 @@ public:
     void mouseDown(const juce::MouseEvent& e)override{
         if(euclidean())return;
         grabKeyboardFocus();
-        for(int i=0;i<int(get("length"));++i)if(cellBounds(i).contains(e.getPosition())){selectStep(i);if(e.mods.isRightButtonDown()&&!stage())change(stepKey("on"),get(stepKey("on"))<.5f?1:0);break;}
+        for(int i=0;i<(stage()?int(get("length")):std::min(16,int(get("length"))));++i)if(cellBounds(i).contains(e.getPosition())){selectStep(i);if(e.mods.isRightButtonDown()&&!stage())change(stepKey("on"),get(stepKey("on"))<.5f?1:0);break;}
     }
     void mouseDoubleClick(const juce::MouseEvent& e)override{if(!euclidean()&&!stage()&&canvas_.contains(e.getPosition()))change(stepKey("on"),get(stepKey("on"))<.5f?1:0);}
     bool keyPressed(const juce::KeyPress& key)override{
@@ -110,6 +121,8 @@ public:
         return false;
     }
 private:
+    juce::TextButton expand_;
+    PatternEditor* fullEditor_=nullptr;std::unique_ptr<PatternWindow> window_;
     std::string type_;std::map<std::string,float> values_;std::shared_ptr<optisynth::Controls> handle_;
     std::function<void(const std::string&,float)> changed_;int selected_=0,playing_=-1;bool refreshing_=false,transportActive_=false;
     juce::ToggleButton enabled,on;juce::ComboBox division,mode;

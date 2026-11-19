@@ -202,3 +202,7 @@ Its observed architecture and known approximations are retained in
 `../../reference/docs/spectral_architecture.md` and the inherited `../legacy/optispectral/design.md` history.
 Source provenance is `../verification/source_snapshot_20261117.json`. Legacy fidelity limitations
 remain explicit while the reusable components are extracted.
+
+Request 49: [Pattern / Motion source decision](sequencers/PATTERN_MOTION_SOURCE_STUDY.md)
+applies the full study to a 64-step performance sequencer. The engine and UI are
+first-party; incomplete firmware documentation prevented upstream code adoption.

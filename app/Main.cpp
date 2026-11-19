@@ -4,9 +4,9 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.7";}
+    const String getApplicationVersion() override {return "0.0.8";}
     void initialise(const String& args) override {
-        window=std::make_unique<Window>(getApplicationName());
+        window=std::make_unique<Window>(getApplicationName()+" "+getApplicationVersion());
         if(args=="--spectral-demo")window->synth->showSpectralDemo();
         if(args=="--sample-demo")window->synth->showSampleDemo();
         if(args=="--sequencer-demo")window->synth->showSequencerDemo();

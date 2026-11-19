@@ -444,6 +444,28 @@ implementations exist, with direct sources and licence notes, as the first
 decision input for the analog pad voice. Research only; no code or downloads
 are implied as adopted.
 
+## 48 — Excessive time spent documenting feedback
+
+```text
+7m just to document what I said??
+```
+
+Keep feedback capture brief; do not turn ordinary discussion into separate Git
+housekeeping deliveries.
+
+## 49 — Mature sequencer implementation; bundle commits
+
+```text
+bundle commits. You are by far too pedantic while missing the obvious tasks.
+But the sequencers, while basic, function. Continue based on the full sequencer module research, and make at least one of them a mature and sophisticated version - maybe just implement an open source design if one is available that meets those criteria
+```
+
+Proceed with a substantial playable implementation grounded in the full research.
+Choose a mature reference, assess practical source reuse and deliver one complete
+sequencer/editor improvement. Bundle implementation, verification, docs and backup
+into the delivery commit; no separate feedback-only commits. Retain module
+routing, preset compatibility, host boundaries and user-performed listening.
+
 ## 50 — Arturia owned; plugin scan; commercial intent
 
 ```text
@@ -470,3 +492,9 @@ I askewd about schematics and research on the actual architecture of those class
 
 Commercial constraints are deferred. Correction: the request was for circuit-level
 architecture research (schematics, service manuals), not plugin inventories.
+
+Request 49 implementation: Pattern / Motion and two FX starters are built; 221
+modular checks pass normally and under ASan/UBSan, with exact stereo preset recall.
+Native UI execution/visual checks remain blocked by desktop startup failures.
+The delivery commit bundles source, tests, presets and docs. See STATUS for the
+exact pending qualification; it is not closed merely because code compiles.

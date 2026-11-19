@@ -7,7 +7,7 @@
 #include <atomic>
 
 namespace optisynth {
-constexpr int quantum = 24, maxParameters = 640;
+constexpr int quantum = 24, maxParameters = 768;
 struct Parameter {
     std::string id, label, unit;
     float minimum, maximum, initial;
@@ -23,6 +23,11 @@ const Panel& panel(const std::string& type);
 struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
     std::atomic<int> playhead{-1};
+    std::array<std::atomic<int>,4> laneHeads{};
+    std::atomic<int> cycle{0};
+    std::atomic<bool> stepFired{false};
+    // UI batches publish an even revision; audio retains the last complete edit.
+    std::atomic<uint64_t> editRevision{0};
 };
 struct RouteControls { std::array<std::atomic<float>,kMaximumModulations> amounts{}; };
 struct Note { int midi = 48; float velocity = .8f; bool gate = false, trigger = false; };
@@ -71,7 +76,7 @@ private:
         std::vector<int> channels;
         struct Route { const float* source; int parameter,index; };
         std::vector<Route> routes;
-        std::array<float,maxParameters> effective{},offset{};
+        std::array<float,maxParameters> effective{},offset{},base{},candidate{};
         NoteEventBlock events;
         const NoteEventBlock* noteInput=nullptr;
         HeldNotes held;

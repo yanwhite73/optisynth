@@ -24,6 +24,19 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
+## Pattern / Motion preview — 0.0.8
+
+The new 64-step Pattern performance editor adds independent pitch, velocity and
+CV loops, conditions, probability, ratchets, swing, scale/keyboard transpose,
+drawing, undo/redo, clipboard and protected generation. Try **Motion / Night
+current** or **Motion / Glass tide**, then open the Pattern performance editor.
+[Controls and playback contract](docs/architecture/PATTERN_MOTION.md).
+
+The compiled preview is `build/motion-native/Optisynth.app`; the normal release
+path below still contains 0.0.7. Core tests and stereo preset recall pass. Native
+UI execution/visual qualification is pending because desktop startup fails in
+the current execution context; see [STATUS](docs/project/STATUS.md).
+
 ## Current implementation
 
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
@@ -77,7 +90,7 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the eleven starter patches; edit their panels directly or select a panel
+octave. Try the thirteen starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a

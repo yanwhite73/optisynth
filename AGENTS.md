@@ -14,7 +14,9 @@ This is the separate modular project. `../partials` is Optispectral; do not use 
 as the edit target. `docs/verification/source_snapshot_20261117.json` records the exact copied
 working source. The starting repository had no commits. On 17 November Yan
 explicitly requested regular commits and pushes (USER_REQUESTS.md request 21).
-Commit and push coherent, checked milestones to origin; this supersedes the
+Bundle implementation, checks and documentation into coherent delivery commits
+(request 49); do not make separate feedback-only commits. Push checked milestones
+to origin; this supersedes the
 inherited no-commit restriction for Optisynth. Preserve independent local backups.
 
 Use the workspace workload launcher and inherited host rules. Keep offline
