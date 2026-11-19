@@ -428,3 +428,18 @@ lengths/directions, probability/ratchets and evolving patterns, plus convincing
 ambient/Berlin School starter patches using delay/reverb. Keep the independent
 arp and voice-group roadmap visible. These are proposed priorities, not features
 implemented by this feedback entry.
+
+## 47 — Availability of schematics, plugins and open-source versions
+
+```text
+first thing to decide is how much schematic info is available on how those synths are built? any plugin versions? open source versions?
+```
+
+19 November 2026 (Claude session; follows request 44's goals). "Those synths"
+are the reference instruments named for the Rich/Roach and Oberheim/Prophet
+goals: Oberheim SEM, OB-X/OB-Xa/OB-8, Xpander/Matrix-12 and Prophet-5 (plus the
+Prophet-6 Rich cites). Survey what circuit documentation (service manuals,
+schematics, chip datasheets), commercial plugin emulations and open-source
+implementations exist, with direct sources and licence notes, as the first
+decision input for the analog pad voice. Research only; no code or downloads
+are implied as adopted.

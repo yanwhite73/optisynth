@@ -55,6 +55,14 @@ above until confirmed):
 6. Berlin School sequencer features.
 
 Open questions: which recordings define the target; how many pad voices.
+
+Request 47: [Oberheim and Prophet sources](../research/instruments/OBERHEIM_PROPHET_SOURCES.md)
+surveys circuit documentation, plugins and open source for the pad voice.
+Schematics exist for all the vintage targets. MAME has BSD-3-Clause CEM chip
+models and a Prophet-5 Rev 3.0 driver. OB-Xf and Odin 2 are GPL-3, so treat
+them as references only until Optisynth's licence is decided. Next: download and
+hash the remaining manuals and datasheets, then analyse the Xpander voice card.
+Research only.
 Documentation only: no code changed, nothing built or tested for this request.
 
 Request 40: documentation is sorted into project, architecture, UI, research,

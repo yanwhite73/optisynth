@@ -620,3 +620,30 @@ A proposed order of work is in `PROJECT_REVIEW_20261119.md` and awaits Yan's
 confirmation. No tests or builds were run: the Codex session held the shared
 `build/` directory and the heavy-workload slots were full. Documentation only;
 no code changes.
+
+## Request 47: schematics, plugins and open-source survey — 19 November 2026
+
+Yan asked how much circuit information, how many plugin versions and how many
+open-source versions exist for the Oberheim and Prophet reference synths. The
+survey used web search plus GitHub API reads of MAME file headers and component
+usage. Nothing was downloaded, built or run.
+
+Results are in `../research/instruments/OBERHEIM_PROPHET_SOURCES.md`:
+- **Schematics:** service manuals and schematics exist for the SEM, OB-X,
+  OB-Xa, OB-8, Xpander/Matrix-12 and Prophet-5 Rev 1/2/3. None were found for
+  the current Prophet-6, Rev4 or OB-X8.
+- **MAME:** BSD-3-Clause models of the CEM3310, 3320, 3340 and 3372, a Prophet-5
+  Rev 3.0 driver and a partial Xpander voice board (filter and pole mixer, no
+  VCOs yet; last change 27 October 2026). Its CEM3320 drive constant is
+  explicitly experimental.
+- **GPL-3 code:** OB-Xf, Odin 2 and GliGli's Prophet-600 firmware. Adopting any
+  of them depends on Optisynth's licence, which is undecided.
+- **Shruthi 4PM:** the board page (read) confirms the Xpander pole-mixing
+  technique and lists its 15 modes (CC-BY-SA-3.0).
+
+Corrections made while checking:
+- The first Shruthi link pointed at the SVF2 board; replaced with the 4PM page.
+- The Native Instruments URLs for Zavalishin's book now return 404; the author's
+  KVR thread is cited instead.
+- GitHub does not detect a licence for Odin 2 or p600fw; their GPL-3 status
+  comes from the project pages.

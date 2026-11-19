@@ -16,6 +16,7 @@ Sound goals (request 44): [ambient Berlin School and analog pads](project/SOUND_
 | `ui/` | Contextual panels, interaction design, sequencer UI and visual-reference coverage | [UI research](ui/README.md) |
 | `research/modules/` | Mutable integration review, other builders, delay/reverb candidates | [Module makers](research/modules/OPEN_SOURCE_MODULE_MAKERS.md) |
 | `research/sequencers/` | Sequencer model/method comparisons, earlier Optiseq findings and source manifest | [Sequencer research](research/sequencers/SEQUENCER_MODELS_RESEARCH.md) |
+| `research/instruments/` | Classic-synth circuit documentation, plugin emulations and open-source models (Oberheim, Prophet) | [Oberheim and Prophet sources](research/instruments/OBERHEIM_PROPHET_SOURCES.md) |
 | `research/platforms/` | Lessons from modular environments and their performance architecture | [VCV lessons](research/platforms/VCV_ARCHITECTURE_LESSONS.md) |
 | `research/` | Research overview, classic-synth manual/schematic catalogue and download receipts | [Research index](research/RESEARCH.md) |
 | `verification/` | Historical build receipts and original source-snapshot provenance | [Source snapshot](verification/source_snapshot_20261117.json) |

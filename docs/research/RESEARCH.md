@@ -19,6 +19,14 @@ reference only, and no upstream firmware build scripts were executed.
 
 ## Oberheim Xpander
 
+Request 47 survey: [Oberheim and Prophet sources](instruments/OBERHEIM_PROPHET_SOURCES.md)
+covers service manuals and schematics, commercial plugins and open-source models
+for the SEM, OB-X/OB-Xa/OB-8, Xpander/Matrix-12 and Prophet-5. Key finding: MAME
+has BSD-3-Clause component-level CEM3310/3320/3340/3372 models, a Prophet-5 Rev 3.0
+driver and a partial Xpander voice board (filter and 15-mode pole mixer; VCOs not
+yet implemented). Survey only: nothing downloaded or adopted.
+
+
 - [Owner manual](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Owners_Manual.pdf).
 - [Service manual](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/Oberheim_Xpander_Service_Manual.pdf), 39-page scanned edition.
 - [Separate schematic archive](https://synthfool.com/docs/Oberheim/Oberheim_Xpander/xpander_schematics.zip).
