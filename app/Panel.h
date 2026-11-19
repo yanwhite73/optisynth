@@ -20,7 +20,10 @@ Colour panelColour(const std::string& id) {
     if(id=="mod.lfo")return Colour(0xffd7b282);
     if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
     if(id=="drum.analog")return Colour(0xffd7b282);
-    if(id.rfind("osc.",0)==0)return Colour(0xff8ebecb);
+    if(id.rfind("osc.",0)==0||id=="analog.vco")return Colour(0xff8ebecb);
+    if(id=="voice.mix")return Colour(0xffc9a96a);
+    if(id.rfind("fx.",0)==0)return Colour(0xff6f8f8b);
+    if(id=="mod.wheel")return Colour(0xffd7b282);
     if(panel(id).family=="filter"&&id!="filter.bypass")return Colour(0xffa2c67f);
     return Colour(0xff36383a);
 }
@@ -32,6 +35,10 @@ int panelWidth(const std::string& id) {
     if(id=="sample.player")return 340;
     if(id=="spectral.ahdsfr")return 330;
     if(id.rfind("spectral.",0)==0&&panel(id).family=="filter")return 290;
+    if(id=="analog.vco"||id=="analog.filter")return 290;
+    if(id=="analog.env")return 230;
+    if(id=="analog.vca"||id=="mod.wheel")return 170;
+    if(id=="voice.mix")return 200;
     if(id=="utility.vca"||id=="filter.bypass")return 155;
     if(id=="utility.mix"||id=="osc.sine")return 200;
     return id=="modal.resonator"?270:250;

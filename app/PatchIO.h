@@ -3,6 +3,7 @@
 #include "../src/modular/rack.h"
 #include "../src/modular/sequencer.h"
 #include "../src/modular/pattern.h"
+#include "../src/modular/analog.h"
 #include "PerformanceStateIO.h"
 #include <set>
 
@@ -19,6 +20,7 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==15||which==16){RackDocument d;d.gain=gain;d.graph=padPatch(which-15);return d;}
     if(which==13||which==14){
         auto d=starterDocument(11,gain);d.tempo=which==13?104:118;
         auto data=std::make_shared<PerformanceData>(defaultPerformance());

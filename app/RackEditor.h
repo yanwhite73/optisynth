@@ -8,7 +8,7 @@
 
 namespace {
 class RackSynth final : public AudioAppComponent, private Timer,
-                        private MidiKeyboardState::Listener, private ListBoxModel {
+                        private MidiKeyboardState::Listener, private ListBoxModel, private MidiInputCallback {
 public:
     RackSynth() : keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
         setWantsKeyboardFocus(true);setSize(1440,940);
@@ -20,10 +20,10 @@ public:
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden"};
-        for(i=0;i<15;++i)starter.addItem(names[i],i+1);
+        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden","Pad / OB swell (8 voices)","Pad / Prophet 4-pole (8 voices)"};
+        for(i=0;i<17;++i)starter.addItem(names[i],i+1);
         starter.setTextWhenNothingSelected("Starter patches");
-        starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),starter.getSelectedId()>=9?"sequence":"source");};
+        starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),starter.getSelectedId()>=16?"filter":starter.getSelectedId()>=9?"sequence":"source");};
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
         remove.onClick=[this]{removeSelected();};
         editor.selectionChanged=[this]{
@@ -56,7 +56,7 @@ public:
         keyboardHelp.setFont(font(12));keyboardHelp.setColour(Label::textColourId,paper.withAlpha(.8f));
         commit({rackPreset(0),.25f},"source");startTimerHz(60);
     }
-    ~RackSynth() override {stopTimer();shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);rackView.setViewedComponent(nullptr,false);}
+    ~RackSynth() override {stopTimer();deviceManager.removeMidiInputDeviceCallback({},this);shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);rackView.setViewedComponent(nullptr,false);}
     void prepareToPlay(int,double rate) override {converter.prepare(rate);}
     void releaseResources() override {}
     void showSampleDemo(){starter.setSelectedId(5,sendNotificationSync);}
@@ -287,7 +287,7 @@ private:
     std::map<std::string,std::shared_ptr<Controls>> handles;
     std::vector<std::unique_ptr<InputRow>> inputs;
     std::vector<std::string> addTypes;std::vector<Endpoint> outputPorts;
-    std::vector<int> held;std::string selected;int activeCount=0;
+    std::vector<int> held;std::set<int> sustained;bool sustain=false;std::string selected;int activeCount=0;
     ComboBox addChoice,starter,output;
     TextButton add{"Add module"},remove{"Remove"},save{"Save"},load{"Open"},audio{"Start audio"},silence{"Silence"};
     Slider gain;TextEditor routes;Label status,keyboardHelp;
@@ -489,9 +489,12 @@ private:
     void toggleAudio() {
         if(running){stopAudio();return;}
         setAudioChannels(0,2);running=deviceManager.getCurrentAudioDevice()!=nullptr;
+        // Hardware MIDI opens only with audio: every available input, notes merged to channel 1.
+        for(const auto& device:MidiInput::getAvailableDevices())deviceManager.setMidiInputDeviceEnabled(device.identifier,true);
+        deviceManager.removeMidiInputDeviceCallback({},this);deviceManager.addMidiInputDeviceCallback({},this);
         audio.setButtonText(running?"Stop audio":"Start audio");message(running?"Audio on - play the keyboard":"Could not open audio output",!running);grabKeyboardFocus();
     }
-    void stopAudio() {player.playing.store(false);updateTransport();typing.release([this](int n){keys.noteOff(1,n,0);});keys.allNotesOff(1);held.clear();player.note(48,false);shutdownAudio();running=false;audio.setButtonText("Start audio");message("Audio stopped");}
+    void stopAudio() {player.playing.store(false);updateTransport();deviceManager.removeMidiInputDeviceCallback({},this);sustained.clear();sustain=false;typing.release([this](int n){keys.noteOff(1,n,0);});keys.allNotesOff(1);held.clear();player.note(48,false);player.releaseAll();shutdownAudio();running=false;audio.setButtonText("Start audio");message("Audio stopped");}
     void updateTransport(){
         const bool active=player.playing.load();play.setButtonText(active?"Stop seq":"Play seq");
         if(editor.sequence)editor.sequence->setTransportActive(active);
@@ -500,8 +503,24 @@ private:
         for(auto& panel:hardware.modules)if(panel->performance)panel->performance->setActive(active);
         const double beat=player.beat.load();position.setText(String(int(beat/4)+1)+" : "+String(std::fmod(beat,4)+1,1)+(running?"":" / audio off"),dontSendNotification);
     }
-    void handleNoteOn(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());held.push_back(note);player.note(note,true);}
-    void handleNoteOff(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());player.note(held.empty()?note:held.back(),!held.empty());}
+    void handleNoteOn(MidiKeyboardState*,int,int note,float velocity) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());held.push_back(note);player.note(note,true);player.noteEvent(note,velocity,true);}
+    void handleNoteOff(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());player.note(held.empty()?note:held.back(),!held.empty());player.noteEvent(note,0,false);}
+    // MIDI thread: continuous controls go straight to atomics; notes are forwarded to the
+    // message thread so the on-screen keyboard, mono and voice paths stay consistent.
+    void handleIncomingMidiMessage(MidiInput*,const MidiMessage& m) override {
+        if(m.isPitchWheel()){player.bend.store(float(m.getPitchWheelValue()-8192)/8192.f*2.f);return;}
+        if(m.isController()&&m.getControllerNumber()==1){player.wheel.store(float(m.getControllerValue())/127.f);return;}
+        if(m.isNoteOnOrOff()||m.isSustainPedalOn()||m.isSustainPedalOff()||m.isAllNotesOff()||m.isAllSoundOff())
+            MessageManager::callAsync([safe=SafePointer<RackSynth>(this),m]{if(safe)safe->midiNote(m);});
+    }
+    void midiNote(const MidiMessage& m) {
+        const int n=m.getNoteNumber();
+        if(m.isNoteOn()){sustained.erase(n);keys.noteOn(1,n,m.getFloatVelocity());}
+        else if(m.isNoteOff()){if(sustain)sustained.insert(n);else keys.noteOff(1,n,0);}
+        else if(m.isSustainPedalOn())sustain=true;
+        else if(m.isSustainPedalOff()){sustain=false;for(int k:sustained)keys.noteOff(1,k,0);sustained.clear();}
+        else {sustained.clear();keys.allNotesOff(1);}
+    }
     void timerCallback() override {
         player.collect();collectSamples();
         if(openPatternWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->sequence){card->sequence->openPerformanceEditor();openPatternWhenReady=false;}}

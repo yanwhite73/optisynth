@@ -9,7 +9,7 @@ app = ET.Element('JUCERPROJECT', id='OptiApp2', name='Optisynth', projectType='g
     jucerFormatVersion='1', defines='TEST=1', headerPath=str(root/'third_party/mutable'))
 group = ET.SubElement(app, 'MAINGROUP', id='optiappsrc', name='Optisynth')
 files = ['app/Main.cpp', 'src/modular/graph.cpp', 'src/modular/runtime.cpp',
-         'src/modular/timing.cpp', 'src/modular/sequencer.cpp', 'src/modular/pattern.cpp', 'src/modular/performance.cpp',
+         'src/modular/timing.cpp', 'src/modular/sequencer.cpp', 'src/modular/pattern.cpp', 'src/modular/performance.cpp', 'src/modular/analog.cpp',
          'src/core/spectrum.cpp', 'src/core/table_bank.cpp', 'src/core/patch.cpp', 'src/core/engine.cpp', 'src/core/arp.cpp', 'src/modular/spectral.cpp', 'src/modular/modules.cpp', 'src/modular/sample.cpp', 'src/core/envelope.cpp', 'src/core/effects.cpp',
          'third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc',
          'third_party/mutable/plaits/dsp/physical_modelling/resonator.cc',
