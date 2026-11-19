@@ -69,6 +69,7 @@ struct Control : juce::Component {
     Control(const Parameter& p,float value,std::function<void(float)> changed,KnobLook& look,Colour text,bool fader=false,bool compactTrim=false) {
         label.setText(String(p.label).toUpperCase(),dontSendNotification);label.setFont(font(11));label.setColour(Label::textColourId,text);label.setJustificationType(Justification::centred);
         const bool trim=compactTrim||p.id.find("_curve")!=std::string::npos||p.id=="fade"||p.id=="mod_rate_hz"||p.id=="mod_depth"||p.id=="start"||p.id=="end";
+        slider.setScrollWheelEnabled(false);
         slider.setSliderStyle(fader?Slider::LinearVertical:trim?Slider::LinearHorizontal:Slider::RotaryHorizontalVerticalDrag);
         slider.setTextBoxStyle(Slider::TextBoxBelow,false,88,20);
         slider.setColour(Slider::textBoxTextColourId,text);slider.setColour(Slider::textBoxBackgroundColourId,Colours::transparentBlack);

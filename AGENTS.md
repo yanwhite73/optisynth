@@ -44,6 +44,11 @@ separate, demonstrate complete multi-part patches, and inspect normal/minimum-si
 native captures before delivery. Record omissions explicitly; do not imply that
 one pattern module implements the researched specialist sequencer families.
 
+Scroll gestures navigate; they must not change parameter values. Disable JUCE
+slider wheel editing in every new standalone control, including popup editors and
+matrix rows. Check that wheel events reach the containing view and deliberate
+drag/numeric edits still work. See ENGINEERING_LOG request 55.
+
 Use the workspace workload launcher and inherited host rules. Keep offline
 qualification distinct from VST3 packaging/installation and user-performed Live
 verification. Do not drive Live. Retain the independent implementation boundary

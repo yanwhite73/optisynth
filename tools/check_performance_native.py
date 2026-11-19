@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run via agent-workload after building the current direct app candidate."""
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import re
@@ -9,6 +10,9 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--ui-only', action='store_true', help='Check changed UI without repeating unchanged audio renders')
+options = parser.parse_args()
 old = root / 'app/Builds/MacOSX/build/Optisynth.build/Release/Optisynth - App.build/Objects-normal/arm64'
 responses = [p for p in old.glob('*-common-args.resp') if '-std=c++17' in p.read_text() and '-fobjc-' not in p.read_text()]
 if len(responses) != 1:
@@ -30,5 +34,6 @@ for framework in frameworks:
     command += ['-framework', framework]
 binary = root / 'build/check-performance-native'
 subprocess.run([*command, '-o', str(binary)], check=True, cwd=root)
-subprocess.run([str(binary)], check=True, cwd=root)
+if not options.ui_only:
+    subprocess.run([str(binary)], check=True, cwd=root)
 subprocess.run([str(binary), '--ui'], check=True, cwd=root)

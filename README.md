@@ -24,7 +24,7 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
-## Four-track Performance sequencer — 0.0.9
+## Four-track Performance sequencer — 0.0.10
 
 The Performance module has four independent tracks, eight 64-step patterns per
 track, quantized pattern launch and a sixteen-row phrase chain. Each track has
@@ -39,9 +39,11 @@ opens the arrangement. **Performance / Clockwork garden** is the second starter.
 The earlier Pattern / Motion, Euclidean and Stage modules remain available.
 
 Always open [Optisynth](app/Builds/MacOSX/build/Release/Optisynth.app).
-That stable delivery location contains 0.0.9. All 251 modular checks pass normally
+That stable delivery location contains 0.0.10, which disables accidental wheel
+edits across the standalone controls. All 251 modular checks passed normally
 and under ASan/UBSan; full-bank/stereo recall, native component interactions and
-four visual captures pass. Desktop window launch and listening remain unverified
+four visual captures pass. The scroll correction has native wheel-event checks;
+unchanged DSP checks were not repeated. Desktop window launch and listening remain unverified
 in the current execution context. The adjacent `Optisynth-build.json` records the
 version, binary hash, checks and previous-app archive. See [STATUS](docs/project/STATUS.md).
 

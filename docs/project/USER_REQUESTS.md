@@ -571,3 +571,18 @@ feature delivery does not substitute for Yan's assessment of the musical result.
 ```text
 is there anything thet awould prevent us from taking a modular approach to these circuits, allowing mix and match? performance? latency?
 ```
+
+## 55 — Scrolling changes faders; result still disappointing; commit discipline
+
+```text
+scrolling causes faders to move.
+Overall its not an exciting result. Please COMMIT YOUR WORK YOU SLOPPY BASTARD
+```
+
+19 November 2026: disable wheel-based parameter changes throughout the standalone
+so navigating the rack does not edit its sound. Preserve deliberate dragging and
+numeric entry. The product-level dissatisfaction remains open: the four-track
+feature delivery has not met the user's musical expectations. Do not mark that
+resolved by this interaction fix. Prior implementation was committed as f92326f;
+current main 4126d4d also includes the concurrent research. Bundle this correction,
+verification and feedback record in a scoped commit and retry the authorised push.

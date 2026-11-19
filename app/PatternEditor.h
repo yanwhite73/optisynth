@@ -12,7 +12,7 @@ class PatternEditor final:public juce::Component,private juce::Timer {
     struct Numeric:juce::Component {
         juce::Label name;juce::Slider value;
         Numeric(){addAndMakeVisible(name);addAndMakeVisible(value);name.setFont(juce::Font(juce::FontOptions(10)));name.setColour(juce::Label::textColourId,juce::Colour(0xffd4cebc));
-            value.setSliderStyle(juce::Slider::LinearHorizontal);value.setTextBoxStyle(juce::Slider::TextBoxRight,false,45,22);value.setColour(juce::Slider::trackColourId,juce::Colour(0xff76c8bb));}
+            value.setScrollWheelEnabled(false);value.setSliderStyle(juce::Slider::LinearHorizontal);value.setTextBoxStyle(juce::Slider::TextBoxRight,false,45,22);value.setColour(juce::Slider::trackColourId,juce::Colour(0xff76c8bb));}
         void resized()override{name.setBounds(0,0,getWidth(),19);value.setBounds(0,19,getWidth(),26);}
     };
 public:

@@ -10,7 +10,7 @@ public:
     std::function<void(int)> removeRoute;
     ModulationEditor(){
         setSize(960,560);for(auto* c:std::initializer_list<juce::Component*>{&source,&target,&amount,&add,&help,&viewport})addAndMakeVisible(c);
-        viewport.setViewedComponent(&rows,false);amount.setRange(-1,1,.001);amount.setValue(.15);amount.setTextBoxStyle(Slider::TextBoxRight,false,65,24);
+        viewport.setViewedComponent(&rows,false);amount.setScrollWheelEnabled(false);amount.setRange(-1,1,.001);amount.setValue(.15);amount.setTextBoxStyle(Slider::TextBoxRight,false,65,24);
         add.onClick=[this]{int s=source.getSelectedId()-1,t=target.getSelectedId()-1;if(s>=0&&t>=0&&addRoute)addRoute(sources[size_t(s)],targets[size_t(t)],float(amount.getValue()));};
         help.setText("Depth adds movement around the saved knob setting. Spectral sources follow its newest sounding voice.",dontSendNotification);
         help.setColour(Label::textColourId,paper);help.setFont(font(13));
@@ -41,7 +41,7 @@ public:
             const auto& m=d.graph.modulations[i];auto row=std::make_unique<Row>();std::string targetName=m.destination.port;
             for(const auto& n:d.graph.nodes)if(n.id==m.destination.node)for(const auto& p:panel(n.type).parameters)if(p.id==m.destination.port)targetName=p.label;
             row->label.setText(m.source.node+" / "+m.source.port+"  >  "+m.destination.node+" / "+targetName,dontSendNotification);
-            row->label.setColour(Label::textColourId,paper);row->label.setFont(font(13));row->depth.setRange(-1,1,.001);row->depth.setValue(m.amount);row->depth.setTextBoxStyle(Slider::TextBoxRight,false,65,24);
+            row->label.setColour(Label::textColourId,paper);row->label.setFont(font(13));row->depth.setScrollWheelEnabled(false);row->depth.setRange(-1,1,.001);row->depth.setValue(m.amount);row->depth.setTextBoxStyle(Slider::TextBoxRight,false,65,24);
             row->depth.onValueChange=[this,index=int(i),p=row.get()]{if(setDepth)setDepth(index,float(p->depth.getValue()));};
             row->remove.onClick=[this,index=int(i)]{if(removeRoute)removeRoute(index);};
             rows.addAndMakeVisible(row->label);rows.addAndMakeVisible(row->depth);rows.addAndMakeVisible(row->remove);controls.push_back(std::move(row));

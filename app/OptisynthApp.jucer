@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<JUCERPROJECT id="OptiApp2" name="Optisynth" projectType="guiapp" version="0.0.9" companyName="Yan White" bundleIdentifier="com.yanwhite.optisynth.app" useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1" defines="TEST=1" headerPath="/Users/yanwhite/Documents/Music docs/Code/optisynth/third_party/mutable">
+<JUCERPROJECT id="OptiApp2" name="Optisynth" projectType="guiapp" version="0.0.10" companyName="Yan White" bundleIdentifier="com.yanwhite.optisynth.app" useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1" defines="TEST=1" headerPath="/Users/yanwhite/Documents/Music docs/Code/optisynth/third_party/mutable">
   <MAINGROUP id="optiappsrc" name="Optisynth">
     <FILE id="optifile0" name="Main.cpp" compile="1" resource="0" file="../app/Main.cpp" />
     <FILE id="optifile1" name="graph.cpp" compile="1" resource="0" file="../src/modular/graph.cpp" />

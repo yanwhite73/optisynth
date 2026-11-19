@@ -11,7 +11,7 @@ class PerformanceEditor final : public juce::Component, private juce::Timer {
         juce::Label label;
         juce::Slider slider;
         Field(){addAndMakeVisible(label);addAndMakeVisible(slider);label.setFont(juce::Font(juce::FontOptions(10)));
-            label.setColour(juce::Label::textColourId,juce::Colour(0xffb8c7c3));slider.setSliderStyle(juce::Slider::LinearHorizontal);
+            label.setColour(juce::Label::textColourId,juce::Colour(0xffb8c7c3));slider.setScrollWheelEnabled(false);slider.setSliderStyle(juce::Slider::LinearHorizontal);
             slider.setTextBoxStyle(juce::Slider::TextBoxRight,false,45,22);slider.setColour(juce::Slider::trackColourId,juce::Colour(0xff80d2bf));}
         void resized()override{label.setBounds(0,0,getWidth(),18);slider.setBounds(0,18,getWidth(),25);}
     };
@@ -267,7 +267,7 @@ private:
 };
 class PerformanceWindow final : public juce::DocumentWindow {
 public:
-    explicit PerformanceWindow(PerformanceEditor* editor):DocumentWindow("Optisynth 0.0.9 / Performance sequencer",juce::Colour(0xff172326),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1260,900);}
+    explicit PerformanceWindow(PerformanceEditor* editor):DocumentWindow("Optisynth 0.0.10 / Performance sequencer",juce::Colour(0xff172326),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1260,900);}
     void closeButtonPressed()override{setVisible(false);}
 };
 class PerformanceLauncher final : public juce::Component,private juce::Timer {

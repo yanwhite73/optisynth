@@ -1,11 +1,26 @@
 #include "../app/PatchIO.h"
 #include "../app/PerformanceEditor.h"
+#include "../app/ModulationEditor.h"
 #include <cstdio>
 #include <fstream>
 
 namespace {
 using namespace optisynth;
 void require(bool ok,const char* message){if(!ok)throw std::runtime_error(message);}
+int checkScrollNavigation(juce::Component& component){
+    struct WheelSink:juce::Component {int received=0;void mouseWheelMove(const juce::MouseEvent&,const juce::MouseWheelDetails&)override{++received;}} sink;
+    sink.addAndMakeVisible(component);int sliders=0;
+    std::function<void(juce::Component&)> visit=[&](juce::Component& c){
+        if(auto* slider=dynamic_cast<juce::Slider*>(&c)){
+            ++sliders;const auto before=slider->getValue();const auto now=juce::Time::getCurrentTime();
+            const juce::MouseEvent event(juce::Desktop::getInstance().getMainMouseSource(),{10,10},{},0,0,0,0,0,slider,slider,now,{10,10},now,0,false);
+            for(int direction=0;direction<4;++direction){juce::MouseWheelDetails wheel{};wheel.deltaX=direction<2?(direction?-.3f:.3f):0;wheel.deltaY=direction>=2?(direction==2?-.3f:.3f):0;wheel.isSmooth=true;
+                const int forwarded=sink.received;slider->mouseWheelMove(event,wheel);
+                require(slider->getValue()==before,"Scrolling changed a parameter");require(sink.received==forwarded+1,"Slider swallowed navigation scroll");}
+        }
+        for(auto* child:c.getChildren())visit(*child);
+    };visit(component);sink.removeChildComponent(&component);return sliders;
+}
 std::vector<float> render(const RackDocument& document,int seconds){
     Runtime runtime(document.graph,{},document.spectral);runtime.clock.tempo(document.tempo);runtime.clock.play(true);
     std::vector<float> left(48000*seconds),right(left.size());runtime.render(left.data(),right.data(),int(left.size()),{});left.insert(left.end(),right.begin(),right.end());return left;
@@ -31,6 +46,10 @@ void editorChecks(){
     std::puts("Construct native performance editor without a window peer");std::fflush(stdout);
     auto data=defaultPerformance();auto module=makePerformance({"sequence","seq.performance",{},std::make_shared<const PerformanceData>(data)});
     optiui::PerformanceEditor editor(data,module->controls,{});int publications=0;
+    int wheelSliders=checkScrollNavigation(editor);
+    {ModulePanel card("all");Values values;for(const auto& p:panels()){card.show(p.type,values,{});wheelSliders+=checkScrollNavigation(card);}}
+    {ModulationEditor matrix;matrix.refresh(starterDocument(13,.25f));wheelSliders+=checkScrollNavigation(matrix);}
+    std::printf("PASS scroll navigation: %d native sliders preserve values and forward four wheel directions\n",wheelSliders);
     editor.dataChanged=[&](const PerformanceData& changed){data=changed;module->controls->performance->publish(changed);++publications;};
     editor.selectPattern(0,1);editor.selectStep(3);editor.pitchControl().setValue(83,juce::sendNotificationSync);
     require(data.tracks[0].patterns[1].steps[3].pitch==83&&publications==1,"Editor gesture does not reach saved bank");require(module->controls->performance->playing[0]==0,"Selecting/editing B launched it");

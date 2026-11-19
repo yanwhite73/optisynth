@@ -1,6 +1,21 @@
 # Optisynth status — 19 November 2026
 
-## Current delivery — request 54, Performance sequencer, 0.0.9
+## Current correction — request 55, 0.0.10
+
+Scroll gestures no longer edit standalone faders/knobs: this covers module panels,
+the three sequencer editors, modulation depth rows, tempo and output level.
+Deliberate drag/numeric entry remains available. The stable delivery path is
+unchanged. Native wheel-event checks cover value preservation and propagation to
+the containing view; full desktop interaction is still a separate check.
+All 758 tested sliders pass in four wheel directions; the existing native editor
+interaction checks also pass. [0.0.10 delivery receipt](../verification/scroll_fix_build_receipt.json).
+
+Yan's assessment of 0.0.9 is “Overall its not an exciting result.” The broader
+sophisticated-sequencer request remains open; this fix does not resolve it.
+The 0.0.9 implementation was already committed as f92326f and is now verified as
+an ancestor of remote main 4126d4d. This correction is a separate bundled commit.
+
+## Previous delivery — request 54, Performance sequencer, 0.0.9
 
 The stable app is **`app/Builds/MacOSX/build/Release/Optisynth.app`**. It now
 contains the signed 0.0.9 build and opens the Four currents performance rack and

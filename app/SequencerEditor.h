@@ -11,7 +11,7 @@ class SequencerEditor final:public juce::Component,private juce::Timer {
     struct Field:juce::Component {
         juce::Label label;juce::Slider slider;
         Field(){addAndMakeVisible(label);addAndMakeVisible(slider);label.setFont(juce::Font(juce::FontOptions(11)));label.setColour(juce::Label::textColourId,juce::Colour(0xff202224));
-            slider.setSliderStyle(juce::Slider::LinearHorizontal);slider.setTextBoxStyle(juce::Slider::TextBoxBelow,false,72,20);
+            slider.setScrollWheelEnabled(false);slider.setSliderStyle(juce::Slider::LinearHorizontal);slider.setTextBoxStyle(juce::Slider::TextBoxBelow,false,72,20);
             slider.setColour(juce::Slider::textBoxTextColourId,juce::Colour(0xff202224));slider.setColour(juce::Slider::textBoxBackgroundColourId,juce::Colours::transparentBlack);slider.setColour(juce::Slider::textBoxOutlineColourId,juce::Colours::transparentBlack);
             slider.setColour(juce::Slider::trackColourId,juce::Colour(0xff46595b));}
         void resized()override{label.setBounds(0,0,getWidth(),18);slider.setBounds(0,18,getWidth(),getHeight()-18);}

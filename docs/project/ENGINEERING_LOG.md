@@ -741,3 +741,35 @@ SHA-256 sidecar, 234 files / 4,788,710 uncompressed bytes. Includes source, patc
 documentation and the four native UI captures; excludes build products and
 upstream reference downloads. This bookkeeping paragraph and the UI index link
 postdate that snapshot and are retained in the bundled Git commit.
+
+## Request 55: scrolling changed faders — 19 November 2026
+
+Yan reported scrolling changes faders, said the result is still not exciting,
+and required a commit. The complete feedback is recorded verbatim. The previous
+sequencer implementation was committed as f92326f; this session verified remote
+main 4126d4d contains it. The earlier push failure was real, but the source is now
+on the remote through the intervening session's push.
+
+Cause: standalone sliders retained JUCE's enabled-by-default wheel editing.
+Navigation could therefore change parameters under the pointer and alter the
+sound during audition. JUCE Slider::mouseWheelMove forwards to its component
+parent when setScrollWheelEnabled(false) is used. This documented/source-checked
+path now applies to all eight slider construction paths: module controls,
+Performance/Pattern/basic-sequencer fields, matrix amount/row depth and rack
+tempo/gain. Deliberate drag and numeric edits retain their existing handlers.
+
+Prevention: AGENTS requires this navigation behaviour for new controls. Native
+checks deliver wheel events in four directions to actual slider components and
+assert both unchanged values and forwarding to the containing view. Existing
+editor value-entry/undo/launch checks run alongside them; unchanged DSP renders
+are skipped using the checker's explicit --ui-only option. Version 0.0.10 uses
+the existing stable delivery helper and archives the previous bundle.
+
+The musical/product complaint remains unresolved. Do not interpret a wheel fix,
+commit or test count as acceptance of the sequencer's depth or appeal.
+
+Result: 758 native sliders passed four wheel directions without changing values
+or swallowing navigation. Existing native editor interactions pass. The signed
+0.0.10 app is delivered at the established Release location, with build/source/
+delivery evidence in `../verification/scroll_fix_build_receipt.json`. No user's
+running app or Live session was stopped, restarted or driven.

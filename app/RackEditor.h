@@ -40,11 +40,11 @@ public:
         audio.onClick=[this]{toggleAudio();};silence.onClick=[this]{stopAudio();};
         play.onClick=[this]{player.playing.store(!player.playing.load());updateTransport();};
         restart.onClick=[this]{player.restart();};restart.setTooltip("Return all sequencers to beat zero; keep current play/stop state");
-        tempo.setSliderStyle(Slider::LinearHorizontal);tempo.setRange(20,300,.1);tempo.setValue(120);
+        tempo.setScrollWheelEnabled(false);tempo.setSliderStyle(Slider::LinearHorizontal);tempo.setRange(20,300,.1);tempo.setValue(120);
         tempo.setTextBoxStyle(Slider::TextBoxRight,false,82,24);tempo.setTextValueSuffix(" BPM");
         tempo.onValueChange=[this]{cancelLoading();document.tempo=float(tempo.getValue());player.tempo.store(document.tempo);};
         position.setFont(font(12));position.setColour(Label::textColourId,paper);
-        gain.setSliderStyle(Slider::LinearHorizontal);gain.setRange(0,1,.001);gain.setValue(document.gain);
+        gain.setScrollWheelEnabled(false);gain.setSliderStyle(Slider::LinearHorizontal);gain.setRange(0,1,.001);gain.setValue(document.gain);
         gain.setTextBoxStyle(Slider::TextBoxRight,false,55,24);gain.setColour(Slider::trackColourId,teal);
         gain.onValueChange=[this]{cancelLoading();document.gain=float(gain.getValue());player.gain.store(document.gain);};
         keyboard.setAvailableRange(24,96);keyboard.setLowestVisibleKey(24);keyboard.setOctaveForMiddleC(4);keyboard.clearKeyMappings();
@@ -70,7 +70,7 @@ public:
     }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.9",25,53,300,20,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.10",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
         g.setColour(paper);g.setFont(font(12));
         g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
