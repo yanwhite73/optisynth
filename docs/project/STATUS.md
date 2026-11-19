@@ -1,5 +1,24 @@
 # Optisynth status — 19 November 2026
 
+## 0.0.14 analog pad voice qualification — requests 57–58
+
+Polyphonic voice groups, the analog VCO, OB filter, CEM-style envelope, OTA VCA,
+Wheel / bend, stereo reverb, chorus, delay and phaser modules, and hardware MIDI
+input. Contract: [VOICE_GROUPS.md](../architecture/VOICE_GROUPS.md). Starters:
+**Pad / OB swell (8 voices)** and **Pad / Prophet 4-pole (8 voices)**. This build
+fixes the OB filter, VCO and envelope panels, which earlier builds left
+partly unplaced, and matches the Prophet starter's level to the OB swell's.
+
+Qualified offline:
+- **Checks:** 1,194 core, 28 graph, 307 modular (normal and ASan/UBSan) and 47
+  timing checks, plus the importer and renderer tests.
+- **Native:** UI checks plus pad starter load, display, recall and level checks.
+- **CPU:** 8-voice pad with chorus and reverb at 6.5% of one core, with no
+  render allocation.
+
+Chord renders for listening: `build/sequencer-ui-review/pad-ob-swell.wav` and
+`pad-prophet.wav`. No audio device was opened. Listening is Yan's.
+
 ## 0.0.13 sound selection — request 60
 
 **Keep sequence** is on by default. Selecting an instrument starter carries the

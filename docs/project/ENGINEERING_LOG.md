@@ -866,3 +866,24 @@ The old delivery helper renamed the previous .app into the archive and installed
 a new directory with the copied bundle timestamp. Updates now copy the backup,
 exchange the signed Contents directories atomically, and keep the installed .app
 directory identity. The helper refreshes its timestamp and registration.
+
+## Requests 57–58: polyphonic analog pad voice — 19 November 2026 (Claude session)
+
+Built on branch `pad-voice` in a worktree, then fast-forwarded into `main`. The
+three WIP engine/app commits were pushed by the concurrent session as part of
+its 0.0.12/0.0.13 deliveries, before native qualification.
+
+Native qualification then found that the OB filter's extra knobs, VCO and
+envelope had no layout: `analog.filter` fell into the generic filter-family
+branch. Dedicated layouts were added. The Prophet starter peaked about 10 dB
+below the OB swell; its voice-mixer level was raised.
+
+Lesson: a module's family selects a shared panel layout. New modules need the
+existing layout bounds check run before delivery. Pushing WIP commits from a
+shared `main` lets another session ship them unqualified, so qualify before
+fast-forwarding.
+
+The first 0.0.11 build's `previous_app` was null. Xcode removed the 0.0.10
+bundle as a stale output before the delivery helper could archive it; 0.0.10 is
+rebuildable from 82d32f9. The concurrent session has since changed delivery to
+keep the installed app in place (5087d57).

@@ -285,6 +285,35 @@ public:
         }
         require(directory.getChildFile("motion-check.txt").replaceWithText("PASS: large editor edits; undo/redo; page clipboard; generator locks; loop duplication; completed atomic transactions; both CV routes; two stereo FX starters with identical state/audio recall; six native captures. No audio device opened.\n"),"Write Motion receipt");
         require(directory.getChildFile("sequencer-check.txt").replaceWithText("PASS: three contextual native editors; selected-step rack/focus edits reach DSP; full sequence and tempo recall with identical audio; v3 compatibility; invalid tempo rejection; Player clock and stop; seven sequencer captures. No audio device opened.\n"),"Write sequencer receipt");
+        // Pad starters (requests 57-58): voice group, analog modules and FX; offline chord renders.
+        for(int pad=0;pad<2;++pad){
+            require(commit(starterDocument(15+pad,.25f),"filter"),"Pad starter loads");drain();
+            require(hardware.find("voices")&&hardware.find("filter")&&hardware.find("reverb"),"Pad modules shown in the rack");
+            const String name=pad==0?"pad-ob-swell":"pad-prophet";
+            capture(name+".png");
+            auto renderPad=[](const RackDocument& d){
+                Runtime r(d.graph);
+                const int frames=48000*12,release=48000*8;
+                std::vector<float> l(static_cast<size_t>(frames)),rr(static_cast<size_t>(frames));
+                NoteEventBlock on,off;on.begin(quantum);off.begin(quantum);
+                for(int k:{48,55,60,64,67}){on.push({0,1,uint64_t(k)+1,NoteEventKind::On,k,.7f});off.push({0,1,uint64_t(k)+1,NoteEventKind::Off,k,0});}
+                for(int i=0;i<frames;i+=quantum)r.render(l.data()+i,rr.data()+i,quantum,Note{},nullptr,i==0?&on:i==release?&off:nullptr);
+                l.insert(l.end(),rr.begin(),rr.end());return l;};
+            const auto sound=renderPad(document);
+            require(sound==renderPad(readRack(rackJSON(document))),"Pad state and stereo audio recall");
+            float peak=0;for(float x:sound)peak=std::max(peak,std::abs(x));
+            std::fprintf(stderr,"Pad %d raw peak %.3f, at app gain 0.25: %.3f\n",pad,peak,peak*.25f);
+            require(peak>.01f&&peak*document.gain<.95f,"Pad chord audible without clipping at the app output gain");
+            const int frames=int(sound.size()/2);
+            AudioBuffer<float> buffer(2,frames);
+            for(int i=0;i<frames;++i){buffer.setSample(0,i,sound[size_t(i)]);buffer.setSample(1,i,sound[size_t(frames+i)]);}
+            const auto wav=directory.getChildFile(name+".wav");wav.deleteFile();
+            auto* stream=wav.createOutputStream().release();WavAudioFormat format;
+            std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream,48000,2,24,{},0));
+            if(!writer)delete stream;
+            require(writer&&writer->writeFromAudioSampleBuffer(buffer,0,frames),"Write pad WAV");
+        }
+        require(directory.getChildFile("pad-check.txt").replaceWithText("PASS: both 8-voice pad starters load and display; five-note chord held 8 s then released; identical stereo audio after JSON recall; audible without clipping; WAVs written. No audio device opened.\n"),"Write pad receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:

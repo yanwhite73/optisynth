@@ -418,7 +418,7 @@ GraphSpec padPatch(int model) {
         {"amp_env", "analog.env", ob ? std::vector<std::pair<std::string,float>>{{"attack", 2.2f}, {"decay", 3}, {"sustain", .9f}, {"release", 8}, {"velocity", .3f}}
                                      : std::vector<std::pair<std::string,float>>{{"attack", .7f}, {"decay", 2}, {"sustain", .85f}, {"release", 5}, {"velocity", .4f}}},
         {"vca", "analog.vca", {}},
-        {"voices", "voice.mix", {{"spread", ob ? .85f : .55f}, {"level", .42f}}},
+        {"voices", "voice.mix", {{"spread", ob ? .85f : .55f}, {"level", ob ? .42f : 1.25f}}},  // matched peaks: 4-pole path is ~10 dB quieter
         {"wheel", "mod.wheel", {}},
         {"breath", "mod.lfo", {{"rate", ob ? .06f : .11f}, {"depth", 1}}},
         {ob ? "chorus" : "delay", ob ? "fx.chorus" : "fx.delay", ob ? std::vector<std::pair<std::string,float>>{{"mix", .3f}, {"rate_hz", .25f}}

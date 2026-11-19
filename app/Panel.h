@@ -285,6 +285,17 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             put("attack",0,0,.34f,.39f);put("hold",.34f,0,.34f,.39f);put("decay",0,.40f,.34f,.39f);put("release",.34f,.40f,.34f,.39f);
             put("sustain",.70f,0,.28f,.58f);put("fade",.70f,.59f,.28f,.21f);
             put("attack_curve",0,.80f,.33f,.20f);put("decay_curve",.33f,.80f,.33f,.20f);put("release_curve",.66f,.80f,.33f,.20f);
+        }else if(current=="analog.filter"){
+            put("cutoff_hz",0,0,.5f,.4f);put("resonance",.5f,0,.5f,.4f);
+            put("mode",0,.4f,.34f,.3f);put("env_octaves",.34f,.4f,.33f,.3f);put("key_track",.67f,.4f,.33f,.3f);
+            put("drive",0,.7f,.25f,.3f);put("fm_depth",.25f,.7f,.25f,.3f);put("band",.5f,.7f,.25f,.3f);put("poles",.75f,.7f,.25f,.3f);
+        }else if(current=="analog.vco"){
+            put("transpose",0,0,.34f,.3f);put("fine",.34f,0,.33f,.3f);put("drift",.67f,0,.33f,.3f);
+            put("saw",0,.3f,.34f,.3f);put("pulse",.34f,.3f,.33f,.3f);put("triangle",.67f,.3f,.33f,.3f);
+            put("pulse_width",0,.6f,.25f,.4f);put("pwm_depth",.25f,.6f,.25f,.4f);put("fm_depth",.5f,.6f,.25f,.4f);put("level",.75f,.6f,.25f,.4f);
+        }else if(current=="analog.env"){
+            put("attack",0,0,.5f,.5f);put("decay",.5f,0,.5f,.5f);
+            put("sustain",0,.5f,.34f,.5f);put("release",.34f,.5f,.33f,.5f);put("velocity",.67f,.5f,.33f,.5f);
         }else if(family=="filter"){
             put("cutoff_hz",.17f,0,.66f,.49f);put("resonance",0,.50f,.5f,.34f);
             if(current.rfind("mutable.",0)==0)put("env_octaves",.5f,.50f,.5f,.34f);
