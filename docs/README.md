@@ -6,6 +6,8 @@ and the [engineering log](project/ENGINEERING_LOG.md).
 Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
 Current sequencer implementation: [Pattern, Euclidean and Stage contract](architecture/FIRST_SEQUENCERS.md).
+Sound goals (request 44): [ambient Berlin School and analog pads](project/SOUND_GOALS.md);
+[project review, 19 November](project/PROJECT_REVIEW_20261119.md).
 
 | Folder | Contents | Start here |
 | --- | --- | --- |

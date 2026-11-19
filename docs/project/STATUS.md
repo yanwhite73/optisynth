@@ -31,6 +31,26 @@ monophonic. Spectral's internal arp retains its own tempo setting; shared beat
 synchronisation is not implemented. This is the standalone, not a new modular
 VST3 build. No Live action or installation occurred.
 
+## Request 44 — project review and new sound goals (19 November)
+
+New design targets: Robert Rich / Steve Roach ambient, psychedelic Berlin School
+sequencing; organic, slowly evolving sounds; lush Oberheim / Prophet-style pad
+swells. Sourced goals and requirements: [SOUND_GOALS.md](SOUND_GOALS.md). Review
+and proposed order: [PROJECT_REVIEW_20261119.md](PROJECT_REVIEW_20261119.md).
+
+Proposed next order (awaiting Yan's confirmation; it does not replace the list
+above until confirmed):
+1. Rack modules for the existing reverb, delay, chorus and phaser effects, plus
+   Noise, Drift/Random and Slew modules and longer envelopes.
+2. Hardware MIDI input.
+3. Voice groups and polyphony.
+4. Analog pad voice: cents detune, 4-pole and SEM-style filters, poly-mod.
+5. Tuning tables.
+6. Berlin School sequencer features.
+
+Open questions: which recordings define the target; how many pad voices.
+Documentation only: no code changed, nothing built or tested for this request.
+
 Request 40: documentation is sorted into project, architecture, UI, research,
 verification and legacy folders. [Documentation index](../README.md) provides the
 entry points; [UI research](../ui/README.md) links the collected interface images.

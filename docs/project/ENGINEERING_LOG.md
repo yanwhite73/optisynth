@@ -591,3 +591,32 @@ files, 2,368,815 bytes, SHA-256
 `215531c9bfc214a4740e549ddbb3ebaca0ef176a025e5e05478be4ca7aa054b7`.
 This receipt paragraph postdates the archive. All owned build/test/backup jobs
 exited normally; no temporary app or service is left running.
+
+## Request 44: project review and ambient / analog-pad goals — 19 November 2026
+
+Claude session, running alongside the Codex session that delivered request 43
+(`73ac3cc`). Request 44 was recorded verbatim on arrival. It asked for a project
+review and added these goals: Rich / Roach ambient, psychedelic Berlin School
+sequencing; organic, evolving sounds; Oberheim / Prophet-style pad swells.
+
+Artist evidence checked online and cited in `SOUND_GOALS.md`:
+- Roach calls the Xpander his "life time instrument" and credits its matrix
+  patching.
+- Rich calls just intonation "a basic part of my music" and says the Prophet-5
+  was his primary keyboard synth for decades.
+- Secondary claims are marked as such. Roach's use of a Prophet-5 was not
+  established.
+
+The review read the source statically. Main findings:
+- The rack is monophonic and has no MIDI input.
+- 13 of our own effects (reverb up to 50 s, delays, chorus, phaser) exist in
+  `src/core/effects.cpp`, but only the filter is exposed as a rack module.
+- Matrix and filter modulation is sampled once per 24-frame block.
+- There are no random or drift modulators, no noise source and no tuning
+  tables. Envelopes stop at 8 s attack and 12 s release.
+- Output protection is a hard ±0.95 clamp.
+
+A proposed order of work is in `PROJECT_REVIEW_20261119.md` and awaits Yan's
+confirmation. No tests or builds were run: the Codex session held the shared
+`build/` directory and the heavy-workload slots were full. Documentation only;
+no code changes.

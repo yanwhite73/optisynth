@@ -380,3 +380,20 @@ a coherent first set, build the standalone app and verify it offline/native befo
 handoff. This supersedes the earlier research-only pause; keep later specialist
 models and the broader polyphony/VST3 roadmap explicit rather than implying them
 complete. Preserve regular commits/pushes, backups and the no-Live-driving rule.
+
+## 44 — Project review; ambient Berlin School and lush analog swell goals
+
+```text
+review this project.
+Some additional goals to be captured:
+modular sequencing styles Im aiming at include robert rich and steve roach ambient psychedelic berlin school, organic detailed evolving sounds
+also some of the lush analog synth swells that they might get using oberheim or Prophet style synths
+```
+
+19 November 2026 (Claude session, concurrent with the Codex session building
+request 43). Two parts. (1) Review the project: architecture, code, docs and
+process against the stated goals. (2) Record new aesthetic goals as design
+targets: Robert Rich / Steve Roach-style ambient, psychedelic Berlin School
+sequencing; organic, detailed, slowly evolving sounds; lush Oberheim / Prophet-
+style analog pads and swells. These steer sequencer, modulation, voice and
+effects priorities; they do not cancel request 43's sequencer build.
