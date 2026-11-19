@@ -647,3 +647,25 @@ Corrections made while checking:
   KVR thread is cited instead.
 - GitHub does not detect a licence for Odin 2 or p600fw; their GPL-3 status
   comes from the project pages.
+
+## Request 53: inconsistent app delivery — 19 November 2026
+
+Failure: after native build-tool startup problems, Codex compiled 0.0.8 into
+`build/motion-native` and handed that temporary path to Yan while the established
+Release app remained 0.0.7. The earlier version confusion (request 45) already
+showed why this was unacceptable. Cost: Yan had to track changing links and
+versions and correct the workflow again. The environment failures did not require
+changing the user-facing location; that was an agent delivery error.
+
+Correction: retain the existing Release app location for every handoff. Normal
+builds now stage separately and use `tools/deliver_app.py`; fallback builds must
+use the same helper. It checks signatures and copied executable identity before
+moving the previous app to a dated archive, then writes an adjacent version/hash/
+qualification receipt. The 0.0.8 signed preview is now at the stable location;
+0.0.7 is archived. No running app was launched, quit or restarted. Native UI
+qualification remains pending; moving the bundle does not change that status.
+
+Prevention: AGENTS now specifies the sole delivery path, shared helper, rollback
+and truthful test-status rules. README and STATUS use that path. User corrections
+are recorded verbatim on arrival (including “DISCIPLINE” and the logging question),
+but the request is fulfilled by the workflow correction, not merely its log entry.

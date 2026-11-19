@@ -1,5 +1,19 @@
 # Optisynth status — 19 November 2026
 
+## Request 53 — Stable app delivery
+
+Always open `app/Builds/MacOSX/build/Release/Optisynth.app`. It now contains the
+**0.0.8 preview**, with the same signed binary as the Motion build receipt.
+`Optisynth-build.json` beside it records version, hash and the pending native UI
+qualification. The previous 0.0.7 app is preserved under
+`build/app-archive/20261119T141532.763540Z-0.0.7/Optisynth.app`.
+
+The normal build now compiles into `build/app-candidate`, then uses the shared
+delivery helper. Fallback builds must use that helper too. It verifies the source
+and copied signatures/hash, archives the previous app and preserves it on a
+copy failure. No app was launched or stopped for this correction. See the request
+53 failure/prevention entry in ENGINEERING_LOG and the enforced AGENTS guidance.
+
 ## Request 49 — Pattern / Motion, standalone 0.0.8
 
 Implemented: a 64-step Pattern engine and large native performance editor with
@@ -17,8 +31,8 @@ and reproduce exactly after JSON save/reload. Presets are in `patches/motion-*`.
 
 Native compilation succeeded through direct Clang using the existing Xcode
 configuration and unchanged JUCE module objects. All project C++ sources were
-rebuilt and the separate app was ad-hoc signed. App: `build/motion-native/Optisynth.app`.
-The previous app in `app/Builds/MacOSX/build/Release` remains 0.0.7.
+rebuilt and the app was ad-hoc signed. Its internal build location was
+`build/motion-native`; request 53 delivered it to the stable app location above.
 
 **Outstanding:** native runtime/UI checks and visual inspection. The new app and
 Projucer both abort during startup with no application log. Xcode also fails
@@ -27,7 +41,7 @@ context cannot resolve the macOS account name and cannot access logd. This is an
 environment obstacle, not proof that the new interface is correct. No screenshots
 or native editor PASS receipt were produced. Next: once desktop services are
 available, run the new app's `--snapshot` checks, inspect all Motion captures,
-correct any issues, then promote the qualified app to the normal release path.
+correct any issues, then update the delivery's qualification record.
 Launch Services also returned -10827 despite the executable being present,
 0755, arm64 and signature-valid. No audio device or Live session was opened.
 
@@ -41,7 +55,19 @@ local commit. Push to `origin/main` failed because `github.com` could not resolv
 from this execution context; retry the existing push when connectivity returns.
 A verified local snapshot is `../backups/optisynth/optisynth-source-20261119-134854.tar.gz`
 (215 files, 2,570,309 bytes; before JSON line-ending normalization). The normal
-release app remains intact. Native qualification and remote push are still open.
+0.0.7 app is archived intact. Native qualification and remote push are still open.
+
+Resume check (request 52, 19 November): `git ls-remote origin refs/heads/main`
+still fails DNS, including outside the sandbox. `scutil --dns` reports no DNS
+configuration; `launchctl print gui/501` fails with error 141, and account lookup
+still returns numeric UID 501. The native snapshot command was queued through the
+workload launcher for 60 seconds, then refused for host load above two tasks per
+CPU; the app did not start. Do not attribute that refusal to the app or rebuild
+unchanged code to address it. Next action remains native `--snapshot` qualification
+of the stable delivery app, visual review, then the authorised push and
+remote-head verification. Source commit `7c1f3c0` remains local-only as far as this
+session could verify at that point. Resume notes are included with request 53's
+delivery-workflow correction.
 
 ## Prior delivery — standalone 0.0.7 sequencers
 

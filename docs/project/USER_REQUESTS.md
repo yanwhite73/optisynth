@@ -498,3 +498,37 @@ modular checks pass normally and under ASan/UBSan, with exact stereo preset reca
 Native UI execution/visual checks remain blocked by desktop startup failures.
 The delivery commit bundles source, tests, presets and docs. See STATUS for the
 exact pending qualification; it is not closed merely because code compiles.
+
+## 52 — Resume Motion qualification and delivery
+
+```text
+codex resuem
+continue
+```
+
+19 November 2026: resume request 49 at native editor verification, then complete
+the source push. Keep the existing bundled implementation commit; preserve the
+concurrent classic-synth research. The supplied workspace Git discipline requires
+checking the actual remote head and reporting any remaining delivery blocker.
+
+## 53 — Consistent build delivery and agent discipline
+
+```text
+why is there no consistency in where you put the builds? I am seeing increasingly chaotic and sloppy practices from codex
+```
+
+```text
+DISCIPLINE
+```
+
+```text
+are you logging my feedback?
+```
+
+19 November 2026: correction accepted. The fallback Motion build was handed over
+from `build/motion-native` while the established release path still contained
+0.0.7. This made the user track changing paths and versions. Fix the delivery
+workflow, not just the wording: one stable user-facing app location, consistent
+build/promotion scripts, explicit version and qualification state, and an archived
+previous app. Capture feedback verbatim immediately and bundle the correction,
+verification and records together. Recording this request does not complete it.

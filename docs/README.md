@@ -3,6 +3,10 @@
 Start with [current status](project/STATUS.md), [user requests](project/USER_REQUESTS.md)
 and the [engineering log](project/ENGINEERING_LOG.md).
 
+App delivery uses one stable location; the workflow and request 53 correction are
+in [AGENTS](../AGENTS.md#build-delivery-discipline) and
+[the engineering log](project/ENGINEERING_LOG.md#request-53-inconsistent-app-delivery--19-november-2026).
+
 Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
 Current sequencer implementation: [Pattern, Euclidean and Stage contract](architecture/FIRST_SEQUENCERS.md).

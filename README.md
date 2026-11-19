@@ -32,10 +32,11 @@ drawing, undo/redo, clipboard and protected generation. Try **Motion / Night
 current** or **Motion / Glass tide**, then open the Pattern performance editor.
 [Controls and playback contract](docs/architecture/PATTERN_MOTION.md).
 
-The compiled preview is `build/motion-native/Optisynth.app`; the normal release
-path below still contains 0.0.7. Core tests and stereo preset recall pass. Native
-UI execution/visual qualification is pending because desktop startup fails in
-the current execution context; see [STATUS](docs/project/STATUS.md).
+Always open [Optisynth](app/Builds/MacOSX/build/Release/Optisynth.app).
+That stable delivery location now contains the 0.0.8 preview. Core tests and
+stereo preset recall pass; native UI execution/visual qualification remains
+pending. The adjacent `Optisynth-build.json` records the exact version, binary
+hash, test status and previous-app archive. See [STATUS](docs/project/STATUS.md).
 
 ## Current implementation
 
@@ -98,6 +99,12 @@ Mixer to combine audio and a VCA with an envelope to articulate continuous sourc
 Required inputs must be connected before a module can become part of the audible
 output. Unrouted modules remain editable without consuming DSP. Patches use
 `.optisynth` JSON files. No audio input or hardware MIDI port is opened.
+
+Builds compile in `build/app-candidate`. `tools/deliver_app.py` verifies and copies
+the result to the same app location above, preserving the previous app under
+`build/app-archive`. Fallback builds use this same delivery step. Temporary build
+folders are internal; handoffs always link the stable app. Delivery does not
+imply native UI qualification; the receipt states what was actually checked.
 
 For sequencing, choose **Pattern / melodic voice**, **Euclidean / modal percussion**
 or **Stage / pulsing voice**, then **Start audio** and **Play seq**. All three share

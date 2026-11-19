@@ -1,0 +1,9 @@
+{
+  "version": "0.0.8",
+  "binary_sha256": "0f989784c00414dc2b69292751a57bbad7c815092136b494ad29d9c5b4cccedb",
+  "delivered_utc": "20261119T141532.763540Z",
+  "app": "/Users/yanwhite/Documents/Music docs/Code/optisynth/app/Builds/MacOSX/build/Release/Optisynth.app",
+  "built_at": "/Users/yanwhite/Documents/Music docs/Code/optisynth/build/motion-native/Optisynth.app",
+  "qualification": "0.0.8 preview: 221 modular checks passed normally and under ASan/UBSan; both Motion presets passed stereo save/reload checks. Native UI execution and visual review remain unverified. See docs/verification/motion_build_receipt.json.",
+  "previous_app": "/Users/yanwhite/Documents/Music docs/Code/optisynth/build/app-archive/20261119T141532.763540Z-0.0.7/Optisynth.app"
+}
