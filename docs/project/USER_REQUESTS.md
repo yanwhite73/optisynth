@@ -697,3 +697,11 @@ Answers the 0.0.15 handoff question: load the installed Arturia instruments in a
 test tool to compare against Optisynth. Workspace rule: read their documentation
 and record what they control, write and open before the first load; offline
 rendering only, no audio/MIDI device, no Live.
+
+## 67 — Were the comparisons started from init patches?
+
+```text
+are you starting with init patches?
+```
+
+Correction: they were not. Arturia AUs load an "Untitled" state and expose only generic program-change presets, so init presets are converted from their preset files (tools/reference_render/arturia_preset.py) and applied before test overrides.

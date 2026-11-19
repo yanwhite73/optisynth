@@ -62,6 +62,11 @@ if command == "params" {
     print("")
     finish(engine)
 }
+if command == "presets" {
+    for p in au.factoryPresets ?? [] { print(p.number, p.name) }
+    print("current:", au.currentPreset?.name ?? "none", "| user presets supported:", au.supportsUserPresets)
+    finish(engine)
+}
 if command == "probe" {
     guard args.count >= 4, let p = parameters.first(where: { $0.displayName == args[3] }) else { fail("unknown parameter", 3) }
     for i in 0...20 {
