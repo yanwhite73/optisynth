@@ -110,18 +110,21 @@ public:
             controls->values[i].store(pair.second);values[i]=pair.second;
         }
     }
+    void wake() noexcept override { snap = true; }
     void update(const AudioBlock& b) noexcept {
         const float amount = -std::expm1(-b.frames/(48000.f*.005f));
+        const float rate_ = snap ? 1.f : amount; snap = false;
         for (std::size_t i=0;i<definition.parameters.size();++i) {
             const auto& p=definition.parameters[i];
             float target=b.parameters?b.parameters[i]:controls->values[i].load(std::memory_order_relaxed);
             if (!std::isfinite(target)) target=p.initial;
             target=std::clamp(target,p.minimum,p.maximum);
-            if(p.step>=1)values[i]=std::round(target);else values[i] += amount*(target-values[i]);
+            if(p.step>=1)values[i]=std::round(target);else values[i] += rate_*(target-values[i]);
         }
     }
     const Panel& definition;
     std::array<float,maxParameters> values{};
+    bool snap=false;
 };
 float noteFrequency(const AudioBlock& b,float transpose,bool useBend=false) {
     const float bend=useBend&&b.inputs&&b.inputs[0]?b.inputs[0][0]*48.f:0.f;

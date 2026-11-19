@@ -664,3 +664,25 @@ use one of my /Users/yanwhite/Documents/Art/2025/code\ based/optimystery/luckydi
 ```text
 hasnt updated. Dont be moving the build around
 ```
+
+## 64 — Continue the pad-voice "not done yet" list; learn from Arturia's engineering
+
+```text
+contonue with not done yet. Dont assume arturia is perfect either, but they may have done some clever stuff with latency and performance, quality levels, threading etc
+```
+
+Claude session. Remaining items from the 0.0.14 handoff: glide, unison, Xpander
+pole-mixing modes, Prophet poly-mod into oscillator pitch/PW, more than 8 voices,
+tuning tables, and comparison with references. Research how Arturia (and others)
+handle quality levels, threading, latency and CPU, as evidence rather than as a
+standard to copy.
+
+## 65 — Learn from the Wavestate executable captured by Optistate
+
+```text
+one thing that might be useful, although a different style of synth, is an exe version of wavestate that was copied from acessing the hardware in optistate. It might tell us something about architecture or efficient coding styles
+```
+
+Study only: inspect the captured binary statically for architecture and
+efficiency lessons (threading, block sizes, voice handling, SIMD). Do not run it
+or copy its code.

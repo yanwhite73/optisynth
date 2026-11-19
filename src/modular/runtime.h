@@ -10,12 +10,13 @@ namespace optisynth {
 class PerformanceExchange;
 struct ReferenceSequenceState;
 class VoiceMixer;
-constexpr int quantum = 24, maxParameters = 768, maximumVoices = 8;
+constexpr int quantum = 24, maxParameters = 768, maximumVoices = 16;
 struct Parameter {
     std::string id, label, unit;
     float minimum, maximum, initial;
     bool logarithmic = false;
     double step = .0001;
+    std::vector<std::string> choices{}; // optional names for stepped values
 };
 struct Panel {
     std::string type, name, description, family;
@@ -53,6 +54,8 @@ class AudioModule : public PreparedModule {
 public:
     std::shared_ptr<Controls> controls = std::make_shared<Controls>();
     virtual void process(const AudioBlock&) noexcept = 0;
+    // A sleeping voice is about to run again: jump smoothed controls to their targets.
+    virtual void wake() noexcept {}
     virtual SpectralPtr spectralState() const { return {}; }
 };
 Registry moduleRegistry(const SampleBank& samples={},const SpectralBank& spectral={});
@@ -76,6 +79,7 @@ public:
     // Offline inspection of the voice group (not for concurrent use with render).
     int voiceGroupSize() const noexcept { return mixer_<0?0:maximumVoices; }
     Note voiceNote(int voice) const noexcept { return voice>=0&&voice<maximumVoices?slots_[size_t(voice)].note:Note{}; }
+    int awakeVoices() const noexcept { int n=0;for(const auto& s:slots_)n+=s.awake;return n; }
 private:
     struct NodeBuffers {
         AudioModule* module = nullptr;
@@ -100,13 +104,15 @@ private:
         std::vector<float*> sliceOut,sliceOutRight;
     };
     struct VoiceChange { int offset; Note note; };
-    struct VoiceSlot { Note note; bool active=false; uint32_t source=0; uint64_t noteId=0, started=0, released=0; };
+    struct VoiceSlot { Note note; bool active=false,awake=false,tuned=false; uint32_t source=0; uint64_t noteId=0, started=0, released=0; float pitch=0,target=0,detune=0; int quiet=0; };
     void prepareBuffers(NodeBuffers&, AudioModule*, const ModuleType&, const std::string& type);
     NodeBuffers& instance(int node,int voice) noexcept { return voice==0?nodes_[size_t(node)]:voiceCopies_[size_t(node)][size_t(voice-1)]; }
     void computeParameters(NodeBuffers&) noexcept;
     void processNode(NodeBuffers&,int frames,const ClockFrame*,const Note&) noexcept;
     void processVoice(NodeBuffers&,int frames,const ClockFrame*,int voice) noexcept;
     void allocate(const NoteEventBlock*,int frames,int voices,const Note& performance) noexcept;
+    void updateTuning(int scale,int root) noexcept;
+    float tuned(int midi) const noexcept { return float(midi)+tuning_[size_t(std::clamp(midi,0,127))]; }
     void pushChange(int voice,int offset,const Note&) noexcept;
     GraphSpec spec_;
     PreparedGraph graph_;
@@ -121,7 +127,10 @@ private:
     std::array<Note,maximumVoices> voiceStart_{};
     std::array<std::array<VoiceChange,32>,maximumVoices> changes_{};
     std::array<int,maximumVoices> changeCount_{};
-    std::array<const float*,maximumVoices> mixLeft_{},mixRight_{};
+    std::array<const float*,maximumVoices> mixLeft_{},mixRight_{},liveLeft_{},liveRight_{};
+    std::array<float,128> tuning_{};
+    std::array<bool,maximumVoices> woke_{};
+    int tuningScale_=0,tuningRoot_=0;
     uint64_t voiceClock_=0;
     std::array<float, quantum> zero_{};
     std::vector<const float*> roots_;

@@ -27,7 +27,7 @@ inline RackDocument starterDocument(int which,float gain) {
         for(auto& c:d.graph.connections)if(c.source.node=="sequence")c.source.port="r"+c.source.port.substr(1);
         for(auto& m:d.graph.modulations)if(m.source.node=="sequence")m.source.port="r"+m.source.port.substr(1,1)+"_accent";return d;}
 
-    if(which==15||which==16){RackDocument d;d.gain=gain;d.graph=padPatch(which-15);return d;}
+    if(which==15||which==16||which==19||which==20){RackDocument d;d.gain=gain;d.graph=padPatch(which<19?which-15:which-17);return d;}
     if(which==13||which==14){
         auto d=starterDocument(11,gain);d.tempo=which==13?104:118;
         auto data=std::make_shared<PerformanceData>(defaultPerformance());

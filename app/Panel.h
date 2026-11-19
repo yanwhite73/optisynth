@@ -24,7 +24,7 @@ Colour panelColour(const std::string& id) {
     if(id.rfind("osc.",0)==0||id=="analog.vco")return Colour(0xff8ebecb);
     if(id=="voice.mix")return Colour(0xffc9a96a);
     if(id.rfind("fx.",0)==0)return Colour(0xff6f8f8b);
-    if(id=="mod.wheel")return Colour(0xffd7b282);
+    if(id=="mod.wheel"||id=="analog.polymod")return Colour(0xffd7b282);
     if(panel(id).family=="filter"&&id!="filter.bypass")return Colour(0xffa2c67f);
     return Colour(0xff36383a);
 }
@@ -39,8 +39,8 @@ int panelWidth(const std::string& id) {
     if(id.rfind("spectral.",0)==0&&panel(id).family=="filter")return 290;
     if(id=="analog.vco"||id=="analog.filter")return 290;
     if(id=="analog.env")return 230;
-    if(id=="analog.vca"||id=="mod.wheel")return 170;
-    if(id=="voice.mix")return 200;
+    if(id=="analog.vca"||id=="mod.wheel"||id=="analog.polymod")return 170;
+    if(id=="voice.mix")return 280;
     if(id=="utility.vca"||id=="filter.bypass")return 155;
     if(id=="utility.mix"||id=="osc.sine")return 200;
     return id=="modal.resonator"?270:250;
@@ -88,6 +88,11 @@ struct Control : juce::Component {
         if(p.logarithmic)slider.setSkewFactorFromMidPoint(p.minimum>0?std::sqrt(p.minimum*p.maximum):.3);
         slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.step>=1?0:p.unit=="Hz"?1:p.unit=="st"?2:3);
         if(p.id=="root_note")slider.setTextValueSuffix(" MIDI");
+        if(!p.choices.empty()){
+            slider.setTextValueSuffix("");
+            slider.textFromValueFunction=[choices=p.choices](double v){return String(choices[size_t(std::clamp(int(std::lround(v)),0,int(choices.size())-1))]);};
+            slider.valueFromTextFunction=[choices=p.choices](const String& t){for(size_t i=0;i<choices.size();++i)if(t.equalsIgnoreCase(String(choices[i])))return double(i);return t.getDoubleValue();};
+        }
         if(p.id=="wave"){
             slider.textFromValueFunction=[](double v){const char* names[]={"Sine","Triangle","Ramp","Pulse"};return String(names[std::clamp(int(std::round(v)),0,3)]);};
             slider.valueFromTextFunction=[](const String& t){return t.equalsIgnoreCase("Triangle")?1.:t.equalsIgnoreCase("Ramp")?2.:t.equalsIgnoreCase("Pulse")?3.:0.;};
@@ -286,9 +291,14 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             put("sustain",.70f,0,.28f,.58f);put("fade",.70f,.59f,.28f,.21f);
             put("attack_curve",0,.80f,.33f,.20f);put("decay_curve",.33f,.80f,.33f,.20f);put("release_curve",.66f,.80f,.33f,.20f);
         }else if(current=="analog.filter"){
-            put("cutoff_hz",0,0,.5f,.4f);put("resonance",.5f,0,.5f,.4f);
-            put("mode",0,.4f,.34f,.3f);put("env_octaves",.34f,.4f,.33f,.3f);put("key_track",.67f,.4f,.33f,.3f);
-            put("drive",0,.7f,.25f,.3f);put("fm_depth",.25f,.7f,.25f,.3f);put("band",.5f,.7f,.25f,.3f);put("poles",.75f,.7f,.25f,.3f);
+            put("cutoff_hz",0,0,.5f,.34f);put("resonance",.5f,0,.5f,.34f);
+            put("mode",0,.34f,.34f,.24f);put("env_octaves",.34f,.34f,.33f,.24f);put("key_track",.67f,.34f,.33f,.24f);
+            put("drive",0,.58f,.25f,.21f);put("fm_depth",.25f,.58f,.25f,.21f);put("band",.5f,.58f,.25f,.21f);put("poles",.75f,.58f,.25f,.21f);
+            put("pole_mix",0,.79f,.6f,.21f);put("quality",.6f,.79f,.4f,.21f);
+        }else if(current=="voice.mix"){
+            put("voices",0,0,.34f,.34f);put("unison",.34f,0,.33f,.34f);put("detune",.67f,0,.33f,.34f);
+            put("glide",0,.34f,.34f,.33f);put("spread",.34f,.34f,.33f,.33f);put("level",.67f,.34f,.33f,.33f);
+            put("tuning",0,.67f,.5f,.33f);put("root",.5f,.67f,.25f,.33f);put("steal",.75f,.67f,.25f,.33f);
         }else if(current=="analog.vco"){
             put("transpose",0,0,.34f,.3f);put("fine",.34f,0,.33f,.3f);put("drift",.67f,0,.33f,.3f);
             put("saw",0,.3f,.34f,.3f);put("pulse",.34f,.3f,.33f,.3f);put("triangle",.67f,.3f,.33f,.3f);

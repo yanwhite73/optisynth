@@ -1,6 +1,7 @@
 #pragma once
 #include "runtime.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <stdexcept>
 
@@ -21,6 +22,7 @@ public:
     void noteEvent(int midi,float velocity,bool on) noexcept {pushKey(uint8_t(std::clamp(midi,0,127)),on?2:1,velocity);}
     void releaseAll() noexcept {pushKey(0,3,0);}
     std::atomic<float> bend{0},wheel{0}; // semitones, 0..1 (MIDI thread may write)
+    std::atomic<float> load{0}; // smoothed DSP time / real time of the rendered audio
     std::atomic<float> gain{.25f};
     std::atomic<float> peak{0};
     std::atomic<float> tempo{120};
@@ -60,12 +62,16 @@ public:
             }
             std::fill_n(output,count,0.f);
             std::fill_n(right,count,0.f);
+            const auto started=std::chrono::steady_clock::now();
             if(active_)active_->render(output,right,count,note,time.data(),&keys_);
             if(fading_) {
                 Note oldNote=note;oldNote.trigger=false;oldNote.gate=false;
                 for(int i=0;i<count;++i)time[i].playing=false;
                 fading_->render(old_.data(),oldRight_.data(),count,oldNote,time.data());
             }
+            const float spent=std::chrono::duration<float>(std::chrono::steady_clock::now()-started).count();
+            smoothedLoad_+=(spent*48000.f/float(count)-smoothedLoad_)*.002f;
+            load.store(smoothedLoad_,std::memory_order_relaxed);
             float max=0;
             float target=gain.load(std::memory_order_relaxed);
             if(!std::isfinite(target))target=0;
@@ -119,7 +125,7 @@ private:
     std::atomic<uint64_t> packed_{48<<1};
     uint64_t serial_=0,seen_=0;
     int fade_=0;
-    float smoothedGain_=0;
+    float smoothedGain_=0,smoothedLoad_=0;
     std::array<float,quantum> old_{};
     std::array<float,quantum> oldRight_{};
 };

@@ -46,19 +46,22 @@ public:
         }
     }
 protected:
+    void wake() noexcept override { snap = true; }
     void update(const AudioBlock& b) noexcept {
         const float amount = -std::expm1(-b.frames / (rate * .005f));
+        const float rate_ = snap ? 1.f : amount; snap = false;
         for (std::size_t i = 0; i < definition.parameters.size(); ++i) {
             const auto& p = definition.parameters[i];
             float target = b.parameters ? b.parameters[i] : controls->values[i].load(std::memory_order_relaxed);
             if (!std::isfinite(target)) target = p.initial;
             target = std::clamp(target, p.minimum, p.maximum);
             if (p.step >= 1) values[i] = std::round(target);
-            else values[i] += amount * (target - values[i]);
+            else values[i] += rate_ * (target - values[i]);
         }
     }
     const Panel& definition;
     std::array<float, 32> values{};
+    bool snap = false;
 };
 
 // --- CEM3340-style VCO -----------------------------------------------------
@@ -109,7 +112,8 @@ public:
                 p += blep(t, dt);
                 float t2 = t - pw; if (t2 < 0) t2 += 1.f;
                 p -= blep(t2, dt);
-                value += pulse * p;
+                // Zero-mean pulse: a voice waking from sleep must not start with a DC step.
+                value += pulse * (p - (2.f * pw - 1.f));
             }
             if (tri > 0) value += tri * (1.f - 4.f * std::abs(t - .5f));
             b.outputs[0][i] = value * normal * level;
@@ -157,29 +161,50 @@ struct Halfband {
 // --- Oberheim-style filter ---------------------------------------------------
 // 2-pole: OTA state-variable (SEM/OB-X/OB-Xa 2-pole) with diode-limited resonance
 // and the SEM LP->notch->HP mode crossfade or band-pass. 4-pole: OTA cascade
-// (OB-Xa/OB-8 4-pole, CEM3320). Zero-delay-feedback structure, 2x oversampled.
+// (OB-Xa/OB-8 4-pole, CEM3320). Pole mixing (Xpander/Matrix-12): weighted sums of
+// the cascade input and stage outputs give 15 responses from the 4-pole core.
+// Quality: 1x, 2x or 4x oversampling of the nonlinear core.
 class ObFilter final : public Base {
 public:
     explicit ObFilter(const NodeSpec& n) : Base(n) {}
+    // Coefficients on {input, stage 1, stage 2, stage 3, stage 4}: binomial forms of
+    // A = one-pole low-pass, (1 - A) = one-pole high-pass, (1 - 2A) = one-pole all-pass.
+    static constexpr float mixes[15][5] = {
+        {0, 0, 0, 0, 1}, {0, 0, 0, 1, 0}, {0, 0, 1, 0, 0}, {0, 1, 0, 0, 0},            // LP 4, 3, 2, 1
+        {1, -3, 3, -1, 0}, {1, -2, 1, 0, 0}, {1, -1, 0, 0, 0},                         // HP 3, 2, 1
+        {0, 0, 4, -8, 4}, {0, 2, -2, 0, 0}, {1, -2, 2, 0, 0}, {1, -6, 12, -8, 0},      // BP 4, BP 2, notch, phase
+        {0, 1, -3, 3, -1}, {0, 1, -2, 1, 0}, {0, 1, -2, 2, 0}, {0, 1, -6, 12, -8}};    // + 1-pole LP variants
     void process(const AudioBlock& b) noexcept override {
         update(b);
         const float cutoff = values[0], res = values[1], mode = values[2], band = values[3], poles = values[4];
         const float envOct = values[5], key = values[6], drive = values[7], fmDepth = values[8];
+        const int poleMix = int(values[9]), factor = values[10] < .5f ? 1 : values[10] < 1.5f ? 2 : 4;
         const float driveGain = 1.f + 5.f * drive, driveNorm = 1.f / std::sqrt(driveGain);
         const float damping = std::pow(.025f, res);   // 2-pole: 1 (Q 0.5) to 0.025
         const float k = 4.15f * res;                   // 4-pole: self-oscillation near 4
         const float keyOct = key * (float(b.note.midi) + b.note.bend - 60.f) / 12.f;
+        const bool cascade = poleMix > 0 || poles >= .5f;
+        const float* coefficients = mixes[std::clamp(poleMix > 0 ? poleMix - 1 : 0, 0, 14)];
+        auto tick = [&](float u, float g) {
+            return cascade ? ladder(u, g, k, coefficients) : svf(u, g, damping, mode, band >= .5f);
+        };
         for (int i = 0; i < b.frames; ++i) {
             float oct = keyOct + envOct * b.inputs[1][i];
             if (fmDepth > 0) oct += fmDepth * std::clamp(b.inputs[2][i], -4.f, 4.f);
             const float hz = std::clamp(cutoff * std::exp2(std::clamp(oct, -12.f, 12.f)), 10.f, 22000.f);
-            const float g = float(std::tan(pi * hz / (2.0 * rate)));
+            const float g = float(std::tan(pi * hz / (double(factor) * rate)));
             const float x = softClip(b.inputs[0][i] * driveGain) * driveNorm;
             float y = 0;
-            for (int os = 0; os < 2; ++os) {
-                const float u = up.push(os == 0 ? 2.f * x : 0.f);
-                const float v = poles >= .5f ? ladder(u, g, k) : svf(u, g, damping, mode, band >= .5f);
-                y = down.push(v);
+            if (factor == 1) y = tick(x, g);
+            else if (factor == 2) {
+                for (int os = 0; os < 2; ++os) y = down.push(tick(up.push(os == 0 ? 2.f * x : 0.f), g));
+            } else {
+                for (int a = 0; a < 2; ++a) {
+                    const float u1 = up.push(a == 0 ? 2.f * x : 0.f);
+                    float d1 = 0;
+                    for (int c = 0; c < 2; ++c) d1 = down2.push(tick(up2.push(c == 0 ? 2.f * u1 : 0.f), g));
+                    y = down.push(d1);
+                }
             }
             // Output DC block (~2 Hz), as after the Prophet-5 VCF (68 kOhm / 2.2 uF).
             const float blocked = y - dcIn + .99974f * dcOut;
@@ -199,24 +224,43 @@ private:
         if (band) return bp * .7f;
         return (1.f - mode) * lp + mode * hp;          // centre of the sweep is the notch
     }
-    float ladder(float x, float g, float k) noexcept {
+    float ladder(float x, float g, float k, const float* mix) noexcept {
         const float G = g / (1.f + g);
         const float one = 1.f - G;
         const float sum = G * G * G * one * stage[0] + G * G * one * stage[1] + G * one * stage[2] + one * stage[3];
         const float g4 = G * G * G * G;
         const float y4 = (g4 * x + sum) / (1.f + k * g4);
         float u = softClip(x - k * y4);                 // input OTA saturation
-        for (auto& s : stage) {
+        float out = mix[0] * u;
+        for (int i = 0; i < 4; ++i) {
+            auto& s = stage[size_t(i)];
             const float v = (u - s) * G;
             const float y = v + s;
             s = y + v;
             u = y;
+            out += mix[i + 1] * y;
         }
-        return u;
+        return out;
     }
-    Halfband up, down;
+    Halfband up, down, up2, down2;
     float s1 = 0, s2 = 0, dcIn = 0, dcOut = 0;
     std::array<float, 4> stage{};
+};
+
+// --- Prophet-style poly-mod ----------------------------------------------------
+// Per-voice mix of oscillator B (audio) and the filter envelope (control), routed to
+// oscillator A pitch/PW and the filter; destination depth knobs act as the switches.
+class PolyMod final : public Base {
+public:
+    explicit PolyMod(const NodeSpec& n) : Base(n) {}
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        for (int i = 0; i < b.frames; ++i) {
+            const float v = values[0] * b.inputs[0][i] + values[1] * b.inputs[1][i];
+            b.outputs[0][i] = v;
+            b.outputs[1][i] = v;
+        }
+    }
 };
 
 // --- CEM3310-style envelope --------------------------------------------------
@@ -297,7 +341,7 @@ public:
              float* outLeft, float* outRight, const float* parameters) noexcept override {
         const float spread = parameters ? std::clamp(parameters[1], 0.f, 1.f) : .7f;
         const float level = parameters ? std::clamp(parameters[2], 0.f, 2.f) : .5f;
-        static constexpr float positions[maximumVoices] = {-.85f, .85f, -.3f, .3f, -.6f, .6f, -.1f, .1f};
+        static constexpr float positions[maximumVoices] = {-.85f, .85f, -.3f, .3f, -.6f, .6f, -.1f, .1f, -.95f, .95f, -.45f, .45f, -.75f, .75f, -.2f, .2f};
         std::fill_n(outLeft, frames, 0.f);
         std::fill_n(outRight, frames, 0.f);
         for (int v = 0; v < count; ++v) {
@@ -364,9 +408,12 @@ std::vector<Panel> analogPanels() {
         {"pwm_depth", "PWM depth", "", 0, .45f, 0}, {"drift", "Drift", "", 0, 1, .3f}, {"level", "Level", "", 0, 1, .5f}}});
     p.push_back({"analog.filter", "OB filter", "Oberheim-style 2-pole SVF (LP-notch-HP / band) or 4-pole OTA cascade", "filter", {
         {"cutoff_hz", "Cutoff", "Hz", 20, 20000, 1200, true}, {"resonance", "Resonance", "", 0, 1, .2f},
-        {"mode", "Mode", "", 0, 1, 0}, {"band", "Band-pass", "", 0, 1, 0, false, 1}, {"poles", "4-pole", "", 0, 1, 0, false, 1},
+        {"mode", "Mode", "", 0, 1, 0}, {"band", "Band-pass", "", 0, 1, 0, false, 1, {"Off", "On"}}, {"poles", "4-pole", "", 0, 1, 0, false, 1, {"Off", "On"}},
         {"env_octaves", "Env amount", "oct", -6, 6, 2}, {"key_track", "Key track", "", 0, 1, .5f},
-        {"drive", "Drive", "", 0, 1, .2f}, {"fm_depth", "FM depth", "oct", 0, 4, 0}}});
+        {"drive", "Drive", "", 0, 1, .2f}, {"fm_depth", "FM depth", "oct", 0, 4, 0},
+        {"pole_mix", "Xpander mode", "", 0, 15, 0, false, 1, {"Classic", "LP 4", "LP 3", "LP 2", "LP 1", "HP 3", "HP 2", "HP 1", "BP 4", "BP 2",
+            "Notch", "Phase", "HP3 + LP1", "HP2 + LP1", "Notch + LP1", "Phase + LP1"}},
+        {"quality", "Quality", "", 0, 2, 1, false, 1, {"Draft 1x", "Normal 2x", "High 4x"}}}});
     p.push_back({"analog.env", "Analog envelope", "CEM3310-style ADSR: RC curves, exponential times, long swells", "envelope", {
         {"attack", "Attack", "s", .001f, 30, .01f, true}, {"decay", "Decay", "s", .001f, 30, .5f, true},
         {"sustain", "Sustain", "", 0, 1, .7f}, {"release", "Release", "s", .001f, 60, 1.5f, true},
@@ -374,8 +421,14 @@ std::vector<Panel> analogPanels() {
     p.push_back({"analog.vca", "OTA VCA", "Audio times control voltage with OTA input saturation", "utility", {
         {"level", "Level", "", 0, 2, 1}, {"drive", "Drive", "", 0, 1, .15f}}});
     p.push_back({"voice.mix", "Voice mixer", "Polyphony boundary: patch above runs per voice; pan-spread stereo sum", "voice", {
-        {"voices", "Voices", "", 1, float(maximumVoices), float(maximumVoices), false, 1},
-        {"spread", "Spread", "", 0, 1, .7f}, {"level", "Level", "", 0, 2, .5f}}});
+        {"voices", "Voices", "", 1, float(maximumVoices), 8, false, 1},
+        {"spread", "Spread", "", 0, 1, .7f}, {"level", "Level", "", 0, 2, .5f},
+        {"glide", "Glide", "s", 0, 5, 0}, {"unison", "Unison", "", 1, 8, 1, false, 1}, {"detune", "Detune", "ct", 0, 50, 10},
+        {"steal", "Steal", "", 0, 1, 1, false, 1, {"Off", "On"}},
+        {"tuning", "Tuning", "", 0, 4, 0, false, 1, {"Equal", "Just 5-limit", "Just 7-limit", "Pythagorean", "Harmonic series"}},
+        {"root", "Root", "", 0, 11, 0, false, 1, {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}}}});
+    p.push_back({"analog.polymod", "Poly-mod", "Prophet-style per-voice mix of oscillator B and filter envelope for FM / PWM / filter", "utility", {
+        {"osc_amount", "Osc B", "", -1, 1, 1}, {"env_amount", "Filter env", "", -1, 1, 0}}});
     p.push_back({"mod.wheel", "Wheel / bend", "Hardware MIDI mod wheel and pitch bend as control sources", "modulator", {
         {"amount", "Amount", "", 0, 1, 1}}});
     p.push_back(effectPanel("fx.reverb", "Reverb", "reverb", "Long modulated stereo reverb (inherited library)", .3f));
@@ -390,7 +443,10 @@ void analogPorts(const std::string& id, ModuleType& type) {
         type.inputs = {{"fm", SignalType::Audio, false}, {"pwm", SignalType::Control, false}, {"sync", SignalType::Audio, false}};
     else if (id == "analog.filter")
         type.inputs = {{"in", SignalType::Audio, true}, {"mod", SignalType::Control, false}, {"fm", SignalType::Audio, false}};
-    else if (id == "analog.vca")
+    else if (id == "analog.polymod") {
+        type.inputs = {{"osc", SignalType::Audio, false}, {"env", SignalType::Control, false}};
+        type.outputs = {{"fm", SignalType::Audio}, {"pw", SignalType::Control}};
+    } else if (id == "analog.vca")
         type.inputs = {{"in", SignalType::Audio, true}, {"cv", SignalType::Control, true}};
     else if (id == "voice.mix") {
         type.inputs = {{"in", SignalType::Audio, true}, {"notes", SignalType::Event, false}};
@@ -404,32 +460,49 @@ void analogPorts(const std::string& id, ModuleType& type) {
 }
 
 GraphSpec padPatch(int model) {
+    // 0 OB swell (2-pole), 1 Prophet 4-pole with poly-mod, 2 Xpander pole-mix unison,
+    // 3 just-intonation drone (harmonic tuning, glide).
+    using Values = std::vector<std::pair<std::string, float>>;
+    const bool ob = model == 0 || model == 3, prophet = model == 1, xpander = model == 2;
+    Values vco1 = prophet ? Values{{"saw", .8f}, {"pulse", .5f}, {"pulse_width", .4f}, {"drift", .3f}, {"level", .55f}, {"fm_depth", .06f}, {"pwm_depth", .1f}}
+                          : Values{{"saw", 1}, {"drift", .45f}, {"level", .55f}};
+    if (xpander) vco1 = {{"saw", .6f}, {"pulse", .6f}, {"pulse_width", .3f}, {"drift", .35f}, {"level", .55f}};
+    Values vco2 = {{"saw", 1}, {"fine", prophet ? -5.f : 7.f}, {"drift", prophet ? .3f : .45f}, {"level", .55f}};
+    if (model == 3) vco2 = {{"triangle", 1}, {"saw", .3f}, {"transpose", 12}, {"drift", .5f}, {"level", .4f}};
+    Values filter = {{"cutoff_hz", 520}, {"resonance", .35f}, {"mode", .12f}, {"env_octaves", 2.6f}, {"key_track", .4f}, {"drive", .25f}};
+    if (prophet) filter = {{"cutoff_hz", 700}, {"resonance", .42f}, {"poles", 1}, {"env_octaves", 3.f}, {"key_track", .5f}, {"drive", .3f}, {"fm_depth", .25f}};
+    if (xpander) filter = {{"cutoff_hz", 900}, {"resonance", .55f}, {"pole_mix", 13}, {"env_octaves", 2.f}, {"key_track", .5f}, {"drive", .2f}};
+    if (model == 3) filter = {{"cutoff_hz", 380}, {"resonance", .45f}, {"mode", .3f}, {"env_octaves", 3.f}, {"key_track", .6f}, {"drive", .3f}};
+    Values filterEnv = prophet ? Values{{"attack", 1.1f}, {"decay", 3}, {"sustain", .4f}, {"release", 4}, {"velocity", .35f}}
+                               : Values{{"attack", 2.8f}, {"decay", 5}, {"sustain", .55f}, {"release", 7}, {"velocity", .2f}};
+    if (model == 3) filterEnv = {{"attack", 9}, {"decay", 12}, {"sustain", .5f}, {"release", 20}, {"velocity", .1f}};
+    Values ampEnv = prophet ? Values{{"attack", .7f}, {"decay", 2}, {"sustain", .85f}, {"release", 5}, {"velocity", .4f}}
+                            : Values{{"attack", 2.2f}, {"decay", 3}, {"sustain", .9f}, {"release", 8}, {"velocity", .3f}};
+    if (model == 3) ampEnv = {{"attack", 6}, {"decay", 8}, {"sustain", .95f}, {"release", 24}, {"velocity", .1f}};
+    Values voices = {{"spread", .85f}, {"level", .42f}};
+    if (prophet) voices = {{"spread", .55f}, {"level", 1.25f}};                     // 4-pole path is ~10 dB quieter
+    if (xpander) voices = {{"voices", 16}, {"unison", 2}, {"detune", 14}, {"glide", .12f}, {"spread", .9f}, {"level", .5f}};
+    if (model == 3) voices = {{"tuning", 4}, {"root", 2}, {"glide", .35f}, {"spread", .9f}, {"level", .4f}};
     GraphSpec g;
-    const bool ob = model == 0;
-    g.nodes = {
-        {"vco1", "analog.vco", ob ? std::vector<std::pair<std::string,float>>{{"saw", 1}, {"drift", .45f}, {"level", .55f}}
-                                  : std::vector<std::pair<std::string,float>>{{"saw", .8f}, {"pulse", .5f}, {"pulse_width", .4f}, {"drift", .3f}, {"level", .55f}}},
-        {"vco2", "analog.vco", {{"saw", 1}, {"fine", ob ? 7.f : -5.f}, {"drift", ob ? .45f : .3f}, {"level", .55f}}},
-        {"osc_mix", "utility.mix", {{"gain_a", .7f}, {"gain_b", .7f}}},
-        {"filter", "analog.filter", ob ? std::vector<std::pair<std::string,float>>{{"cutoff_hz", 520}, {"resonance", .35f}, {"mode", .12f}, {"env_octaves", 2.6f}, {"key_track", .4f}, {"drive", .25f}}
-                                       : std::vector<std::pair<std::string,float>>{{"cutoff_hz", 700}, {"resonance", .42f}, {"poles", 1}, {"env_octaves", 3.f}, {"key_track", .5f}, {"drive", .3f}, {"fm_depth", .25f}}},
-        {"filter_env", "analog.env", ob ? std::vector<std::pair<std::string,float>>{{"attack", 2.8f}, {"decay", 5}, {"sustain", .55f}, {"release", 7}, {"velocity", .2f}}
-                                        : std::vector<std::pair<std::string,float>>{{"attack", 1.1f}, {"decay", 3}, {"sustain", .4f}, {"release", 4}, {"velocity", .35f}}},
-        {"amp_env", "analog.env", ob ? std::vector<std::pair<std::string,float>>{{"attack", 2.2f}, {"decay", 3}, {"sustain", .9f}, {"release", 8}, {"velocity", .3f}}
-                                     : std::vector<std::pair<std::string,float>>{{"attack", .7f}, {"decay", 2}, {"sustain", .85f}, {"release", 5}, {"velocity", .4f}}},
-        {"vca", "analog.vca", {}},
-        {"voices", "voice.mix", {{"spread", ob ? .85f : .55f}, {"level", ob ? .42f : 1.25f}}},  // matched peaks: 4-pole path is ~10 dB quieter
-        {"wheel", "mod.wheel", {}},
-        {"breath", "mod.lfo", {{"rate", ob ? .06f : .11f}, {"depth", 1}}},
-        {ob ? "chorus" : "delay", ob ? "fx.chorus" : "fx.delay", ob ? std::vector<std::pair<std::string,float>>{{"mix", .3f}, {"rate_hz", .25f}}
-                                                                    : std::vector<std::pair<std::string,float>>{{"mix", .18f}, {"time_l_ms", 410}, {"time_r_ms", 615}, {"feedback", .45f}, {"lowpass_hz", 3500}}},
-        {"reverb", "fx.reverb", {{"mix", ob ? .38f : .3f}, {"time_s", ob ? 11.f : 7.f}, {"damping", .35f}, {"mod_depth", 14}, {"predelay_ms", 45}}}};
-    const std::string space = ob ? "chorus" : "delay";
+    g.nodes = {{"vco1", "analog.vco", vco1}, {"vco2", "analog.vco", vco2}, {"osc_mix", "utility.mix", {{"gain_a", .7f}, {"gain_b", .7f}}},
+               {"filter", "analog.filter", filter}, {"filter_env", "analog.env", filterEnv}, {"amp_env", "analog.env", ampEnv},
+               {"vca", "analog.vca", {}}, {"voices", "voice.mix", voices}, {"wheel", "mod.wheel", {}},
+               {"breath", "mod.lfo", {{"rate", prophet ? .11f : model == 3 ? .03f : .06f}, {"depth", 1}}}};
+    const std::string space = prophet ? "delay" : "chorus";
+    if (prophet) g.nodes.push_back({"delay", "fx.delay", {{"mix", .18f}, {"time_l_ms", 410}, {"time_r_ms", 615}, {"feedback", .45f}, {"lowpass_hz", 3500}}});
+    else g.nodes.push_back({"chorus", "fx.chorus", {{"mix", .3f}, {"rate_hz", .25f}}});
+    g.nodes.push_back({"reverb", "fx.reverb", {{"mix", ob ? .38f : .3f}, {"time_s", model == 3 ? 18.f : ob ? 11.f : 7.f}, {"damping", .35f}, {"mod_depth", 14}, {"predelay_ms", 45}}});
     g.connections = {{{"vco1", "out"}, {"osc_mix", "a"}}, {{"vco2", "out"}, {"osc_mix", "b"}}, {{"osc_mix", "out"}, {"filter", "in"}},
                      {{"filter_env", "out"}, {"filter", "mod"}}, {{"filter", "out"}, {"vca", "in"}}, {{"amp_env", "out"}, {"vca", "cv"}},
                      {{"vca", "out"}, {"voices", "in"}}, {{"voices", "out"}, {space, "in"}}, {{space, "out"}, {"reverb", "in"}}};
-    if (!ob) g.connections.push_back({{"vco2", "out"}, {"filter", "fm"}});   // Prophet-style osc B -> filter poly-mod
-    g.modulations = {{{"wheel", "out"}, {"filter", "cutoff_hz"}, .3f}, {{"breath", "out"}, {"filter", "cutoff_hz"}, .05f}};
+    if (prophet) {
+        // Poly-mod: osc B and the filter envelope into osc A pitch and PW and the filter.
+        g.nodes.push_back({"polymod", "analog.polymod", {{"osc_amount", 1}, {"env_amount", .4f}}});
+        for (Connection c : std::vector<Connection>{{{"vco2", "out"}, {"polymod", "osc"}}, {{"filter_env", "out"}, {"polymod", "env"}},
+                                                     {{"polymod", "fm"}, {"vco1", "fm"}}, {{"polymod", "pw"}, {"vco1", "pwm"}}, {{"polymod", "fm"}, {"filter", "fm"}}})
+            g.connections.push_back(c);
+    }
+    g.modulations = {{{"wheel", "out"}, {"filter", "cutoff_hz"}, .3f}, {{"breath", "out"}, {"filter", "cutoff_hz"}, model == 3 ? .1f : .05f}};
     g.outputs = {{"reverb", "out"}};
     return g;
 }
@@ -440,6 +513,7 @@ std::unique_ptr<AudioModule> makeAnalog(const NodeSpec& n, const PrepareContext&
     if (id == "analog.filter") return std::make_unique<ObFilter>(n);
     if (id == "analog.env") return std::make_unique<AnalogEnv>(n);
     if (id == "analog.vca") return std::make_unique<OtaVca>(n);
+    if (id == "analog.polymod") return std::make_unique<PolyMod>(n);
     if (id == "voice.mix") return std::make_unique<VoiceMix>(n);
     if (id == "mod.wheel") return std::make_unique<Wheel>(n);
     if (id == "fx.reverb") return std::make_unique<Fx>(n, "reverb");

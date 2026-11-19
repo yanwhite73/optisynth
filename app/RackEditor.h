@@ -20,11 +20,12 @@ public:
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden","Pad / OB swell (8 voices)","Pad / Prophet 4-pole (8 voices)","Probability / Glass branches","Orbit / Four satellites"};
-        for(i=0;i<19;++i){
-            if(i==0 || i==15) starter.addSectionHeading("Instrument sounds");
-            if(i==8 || i==17) starter.addSectionHeading("Sequencer racks");
-            starter.addItem(names[i],i+1);
+        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden","Pad / OB swell (8 voices)","Pad / Prophet 4-pole + poly-mod","Probability / Glass branches","Orbit / Four satellites","Pad / Xpander mode, unison + glide","Pad / Just-intonation harmonic drone"};
+        const int order[]={0,1,2,3,4,5,6,7,15,16,19,20,8,9,10,11,12,13,14,17,18};   // menu order; IDs stay index+1
+        for(int k=0;k<21;++k){
+            if(k==0) starter.addSectionHeading("Instrument sounds");
+            if(k==12) starter.addSectionHeading("Sequencer racks");
+            starter.addItem(names[order[k]],order[k]+1);
         }
         keepSequence.setToggleState(true,dontSendNotification);
         keepSequence.setTooltip("Keep the current pattern and tempo when choosing an instrument sound. Sequencer racks load their own patterns.");
@@ -34,7 +35,7 @@ public:
             if(refreshing || id<=0) return;
             try {
                 auto next=chooseStarter(document,id-1,keepSequence.getToggleState());
-                commit(std::move(next),id==16 || id==17 ? "filter" : id>=9 ? "sequence" : "source");
+                commit(std::move(next),id==16 || id==17 || id==20 || id==21 ? "filter" : id>=9 ? "sequence" : "source");
             } catch(const std::exception& e){message(e.what(),true);}
         };
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
@@ -286,10 +287,10 @@ public:
         require(directory.getChildFile("motion-check.txt").replaceWithText("PASS: large editor edits; undo/redo; page clipboard; generator locks; loop duplication; completed atomic transactions; both CV routes; two stereo FX starters with identical state/audio recall; six native captures. No audio device opened.\n"),"Write Motion receipt");
         require(directory.getChildFile("sequencer-check.txt").replaceWithText("PASS: three contextual native editors; selected-step rack/focus edits reach DSP; full sequence and tempo recall with identical audio; v3 compatibility; invalid tempo rejection; Player clock and stop; seven sequencer captures. No audio device opened.\n"),"Write sequencer receipt");
         // Pad starters (requests 57-58): voice group, analog modules and FX; offline chord renders.
-        for(int pad=0;pad<2;++pad){
-            require(commit(starterDocument(15+pad,.25f),"filter"),"Pad starter loads");drain();
+        for(int pad=0;pad<4;++pad){
+            require(commit(starterDocument(pad<2?15+pad:17+pad,.25f),"filter"),"Pad starter loads");drain();
             require(hardware.find("voices")&&hardware.find("filter")&&hardware.find("reverb"),"Pad modules shown in the rack");
-            const String name=pad==0?"pad-ob-swell":"pad-prophet";
+            const String name=String(std::array<const char*,4>{"pad-ob-swell","pad-prophet","pad-xpander","pad-harmonic-drone"}[size_t(pad)]);
             capture(name+".png");
             auto renderPad=[](const RackDocument& d){
                 Runtime r(d.graph);
@@ -313,7 +314,7 @@ public:
             if(!writer)delete stream;
             require(writer&&writer->writeFromAudioSampleBuffer(buffer,0,frames),"Write pad WAV");
         }
-        require(directory.getChildFile("pad-check.txt").replaceWithText("PASS: both 8-voice pad starters load and display; five-note chord held 8 s then released; identical stereo audio after JSON recall; audible without clipping; WAVs written. No audio device opened.\n"),"Write pad receipt");
+        require(directory.getChildFile("pad-check.txt").replaceWithText("PASS: all four pad starters (OB, Prophet poly-mod, Xpander unison/glide, harmonic drone) load and display; five-note chord held 8 s then released; identical stereo audio after JSON recall; audible without clipping; WAVs written. No audio device opened.\n"),"Write pad receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
@@ -561,7 +562,7 @@ private:
         for(auto& panel:hardware.modules)if(panel->sequence)panel->sequence->setTransportActive(active);
         for(auto& panel:hardware.modules)if(panel->performance)panel->performance->setActive(active);
         for(auto& panel:hardware.modules)if(panel->referenceSequence)panel->referenceSequence->setActive(active);
-        const double beat=player.beat.load();position.setText(String(int(beat/4)+1)+" : "+String(std::fmod(beat,4)+1,1)+(running?"":" / audio off"),dontSendNotification);
+        const double beat=player.beat.load();position.setText(String(int(beat/4)+1)+" : "+String(std::fmod(beat,4)+1,1)+(running?" / DSP "+String(int(std::lround(player.load.load()*100)))+"%":" / audio off"),dontSendNotification);
     }
     void handleNoteOn(MidiKeyboardState*,int,int note,float velocity) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());held.push_back(note);player.note(note,true);player.noteEvent(note,velocity,true);}
     void handleNoteOff(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());player.note(held.empty()?note:held.back(),!held.empty());player.noteEvent(note,0,false);}

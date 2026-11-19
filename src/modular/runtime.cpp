@@ -206,6 +206,7 @@ void Runtime::processVoice(NodeBuffers& node,int n,const ClockFrame* time,int vo
     for (auto* p : node.out) std::fill_n(p, n, 0.f);
     for (auto* p : node.outRight) std::fill_n(p,n,0.f);
     computeParameters(node);
+    if(woke_[size_t(voice)])node.module->wake();
     const auto& changes=changes_[size_t(voice)];
     const int total=changeCount_[size_t(voice)];
     Note current=voiceStart_[size_t(voice)];
@@ -231,13 +232,50 @@ void Runtime::pushChange(int voice,int offset,const Note& note) noexcept {
     else list[list.size()-1]={offset,note};
 }
 
+void Runtime::updateTuning(int scale,int root) noexcept {
+    scale=std::clamp(scale,0,4);root=std::clamp(root,0,11);
+    if(scale==tuningScale_&&root==tuningRoot_)return;
+    tuningScale_=scale;tuningRoot_=root;
+    // Ratios per pitch class above the root: 5-limit (Ptolemaic), 7-limit, Pythagorean.
+    static constexpr double ratios[3][12]={
+        {1,16./15,9./8,6./5,5./4,4./3,45./32,3./2,8./5,5./3,9./5,15./8},
+        {1,15./14,9./8,7./6,5./4,4./3,7./5,3./2,8./5,5./3,7./4,15./8},
+        {1,256./243,9./8,32./27,81./64,4./3,729./512,3./2,128./81,27./16,16./9,243./128}};
+    for(int m=0;m<128;++m){
+        double pitch=m;
+        if(scale>=1&&scale<=3){
+            const int rel=m-root,octave=int(std::floor(rel/12.0)),pc=rel-12*octave;
+            pitch=root+12.0*octave+12.0*std::log2(ratios[scale-1][pc]);
+        }else if(scale==4){
+            // Non-octave harmonic series: the root key at C4's octave is partial 8;
+            // each key above is the next partial. Lower keys fold down by octaves.
+            const int reference=60+root;int key=m,folds=0;
+            while(8+(key-reference)<1){key+=12;++folds;}
+            pitch=reference+12.0*std::log2((8.0+(key-reference))/8.0)-12.0*folds;
+        }
+        tuning_[size_t(m)]=float(pitch-m);
+    }
+}
+
 void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note& performance) noexcept {
+    auto& mixer=nodes_[size_t(mixer_)];
+    computeParameters(mixer);
+    const float* mp=mixer.effective.data();
+    const float glide=mp[3],detune=mp[5];
+    const int unison=std::clamp(int(std::lround(mp[4])),1,8);
+    const bool steal=mp[6]>=.5f;
+    updateTuning(int(std::lround(mp[7])),int(std::lround(mp[8])));
+    // Glide time is the time to cover ~95% of the interval (three RC constants).
+    const float step=glide<=0?1.f:1.f-std::exp(-3.f*float(n)/(glide*48000.f));
+    auto bendOf=[&](const VoiceSlot& s){return performance.bend+(s.pitch-float(s.note.midi))+s.detune*.01f;};
     for(int v=0;v<maximumVoices;++v){
         auto& slot=slots_[size_t(v)];
-        slot.note.trigger=false;slot.note.bend=performance.bend;slot.note.wheel=performance.wheel;
+        if(slot.tuned)slot.pitch+=(slot.target-slot.pitch)*step;
+        slot.note.trigger=false;slot.note.bend=bendOf(slot);slot.note.wheel=performance.wheel;
+        woke_[size_t(v)]=false;
         voiceStart_[size_t(v)]=slot.note;
         changeCount_[size_t(v)]=0;
-        if(v>=voices&&slot.active){slot.active=false;slot.note.gate=false;slot.released=++voiceClock_;pushChange(v,0,slot.note);}
+        if(v>=voices){if(slot.active){slot.active=false;slot.note.gate=false;slot.released=++voiceClock_;pushChange(v,0,slot.note);}slot.awake=false;}
     }
     if(!events)return;
     auto release=[&](int v,int offset){
@@ -249,20 +287,37 @@ void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note&
     for(const auto& e:*events){
         const int offset=std::clamp(int(e.offset),0,n-1);
         if(e.kind==NoteEventKind::Reset){for(int v=0;v<voices;++v)if(slots_[size_t(v)].active)release(v,offset);continue;}
-        int match=-1;
-        for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.active&&s.source==e.source&&s.noteId==e.noteId){match=v;break;}}
-        if(e.kind==NoteEventKind::Off){if(match>=0)release(match,offset);continue;}
-        int chosen=match;
-        if(chosen<0){uint64_t oldest=~uint64_t(0);
-            for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(!s.active&&s.released<oldest){oldest=s.released;chosen=v;}}}
-        if(chosen<0){uint64_t oldest=~uint64_t(0);
-            for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.started<oldest){oldest=s.started;chosen=v;}}}
-        if(chosen<0)continue;
-        auto& slot=slots_[size_t(chosen)];
-        slot.active=true;slot.source=e.source;slot.noteId=e.noteId;slot.started=++voiceClock_;
-        slot.note={std::clamp(e.pitch,0,127),std::clamp(e.velocity,0.f,1.f),true,true,performance.bend,performance.wheel};
-        pushChange(chosen,offset,slot.note);
-        slot.note.trigger=false;
+        if(e.kind==NoteEventKind::Off){
+            for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.active&&s.source==e.source&&s.noteId==e.noteId)release(v,offset);}
+            continue;
+        }
+        const int pitch=std::clamp(e.pitch,0,127);
+        auto start=[&](int v,int index){
+            auto& slot=slots_[size_t(v)];
+            if(!slot.awake)woke_[size_t(v)]=true;
+            slot.active=slot.awake=true;slot.quiet=0;slot.source=e.source;slot.noteId=e.noteId;slot.started=++voiceClock_;
+            slot.target=tuned(pitch);
+            if(!slot.tuned||glide<=0)slot.pitch=slot.target;
+            slot.tuned=true;
+            slot.detune=unison>1?detune*(float(index)/float(unison-1)-.5f):0.f;
+            slot.note={pitch,std::clamp(e.velocity,0.f,1.f),true,true,0.f,performance.wheel};
+            slot.note.bend=bendOf(slot);
+            pushChange(v,offset,slot.note);
+            slot.note.trigger=false;
+        };
+        // A key already sounding retriggers its own voices.
+        int existing=0;
+        for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.active&&s.source==e.source&&s.noteId==e.noteId)start(v,existing++);}
+        if(existing)continue;
+        uint32_t chosen=0;
+        for(int k=0;k<unison;++k){
+            int pick=-1;uint64_t oldest=~uint64_t(0);
+            for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(!(chosen>>v&1)&&!s.active&&s.released<oldest){oldest=s.released;pick=v;}}
+            if(pick<0&&steal){oldest=~uint64_t(0);
+                for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(!(chosen>>v&1)&&s.started<oldest){oldest=s.started;pick=v;}}}
+            if(pick<0)break;   // stealing off and no free voice: the note is not played
+            chosen|=1u<<pick;start(pick,k);
+        }
     }
 }
 
@@ -282,11 +337,24 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
                 allocate(bus?bus:(first?keys:nullptr),n,voices,note);
                 allocated=true;
             }
-            if(voiceMixer_&&voiceNode_[size_t(i)]){for(int v=0;v<voices;++v)processVoice(instance(i,v),n,time,v);continue;}
+            if(voiceMixer_&&voiceNode_[size_t(i)]){for(int v=0;v<voices;++v)if(slots_[size_t(v)].awake)processVoice(instance(i,v),n,time,v);continue;}
             if(i==mixer_){
                 node.events.begin(uint32_t(n));
                 computeParameters(node);
-                voiceMixer_->mix(mixLeft_.data(),mixRight_.data(),voices,n,node.out[0],node.outRight[0],node.effective.data());
+                for(int v=0;v<maximumVoices;++v){
+                    const bool awake=slots_[size_t(v)].awake;
+                    liveLeft_[size_t(v)]=awake?mixLeft_[size_t(v)]:zero_.data();
+                    liveRight_[size_t(v)]=awake?mixRight_[size_t(v)]:zero_.data();
+                }
+                voiceMixer_->mix(liveLeft_.data(),liveRight_.data(),voices,n,node.out[0],node.outRight[0],node.effective.data());
+                for(int v=0;v<voices;++v){
+                    auto& slot=slots_[size_t(v)];
+                    if(!slot.awake||slot.active)continue;
+                    float peak=0;
+                    for(int k=0;k<n;++k)peak=std::max(peak,std::max(std::abs(mixLeft_[size_t(v)][k]),std::abs(mixRight_[size_t(v)][k])));
+                    slot.quiet=peak<1e-5f?slot.quiet+n:0;
+                    if(slot.quiet>=24000)slot.awake=false;   // 0.5 s below -100 dBFS after release
+                }
                 continue;
             }
             processNode(node,n,time,note);

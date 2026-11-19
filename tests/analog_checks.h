@@ -27,6 +27,97 @@ double frequency(const std::vector<float>& x,size_t skip){
     for(size_t i=skip+1;i<x.size();++i)if(x[i-1]<=0&&x[i]>0){if(!crossings)first=i;last=i;++crossings;}
     return crossings>1?48000.0*(crossings-1)/double(last-first):0;
 }
+GraphSpec withVoices(int model,std::vector<std::pair<std::string,float>> params){auto g=padPatch(model);for(auto& n:g.nodes)if(n.id=="voices")n.parameters=std::move(params);return g;}
+void voiceFeatureChecks(){
+    // Unison stacks detuned voices per key; release frees all of them.
+    {
+        Runtime r(withVoices(0,{{"voices",16},{"unison",4},{"detune",20}}));
+        renderKeys(r,{keyEvent(60,true)},.05);
+        std::vector<float> bends;for(int v=0;v<maximumVoices;++v)if(r.voiceNote(v).gate&&r.voiceNote(v).midi==60)bends.push_back(r.voiceNote(v).bend);
+        std::sort(bends.begin(),bends.end());
+        check(bends.size()==4&&std::abs(bends.front()+.1f)<1e-4f&&std::abs(bends.back()-.1f)<1e-4f,"Unison of four spreads 20 cents across one key");
+        renderKeys(r,{keyEvent(60,false)},.05);
+        int gated=0;for(int v=0;v<maximumVoices;++v)gated+=r.voiceNote(v).gate;
+        check(gated==0,"Releasing a unison key frees all its voices");
+        renderKeys(r,{keyEvent(48,true),keyEvent(52,true),keyEvent(55,true),keyEvent(59,true),keyEvent(62,true)},.05);
+        gated=0;for(int v=0;v<maximumVoices;++v)gated+=r.voiceNote(v).gate;
+        check(gated==16,"Sixteen voices hold four unison notes, the fifth steals");
+    }
+    // Stealing can be switched off: surplus notes are not played.
+    {
+        Runtime r(withVoices(0,{{"voices",2},{"steal",0}}));
+        renderKeys(r,{keyEvent(60,true),keyEvent(64,true),keyEvent(67,true)},.05);
+        bool third=false;int gated=0;for(int v=0;v<maximumVoices;++v){gated+=r.voiceNote(v).gate;third|=r.voiceNote(v).gate&&r.voiceNote(v).midi==67;}
+        check(gated==2&&!third,"With stealing off a third key on two voices is ignored");
+    }
+    // Glide moves a voice from its previous pitch to the new one over the set time.
+    {
+        Runtime r(withVoices(0,{{"voices",1},{"glide",.5f}}));
+        renderKeys(r,{keyEvent(60,true)},.3);
+        renderKeys(r,{keyEvent(72,true)},.01);
+        const float early=r.voiceNote(0).bend;
+        renderKeys(r,{},.6);
+        const float late=r.voiceNote(0).bend;
+        check(r.voiceNote(0).midi==72&&early<-10.f&&late>-1.f&&late<=0.f,"Glide sweeps 12 semitones in about the glide time");
+    }
+    // Tuning tables: exact just-intonation and harmonic-series offsets.
+    {
+        Runtime ji(withVoices(0,{{"tuning",1},{"root",0}})),harmonic(withVoices(0,{{"tuning",4},{"root",0}}));
+        renderKeys(ji,{keyEvent(64,true),keyEvent(67,true)},.05);
+        renderKeys(harmonic,{keyEvent(61,true),keyEvent(72,true)},.05);
+        auto bendFor=[](const Runtime& r,int key){for(int v=0;v<maximumVoices;++v)if(r.voiceNote(v).gate&&r.voiceNote(v).midi==key)return r.voiceNote(v).bend;return 99.f;};
+        check(std::abs(bendFor(ji,64)-float(12*std::log2(1.25)-4))<1e-4f,"5-limit major third is 5/4");
+        check(std::abs(bendFor(ji,67)-float(12*std::log2(1.5)-7))<1e-4f,"5-limit fifth is 3/2");
+        check(std::abs(bendFor(harmonic,61)-float(12*std::log2(9./8)-1))<1e-4f,"Harmonic series: next key is partial 9");
+        check(std::abs(bendFor(harmonic,72)-float(12*std::log2(20./8)-12))<1e-4f,"Harmonic series is not octave-repeating");
+    }
+    // Released voices go to sleep once silent; held voices stay awake.
+    {
+        Runtime r(padPatch(1));
+        renderKeys(r,{keyEvent(60,true),keyEvent(64,true),keyEvent(67,true)},1);
+        check(r.awakeVoices()==3,"Only the three played voices are processed");
+        renderKeys(r,{keyEvent(60,false),keyEvent(64,false),keyEvent(67,false)},20);
+        check(r.awakeVoices()==0,"Released voices sleep after their tails fall silent");
+    }
+    // Xpander pole mixing: LP4 equals the classic 4-pole; every mode stays bounded.
+    {
+        std::vector<float> noise(48000);uint32_t s=11;for(auto& x:noise){s=s*1664525u+1013904223u;x=float(s>>8)/8388608.f-1.f;}
+        Note n{60,.8f,true,true};
+        check(runModule({"f","analog.filter",{{"poles",1},{"resonance",.5f}}},48000,n,0,noise)==runModule({"f","analog.filter",{{"pole_mix",1},{"resonance",.5f}}},48000,n,0,noise),"Xpander LP 4 equals the classic 4-pole");
+        auto lowBand=[](const std::vector<float>& x){double a=0,b=0,e=0;for(float v:x){a+=(v-a)*.013;b+=(a-b)*.013;e+=b*b;}return e;};
+        const auto lp1=runModule({"f","analog.filter",{{"pole_mix",4},{"cutoff_hz",2000}}},48000,n,0,noise),hp1=runModule({"f","analog.filter",{{"pole_mix",7},{"cutoff_hz",2000}}},48000,n,0,noise);
+        check(lowBand(lp1)>4*lowBand(hp1),"Xpander HP 1 removes the low end that LP 1 keeps");
+        std::vector<float> impulse(48000);impulse[10]=1;
+        bool bounded=true;
+        for(int mode=1;mode<=15;++mode)for(float res:{0.f,1.f}){
+            const auto y=runModule({"f","analog.filter",{{"pole_mix",float(mode)},{"resonance",res}}},48000,n,0,mode%2?noise:impulse);
+            for(float v:y)bounded&=std::isfinite(v)&&std::abs(v)<6.f;
+        }
+        check(bounded,"All 15 Xpander modes stay finite and bounded at zero and full resonance");
+    }
+    // Quality levels agree in the passband.
+    {
+        std::vector<float> tone(48000);for(size_t i=0;i<tone.size();++i)tone[i]=.5f*std::sin(float(i)*2*3.14159265f*200/48000);
+        Note n{60,.8f,true,true};
+        double level[3];
+        for(int q=0;q<3;++q)level[q]=rms(runModule({"f","analog.filter",{{"cutoff_hz",2000},{"quality",float(q)}}},48000,n,0,tone),4800);
+        check(std::abs(20*std::log10(level[0]/level[1]))<1&&std::abs(20*std::log10(level[2]/level[1]))<1,"Draft, normal and high quality agree within 1 dB in the passband");
+    }
+    // Sixteen voices with unison: cost of the busiest pad starter.
+    {
+        Runtime r(padPatch(2));
+        NoteEventBlock keys;keys.begin(quantum);for(int k:{48,55,60,64,67,71,74,79})keys.push(keyEvent(k,true));
+        std::array<float,quantum> l{},rr{};
+        r.render(l.data(),rr.data(),quantum,Note{},nullptr,&keys);
+        allocations=0;watchAllocations=true;
+        const auto start=std::chrono::steady_clock::now();
+        for(int i=0;i<48000*10/quantum;++i)r.render(l.data(),rr.data(),quantum,Note{});
+        const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+        watchAllocations=false;
+        check(allocations==0&&r.awakeVoices()==16,"Sixteen unison voices render without allocation");
+        std::printf("Xpander pad: 16 voices (8 keys x unison 2) + chorus + reverb, 10 s audio in %.3f s (%.2f%% of one core)\n",seconds,seconds*10);
+    }
+}
 void analogChecks(){
     // Voice allocation from keyboard events.
     {
@@ -65,6 +156,9 @@ void analogChecks(){
         for(auto& n:g.nodes){if(n.id=="voices")n.parameters={{"voices",2},{"level",.5f}};if(n.id=="filter_env")n.parameters={{"attack",.001f},{"sustain",1}};
             if(n.id=="amp_env")n.parameters={{"attack",.001f},{"sustain",1}};}
         g.modulations.clear();
+        // Poly-mod PWM creates near-DC beating that passes even a closed filter; isolate knob sharing.
+        g.nodes.erase(std::remove_if(g.nodes.begin(),g.nodes.end(),[](const NodeSpec& n){return n.id=="polymod";}),g.nodes.end());
+        g.connections.erase(std::remove_if(g.connections.begin(),g.connections.end(),[](const Connection& c){return c.source.node=="polymod"||c.destination.node=="polymod";}),g.connections.end());
         Runtime open(g),closed(g);
         closed.controls("filter")->values[0].store(20);closed.controls("filter")->values[5].store(-6);
         renderKeys(open,{},.1);renderKeys(closed,{},.1);   // let the 5 ms knob smoothing settle first
@@ -107,6 +201,7 @@ void analogChecks(){
         check(seconds<10*.25,"Eight-voice pad renders well under real time");
         std::printf("Analog pad: 8 voices + chorus + reverb, 10 s audio in %.3f s (%.2f%% of one core)\n",seconds,seconds*10);
     }
+    voiceFeatureChecks();
     // VCO tuning and per-voice drift.
     {
         Note a4{69,.8f,true,true};
