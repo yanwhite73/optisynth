@@ -9,7 +9,7 @@ in [AGENTS](../AGENTS.md#build-delivery-discipline) and
 
 Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
-Polyphony and analog pad modules: [voice-group contract](architecture/VOICE_GROUPS.md).
+Polyphony and analog pad modules: [voice-group contract](architecture/VOICE_GROUPS.md); [performance lessons from Arturia, Diva and Korg](research/platforms/PERFORMANCE_QUALITY_LESSONS.md).
 Current sequencer implementation: [Probability and Orbit](architecture/REFERENCE_SEQUENCERS.md)
 with [native visual evidence](ui/REFERENCE_SEQUENCERS_REVIEW.md), [four-track Performance sequencer](architecture/PERFORMANCE_SEQUENCER.md),
 [Pattern / Motion](architecture/PATTERN_MOTION.md), and the

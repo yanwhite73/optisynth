@@ -887,3 +887,27 @@ The first 0.0.11 build's `previous_app` was null. Xcode removed the 0.0.10
 bundle as a stale output before the delivery helper could archive it; 0.0.10 is
 rebuildable from 82d32f9. The concurrent session has since changed delivery to
 keep the installed app in place (5087d57).
+
+## Requests 64–65: pad-voice features and engineering lessons — 19 November 2026 (Claude session)
+
+**Evidence.** Arturia XML resources (data only), Diva documentation and demangled
+wavestate Native symbol names (already extracted; nothing run or copied) shaped
+the design. Korg's engine design shows cost-budgeted voices, cost-balanced
+voice-vector threads, level-sorted stealing, staggered starts and TPT filters.
+Adopted now: sleeping voices, quietest-voice stealing, unison clusters, an
+optional Steal switch, glide, quality levels, a DSP meter. Deferred with
+reasons: threading, SIMD, CPU-budget stealing.
+
+**Bugs found by checks before delivery:**
+- Sleeping voices left knob smoothing stale, which produced a filter glide burst
+  on wake. Fixed with a `wake()` hook that snaps smoothing.
+- A woken pulse wave started with a DC step, heard as a thump through a closed
+  filter. Fixed by making the pulse zero-mean at the source.
+- One edit swallowed a statement into a comment, so note-offs could no longer
+  find their voices. The release check caught it.
+
+**Lessons:**
+- After adding an optimisation that pauses processing, run the existing
+  behavioural checks before trusting it. Every pause boundary hides state.
+- Starter IDs are shared with the concurrent session's menu: map new starters
+  explicitly rather than by range.

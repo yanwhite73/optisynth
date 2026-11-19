@@ -1,5 +1,23 @@
 # Optisynth status — 19 November 2026
 
+## 0.0.15 pad voice: 16 voices, glide, unison, tuning, Xpander modes — requests 64–65
+
+- **Voice mixer:** up to 16 voices, unison 1–8 with detune, glide, a Steal
+  switch, and tuning (Equal, Just 5-limit, Just 7-limit, Pythagorean,
+  non-octave Harmonic series) with a root note.
+- **OB filter:** Xpander's 15 pole-mixing modes, and quality at 1×, 2× or 4×
+  oversampling.
+- **Poly-mod:** a new Prophet-style module for per-voice FM, PWM and filter.
+- **Voice handling:** released silent voices sleep, and stealing takes the
+  quietest held voice.
+- **DSP meter:** load is shown beside the transport position.
+- **New starters:** Pad / Xpander mode, unison + glide; and Pad / Just-intonation
+  harmonic drone. The Prophet pad now uses poly-mod.
+- **Background:** the engineering choices draw on Arturia, Diva and Korg
+  wavestate evidence; see
+  [PERFORMANCE_QUALITY_LESSONS.md](../research/platforms/PERFORMANCE_QUALITY_LESSONS.md).
+  Contract: [VOICE_GROUPS.md](../architecture/VOICE_GROUPS.md).
+
 ## 0.0.14 analog pad voice qualification — requests 57–58
 
 Polyphonic voice groups, the analog VCO, OB filter, CEM-style envelope, OTA VCA,
