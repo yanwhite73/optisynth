@@ -3,6 +3,7 @@
 #include "../src/modular/rack.h"
 #include "../src/modular/sequencer.h"
 #include "../src/modular/pattern.h"
+#include "PerformanceStateIO.h"
 #include <set>
 
 namespace optisynth {
@@ -18,6 +19,26 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==13||which==14){
+        auto d=starterDocument(11,gain);d.tempo=which==13?104:118;
+        auto data=std::make_shared<PerformanceData>(defaultPerformance());
+        if(which==14){data->seed=8107;for(auto& track:data->tracks)for(auto& p:track.patterns){p.traversal=3;p.root=2;p.swing=.12f;}data->tracks[2].name="Chimes";}
+        for(auto& p:data->tracks[3].patterns)for(auto& s:p.steps)s.pitch=48;
+        d.graph.nodes={{"sequence","seq.performance",{},data},{"bass","osc.variable",{{"shape",.3f},{"level",.28f}}},
+            {"bass_env","spectral.adsr",{{"attack",.003f},{"decay",.19f},{"sustain",.35f},{"release",.2f}}},
+            {"bass_filter","mutable.lowpass",{{"cutoff_hz",900},{"resonance",1.8f},{"env_octaves",2}}},{"bass_vca","utility.vca",{}},
+            {"spectral","spectral.engine",{}},{"glass","modal.voice",{{"structure",.45f},{"brightness",.45f},{"decay",.35f}}},
+            {"drum","drum.analog",{{"decay",.2f},{"attack_fm",.22f}}},
+            {"rhythm_mix","utility.mix",{{"gain_a",.5f},{"gain_b",.35f}}},{"voice_mix","utility.mix",{{"gain_a",.7f},{"gain_b",.5f}}},
+            {"pair","utility.stereo",{}},{"output","utility.stereo_mix",{{"gain_a",.7f},{"gain_b",.6f}}}};
+        d.graph.connections={{{"sequence","t1_notes"},{"bass","notes"}},{{"sequence","t1_notes"},{"bass_env","notes"}},{{"sequence","t1_bend"},{"bass","bend"}},
+            {{"bass","out"},{"bass_filter","in"}},{{"bass_env","out"},{"bass_filter","mod"}},{{"bass_filter","out"},{"bass_vca","in"}},{{"bass_env","out"},{"bass_vca","gain"}},
+            {{"sequence","t2_notes"},{"spectral","notes"}},{{"sequence","t3_notes"},{"glass","notes"}},{{"sequence","t4_notes"},{"drum","notes"}},
+            {{"glass","out"},{"rhythm_mix","a"}},{{"drum","out"},{"rhythm_mix","b"}},{{"bass_vca","out"},{"voice_mix","a"}},{{"rhythm_mix","out"},{"voice_mix","b"}},
+            {{"voice_mix","out"},{"pair","left"}},{{"voice_mix","out"},{"pair","right"}},{{"pair","out"},{"output","a"}},{{"spectral","out"},{"output","b"}}};
+        d.graph.modulations={{{"sequence","t1_cv"},{"bass_filter","cutoff_hz"},.08f},{{"sequence","t2_cv"},{"spectral","osc1_filter_cutoff"},.09f},{{"sequence","t3_cv"},{"glass","brightness"},.15f},{{"sequence","t4_cv"},{"drum","tone"},.12f}};
+        d.graph.outputs={{"output","out"}};return d;
+    }
     if(which==11||which==12){
         RackDocument d;d.gain=gain;d.tempo=which==11?96:112;
         auto sound=spectralDemoPatch();sound.name=which==11?"Motion / Night current":"Motion / Glass tide";
@@ -112,7 +133,7 @@ inline Endpoint readEndpoint(const juce::var& v) {
     return {identifier(v["node"]),identifier(v["port"])};
 }
 inline juce::var rackJSON(const RackDocument& document) {
-    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",4);root->setProperty("gain",document.gain);root->setProperty("tempo",document.tempo);
+    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",5);root->setProperty("gain",document.gain);root->setProperty("tempo",document.tempo);
     auto* assets=new juce::DynamicObject;
     for(const auto& s:document.samples){auto* ref=new juce::DynamicObject;ref->setProperty("path",juce::String(s.second.path));ref->setProperty("fingerprint",juce::String(s.second.fingerprint));assets->setProperty(juce::Identifier(s.first),juce::var(ref));}
     root->setProperty("samples",juce::var(assets));
@@ -126,14 +147,16 @@ inline juce::var rackJSON(const RackDocument& document) {
     for(const auto& n:document.graph.nodes) {
         auto* node=new juce::DynamicObject;node->setProperty("id",juce::String(n.id));node->setProperty("type",juce::String(n.type));
         auto* params=new juce::DynamicObject;for(const auto& p:n.parameters)params->setProperty(juce::Identifier(juce::String(p.first)),p.second);
-        node->setProperty("parameters",juce::var(params));nodes.add(node);
+        node->setProperty("parameters",juce::var(params));
+        if(n.type=="seq.performance")node->setProperty("performance",performanceJSON(n.performance?*n.performance:defaultPerformance()));
+        nodes.add(node);
     }
     for(const auto& c:document.graph.connections){auto* link=new juce::DynamicObject;link->setProperty("from",endpointJSON(c.source));link->setProperty("to",endpointJSON(c.destination));links.add(link);}
     for(const auto& e:document.graph.outputs)outputs.add(endpointJSON(e));
     root->setProperty("nodes",nodes);root->setProperty("connections",links);root->setProperty("outputs",outputs);return root;
 }
 inline RackDocument readRack(const juce::var& value) {
-    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>4)throw std::invalid_argument("Unsupported patch version");
+    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>5)throw std::invalid_argument("Unsupported patch version");
     RackDocument d;d.gain=number(value["gain"]);
     if(int(value["version"])>=4){d.tempo=number(value["tempo"]);if(d.tempo<20||d.tempo>300)throw std::invalid_argument("Tempo outside range");}
     if(d.gain<0||d.gain>1)throw std::invalid_argument("Output gain outside range");
@@ -161,6 +184,8 @@ inline RackDocument readRack(const juce::var& value) {
             NodeSpec n{identifier(v["id"]),identifier(v["type"]),{}};
             auto* params=v["parameters"].getDynamicObject();if(!params)throw std::invalid_argument("Missing node parameters");
             for(const auto& p:params->getProperties())n.parameters.push_back({p.name.toString().toStdString(),number(p.value)});
+            if(n.type=="seq.performance")n.performance=readPerformance(v["performance"]);
+            else if(v.hasProperty("performance"))throw std::invalid_argument("Performance data on incompatible module");
             d.graph.nodes.push_back(std::move(n));
         }
         for(const auto& v:*links)d.graph.connections.push_back({readEndpoint(v["from"]),readEndpoint(v["to"])});

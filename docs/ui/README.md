@@ -1,5 +1,7 @@
 # Interface and visual research
 
+- [Performance sequencer: actual native editor and visual checks](PERFORMANCE_REVIEW.md):
+  four-track pattern/chain views, interaction evidence and minimum-size captures.
 - [Contextual rack panels and modulation UI](CONTEXTUAL_UI.md): the approved
   Matriarch-inspired direction, existing implementation and Pigments suggestion.
 - [Sequencer modes, shared UI and specialist editors](SEQUENCER_UI_ARCHITECTURE.md):

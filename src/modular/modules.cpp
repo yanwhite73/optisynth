@@ -1,5 +1,6 @@
 #include "runtime.h"
 #include "sequencer.h"
+#include "performance.h"
 #include "../core/envelope.h"
 #include "../core/effects.h"
 #include "plaits/dsp/drums/analog_bass_drum.h"
@@ -67,6 +68,7 @@ const std::vector<Panel>& panels() {
             {"cutoff_hz","Cutoff","Hz",20,20000,2500,true},
             {"resonance","Resonance","Q",.5f,20,.707f,true},
             {"env_octaves","Mod amount","oct",-6,6,2}}});
+        p.push_back(performancePanel());
         Panel spectral{"spectral.engine","Spectral engine","Complete instrument / stereo / latest-voice modulation outputs","engine",{}};
         for(const auto& s:partials::liveControlSpecs())spectral.parameters.push_back({s.id,s.name,s.unit,s.minimum,s.maximum,s.initial,s.logarithmic});
         spectral.parameters.push_back({"tempo","Tempo","BPM",20,300,120,false,.1});p.push_back(std::move(spectral));
@@ -117,8 +119,9 @@ public:
     const Panel& definition;
     std::array<float,maxParameters> values{};
 };
-float noteFrequency(const AudioBlock& b,float transpose) {
-    return std::clamp(440.f*std::exp2((b.note.midi+transpose-69.f)/12.f)/48000.f,8.f/48000,.24f);
+float noteFrequency(const AudioBlock& b,float transpose,bool useBend=false) {
+    const float bend=useBend&&b.inputs&&b.inputs[0]?b.inputs[0][0]*48.f:0.f;
+    return std::clamp(440.f*std::exp2((b.note.midi+transpose+bend-69.f)/12.f)/48000.f,8.f/48000,.24f);
 }
 class SamplePlayer final : public Module {
 public:
@@ -152,7 +155,7 @@ class VariableOsc final : public Module {
 public:
     explicit VariableOsc(const NodeSpec& n):Module(n){osc.Init();}
     void process(const AudioBlock& b) noexcept override {
-        update(b);const float f=noteFrequency(b,values[0]);
+        update(b);const float f=noteFrequency(b,values[0],true);
         if(values[3]<=1.00001f)osc.Render(f,values[2],values[1],b.outputs[0],b.frames);
         else osc.Render(f,std::min(.249f,f*values[3]),values[2],values[1],b.outputs[0],b.frames);
         for(int i=0;i<b.frames;++i)b.outputs[0][i]*=values[4];
@@ -163,7 +166,7 @@ class Sine final : public Module {
 public:
     explicit Sine(const NodeSpec& n):Module(n){osc.Init();}
     void process(const AudioBlock& b) noexcept override {
-        update(b);osc.Render(noteFrequency(b,values[0]),b.outputs[0],b.frames);
+        update(b);osc.Render(noteFrequency(b,values[0],true),b.outputs[0],b.frames);
         for(int i=0;i<b.frames;++i)b.outputs[0][i]*=values[1];
     }
 private:plaits::SineOscillator osc;
@@ -312,12 +315,15 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
         if (p.family=="filter") type.inputs={{"in",SignalType::Audio,true},{"mod",SignalType::Control,false}};
         if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,true},{"gain",SignalType::Control,true}};
         if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
+        if(id=="osc.variable"||id=="osc.sine")type.inputs.push_back({"bend",SignalType::Control,false});
         if(p.family=="source"||p.family=="envelope"||p.family=="engine"||p.family=="resonator"||id=="mod.lfo")type.inputs.push_back({"notes",SignalType::Event,false});
         if(isSequencer(id))type.outputs={{"notes",SignalType::Event}};
         if(id=="seq.pattern"){type.outputs.push_back({"cv1",SignalType::Control});type.outputs.push_back({"cv2",SignalType::Control});}
+        if(id=="seq.performance"){type.outputs.clear();for(int t=1;t<=4;++t){const auto prefix="t"+std::to_string(t)+"_";type.outputs.push_back({prefix+"notes",SignalType::Event});for(const char* name:{"gate","bend","cv"})type.outputs.push_back({prefix+name,SignalType::Control});}}
         type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
             if(isSequencer(id))return makeSequencer(n);
+            if(id=="seq.performance")return makePerformance(n);
             if(id=="sample.player"){auto it=assets.find(n.id);return std::make_unique<SamplePlayer>(n,it==assets.end()?SamplePtr{}:it->second);}
             if(id=="spectral.engine"){auto it=engines.find(n.id);return makeSpectral(n,it==engines.end()?SpectralPtr{}:it->second);}
             if(id=="mod.lfo")return std::make_unique<Lfo>(n);

@@ -1,5 +1,6 @@
 #pragma once
 #include "runtime.h"
+#include "performance.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -8,6 +9,7 @@ namespace optisynth {
 // UI/loader helpers. Validate dormant parameters too, without constructing DSP.
 inline void validateRack(const GraphSpec& g) {
     for(const auto& node:g.nodes) {
+        if(node.performance){if(node.type!="seq.performance")throw std::invalid_argument("Performance banks on incompatible module");validatePerformance(*node.performance);}
         const auto& p=panel(node.type);
         for(const auto& value:node.parameters) {
             auto it=std::find_if(p.parameters.begin(),p.parameters.end(),[&](const Parameter& x){return x.id==value.first;});

@@ -10,6 +10,8 @@
 
 namespace optisynth {
 
+struct PerformanceData;
+
 enum class SignalType { Audio, Control, Event };
 enum class Scope { Voice, Global };
 struct Port {
@@ -21,6 +23,11 @@ struct Port {
 struct NodeSpec {
     std::string id, type;
     std::vector<std::pair<std::string, float>> parameters;
+    std::shared_ptr<const PerformanceData> performance;
+    NodeSpec() = default;
+    NodeSpec(std::string name,std::string model,std::vector<std::pair<std::string,float>> values,
+             std::shared_ptr<const PerformanceData> banks={})
+        :id(std::move(name)),type(std::move(model)),parameters(std::move(values)),performance(std::move(banks)){}
 };
 struct Endpoint { std::string node, port; };
 struct Connection { Endpoint source, destination; };

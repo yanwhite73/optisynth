@@ -1,6 +1,53 @@
 # Optisynth status — 19 November 2026
 
-## Request 53 — Stable app delivery
+## Current delivery — request 54, Performance sequencer, 0.0.9
+
+The stable app is **`app/Builds/MacOSX/build/Release/Optisynth.app`**. It now
+contains the signed 0.0.9 build and opens the Four currents performance rack and
+editor with audio off. The previous 0.0.8 bundle is preserved under
+`build/app-archive/20261119T145353.389402Z-0.0.8/Optisynth.app`.
+
+Implemented from the PER|FORMER/Foundry workflow studies: four independent tracks,
+eight 64-step patterns each, separate note/gate/bend/CV outputs, queued/cancellable
+boundary launches, sixteen repeating chain rows, individual rates/lengths,
+ties/slides/ratchets/conditions, mute/solo/reset/fill/transpose, protected variation
+preview, clipboard and scoped undo/redo. The contextual editor keeps selection,
+playing and queued states distinct. Four currents and Clockwork garden connect
+four audible destinations and CV assignments. There are 27 module types and 15
+starters. Rack v5 embeds all banks/chains and reads prior versions.
+
+- **Engine checks:** 251 pass normally and under ASan/UBSan, including independent
+  output buses, exact launch/chain timing, tied pitch motion, stop ownership,
+  callback-size independence and no render allocations.
+- **State/audio:** both starters reproduce identical twelve-second stereo audio
+  after full JSON recall; every track produces audio when soloed. Twenty-four
+  second chain WAVs are under `build/performance-*.wav`. No listening claim.
+- **Interface:** real JUCE component interaction checks pass without a desktop
+  window peer. Four screenshots were inspected at 1260×930 and 1120×800. The
+  clipped final chain row and cramped settings in the first capture were fixed.
+  [Visual evidence](../ui/PERFORMANCE_REVIEW.md).
+- **Desktop/Live:** native application startup still aborts before application
+  code in this execution environment. Component testing avoids NSApplication
+  startup and does not establish desktop-window, audio-device or keyboard feel.
+  No Live session was driven and no plugin was installed.
+
+[Controls and source-to-feature mapping](../architecture/PERFORMANCE_SEQUENCER.md),
+[build receipt](../verification/performance_build_receipt.json). The judgment of
+musical usefulness remains Yan's; passing checks does not establish that judgment.
+
+Next verification: open the stable app in the user's desktop, press PLAY and
+exercise bank launching and the chain. No further rebuild is needed for this
+check. Pending product work includes independent held-note arp, specialist
+memory/stochastic/chord models and polyphonic destinations. The older modules
+remain available; this implementation does not claim to cover those families.
+
+Git: base `f003919` includes concurrent classic-synth research and the prior
+delivery commits. The current work is bundled into one scoped commit. GitHub
+lookup still fails (`Could not resolve host: github.com`) inside and outside the
+sandbox. Keep the local source backup; retry the authorised push and verify the
+remote branch head when DNS is restored. See ENGINEERING_LOG for the final receipt.
+
+## Prior delivery — request 53, stable app delivery
 
 Always open `app/Builds/MacOSX/build/Release/Optisynth.app`. It now contains the
 **0.0.8 preview**, with the same signed binary as the Motion build receipt.

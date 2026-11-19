@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<JUCERPROJECT id="OptiApp2" name="Optisynth" projectType="guiapp" version="0.0.8" companyName="Yan White" bundleIdentifier="com.yanwhite.optisynth.app" useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1" defines="TEST=1" headerPath="/Users/yanwhite/Documents/Music docs/Code/optisynth/third_party/mutable">
+<JUCERPROJECT id="OptiApp2" name="Optisynth" projectType="guiapp" version="0.0.9" companyName="Yan White" bundleIdentifier="com.yanwhite.optisynth.app" useAppConfig="0" addUsingNamespaceToJuceHeader="0" cppLanguageStandard="17" jucerFormatVersion="1" defines="TEST=1" headerPath="/Users/yanwhite/Documents/Music docs/Code/optisynth/third_party/mutable">
   <MAINGROUP id="optiappsrc" name="Optisynth">
     <FILE id="optifile0" name="Main.cpp" compile="1" resource="0" file="../app/Main.cpp" />
     <FILE id="optifile1" name="graph.cpp" compile="1" resource="0" file="../src/modular/graph.cpp" />
@@ -7,21 +7,22 @@
     <FILE id="optifile3" name="timing.cpp" compile="1" resource="0" file="../src/modular/timing.cpp" />
     <FILE id="optifile4" name="sequencer.cpp" compile="1" resource="0" file="../src/modular/sequencer.cpp" />
     <FILE id="optifile5" name="pattern.cpp" compile="1" resource="0" file="../src/modular/pattern.cpp" />
-    <FILE id="optifile6" name="spectrum.cpp" compile="1" resource="0" file="../src/core/spectrum.cpp" />
-    <FILE id="optifile7" name="table_bank.cpp" compile="1" resource="0" file="../src/core/table_bank.cpp" />
-    <FILE id="optifile8" name="patch.cpp" compile="1" resource="0" file="../src/core/patch.cpp" />
-    <FILE id="optifile9" name="engine.cpp" compile="1" resource="0" file="../src/core/engine.cpp" />
-    <FILE id="optifile10" name="arp.cpp" compile="1" resource="0" file="../src/core/arp.cpp" />
-    <FILE id="optifile11" name="spectral.cpp" compile="1" resource="0" file="../src/modular/spectral.cpp" />
-    <FILE id="optifile12" name="modules.cpp" compile="1" resource="0" file="../src/modular/modules.cpp" />
-    <FILE id="optifile13" name="sample.cpp" compile="1" resource="0" file="../src/modular/sample.cpp" />
-    <FILE id="optifile14" name="envelope.cpp" compile="1" resource="0" file="../src/core/envelope.cpp" />
-    <FILE id="optifile15" name="effects.cpp" compile="1" resource="0" file="../src/core/effects.cpp" />
-    <FILE id="optifile16" name="modal_voice.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc" />
-    <FILE id="optifile17" name="resonator.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/resonator.cc" />
-    <FILE id="optifile18" name="resources_selected.cc" compile="1" resource="0" file="../third_party/mutable/plaits/resources_selected.cc" />
-    <FILE id="optifile19" name="units.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/dsp/units.cc" />
-    <FILE id="optifile20" name="random.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/utils/random.cc" />
+    <FILE id="optifile6" name="performance.cpp" compile="1" resource="0" file="../src/modular/performance.cpp" />
+    <FILE id="optifile7" name="spectrum.cpp" compile="1" resource="0" file="../src/core/spectrum.cpp" />
+    <FILE id="optifile8" name="table_bank.cpp" compile="1" resource="0" file="../src/core/table_bank.cpp" />
+    <FILE id="optifile9" name="patch.cpp" compile="1" resource="0" file="../src/core/patch.cpp" />
+    <FILE id="optifile10" name="engine.cpp" compile="1" resource="0" file="../src/core/engine.cpp" />
+    <FILE id="optifile11" name="arp.cpp" compile="1" resource="0" file="../src/core/arp.cpp" />
+    <FILE id="optifile12" name="spectral.cpp" compile="1" resource="0" file="../src/modular/spectral.cpp" />
+    <FILE id="optifile13" name="modules.cpp" compile="1" resource="0" file="../src/modular/modules.cpp" />
+    <FILE id="optifile14" name="sample.cpp" compile="1" resource="0" file="../src/modular/sample.cpp" />
+    <FILE id="optifile15" name="envelope.cpp" compile="1" resource="0" file="../src/core/envelope.cpp" />
+    <FILE id="optifile16" name="effects.cpp" compile="1" resource="0" file="../src/core/effects.cpp" />
+    <FILE id="optifile17" name="modal_voice.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc" />
+    <FILE id="optifile18" name="resonator.cc" compile="1" resource="0" file="../third_party/mutable/plaits/dsp/physical_modelling/resonator.cc" />
+    <FILE id="optifile19" name="resources_selected.cc" compile="1" resource="0" file="../third_party/mutable/plaits/resources_selected.cc" />
+    <FILE id="optifile20" name="units.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/dsp/units.cc" />
+    <FILE id="optifile21" name="random.cc" compile="1" resource="0" file="../third_party/mutable/stmlib/utils/random.cc" />
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0" />

@@ -7,6 +7,7 @@
 #include <atomic>
 
 namespace optisynth {
+class PerformanceExchange;
 constexpr int quantum = 24, maxParameters = 768;
 struct Parameter {
     std::string id, label, unit;
@@ -28,6 +29,7 @@ struct Controls {
     std::atomic<bool> stepFired{false};
     // UI batches publish an even revision; audio retains the last complete edit.
     std::atomic<uint64_t> editRevision{0};
+    std::shared_ptr<PerformanceExchange> performance;
 };
 struct RouteControls { std::array<std::atomic<float>,kMaximumModulations> amounts{}; };
 struct Note { int midi = 48; float velocity = .8f; bool gate = false, trigger = false; };
@@ -41,6 +43,7 @@ struct AudioBlock {
     const float* parameters = nullptr;
     const ClockFrame* clock = nullptr;
     NoteEventBlock* events = nullptr;
+    NoteEventBlock* const* eventOutputs = nullptr; // indexed by resolved output port
 };
 class AudioModule : public PreparedModule {
 public:
@@ -78,6 +81,8 @@ private:
         std::vector<Route> routes;
         std::array<float,maxParameters> effective{},offset{},base{},candidate{};
         NoteEventBlock events;
+        std::vector<NoteEventBlock> additionalEvents;
+        std::vector<NoteEventBlock*> eventOutputs;
         const NoteEventBlock* noteInput=nullptr;
         HeldNotes held;
         Note routedNote;

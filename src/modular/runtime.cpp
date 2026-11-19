@@ -29,10 +29,16 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
         for(size_t k=0;k<n.parameters.size();++k)n.base[k]=n.module->controls->values[k].load();
         n.sliceIn.resize(n.in.size());n.sliceRight.resize(n.in.size());
         n.sliceOut.resize(n.out.size());n.sliceOutRight.resize(n.out.size());
+        const auto count=std::count_if(r->outputs.begin(),r->outputs.end(),[](const Port& p){return p.type==SignalType::Event;});
+        n.additionalEvents.resize(count>0?size_t(count-1):0);
+        n.eventOutputs.resize(r->outputs.size(),nullptr);
+        int eventIndex=0;
+        for(size_t p=0;p<r->outputs.size();++p)if(r->outputs[p].type==SignalType::Event)
+            n.eventOutputs[p]=eventIndex++==0?&n.events:&n.additionalEvents[size_t(eventIndex-2)];
     }
     for (const auto& c : graph_.plan.connections) {
         if(c.type==SignalType::Event){
-            nodes_[c.destination.node].noteInput=&nodes_[c.source.node].events;continue;
+            nodes_[c.destination.node].noteInput=nodes_[c.source.node].eventOutputs[size_t(c.source.port)];continue;
         }
         nodes_[c.destination.node].in[c.destination.port] = nodes_[c.source.node].out[c.source.port];
         nodes_[c.destination.node].inRight[c.destination.port] = nodes_[c.source.node].outRight[c.source.port];
@@ -61,6 +67,7 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
         const auto* time=clockFrames?clockFrames:localClock.data();
         for (auto& node : nodes_) {
             node.events.begin(n);
+            for(auto& bus:node.additionalEvents)bus.begin(n);
             for (auto* p : node.out) std::fill_n(p, n, 0.f);
             for (auto* p : node.outRight) std::fill_n(p,n,0.f);
             std::fill_n(node.offset.data(),node.parameters.size(),0.f);
@@ -83,7 +90,7 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
                     base*std::exp(offset*std::log(p.maximum/p.minimum)):base+offset*(p.maximum-p.minimum);
                 node.effective[i]=std::clamp(value,p.minimum,p.maximum);
             }
-            if(!node.noteInput)node.module->process({n,note,node.in.data(),node.out.data(),node.inRight.data(),node.outRight.data(),node.effective.data(),time,&node.events});
+            if(!node.noteInput)node.module->process({n,note,node.in.data(),node.out.data(),node.inRight.data(),node.outRight.data(),node.effective.data(),time,&node.events,node.eventOutputs.data()});
             else {
                 const auto& bus=*node.noteInput;node.held.beginBlock(bus);
                 if(bus.failed()){node.routedNote.gate=false;node.routedNote.trigger=false;}

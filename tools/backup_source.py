@@ -25,9 +25,10 @@ FILES = (
     'optisynth/plugin/Tests/StressTest.cpp', 'optisynth/plugin/Tests/PresetExport.h',
     'optisynth/app/Main.cpp', 'optisynth/app/OptisynthApp.jucer',
     'optisynth/app/Panel.h', 'optisynth/app/PatchIO.h', 'optisynth/app/RackEditor.h', 'optisynth/app/SampleLoader.h', 'optisynth/app/ModulationEditor.h', 'optisynth/app/SequencerEditor.h', 'optisynth/app/PatternEditor.h',
+    'optisynth/app/PerformanceEditor.h', 'optisynth/app/PerformanceStateIO.h',
     'optisynth/third_party/mutable/LICENSE-stmlib',
 )
-SUFFIXES = {'.h', '.cpp', '.cc', '.py', '.sh', '.md', '.json', '.optisynth'}
+SUFFIXES = {'.h', '.cpp', '.cc', '.py', '.sh', '.md', '.json', '.optisynth', '.png'}
 
 
 def digest(data):

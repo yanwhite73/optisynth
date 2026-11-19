@@ -20,8 +20,8 @@ public:
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide"};
-        for(i=0;i<13;++i)starter.addItem(names[i],i+1);
+        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden"};
+        for(i=0;i<15;++i)starter.addItem(names[i],i+1);
         starter.setTextWhenNothingSelected("Starter patches");
         starter.onChange=[this]{if(!refreshing&&starter.getSelectedId()>0)commit(starterDocument(starter.getSelectedId()-1,document.gain),starter.getSelectedId()>=9?"sequence":"source");};
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
@@ -61,7 +61,7 @@ public:
     void releaseResources() override {}
     void showSampleDemo(){starter.setSelectedId(5,sendNotificationSync);}
     void showSpectralDemo(){starter.setSelectedId(7,sendNotificationSync);}
-    void showSequencerDemo(){openPatternWhenReady=true;starter.setSelectedId(12,sendNotificationSync);}
+    void showSequencerDemo(){openPerformanceWhenReady=true;starter.setSelectedId(14,sendNotificationSync);}
     void getNextAudioBlock(const AudioSourceChannelInfo& block) override {
         if(block.buffer->getNumChannels()<1)return;
         if(block.buffer->getNumChannels()>1)converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.buffer->getWritePointer(1,block.startSample),block.numSamples);
@@ -70,7 +70,7 @@ public:
     }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.8",25,53,300,20,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  0.0.9",25,53,300,20,Justification::centredLeft);
         const int right=getWidth()-324;
         g.setColour(paper);g.setFont(font(12));
         g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
@@ -293,7 +293,7 @@ private:
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
     std::unique_ptr<FileChooser> chooser;
-    bool refreshing=false,running=false,openPatternWhenReady=false;
+    bool refreshing=false,running=false,openPatternWhenReady=false,openPerformanceWhenReady=false;
     int bodyBottom() const {return getHeight()-185;}
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
@@ -326,7 +326,20 @@ private:
             safe->chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles,[safe,id](const FileChooser& c){if(safe&&c.getResult()!=File())safe->loadSpectral(id,c.getResult());});
         };
     }
-    void bindSequencePanel(ModulePanel& panel){if(panel.sequence){panel.sequence->getTempo=[this]{return double(document.tempo);};panel.sequence->changeTempo=[this](double value){tempo.setValue(value,sendNotificationSync);};panel.sequence->onPlay=[this]{if(!running)toggleAudio();if(running){player.playing.store(!player.playing.load());updateTransport();}};panel.sequence->onRestart=[this]{player.restart();};}}
+    void bindSequencePanel(ModulePanel& panel){
+        const auto playAction=[this]{if(!running)toggleAudio();if(running){player.playing.store(!player.playing.load());updateTransport();}};
+        if(panel.sequence){panel.sequence->getTempo=[this]{return double(document.tempo);};panel.sequence->changeTempo=[this](double value){tempo.setValue(value,sendNotificationSync);};panel.sequence->onPlay=playAction;panel.sequence->onRestart=[this]{player.restart();};}
+        if(panel.performance){const auto id=panel.instance;auto* view=panel.performance.get();
+            for(const auto& n:document.graph.nodes)if(n.id==id)view->setData(n.performance?*n.performance:defaultPerformance());
+            view->getTempo=[this]{return double(document.tempo);};view->changeTempo=[this](double value){tempo.setValue(value,sendNotificationSync);};view->onPlay=playAction;view->onRestart=[this]{player.restart();};
+            view->dataChanged=[this,id](const PerformanceData& data){cancelLoading();validatePerformance(data);auto saved=std::make_shared<const PerformanceData>(data);
+                for(auto& n:document.graph.nodes)if(n.id==id)n.performance=saved;
+                if(auto handle=handles[id])if(handle->performance)handle->performance->publish(data);
+                if(auto* p=hardware.find(id))if(p->performance)p->performance->setData(data);
+                if(editor.instance==id&&editor.performance)editor.performance->setData(data);
+            };
+        }
+    }
     void rebuildHardware() {
         hardware.clear();
         for(const auto& node:document.graph.nodes){
@@ -344,7 +357,7 @@ private:
         }
     }
     bool replaceModule(const std::string& id,const std::string& nextType) {
-        auto next=document;for(auto& n:next.graph.nodes)if(n.id==id){n.type=nextType;n.parameters.clear();}return commit(std::move(next),id);
+        auto next=document;for(auto& n:next.graph.nodes)if(n.id==id){n.type=nextType;n.parameters.clear();if(nextType!="seq.performance")n.performance.reset();}return commit(std::move(next),id);
     }
     void applySocketChoice(const std::string& node,const Port& port,bool isOutput,int result,const std::vector<Endpoint>& endpoints) {
         if(result==0)return;auto next=document;
@@ -482,7 +495,9 @@ private:
     void updateTransport(){
         const bool active=player.playing.load();play.setButtonText(active?"Stop seq":"Play seq");
         if(editor.sequence)editor.sequence->setTransportActive(active);
+        if(editor.performance)editor.performance->setActive(active);
         for(auto& panel:hardware.modules)if(panel->sequence)panel->sequence->setTransportActive(active);
+        for(auto& panel:hardware.modules)if(panel->performance)panel->performance->setActive(active);
         const double beat=player.beat.load();position.setText(String(int(beat/4)+1)+" : "+String(std::fmod(beat,4)+1,1)+(running?"":" / audio off"),dontSendNotification);
     }
     void handleNoteOn(MidiKeyboardState*,int,int note,float) override {held.erase(std::remove(held.begin(),held.end(),note),held.end());held.push_back(note);player.note(note,true);}
@@ -490,6 +505,7 @@ private:
     void timerCallback() override {
         player.collect();collectSamples();
         if(openPatternWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->sequence){card->sequence->openPerformanceEditor();openPatternWhenReady=false;}}
+        if(openPerformanceWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->performance){card->performance->openEditor();openPerformanceWhenReady=false;}}
         updateTransport();
         auto* focus=juce::Component::getCurrentlyFocusedComponent();
         bool textEditing=false;for(auto* c=focus;c;c=c->getParentComponent())if(dynamic_cast<TextEditor*>(c)||dynamic_cast<ComboBox*>(c))textEditing=true;
@@ -497,6 +513,8 @@ private:
         const bool caps=(CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState)&kCGEventFlagMaskAlphaShift)!=0;
         bool noteFocus=hasKeyboardFocus(true)||(editor.sequence&&editor.sequence->performanceHasFocus());
         for(const auto& card:hardware.modules)noteFocus|=card->sequence&&card->sequence->performanceHasFocus();
+        noteFocus|=editor.performance&&editor.performance->hasEditorFocus();
+        for(const auto& card:hardware.modules)noteFocus|=card->performance&&card->performance->hasEditorFocus();
         const bool enabled=caps&&Process::isForegroundProcess()&&noteFocus&&!textEditing&&!mods.isCommandDown()&&!mods.isCtrlDown()&&!mods.isAltDown();
         std::array<bool,18> down{};for(size_t i=0;i<down.size();++i)down[i]=KeyPress::isKeyCurrentlyDown(TypingKeyboard::keys[i]);
         typing.update(enabled,down,KeyPress::isKeyCurrentlyDown('Z'),KeyPress::isKeyCurrentlyDown('X'),[this](int n){keys.noteOn(1,n,.8f);},[this](int n){keys.noteOff(1,n,0);});

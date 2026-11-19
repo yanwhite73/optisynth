@@ -24,28 +24,35 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 - [Open-source delay/reverb candidates](docs/research/modules/OPEN_SOURCE_DELAY_REVERB.md)
 - [Source snapshot provenance](docs/verification/source_snapshot_20261117.json)
 
-## Pattern / Motion preview — 0.0.8
+## Four-track Performance sequencer — 0.0.9
 
-The new 64-step Pattern performance editor adds independent pitch, velocity and
-CV loops, conditions, probability, ratchets, swing, scale/keyboard transpose,
-drawing, undo/redo, clipboard and protected generation. Try **Motion / Night
-current** or **Motion / Glass tide**, then open the Pattern performance editor.
-[Controls and playback contract](docs/architecture/PATTERN_MOTION.md).
+The Performance module has four independent tracks, eight 64-step patterns per
+track, quantized pattern launch and a sixteen-row phrase chain. Each track has
+separate note, gate, pitch-bend and CV outputs. Pattern lengths/rates, ties,
+slides, ratchets, conditions, probability, mute/solo/fill, protected variations
+and scoped undo/redo support editing and performing a multi-part patch.
+[Controls, research mapping and limits](docs/architecture/PERFORMANCE_SEQUENCER.md).
+
+The app opens **Performance / Four currents** and its editor, with audio off.
+Press **PLAY**. Click a bank to edit it; its triangle queues playback. **CHAIN**
+opens the arrangement. **Performance / Clockwork garden** is the second starter.
+The earlier Pattern / Motion, Euclidean and Stage modules remain available.
 
 Always open [Optisynth](app/Builds/MacOSX/build/Release/Optisynth.app).
-That stable delivery location now contains the 0.0.8 preview. Core tests and
-stereo preset recall pass; native UI execution/visual qualification remains
-pending. The adjacent `Optisynth-build.json` records the exact version, binary
-hash, test status and previous-app archive. See [STATUS](docs/project/STATUS.md).
+That stable delivery location contains 0.0.9. All 251 modular checks pass normally
+and under ASan/UBSan; full-bank/stereo recall, native component interactions and
+four visual captures pass. Desktop window launch and listening remain unverified
+in the current execution context. The adjacent `Optisynth-build.json` records the
+version, binary hash, checks and previous-app archive. See [STATUS](docs/project/STATUS.md).
 
 ## Current implementation
 
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
 modal percussion, externally excited resonator and bass-drum DSP, plus Mutable's
 digital SVF filters. Spectral AHDSFR/ADSR envelopes and LP/HP/BP/notch filters remain
-interchangeable options. There are 26 module types, including a WAV sample player,
+interchangeable options. There are 27 module types, including a WAV sample player,
 mixer, VCA, complete Spectral engine, independent LFO and stereo utilities.
-Pattern, Euclidean and Stage sequencers share an audio clock and route notes to
+Performance, Pattern, Euclidean and Stage sequencers share an audio clock and route notes to
 independent destinations. [Sequencer contract](docs/architecture/FIRST_SEQUENCERS.md).
 Only output-reachable modules are constructed. Audio/control buffers and numeric
 bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
@@ -91,7 +98,7 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the thirteen starter patches; edit their panels directly or select a panel
+octave. Try the fifteen starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a
@@ -115,8 +122,9 @@ ring. Stage widths follow pulse duration; select Repeat, Hold or Rest per stage.
 The pale outline shows selection; the gold marker shows the audio playhead.
 The `notes` output can drive several inputs, for example both an oscillator and
 its envelope. Unpatched `notes` inputs use the keyboard. Destination voices are
-currently monophonic; independent held-note arp, chord modes and arranger remain
-planned. Rack version 4 saves tempo; playback state is transient.
+currently monophonic; independent held-note arp, chord modes and a general rack
+conductor remain planned. Performance supplies its own four-track chain. Rack
+version 5 saves tempo and all pattern banks; playback state is transient.
 
 Choose **Sample into resonator** or **Sample attack + resonator** for built-in
 examples. **Load WAV…** or drop a WAV onto the sample panel, then adjust pitch,

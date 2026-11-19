@@ -34,6 +34,16 @@ launch, quit or replace a running user's process as part of delivery.
 Read the failure/prevention record in `docs/project/ENGINEERING_LOG.md`, request
 53. Capture corrections immediately; a log entry does not fulfil the correction.
 
+## Sequencer product discipline
+
+Request 54 corrects the gap between extensive research and basic implementations.
+Use the saved source/manual/UI studies to define concrete musical operations and
+then exercise them in the actual editor. A feature count, compilation or DSP
+checks cannot establish a mature interface. Keep edit, playing and queued states
+separate, demonstrate complete multi-part patches, and inspect normal/minimum-size
+native captures before delivery. Record omissions explicitly; do not imply that
+one pattern module implements the researched specialist sequencer families.
+
 Use the workspace workload launcher and inherited host rules. Keep offline
 qualification distinct from VST3 packaging/installation and user-performed Live
 verification. Do not drive Live. Retain the independent implementation boundary

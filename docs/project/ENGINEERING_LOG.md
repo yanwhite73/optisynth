@@ -669,3 +669,75 @@ Prevention: AGENTS now specifies the sole delivery path, shared helper, rollback
 and truthful test-status rules. README and STATUS use that path. User corrections
 are recorded verbatim on arrival (including “DISCIPLINE” and the logging question),
 but the request is fulfilled by the workflow correction, not merely its log entry.
+
+## Request 54: modular sequencer depth — 19 November 2026
+
+Failure: despite the saved source/manual/visual research, the earlier delivery
+treated additional step controls and DSP checks as sufficient progress toward a
+sophisticated modular sequencer. Yan rejected both the result and the vague
+promise to improve it. Cost: repeated direction and audition cycles without the
+requested multi-part performance workflow. That product mismatch is established
+by the feedback; no claim is made that testing proves a musical result inspiring.
+
+Correction: implemented a separate four-track Performance module from the
+PER|FORMER/Foundry workflow studies. It has eight 64-step patterns per track,
+sixteen chain rows, boundary launches/cancellation, edit/play/queued separation,
+ties/slides/ratchets/conditions, mute/solo/reset/fill/transpose, preview/apply with
+protected steps, scoped undo and clipboard. Four independent event buses and
+bend/gate/CV outputs reach real destinations. Two four-part starter racks make
+these behaviours available immediately. Existing specialist modules remain.
+
+The architecture avoids thousands of global scalar slots: immutable bank payloads
+are prepared/published off-thread and retired on the message thread. Event buses
+are preallocated per output. Rack v5 serializes inactive banks as well as active
+ones; previous racks remain readable. VA/sine accept bend for tied pitch changes;
+whole Spectral does not yet accept that input.
+
+Qualification: 251 modular checks pass normally and under ASan/UBSan. Tests cover
+independent outputs/rates, exact launch/cancel/chain boundaries, stop/start bank
+retention, note release, ties/glides, callback partitions and zero render
+allocations. Both starters reproduce identical twelve-second stereo audio after
+JSON recall; every solo track produces audio, and 24-second chains are rendered.
+These are offline measurements, not listening or worst-case polyphony benchmarks.
+
+Desktop startup remains unavailable: the standalone aborts before application
+entry, with the same macOS service/account limitations seen previously. Reading
+JUCE startup source identified a useful test boundary: initialize message handling
+and instantiate real editor components without NSApplication/a native window peer.
+That works. Native interaction checks and four actual component captures pass.
+Visual review caught clipped final chain rows and cramped minimum-size settings;
+both were corrected and rechecked. This evidence does not qualify full window
+launch, audio-device interaction or physical keyboard feel.
+
+The signed 0.0.9 binary is delivered through the shared helper to the sole stable
+app path; 0.0.8 is archived. Exact evidence is in
+`../verification/performance_build_receipt.json` and `../ui/PERFORMANCE_REVIEW.md`.
+All project sources were compiled; unchanged JUCE objects were reused through the
+documented direct compiler fallback. The saved receipt's source hashes were
+checked against the finished worktree. No Live action, plugin installation or
+user-process restart occurred.
+
+Final source review also cleared the optional bank payload when replacing a
+Performance node with another module type; otherwise dormant module replacement
+would fail validation. The app was rebuilt after this change. Engine/editor code
+and the reviewed captures are unchanged. The native checker now verifies source
+hashes and selects exactly the generated project's objects, avoiding stale object
+files after a source-list change. Own UI PNG evidence is included in source backups.
+
+Prevention: AGENTS now requires explicit musical operations drawn from the saved
+references, actual editor interaction/normal-and-minimum visual evidence, and
+honest boundaries between implemented and remaining models. Do not close a product
+request merely because a feature list or engine test count increased. Feedback is
+retained verbatim under request 54 and this correction is bundled with its code.
+
+Git preflight: main at `f003919` includes the concurrent classic-synth research;
+those source studies are preserved. GitHub DNS still fails both inside and outside
+the sandbox. Retry the authorised push and verify the remote head when connectivity
+returns; do not force-push. Local snapshot/commit receipts follow below.
+
+Verified independent source backup:
+`../../../backups/optisynth/optisynth-source-20261119-145800.tar.gz` and its
+SHA-256 sidecar, 234 files / 4,788,710 uncompressed bytes. Includes source, patches,
+documentation and the four native UI captures; excludes build products and
+upstream reference downloads. This bookkeeping paragraph and the UI index link
+postdate that snapshot and are retained in the bundled Git commit.

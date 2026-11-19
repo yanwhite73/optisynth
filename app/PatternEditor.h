@@ -168,7 +168,7 @@ private:
 };
 class PatternWindow final:public juce::DocumentWindow {
 public:
-    PatternWindow(PatternEditor* editor):DocumentWindow("Optisynth 0.0.8 / Pattern performance editor",juce::Colour(0xff192729),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1220,850);}
+    PatternWindow(PatternEditor* editor):DocumentWindow("Optisynth / Pattern editor",juce::Colour(0xff192729),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1220,850);}
     void closeButtonPressed()override{setVisible(false);}
 };
 }

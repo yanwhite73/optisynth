@@ -9,7 +9,9 @@ in [AGENTS](../AGENTS.md#build-delivery-discipline) and
 
 Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
-Current sequencer implementation: [Pattern, Euclidean and Stage contract](architecture/FIRST_SEQUENCERS.md).
+Current sequencer implementation: [four-track Performance sequencer](architecture/PERFORMANCE_SEQUENCER.md),
+[Pattern / Motion](architecture/PATTERN_MOTION.md), and the
+[Pattern, Euclidean and Stage foundation](architecture/FIRST_SEQUENCERS.md).
 Sound goals (request 44): [ambient Berlin School and analog pads](project/SOUND_GOALS.md);
 [project review, 19 November](project/PROJECT_REVIEW_20261119.md).
 
