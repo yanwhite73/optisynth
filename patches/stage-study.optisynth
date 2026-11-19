@@ -1,0 +1,119 @@
+{
+  "format": "optisynth.rack",
+  "version": 4,
+  "gain": 0.25,
+  "tempo": 137.5,
+  "samples": {
+  },
+  "spectral": {
+  },
+  "modulations": [],
+  "nodes": [
+    {
+      "id": "sequence",
+      "type": "seq.stage",
+      "parameters": {
+        "step3_pitch": 72.0
+      }
+    },
+    {
+      "id": "source",
+      "type": "osc.variable",
+      "parameters": {
+      }
+    },
+    {
+      "id": "envelope",
+      "type": "spectral.adsr",
+      "parameters": {
+        "attack": 0.003000000026077,
+        "decay": 0.180000007152557,
+        "sustain": 0.349999994039536,
+        "release": 0.119999997317791
+      }
+    },
+    {
+      "id": "filter",
+      "type": "mutable.lowpass",
+      "parameters": {
+        "cutoff_hz": 1200.0,
+        "env_octaves": 2.0,
+        "resonance": 1.200000047683716
+      }
+    },
+    {
+      "id": "vca",
+      "type": "utility.vca",
+      "parameters": {
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": {
+        "node": "source",
+        "port": "out"
+      },
+      "to": {
+        "node": "filter",
+        "port": "in"
+      }
+    },
+    {
+      "from": {
+        "node": "envelope",
+        "port": "out"
+      },
+      "to": {
+        "node": "filter",
+        "port": "mod"
+      }
+    },
+    {
+      "from": {
+        "node": "filter",
+        "port": "out"
+      },
+      "to": {
+        "node": "vca",
+        "port": "in"
+      }
+    },
+    {
+      "from": {
+        "node": "envelope",
+        "port": "out"
+      },
+      "to": {
+        "node": "vca",
+        "port": "gain"
+      }
+    },
+    {
+      "from": {
+        "node": "sequence",
+        "port": "notes"
+      },
+      "to": {
+        "node": "source",
+        "port": "notes"
+      }
+    },
+    {
+      "from": {
+        "node": "sequence",
+        "port": "notes"
+      },
+      "to": {
+        "node": "envelope",
+        "port": "notes"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "node": "vca",
+      "port": "out"
+    }
+  ]
+}

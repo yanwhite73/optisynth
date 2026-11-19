@@ -148,9 +148,11 @@ establish reusable source. Tidal's collected GitHub snapshot is historical after
 its move to Codeberg. No sequencer candidate has been adopted or run.
 
 [SEQUENCERS_AND_ARPEGGIATORS.md](sequencers/SEQUENCERS_AND_ARPEGGIATORS.md) retains the earlier
-VCV/local Optiseq findings and tested, isolated timing prototype. Request 38
-supersedes its old implementation order. No new engine code or app build was made
-for this research; event cables and playable sequencer/arp modules remain pending.
+VCV/local Optiseq findings and the tested timing foundation. Request 38
+superseded its old implementation order. The research itself changed no engine code.
+Request 43 now implements first-party Pattern, Euclidean and Stage modules with
+event routing and shared transport; see [the implementation contract](../architecture/FIRST_SEQUENCERS.md).
+The independent held-note arpeggiator and later specialist models remain pending.
 
 ## Delay and reverb modules
 

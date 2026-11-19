@@ -18,6 +18,10 @@ public:
     }
     std::atomic<float> gain{.25f};
     std::atomic<float> peak{0};
+    std::atomic<float> tempo{120};
+    std::atomic<bool> playing{false};
+    std::atomic<double> beat{0};
+    void restart() noexcept {restart_.fetch_add(1,std::memory_order_release);}
     void render(float* output,int n) noexcept {
         std::array<float,quantum> right;
         while(n>0){const int count=std::min(n,quantum);render(output,right.data(),count);output+=count;n-=count;}
@@ -25,6 +29,15 @@ public:
     void render(float* output,float* right,int n) noexcept {
         while(n>0) {
             const int count=std::min(n,quantum);
+            const auto reset=restart_.load(std::memory_order_acquire);
+            if(reset!=seenRestart_){clock_.seek(0);seenRestart_=reset;}
+            float bpm=tempo.load(std::memory_order_relaxed);
+            if(!std::isfinite(bpm))bpm=120;bpm=std::clamp(bpm,20.f,300.f);
+            if(bpm!=lastTempo_){clock_.tempo(bpm);lastTempo_=bpm;}
+            clock_.play(playing.load(std::memory_order_relaxed));
+            std::array<ClockFrame,quantum> time;
+            for(int i=0;i<count;++i)time[i]=clock_.next();
+            beat.store(time[count-1].beat,std::memory_order_relaxed);
             const auto packed=packed_.load(std::memory_order_acquire);
             Note note{int((packed>>1)&127),.8f,bool(packed&1),false};
             note.trigger=(packed>>8)!=seen_ && note.gate;seen_=packed>>8;
@@ -35,10 +48,11 @@ public:
             }
             std::fill_n(output,count,0.f);
             std::fill_n(right,count,0.f);
-            if(active_)active_->render(output,right,count,note);
+            if(active_)active_->render(output,right,count,note,time.data());
             if(fading_) {
                 Note oldNote=note;oldNote.trigger=false;oldNote.gate=false;
-                fading_->render(old_.data(),oldRight_.data(),count,oldNote);
+                for(int i=0;i<count;++i)time[i].playing=false;
+                fading_->render(old_.data(),oldRight_.data(),count,oldNote,time.data());
             }
             float max=0;
             float target=gain.load(std::memory_order_relaxed);
@@ -64,6 +78,9 @@ public:
 private:
     std::atomic<Runtime*> pending_{nullptr},retired_{nullptr};
     Runtime *active_=nullptr,*fading_=nullptr;
+    SampleClock clock_;
+    std::atomic<uint64_t> restart_{0};
+    uint64_t seenRestart_=0;float lastTempo_=120;
     std::atomic<uint64_t> packed_{48<<1};
     uint64_t serial_=0,seen_=0;
     int fade_=0;

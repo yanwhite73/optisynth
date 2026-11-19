@@ -1,4 +1,35 @@
-# Optisynth status — 17 November 2026
+# Optisynth status — 19 November 2026
+
+## Current delivery — standalone 0.0.7 sequencers
+
+Request 43 adds three playable first-party modules: Pattern (16 stored steps),
+Euclidean (up to 32 steps, hits/rotation) and Stage (eight variable-duration
+Repeat/Hold/Rest stages). Their contextual editors share transport and a selected
+step inspector; the playing marker comes from audio-thread state. There are now
+26 modules and 11 starters. Start audio, choose one of the three new starters,
+then Play seq. Stop seq releases notes; Restart returns to beat zero.
+
+Typed `notes` sockets route independent sequences, with fan-out to an oscillator
+and its envelope. Receivers split processing at event offsets; unpatched notes
+retain keyboard fallback. Preparation is still lazy/off-thread, and tested render
+paths allocate nothing. Rack v4 saves tempo and all sequence settings; v1/v2/v3
+remain readable. Play/stop and selection are transient. Contract:
+[FIRST_SEQUENCERS.md](../architecture/FIRST_SEQUENCERS.md).
+
+Qualified: 198 modular checks normally and under ASan/UBSan, 1,194 core, 28 graph,
+47 timing/event, four importer and one renderer checks. Native app build and all
+native checks pass, including contextual edits reaching DSP, rack/focus sync,
+complete state/audio recall, stop indicators and minimum-window layouts. Final
+captures: `../../build/sequencer-ui-review/`; audio fixtures: `../../build/sequencer-0.wav`
+through `sequencer-2.wav`. No audio device was opened by UI checks; listening is
+user-performed. The 123 BPM tests verify exact starts/releases inside a render
+quantum with different callback sizes. [Build receipt](../verification/sequencer_build_receipt.json).
+
+Limits/next: independent held-note arp; voice groups/polyphony; deeper Pattern
+editing, probability, capture and arrangement. Note destinations are currently
+monophonic. Spectral's internal arp retains its own tempo setting; shared beat
+synchronisation is not implemented. This is the standalone, not a new modular
+VST3 build. No Live action or installation occurred.
 
 Request 40: documentation is sorted into project, architecture, UI, research,
 verification and legacy folders. [Documentation index](../README.md) provides the
@@ -6,7 +37,7 @@ entry points; [UI research](../ui/README.md) links the collected interface image
 Current agent/helper/link paths follow this structure. Historical evidence and
 verbatim request text are preserved; no new synth build accompanies the move.
 
-## Current delivery — sequencer research and architecture proposal
+## Prior delivery — sequencer research and architecture proposal
 
 Request 42 adds [OXI ONE MKII](../research/sequencers/OXI_ONE_REFERENCE.md), interpreting
 the user's “ox sequencer” as OXI ONE. Fifteen official diagrams are saved, visually
@@ -53,12 +84,14 @@ explicit editing scope, separate playing/selected/queued states, and visible
 process state for Stage, Memory, Counters and Arp. Raw visuals remain local with
 a separate backup; analysis and provenance are tracked in Git.
 
-Exact next work before a build: compare static Pattern/Arp/Stage/Memory wireframes
+Historical research handoff before request 43: compare Pattern/Arp/Stage/Memory wireframes
 against the documented tasks and empty/selected/playing/queued states; make the
 Pattern lane/event/port contract concrete and complete the selected dependency
 review. Existing timing code remains an isolated prototype to reassess against
 that contract. The remaining implementation steps below are queued; the prior
-standing instruction to continue does not override this research-first request.
+standing instruction to continue did not override that research-first request.
+Request 43 subsequently authorized implementation; the current delivery above
+supersedes this pause for its first three modules. Other model proposals remain queued.
 
 Research backup: `../../../backups/optisynth/optisynth-sequencer-references-20261117-212558.tar.gz`
 and source/docs backup `optisynth-source-20261117-212559.tar.gz` in the same folder,
@@ -71,7 +104,7 @@ contains all 39 images plus the illustrated analysis/catalogue (50 files verifie
 Updated source/docs backup: `optisynth-source-20261117-215438.tar.gz` in the same
 folder, 186 files verified. Checksums and details are in `ENGINEERING_LOG.md`.
 
-## Current delivery: complete Spectral and modulation matrix, standalone 0.0.6
+## Prior delivery: complete Spectral and modulation matrix, standalone 0.0.6
 
 23 module types and eight starters. New: complete `spectral.engine`, independent
 LFO, Stereo to mono, Stereo pair and Stereo mixer. Full Spectral preset state,

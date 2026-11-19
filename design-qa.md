@@ -130,3 +130,29 @@ listening are pending. Drag-to-parameter assignment, modulation rings and cable
 overlays remain later work; this first matrix uses explicit selections.
 
 No actionable P0/P1/P2 remains in the reviewed surfaces. Final result: passed.
+
+## Sequencers — standalone 0.0.7, 19 November 2026
+
+Request 43 uses the collected Bespoke/PER|FORMER/OXI workflow research. Pattern
+has selectable note cells and a scoped pitch/velocity/rest inspector. Stage uses
+duration-weighted blocks and a pitch/pulses/articulation inspector. Euclidean
+shows generated hits around a ring with length/hits/rotation controls, rather
+than pretending its cells are stored notes. A pale outline indicates selection;
+a gold marker indicates the actual audio playhead. Arrow keys change selection;
+double/right click toggles Pattern rests. Numeric editors retain keyboard-focus
+protection from Caps Lock note entry.
+
+Native checks exercise the real controls, stored parameters and runtime handles;
+saved documents reproduce the same offline audio and tempo. A new assertion
+requires stop to clear the displayed playhead without waiting for another audio
+callback. The first small-window capture showed a cramped Euclidean ring; moving
+its inspector to the right made all positions distinguishable. Stage short cells
+now have a readable minimum width; additional width reflects pulse duration.
+
+Final captures: `build/sequencer-ui-review/sequencer-{0,1,2}-{focus,rack}.png`
+and `sequencer-minimum.png`. Checked at the 1120 x 800 minimum. Existing rack,
+sample, Spectral and matrix captures/checks also pass. Audio remains off during
+native checks; visible playheads come from explicit offline Player rendering.
+Listening and physical pointer audition remain user checks. General undo,
+multi-cell selection, chord/piano-roll modes, arranger and drawn cables remain
+future work. Source and binary hashes are in the sequencer build receipt.

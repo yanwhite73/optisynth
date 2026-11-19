@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "sequencer.h"
 #include "../core/envelope.h"
 #include "../core/effects.h"
 #include "plaits/dsp/drums/analog_bass_drum.h"
@@ -76,6 +77,7 @@ const std::vector<Panel>& panels() {
         p.push_back({"mod.lfo","LFO","Independent sine / triangle / ramp / pulse modulation","modulator",{
             {"rate","Rate","Hz",.01f,30,1,true},{"depth","Depth","",0,1,1},
             {"wave","Shape","",0,3,0,false,1},{"retrigger","Note reset","",0,1,0,false,1}}});
+        for(auto& sequencer:sequencerPanels())p.push_back(std::move(sequencer));
         return p;
     }();
     return list;
@@ -310,8 +312,11 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
         if (p.family=="filter") type.inputs={{"in",SignalType::Audio,true},{"mod",SignalType::Control,false}};
         if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,true},{"gain",SignalType::Control,true}};
         if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
+        if(p.family=="source"||p.family=="envelope"||p.family=="engine"||p.family=="resonator"||id=="mod.lfo")type.inputs.push_back({"notes",SignalType::Event,false});
+        if(isSequencer(id))type.outputs={{"notes",SignalType::Event}};
         type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
+            if(isSequencer(id))return makeSequencer(n);
             if(id=="sample.player"){auto it=assets.find(n.id);return std::make_unique<SamplePlayer>(n,it==assets.end()?SamplePtr{}:it->second);}
             if(id=="spectral.engine"){auto it=engines.find(n.id);return makeSpectral(n,it==engines.end()?SpectralPtr{}:it->second);}
             if(id=="mod.lfo")return std::make_unique<Lfo>(n);

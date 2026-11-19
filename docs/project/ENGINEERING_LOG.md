@@ -542,3 +542,52 @@ SHA-256: `27d87e6a1474e3b7492c1b41f520c7c2ecaecfc008353a5e8ae862486163fad8`.
 Source/docs archive: `../../../backups/optisynth/optisynth-source-20261117-220809.tar.gz`
 plus checksum, 189 files / 2,287,116 bytes verified. These receipts postdate archive
 creation. The validation/archive job completed normally.
+
+## Request 43: first playable sequencers — 19 November 2026
+
+Implementation follows the completed model and visual study. Added first-party
+Pattern (16 stored notes), Euclidean (up to 32 generated steps) and Stage (eight
+variable-duration Repeat/Hold/Rest stages), with distinct contextual editors.
+No unreviewed upstream sequencer code was adopted. The existing SampleClock,
+GridClock and bounded event/ownership ledger now drive real runtime note inputs.
+Player owns shared transport; receivers split processing at note offsets. Native
+editors poll audio-published playheads and never schedule notes from UI timers.
+
+Contract and acceptance were recorded before source edits in
+`../architecture/FIRST_SEQUENCERS.md`. Note sockets support fan-out, including an
+oscillator and its envelope; unpatched notes retain keyboard fallback. Each
+connected destination remains monophonic. Stop/mute/discontinuity releases and
+5 ms graph retirement keep note ownership local to its route. Rack v4 adds saved
+tempo while retaining v1/v2/v3 imports. Playback/selection state is transient.
+Three audible starters demonstrate the different editors. Spectral's internal
+arp still has its own tempo; no claim of shared song-phase synchronisation.
+
+Initial normal qualification passed 194 modular checks (43 new), 1,194 core,
+28 graph, 47 timing/event, four importer and one renderer checks. Native app
+build succeeded. All 194 modular checks also passed ASan/UBSan. Native checks passed
+for all three contextual editors, full native state/audio recall, v3 compatibility,
+invalid tempo rejection and Player transport. The first visual review found a
+cramped Euclidean ring at 1120 x 800; its controls were moved alongside a larger
+ring. Stage cells received a readable minimum width with extra width weighted by
+duration. A final UI fix masks the stale audio playhead immediately on stop, even
+when no subsequent audio callback occurs. Rebuilt native checks passed again.
+The UI review and final hashes are recorded separately. No Live action or plugin
+installation; no audio device was opened by native qualification.
+
+Added four final assertions for real runtime note edges at 123 BPM, deliberately
+off the 24-frame quantum boundary and rendered with two callback partitions.
+Both starts and releases land at the expected sample. The expanded 198 modular
+checks pass normally and with ASan/UBSan. Visual inspection also caught colliding
+Pattern pitch/velocity labels in the shortest rack cards; their two text rows
+now scale to cell height. The UI-only qualification helper rebuilds and captures
+the native app without repeating unchanged DSP tests.
+
+Final binary/source/capture hashes and receipts:
+`../verification/sequencer_build_receipt.json`. Three native study racks are in
+`../../patches/`; all seven sequencer captures were visually checked across the
+layout review. Verified local backup:
+`../../../backups/optisynth/optisynth-source-20261119-122718.tar.gz`, 201 source/docs
+files, 2,368,815 bytes, SHA-256
+`215531c9bfc214a4740e549ddbb3ebaca0ef176a025e5e05478be4ca7aa054b7`.
+This receipt paragraph postdates the archive. All owned build/test/backup jobs
+exited normally; no temporary app or service is left running.

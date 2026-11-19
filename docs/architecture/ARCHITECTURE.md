@@ -26,22 +26,23 @@ the editor, automation and agent interface must address the same stable identiti
 
 ## Sequencer and effect interfaces
 
-Request 38 pauses further implementation for the expanded source study in
+Request 38 paused implementation for the expanded source study in
 [SEQUENCER_MODELS_RESEARCH.md](../research/sequencers/SEQUENCER_MODELS_RESEARCH.md). The resulting
 [UI/module proposal](../ui/SEQUENCER_UI_ARCHITECTURE.md) recommends a shared configurable
 Pattern module, distinct live-process/arp/conductor modules, and explicit capture
 between incompatible native states. Views, traversal options and pattern generators
 are not automatically separate module types. Definitions and playback-instance
 state should be separate; control lanes retain their own types and units. Existing
-timing code is provisional until assessed against these requirements.
+timing code was assessed for request 43's first playable sequencers; the current
+implementation contract is [FIRST_SEQUENCERS.md](FIRST_SEQUENCERS.md).
 
 Requests 33–35 add requirements for independent sequencer/arp models and modular
 delay/reverb. Detailed proposals and evidence: `../research/sequencers/SEQUENCERS_AND_ARPEGGIATORS.md`
 and `../research/modules/OPEN_SOURCE_DELAY_REVERB.md`. The local sample clock, grid divisions, bounded
 event buffers and note-ownership ledger now exist in `timing.h/.cpp`, qualified
-offline. They are not yet integrated into the audio runtime or app. The proposed
-runtime connections below remain; 0.0.6 implements stereo ports and control-rate
-parameter assignments:
+offline. Standalone 0.0.7 integrates them into the runtime and app with Pattern,
+Euclidean and Stage modules, shared transport and optional per-node note inputs.
+Stereo ports and control-rate parameter assignments were added in 0.0.6:
 
 - Shared transport includes tempo, beat/sample position, meter and discontinuities;
   individual modules retain explicit run/reset and clock-rate policies.
@@ -55,8 +56,10 @@ parameter assignments:
   Tail continuity and captured-audio persistence need explicit contracts.
 
 The complete Spectral engine now runs in the rack with embedded state, stereo
-output and actual modulation exports. The note context remains monophonic; shared
-transport, event cables, global voice groups and tail transfer remain to implement.
+output and actual modulation exports. Each destination's note context remains
+monophonic; global voice groups and tail transfer remain to implement. The new
+transport clocks external sequencers; Spectral's internal arp still uses its own
+module tempo setting and is not yet slaved to the shared beat position.
 
 ## Performance contract
 
@@ -106,8 +109,9 @@ Milestones 1–2 are implemented at foundation level. The planner validates dorm
 graph structure too, but never invokes dormant module factories. It traverses
 control/event dependencies as well as audio. `PreparedGraph` owns module lifetimes;
 `Runtime` now adds mono/stereo audio/control execution with preallocated 24-frame buffers,
-resolved numeric connections and active module construction. Event cables are not
-executed yet; one monophonic note context reaches source and envelope nodes.
+resolved numeric connections and active module construction. Event cables now
+drive independent held-note ledgers and sample-offset processing splits. Unpatched
+note inputs retain the shared monophonic keyboard context.
 The first extracted Spectral sampling primitives preserve existing audio exactly
 on the three verified fixtures; this is regression evidence, not new fidelity.
 
@@ -121,8 +125,8 @@ marked as unrouted; routing activates their DSP. The rack now exposes typed inpu
 selectors, multiple instances and an audio output selector. Each node has independent
 parameter values and DSP state; same-algorithm copies do not share knobs.
 
-`RackDocument` persists the full graph as `optisynth.rack` version 3. Version 1/2
-racks remain readable. Version 3 embeds full Spectral state and parameter routes;
+`RackDocument` persists the full graph as `optisynth.rack` version 4 with tempo.
+Version 1/2/3 racks remain readable. Version 3 embeds full Spectral state and parameter routes;
 version 2 added per-node sample paths/fingerprints, while
 immutable decoded assets live outside GraphSpec. An explicit
 import path converts 0.0.2 `optisynth.instrument` patches. All nodes, including
@@ -148,8 +152,8 @@ the audio thread. Reachable Spectral engines always prepare on the same worker,
 reusing compatible immutable tables. `SPECTRAL_ENGINE_INTEGRATION.md` records the
 instance/memory boundary, snapshot voice policy and control-rate matrix mapping.
 Sample-free graphs keep their existing parameter/schema behaviour. Full contract
-and resource bounds: `SAMPLE_PLAYER.md`. This does not yet add event cables or
-per-voice sample triggering; the current monophonic note context is retained.
+and resource bounds: `SAMPLE_PLAYER.md`. Sample players now accept note events,
+but each instance retains a single monophonic playhead.
 
 Mutable DSP keeps a 48 kHz internal rate; `OutputConverter` uses precomputed
 32-tap/256-phase windowed-sinc coefficients and bounded history. The wrapper adds
@@ -180,7 +184,7 @@ Proposed interaction layers:
   remove them with undo. Moving a panel changes presentation only, not sound.
 - Drag typed audio/control cables between sockets; highlight valid targets, show
   the selected module's connections clearly, and allow cable hiding/dimming.
-  Keep click menus as an accessible alternative. Event cables require runtime work.
+  Keep click menus as an accessible alternative. Event routing now works through these menus.
 - Preview insert/remove consequences. A simple one-input/one-output audio processor
   may offer an explicit bypass/reconnect operation. Branches, mixers, modulators
   and output removal need clear disconnection/output choices rather than guessing.

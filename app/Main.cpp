@@ -4,11 +4,12 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.6";}
+    const String getApplicationVersion() override {return "0.0.7";}
     void initialise(const String& args) override {
         window=std::make_unique<Window>(getApplicationName());
         if(args=="--spectral-demo")window->synth->showSpectralDemo();
         if(args=="--sample-demo")window->synth->showSampleDemo();
+        if(args=="--sequencer-demo")window->synth->showSequencerDemo();
         if(args.startsWith("--snapshot ")) {
             const File path(args.fromFirstOccurrenceOf("--snapshot ",false,false).unquoted());
             MessageManager::callAsync([this,path]{try{window->synth->snapshots(path);}catch(const std::exception& e){std::fprintf(stderr,"%s\n",e.what());setApplicationReturnValue(1);}quit();});

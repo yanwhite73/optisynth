@@ -1,0 +1,72 @@
+{
+  "created_utc": "2026-11-19T12:27:18.685672+00:00",
+  "version": "0.0.7",
+  "platform": "macOS arm64 standalone",
+  "binary": "app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth",
+  "binary_sha256": "3e345f6582f2d63efaac2289f962f4027026b73d4719adc74b55516b5452ef26",
+  "source_sha256": {
+    "app/Main.cpp": "28e5aa362d4c76eb0094e950ab89922bc1a7f932cb3eb4f2cc87fdd04f7b7f8a",
+    "app/ModulationEditor.h": "74461e1c11e152790d40e4dd472ade91a120a812b579d633ae43ecd35f2c496e",
+    "app/Panel.h": "135e9fdac87c811252923fe53297c1243ec529ba59f4c9dfbf3f31fae79e2f70",
+    "app/PatchIO.h": "70e853002d19d2c05d52fc021123526060d3978995604a5641eb118a76eba637",
+    "app/RackEditor.h": "70e388b2cf6660a49ce6115f774a8d8adcfaa76b6211dca45010a9a0234f57f9",
+    "app/SampleLoader.h": "0e639ed02c02ca97f5656a167eeade014f214911afa785f8d4ff8f97a9790add",
+    "app/SequencerEditor.h": "17bc4bf6f30a4a0df5aebc6994a9eeaa59bdd0a364322d3e48bcf7f1baf08bc9",
+    "src/modular/graph.cpp": "caddd2519954ea6dda13d1784194d4918360cd6cbb550ce05f29f0f0c33a60bf",
+    "src/modular/graph.h": "d204dcd25bc8552c405853ecf319e07e0602ed44cf9f557102695d75eafd323a",
+    "src/modular/modules.cpp": "ad34e29a5c227a18e04a02aadb1149a6df8a233461a8f3b82a19449aaa2901ca",
+    "src/modular/player.h": "48c0582c05850ffa8bc61423b7d230e2727aec49752afeedaa9186e7bc2ac182",
+    "src/modular/rack.h": "7b72fb1d7d7854304a1f98fefdb3141b8dbe13d222b349f25b2fb7bf20d1a93b",
+    "src/modular/runtime.cpp": "ce5cc278e6dacba386fc335e5be00ce832e0e746dcda3ed17e038ba31b0650b9",
+    "src/modular/runtime.h": "9aec12fd7d25460e0b1dda99654dff81a15505eeb783396cfdf85cd60901e319",
+    "src/modular/sample.cpp": "b3eb3d0fa886a196ade029ae51c88d2942ed24a72e05528a3a180d818d6891bc",
+    "src/modular/sample.h": "3cf21bb6be180c1fee9d32620c8be147cb68696b6db73e2a846bd3219a4722c4",
+    "src/modular/sequencer.cpp": "72ed30b4f9b0e8d3ae45bb0fff12709af14516e64a210238e9ba3b68ffb7665c",
+    "src/modular/sequencer.h": "98031817b7dea4ace51e6a510f174ceadd33afc9ab1a2004564a34a95602b0a3",
+    "src/modular/spectral.cpp": "c4c26efb1fc04645af14b23b537540f42b08c543d8cb0161e61d982ccff10f02",
+    "src/modular/spectral.h": "30f97d32d82299d47daf9d3d55211479a6c8b35b8c5223c4b4f98b0f2e04e5b5",
+    "src/modular/timing.cpp": "2516940f290c1d0154bafc4d1356b6642a95873b927db05871951fbfc25b5cfc",
+    "src/modular/timing.h": "6e051b46a5f9c3ae2c37745e36a956611db08b799306573781f5c6c65ba986f9"
+  },
+  "modules": 26,
+  "starters": 11,
+  "qualification": {
+    "modular_normal": 198,
+    "modular_asan_ubsan": 198,
+    "core": 1194,
+    "graph": 28,
+    "timing_event": 47,
+    "importer": 4,
+    "renderer": 1
+  },
+  "test_log_sha256": "f47aed29b6d406366d26c65e6b57ce91a16241aa6e12df47f5923a822cee1b10",
+  "ui_receipts": {
+    "ui-check.txt": "PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.",
+    "sequencer-check.txt": "PASS: three contextual native editors; selected-step rack/focus edits reach DSP; full sequence and tempo recall with identical audio; v3 compatibility; invalid tempo rejection; Player clock and stop; seven sequencer captures. No audio device opened.",
+    "spectral-check.txt": "PASS: background full-engine load; stereo; active LFO routing; matrix live depth; preset control synchronisation; complete embedded state and stereo audio recall; cycle/malformed-state rejection; imported preset worker; missing-file preservation; cancellation; explicit mono adapter; four native captures. No audio device opened."
+  },
+  "sequencer_captures": {
+    "build/sequencer-ui-review/sequencer-0-focus.png": "c2643f71f521502952539a723afd127e8665e4b71d76faa8f75754bf7736bf73",
+    "build/sequencer-ui-review/sequencer-0-rack.png": "468d00d6f7fd0e8ca83baae93114147303652fd1742124305fd0d27c31e0a0f7",
+    "build/sequencer-ui-review/sequencer-1-focus.png": "51aa75dec4ec92ea25d2906b8a4a7d42400e699efa88e5c87b3d86d217ca4026",
+    "build/sequencer-ui-review/sequencer-1-rack.png": "880717c41a5f2ba582fcaefcaa2fcb483871982858bb8d137f185d590c3fe6f3",
+    "build/sequencer-ui-review/sequencer-2-focus.png": "ec650d3d85dc85059d6ce5c38a9c5d0e05dc09f9a510519f5e4c7267418be69b",
+    "build/sequencer-ui-review/sequencer-2-rack.png": "2ec60f243969ffb43588cc0fbc72a0ab9b2dcbe2b1b0e43eaf7bd1769b56bb45",
+    "build/sequencer-ui-review/sequencer-minimum.png": "ea374f6c94683101205f5a9312db133da8c9b66a7204a25767a9cdaf03af3c4f"
+  },
+  "audio_fixtures": {
+    "build/sequencer-0.wav": "65c37eaeceababfd3bd9fd38a77d4f8c299b07ca36a72657aedd44b1a912343c",
+    "build/sequencer-1.wav": "cd36442c2aed96ebce9eff7e45fd062ac950ec6d15ef0d7eb0a23a7a2d506d58",
+    "build/sequencer-2.wav": "be4c54423841a6feb710244aa1857c971e591709f2a89a3d29913d9a6822b91a"
+  },
+  "audio_device_opened": false,
+  "live_driven": false,
+  "plugin_built_or_installed": false,
+  "limits": [
+    "Monophonic note destinations",
+    "Independent held-note arp pending",
+    "Spectral internal arp retains module tempo",
+    "No dense polyphony performance claim",
+    "User listening pending"
+  ]
+}

@@ -29,8 +29,10 @@ Repository: https://github.com/yanwhite73/optisynth.git .
 The modular audio runtime uses original Plaits variable-shape and sine oscillators,
 modal percussion, externally excited resonator and bass-drum DSP, plus Mutable's
 digital SVF filters. Spectral AHDSFR/ADSR envelopes and LP/HP/BP/notch filters remain
-interchangeable options. There are 23 module types, including a WAV sample player,
+interchangeable options. There are 26 module types, including a WAV sample player,
 mixer, VCA, complete Spectral engine, independent LFO and stereo utilities.
+Pattern, Euclidean and Stage sequencers share an audio clock and route notes to
+independent destinations. [Sequencer contract](docs/architecture/FIRST_SEQUENCERS.md).
 Only output-reachable modules are constructed. Audio/control buffers and numeric
 bindings are prepared off-thread. One envelope can drive amplitude and cutoff;
 the core also accepts multiple sources and an explicit mixer.
@@ -40,7 +42,7 @@ as DSP. A Matriarch-inspired rack presents coloured sections, module-specific
 control arrangements and clickable routing sockets, with an enlarged focus view.
 It supports Caps Lock typing notes, a piano keyboard, patch save/open,
 typed input routing and device-rate conversion around the 48 kHz DSP core.
-Add independent module instances, connect their audio/control ports, select the
+Add independent module instances, connect their audio/control/note ports, select the
 output and save the complete rack. Older instrument patches import automatically.
 This first voice is monophonic; polyphony, granular engines, hardware MIDI
 and an agent API remain upcoming. Samples can excite a resonator or form its
@@ -64,8 +66,8 @@ The C++17 modular core includes a reviewed, pinned MIT DSP subset under
 retains the legacy name and `.ptch` format for regression comparisons; it renders
 the compatibility engine. `make test-modular asan-modular` checks the new runtime
 and creates short source/starter audio examples under `build/`.
-`make test-timing asan-timing` checks the next clock/event foundation independently;
-it is not yet connected to the app's monophonic keyboard or module routing.
+`make test-timing asan-timing` also checks the clock/event foundation independently.
+The modular tests exercise sequencer timing, note routes and note-release ownership.
 
 Build the native Apple Silicon app with the existing JUCE 8.0.8 installation:
 
@@ -75,7 +77,7 @@ agent-workload run --owner YOUR_OWNER --kind build --purpose 'Build Optisynth ap
 
 The app is `app/Builds/MacOSX/build/Release/Optisynth.app`. Click **Start audio**,
 then use the piano or turn on **Caps Lock** and play A/W/S/E/D/F…; Z/X changes
-octave. Try the eight starter patches; edit their panels directly or select a panel
+octave. Try the eleven starter patches; edit their panels directly or select a panel
 and click **Focus module** for larger controls and a connection list. Click a socket
 to choose a compatible connection; hover to see existing routes. Add modules with
 the menu above the rack, or use a panel's selector to replace its type. Use a
@@ -83,6 +85,18 @@ Mixer to combine audio and a VCA with an envelope to articulate continuous sourc
 Required inputs must be connected before a module can become part of the audible
 output. Unrouted modules remain editable without consuming DSP. Patches use
 `.optisynth` JSON files. No audio input or hardware MIDI port is opened.
+
+For sequencing, choose **Pattern / melodic voice**, **Euclidean / modal percussion**
+or **Stage / pulsing voice**, then **Start audio** and **Play seq**. All three share
+the BPM control. **Stop seq** releases notes; **Restart** returns to beat zero.
+Select a Pattern cell to change pitch/velocity or turn its note off (double-click
+also toggles a rest). Euclidean exposes hits/length/rotation around a generated
+ring. Stage widths follow pulse duration; select Repeat, Hold or Rest per stage.
+The pale outline shows selection; the gold marker shows the audio playhead.
+The `notes` output can drive several inputs, for example both an oscillator and
+its envelope. Unpatched `notes` inputs use the keyboard. Destination voices are
+currently monophonic; independent held-note arp, chord modes and arranger remain
+planned. Rack version 4 saves tempo; playback state is transient.
 
 Choose **Sample into resonator** or **Sample attack + resonator** for built-in
 examples. **Load WAV…** or drop a WAV onto the sample panel, then adjust pitch,

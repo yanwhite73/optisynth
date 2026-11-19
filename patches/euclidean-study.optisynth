@@ -1,0 +1,86 @@
+{
+  "format": "optisynth.rack",
+  "version": 4,
+  "gain": 0.25,
+  "tempo": 137.5,
+  "samples": {
+  },
+  "spectral": {
+  },
+  "modulations": [],
+  "nodes": [
+    {
+      "id": "sequence",
+      "type": "seq.euclidean",
+      "parameters": {
+        "pitch": 72.0
+      }
+    },
+    {
+      "id": "source",
+      "type": "modal.voice",
+      "parameters": {
+      }
+    },
+    {
+      "id": "envelope",
+      "type": "spectral.ahdsfr",
+      "parameters": {
+        "attack": 0.003000000026077,
+        "decay": 0.180000007152557,
+        "sustain": 0.349999994039536,
+        "release": 0.119999997317791
+      }
+    },
+    {
+      "id": "filter",
+      "type": "filter.bypass",
+      "parameters": {
+      }
+    },
+    {
+      "id": "vca",
+      "type": "utility.vca",
+      "parameters": {
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": {
+        "node": "source",
+        "port": "out"
+      },
+      "to": {
+        "node": "filter",
+        "port": "in"
+      }
+    },
+    {
+      "from": {
+        "node": "sequence",
+        "port": "notes"
+      },
+      "to": {
+        "node": "source",
+        "port": "notes"
+      }
+    },
+    {
+      "from": {
+        "node": "sequence",
+        "port": "notes"
+      },
+      "to": {
+        "node": "envelope",
+        "port": "notes"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "node": "filter",
+      "port": "out"
+    }
+  ]
+}

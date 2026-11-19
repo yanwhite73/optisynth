@@ -2,6 +2,7 @@
 #include "graph.h"
 #include "sample.h"
 #include "spectral.h"
+#include "timing.h"
 #include <array>
 #include <atomic>
 
@@ -21,6 +22,7 @@ const std::vector<Panel>& panels();
 const Panel& panel(const std::string& type);
 struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
+    std::atomic<int> playhead{-1};
 };
 struct RouteControls { std::array<std::atomic<float>,kMaximumModulations> amounts{}; };
 struct Note { int midi = 48; float velocity = .8f; bool gate = false, trigger = false; };
@@ -32,6 +34,8 @@ struct AudioBlock {
     const float* const* inputsRight = nullptr;
     float* const* outputsRight = nullptr;
     const float* parameters = nullptr;
+    const ClockFrame* clock = nullptr;
+    NoteEventBlock* events = nullptr;
 };
 class AudioModule : public PreparedModule {
 public:
@@ -48,7 +52,8 @@ class Runtime {
 public:
     explicit Runtime(const GraphSpec&,const SampleBank& samples={},const SpectralBank& spectral={});
     void render(float* out, int frames, Note note) noexcept;
-    void render(float* left,float* right,int frames,Note note) noexcept;
+    void render(float* left,float* right,int frames,Note note,const ClockFrame* clockFrames=nullptr) noexcept;
+    SampleClock clock; // offline default; Player supplies the shared transport
     std::shared_ptr<Controls> controls(const std::string& node) const;
     SpectralBank spectralBank() const;
     std::shared_ptr<RouteControls> routeControls() const { return routes_; }
@@ -67,6 +72,12 @@ private:
         struct Route { const float* source; int parameter,index; };
         std::vector<Route> routes;
         std::array<float,maxParameters> effective{},offset{};
+        NoteEventBlock events;
+        const NoteEventBlock* noteInput=nullptr;
+        HeldNotes held;
+        Note routedNote;
+        std::vector<const float*> sliceIn,sliceRight;
+        std::vector<float*> sliceOut,sliceOutRight;
     };
     GraphSpec spec_;
     PreparedGraph graph_;

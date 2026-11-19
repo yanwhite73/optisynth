@@ -26,10 +26,13 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
         for(const auto& p:r->outputs)n.channels.push_back(p.channels);
         n.parameters=panel(type).parameters;
         if(n.parameters.size()>maxParameters)throw std::invalid_argument("Too many module parameters");
-        for (const auto& p : r->inputs) if (p.type == SignalType::Event)
-            throw std::invalid_argument("Event cables are not implemented yet");
+        n.sliceIn.resize(n.in.size());n.sliceRight.resize(n.in.size());
+        n.sliceOut.resize(n.out.size());n.sliceOutRight.resize(n.out.size());
     }
     for (const auto& c : graph_.plan.connections) {
+        if(c.type==SignalType::Event){
+            nodes_[c.destination.node].noteInput=&nodes_[c.source.node].events;continue;
+        }
         nodes_[c.destination.node].in[c.destination.port] = nodes_[c.source.node].out[c.source.port];
         nodes_[c.destination.node].inRight[c.destination.port] = nodes_[c.source.node].outRight[c.source.port];
     }
@@ -49,10 +52,14 @@ void Runtime::render(float* out, int frames, Note note) noexcept {
     std::array<float,quantum> right;
     while(frames>0){const int n=std::min(frames,quantum);render(out,right.data(),n,note);note.trigger=false;out+=n;frames-=n;}
 }
-void Runtime::render(float* out,float* right,int frames,Note note) noexcept {
+void Runtime::render(float* out,float* right,int frames,Note note,const ClockFrame* clockFrames) noexcept {
     while (frames > 0) {
         const int n = std::min(frames, quantum);
+        std::array<ClockFrame,quantum> localClock;
+        if(!clockFrames)for(int i=0;i<n;++i)localClock[i]=clock.next();
+        const auto* time=clockFrames?clockFrames:localClock.data();
         for (auto& node : nodes_) {
+            node.events.begin(n);
             for (auto* p : node.out) std::fill_n(p, n, 0.f);
             for (auto* p : node.outRight) std::fill_n(p,n,0.f);
             std::fill_n(node.offset.data(),node.parameters.size(),0.f);
@@ -70,7 +77,26 @@ void Runtime::render(float* out,float* right,int frames,Note note) noexcept {
                     base*std::exp(offset*std::log(p.maximum/p.minimum)):base+offset*(p.maximum-p.minimum);
                 node.effective[i]=std::clamp(value,p.minimum,p.maximum);
             }
-            node.module->process({n,note,node.in.data(),node.out.data(),node.inRight.data(),node.outRight.data(),node.effective.data()});
+            if(!node.noteInput)node.module->process({n,note,node.in.data(),node.out.data(),node.inRight.data(),node.outRight.data(),node.effective.data(),time,&node.events});
+            else {
+                const auto& bus=*node.noteInput;node.held.beginBlock(bus);
+                if(bus.failed()){node.routedNote.gate=false;node.routedNote.trigger=false;}
+                auto event=bus.begin();
+                for(int offset=0;offset<n;){
+                    bool attack=false;
+                    while(event!=bus.end()&&int(event->offset)==offset){
+                        const auto change=node.held.apply(*event++);
+                        attack|=change==NoteChange::Added||change==NoteChange::Updated;
+                    }
+                    if(const auto* held=node.held.newest())node.routedNote={held->pitch,held->velocity,true,attack};
+                    else {node.routedNote.gate=false;node.routedNote.trigger=false;}
+                    const int end=event==bus.end()?n:int(event->offset);
+                    for(size_t i=0;i<node.in.size();++i){node.sliceIn[i]=node.in[i]+offset;node.sliceRight[i]=node.inRight[i]+offset;}
+                    for(size_t i=0;i<node.out.size();++i){node.sliceOut[i]=node.out[i]+offset;node.sliceOutRight[i]=node.outRight[i]+offset;}
+                    node.module->process({end-offset,node.routedNote,node.sliceIn.data(),node.sliceOut.data(),node.sliceRight.data(),node.sliceOutRight.data(),node.effective.data(),time+offset,nullptr});
+                    offset=end;
+                }
+            }
             for(size_t p=0;p<node.out.size();++p)if(node.channels[p]==1)std::copy_n(node.out[p],n,node.outRight[p]);
         }
         std::fill_n(out, n, 0.f);
@@ -79,6 +105,7 @@ void Runtime::render(float* out,float* right,int frames,Note note) noexcept {
         for (const auto* root : rightRoots_) for (int i=0;i<n;++i)right[i]+=root[i];
         note.trigger = false;
         out += n;right+=n; frames -= n;
+        if(clockFrames)clockFrames+=n;
     }
 }
 SpectralBank Runtime::spectralBank() const {

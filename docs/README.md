@@ -5,6 +5,7 @@ and the [engineering log](project/ENGINEERING_LOG.md).
 
 Sequencer UI research: [illustrated atlas with 54 references](ui/sequencers/README.md)
 and [workflow comparison](ui/sequencers/WORKFLOWS.md).
+Current sequencer implementation: [Pattern, Euclidean and Stage contract](architecture/FIRST_SEQUENCERS.md).
 
 | Folder | Contents | Start here |
 | --- | --- | --- |

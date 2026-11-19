@@ -1,11 +1,12 @@
 #pragma once
 #include <JuceHeader.h>
 #include "../src/modular/rack.h"
+#include "../src/modular/sequencer.h"
 #include <set>
 
 namespace optisynth {
 struct SampleReference { std::string path,fingerprint;SamplePtr data; };
-struct RackDocument { GraphSpec graph; float gain=.25f; std::map<std::string,SampleReference> samples; SpectralBank spectral; };
+struct RackDocument { GraphSpec graph; float gain=.25f; std::map<std::string,SampleReference> samples; SpectralBank spectral; float tempo=120; };
 inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id){
     auto state=d.spectral.find(id);if(state==d.spectral.end()||!state->second)return {};
     auto patch=state->second->patch;auto values=partials::liveValues(patch);const auto& specs=panel("spectral.engine").parameters;
@@ -16,6 +17,7 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which>=8&&which<=10)return {sequencerPatch(which-8),gain};
     RackDocument d{rackPreset(which),gain,{}};
     if(which==4||which==5)d.samples["source"]={"builtin:click","builtin-click-v1",{}};
     if(which>=6){
@@ -82,7 +84,7 @@ inline Endpoint readEndpoint(const juce::var& v) {
     return {identifier(v["node"]),identifier(v["port"])};
 }
 inline juce::var rackJSON(const RackDocument& document) {
-    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",3);root->setProperty("gain",document.gain);
+    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",4);root->setProperty("gain",document.gain);root->setProperty("tempo",document.tempo);
     auto* assets=new juce::DynamicObject;
     for(const auto& s:document.samples){auto* ref=new juce::DynamicObject;ref->setProperty("path",juce::String(s.second.path));ref->setProperty("fingerprint",juce::String(s.second.fingerprint));assets->setProperty(juce::Identifier(s.first),juce::var(ref));}
     root->setProperty("samples",juce::var(assets));
@@ -103,8 +105,9 @@ inline juce::var rackJSON(const RackDocument& document) {
     root->setProperty("nodes",nodes);root->setProperty("connections",links);root->setProperty("outputs",outputs);return root;
 }
 inline RackDocument readRack(const juce::var& value) {
-    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>3)throw std::invalid_argument("Unsupported patch version");
+    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>4)throw std::invalid_argument("Unsupported patch version");
     RackDocument d;d.gain=number(value["gain"]);
+    if(int(value["version"])>=4){d.tempo=number(value["tempo"]);if(d.tempo<20||d.tempo>300)throw std::invalid_argument("Tempo outside range");}
     if(d.gain<0||d.gain>1)throw std::invalid_argument("Output gain outside range");
     if(value["format"].toString()=="optisynth.instrument") {
         if(int(value["version"])!=1)throw std::invalid_argument("Unsupported legacy patch version");
@@ -146,7 +149,7 @@ inline RackDocument readRack(const juce::var& value) {
                 d.samples[id]={path.toStdString(),hash.toStdString(),{}};
             }
         }
-        if(int(value["version"])==3){
+        if(int(value["version"])>=3){
             auto* engines=value["spectral"].getDynamicObject();auto* modulation=value["modulations"].getArray();
             if(!engines||engines->getProperties().size()>kMaximumNodes||!modulation||modulation->size()>kMaximumModulations)throw std::invalid_argument("Invalid engine or modulation state");
             size_t bytes=0;

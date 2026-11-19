@@ -366,3 +366,17 @@ Delivered under that working identification: OXI ONE MKII model/source assessmen
 to the shared editor/mode proposal. See `../research/sequencers/OXI_ONE_REFERENCE.md`
 and `../ui/sequencers/oxi.md`. Firmware/manual edition and unresolved source/table
 limitations are explicit. No device implementation.
+
+## 43 — Start building sequencers
+
+```text
+start building some sequencers
+```
+
+19 November 2026: resume implementation using the collected model and UI research.
+Deliver playable, independently routable sequencer modules with contextual editors,
+shared transport, saved native state and qualified note-release behaviour. Choose
+a coherent first set, build the standalone app and verify it offline/native before
+handoff. This supersedes the earlier research-only pause; keep later specialist
+models and the broader polyphony/VST3 roadmap explicit rather than implying them
+complete. Preserve regular commits/pushes, backups and the no-Live-driving rule.
