@@ -3,7 +3,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 CORE := src/core/spectrum.cpp src/core/table_bank.cpp src/core/envelope.cpp src/core/patch.cpp src/core/engine.cpp src/core/effects.cpp src/core/arp.cpp
 MUTABLE := third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc third_party/mutable/plaits/dsp/physical_modelling/resonator.cc third_party/mutable/plaits/resources_selected.cc third_party/mutable/stmlib/dsp/units.cc third_party/mutable/stmlib/utils/random.cc
-MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/modular/sample.cpp src/modular/spectral.cpp src/modular/timing.cpp src/modular/sequencer.cpp src/modular/pattern.cpp src/modular/performance.cpp $(CORE) $(MUTABLE)
+MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/modular/sample.cpp src/modular/spectral.cpp src/modular/timing.cpp src/modular/sequencer.cpp src/modular/pattern.cpp src/modular/performance.cpp src/modular/analog.cpp $(CORE) $(MUTABLE)
 MODFLAGS := -DTEST -Ithird_party/mutable
 MODHEADERS := $(wildcard src/modular/*.h) $(wildcard src/core/*.h) $(wildcard tests/*.h) $(wildcard third_party/mutable/plaits/dsp/oscillator/*.h) $(wildcard third_party/mutable/stmlib/dsp/*.h)
 HEADERS := $(wildcard src/core/*.h) plugin/Source/TypingKeyboard.h $(wildcard tests/*.h)

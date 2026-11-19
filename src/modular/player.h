@@ -16,6 +16,11 @@ public:
     void note(int midi,bool gate) {
         packed_.store((++serial_<<8) | (std::clamp(midi,0,127)<<1) | int(gate),std::memory_order_release);
     }
+    // Polyphonic key events for voice groups. One producer (UI/message thread),
+    // drained on the audio thread. Full ring drops the event rather than blocking.
+    void noteEvent(int midi,float velocity,bool on) noexcept {pushKey(uint8_t(std::clamp(midi,0,127)),on?2:1,velocity);}
+    void releaseAll() noexcept {pushKey(0,3,0);}
+    std::atomic<float> bend{0},wheel{0}; // semitones, 0..1 (MIDI thread may write)
     std::atomic<float> gain{.25f};
     std::atomic<float> peak{0};
     std::atomic<float> tempo{120};
@@ -41,14 +46,21 @@ public:
             const auto packed=packed_.load(std::memory_order_acquire);
             Note note{int((packed>>1)&127),.8f,bool(packed&1),false};
             note.trigger=(packed>>8)!=seen_ && note.gate;seen_=packed>>8;
+            float b=bend.load(std::memory_order_relaxed),w=wheel.load(std::memory_order_relaxed);
+            note.bend=std::isfinite(b)?std::clamp(b,-24.f,24.f):0.f;note.wheel=std::isfinite(w)?std::clamp(w,0.f,1.f):0.f;
+            keys_.begin(uint32_t(count));
+            drainKeys();
             if(!fading_ && !retired_.load(std::memory_order_acquire)) {
                 if(auto* next=pending_.exchange(nullptr,std::memory_order_acq_rel)) {
                     fading_=active_;active_=next;fade_=0;note.trigger=note.gate;
+                    // The new plan starts with no voices: hand it every key still held.
+                    keys_.begin(uint32_t(count));
+                    for(int k=0;k<128;++k)if(held_[size_t(k)]>0)keys_.push({0,1,uint64_t(k)+1,NoteEventKind::On,k,held_[size_t(k)]});
                 }
             }
             std::fill_n(output,count,0.f);
             std::fill_n(right,count,0.f);
-            if(active_)active_->render(output,right,count,note,time.data());
+            if(active_)active_->render(output,right,count,note,time.data(),&keys_);
             if(fading_) {
                 Note oldNote=note;oldNote.trigger=false;oldNote.gate=false;
                 for(int i=0;i<count;++i)time[i].playing=false;
@@ -76,6 +88,29 @@ public:
         }
     }
 private:
+    struct Key { uint8_t pitch=0,kind=0; float velocity=0; };
+    void pushKey(uint8_t pitch,uint8_t kind,float velocity) noexcept {
+        const auto head=keyHead_.load(std::memory_order_relaxed);
+        if(head-keyTail_.load(std::memory_order_acquire)>=ring_.size())return;
+        ring_[head%ring_.size()]={pitch,kind,std::isfinite(velocity)?std::clamp(velocity,0.f,1.f):.8f};
+        keyHead_.store(head+1,std::memory_order_release);
+    }
+    void drainKeys() noexcept {
+        auto tail=keyTail_.load(std::memory_order_relaxed);
+        const auto head=keyHead_.load(std::memory_order_acquire);
+        for(;tail!=head;++tail){
+            const auto key=ring_[tail%ring_.size()];
+            if(key.kind==3){held_.fill(0);keys_.push({0,1,0,NoteEventKind::Reset,0,0});continue;}
+            const bool on=key.kind==2;
+            held_[key.pitch]=on?std::max(key.velocity,.001f):0.f;
+            keys_.push({0,1,uint64_t(key.pitch)+1,on?NoteEventKind::On:NoteEventKind::Off,int(key.pitch),key.velocity});
+        }
+        keyTail_.store(tail,std::memory_order_release);
+    }
+    std::array<Key,256> ring_{};
+    std::atomic<uint64_t> keyHead_{0},keyTail_{0};
+    std::array<float,128> held_{};
+    NoteEventBlock keys_;
     std::atomic<Runtime*> pending_{nullptr},retired_{nullptr};
     Runtime *active_=nullptr,*fading_=nullptr;
     SampleClock clock_;

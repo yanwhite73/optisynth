@@ -49,7 +49,7 @@ class PreparedModule {
 public:
     virtual ~PreparedModule() = default;
 };
-struct PrepareContext { double sampleRate = 48000; int maximumBlock = 256; Scope scope = Scope::Voice; };
+struct PrepareContext { double sampleRate = 48000; int maximumBlock = 256; Scope scope = Scope::Voice; int voice = 0; };
 struct ModuleType {
     std::string id;
     std::vector<Port> inputs, outputs;

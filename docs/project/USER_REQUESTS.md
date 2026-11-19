@@ -566,7 +566,9 @@ Desktop-window startup is still unverified in this execution context. See
 `../architecture/PERFORMANCE_SEQUENCER.md`, STATUS and the build receipt. The
 feature delivery does not substitute for Yan's assessment of the musical result.
 
-## 52 — Modular mix-and-match of the classic circuits; performance and latency
+## 56 — Modular mix-and-match of the classic circuits; performance and latency
+
+First recorded as 52 in commit 4126d4d while another session also used 52–55; renumbered so every request number is unique.
 
 ```text
 is there anything thet awould prevent us from taking a modular approach to these circuits, allowing mix and match? performance? latency?
@@ -586,3 +588,17 @@ feature delivery has not met the user's musical expectations. Do not mark that
 resolved by this interaction fix. Prior implementation was committed as f92326f;
 current main 4126d4d also includes the concurrent research. Bundle this correction,
 verification and feedback record in a scoped commit and retry the authorised push.
+
+## 57 — What to build first
+
+```text
+ok what do you suggest building first?
+```
+
+## 58 — Build the polyphonic analog pad voice
+
+```text
+ok
+```
+
+Approves the request 57 proposal; this Claude session builds it.

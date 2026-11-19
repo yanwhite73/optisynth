@@ -34,9 +34,11 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "sample_checks.h"
 #include "spectral_checks.h"
 #include "sequencer_checks.h"
+#include "analog_checks.h"
 #include "pattern_checks.h"
 #include "performance_checks.h"
 int main(){try {
+    analogChecks();
     sequencerChecks();patternChecks();performanceChecks();
     spectralChecks();
     sampleChecks();
