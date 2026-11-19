@@ -458,3 +458,15 @@ loaded, run or modified). (2) Optisynth is ultimately intended as a commercial
 product. Other projects (including GPL ones) may be studied to learn techniques
 and behaviour, but adopted code must be licence-compatible with closed
 commercial distribution. Record the resulting licence policy.
+
+## 51 — Research the actual architecture of the classic pad synths
+
+```text
+Forget selling for now. I want to see if results are useful first.
+You could do an inventory of parameter names and values, but that wont necessarily give the character of the sound.
+If you can decompile and learn from that without copying then ok.
+I askewd about schematics and research on the actual architecture of those classic pad synths.
+```
+
+Commercial constraints are deferred. Correction: the request was for circuit-level
+architecture research (schematics, service manuals), not plugin inventories.
