@@ -4,7 +4,8 @@
 //
 // render_au params <subtype> [manufacturer]
 // render_au probe <subtype> <Display Name>   (display text at 21 normalised values)
-// render_au render <subtype> <out.wav> <seconds> <notes> [Display Name=value | @settings-file ...]
+// render_au render <subtype> <out.wav> <seconds> <notes> [preset=<Arturia preset file>] [Display Name=value | @settings-file ...]
+//   preset= loads the whole preset into the AU state (in memory) before any parameter values.
 //   notes: pitch:velocity:on_s:off_s separated by commas, e.g. 60:100:0:3,64:100:0:3
 // Prints JSON lines: latency, render time, and the process's network sockets
 // (lsof) mid-run and at the end.
@@ -62,6 +63,16 @@ if command == "params" {
     print("")
     finish(engine)
 }
+if command == "state" {
+    // Read-only: describe the AU's saved state (fullState) so presets can be loaded whole.
+    for (key, value) in au.fullState ?? [:] {
+        if let d = value as? Data {
+            let text = String(decoding: d.prefix(160), as: UTF8.self).replacingOccurrences(of: "\n", with: " ")
+            print(key, "Data", d.count, "bytes; archive:", d.range(of: "serialization::archive".data(using: .utf8)!) != nil, "| head:", text)
+        } else { print(key, type(of: value), String(describing: value).prefix(120)) }
+    }
+    finish(engine)
+}
 if command == "presets" {
     for p in au.factoryPresets ?? [] { print(p.number, p.name) }
     print("current:", au.currentPreset?.name ?? "none", "| user presets supported:", au.supportsUserPresets)
@@ -76,8 +87,26 @@ if command == "probe" {
     finish(engine)
 }
 guard command == "render", args.count >= 6, let seconds = Double(args[4]) else { fail("bad render arguments", 2) }
+// Arturia AUs keep the full preset as a Boost archive in fullState["Controller State"].
+func presetName(_ state: [String: Any]?) -> String {
+    guard let d = state?["Controller State"] as? Data else { return "unknown" }
+    let words = String(decoding: d.prefix(200), as: UTF8.self).split(separator: " ")
+    // Layout: 22 serialization::archive 10 0 7 0 7 <len> <name...> 7 Factory ...
+    guard words.count > 8, let length = Int(words[7]) else { return "unknown" }
+    var name = ""; var i = 8
+    while i < words.count && name.count < length { name += (name.isEmpty ? "" : " ") + words[i]; i += 1 }
+    return name
+}
+var loadedPreset = presetName(au.fullState)
+for a in args.dropFirst(6) where a.hasPrefix("preset=") {
+    guard let data = FileManager.default.contents(atPath: String(a.dropFirst(7))) else { fail("cannot read preset", 3) }
+    var state = au.fullState ?? [:]
+    state["Controller State"] = data
+    au.fullState = state
+    loadedPreset = presetName(au.fullState)
+}
 var assignments: [String] = []
-for a in args.dropFirst(6) {
+for a in args.dropFirst(6) where !a.hasPrefix("preset=") {
     if a.hasPrefix("@"), let text = try? String(contentsOfFile: String(a.dropFirst()), encoding: .utf8) {
         assignments += text.split(separator: "\n").map(String.init).filter { !$0.isEmpty && !$0.hasPrefix("#") }
     } else { assignments.append(a) }
@@ -119,7 +148,7 @@ while position < total {
     if midSockets.isEmpty && position >= total / 2 { midSockets = sockets() }
 }
 file = nil   // finalises the WAV header before the fast exit
-let report: [String: Any] = ["component": au.componentName ?? subtype, "latency_s": au.latency, "audio_s": seconds,
+let report: [String: Any] = ["component": au.componentName ?? subtype, "preset": loadedPreset, "latency_s": au.latency, "audio_s": seconds,
                              "render_s": renderTime, "core_fraction": renderTime / seconds,
                              "sockets_mid": midSockets, "sockets_end": sockets()]
 let data = try! JSONSerialization.data(withJSONObject: report, options: [.sortedKeys])

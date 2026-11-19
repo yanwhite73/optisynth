@@ -705,3 +705,25 @@ are you starting with init patches?
 ```
 
 Correction: they were not. Arturia AUs load an "Untitled" state and expose only generic program-change presets, so init presets are converted from their preset files (tools/reference_render/arturia_preset.py) and applied before test overrides.
+
+## 68 — SEM V2 plays in its own app, but not from the computer keyboard
+
+```text
+I can confirm it does, but doesnt respond via CAPS keyboard. I pressed its keyboard keys
+```
+
+SEM V2 is activated and sounds from its on-screen keys; it ignores computer-keyboard MIDI. Points to MIDI input (e.g. channel) rather than licensing.
+
+## 69 — Use MIDI channel ALL
+
+```text
+Just use ALL ?
+```
+
+## 70 — Read init patches instead of assuming and testing
+
+```text
+dont make blanket assumptions and then run tests on them. Init should give a good idea of what the routing needs for each synth
+```
+
+Correction: stop applying guessed overrides and probing them by trial. Read each init preset as the description of that synth's routing and voice settings, and derive the test configuration from it.

@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         const float quality = test.find("q0") != std::string::npos ? 0.f : test.find("q2") != std::string::npos ? 2.f : 1.f;
         Runtime rt(bareVoice(quality, 0, 1));
         render(rt, {{pitch, 0, 1.4}}, 1.5, l, r);
-    } else if (test == "chord8") {
+    } else if (test == "chord8" || test == "chord5") {
         auto g = padPatch(0);   // OB swell voice, effects removed for a bare-voice CPU figure
         g.nodes.erase(std::remove_if(g.nodes.begin(), g.nodes.end(), [](const NodeSpec& n) { return n.id == "chorus" || n.id == "reverb"; }), g.nodes.end());
         g.connections.erase(std::remove_if(g.connections.begin(), g.connections.end(), [](const Connection& c) {
@@ -65,8 +65,9 @@ int main(int argc, char** argv) {
         g.outputs = {{"voices", "out"}};
         Runtime rt(g);
         std::vector<Key> keys; for (int k : {48, 52, 55, 59, 60, 64, 67, 71}) keys.push_back({k, 0, 9.5});
+        if (test == "chord5") keys.erase(keys.begin(), keys.begin() + 3);
         const double spent = render(rt, keys, 10, l, r);
-        std::printf("{\"component\":\"Optisynth OB voice x8 (no FX)\",\"audio_s\":10,\"render_s\":%.4f,\"core_fraction\":%.5f}\n", spent, spent / 10);
+        std::printf("{\"component\":\"Optisynth OB voice x%d (no FX)\",\"audio_s\":10,\"render_s\":%.4f,\"core_fraction\":%.5f}\n", int(keys.size()), spent, spent / 10);
     } else if (test == "spread") {
         Runtime rt(bareVoice(1, .45f, 8));
         std::vector<Key> keys; for (int i = 0; i < 8; ++i) keys.push_back({69, i * .5, i * .5 + .4});

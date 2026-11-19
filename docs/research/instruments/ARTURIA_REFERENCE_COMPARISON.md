@@ -38,78 +38,70 @@ Offline renders at 48 kHz. Neither side is assumed to be right.
 
 Run the same measurements on Optisynth's modules.
 
-## Results (19 November 2026, revised after request 67)
+## Results (19 November 2026, final: whole init presets, requests 67–70)
 
-**Method:**
-- Every Arturia render starts from an init preset: SEM V2 "Init Voice 1
-  (Sawtooth Wave)" and Prophet V3 "Default".
-- The Audio Units load an "Untitled" state and expose only generic
-  program-change presets. So `tools/reference_render/arturia_preset.py`
-  converts each preset file into parameter settings. It matched 156 of SEM's
-  201 parameters and 162 of Prophet's 194 (Prophet through its XML
-  internal-to-display name map). Preset state that is not exposed as a
-  parameter cannot be applied this way.
-- Test overrides on top of the presets:
-  - SEM: VCF Mode = 0, chorus and delay off.
-  - Prophet: VS mixer path to the Pro5 filter off, chorus and delay off.
-- Renders are offline at 48 kHz. Reproduce with
-  `tools/reference_render/run_comparison.sh` inside a workload job.
-- The first pass, made from the default "Untitled" state, is superseded: it
-  left unknown settings active.
+**What went wrong first, and the correction.**
+- An Arturia Audio Unit does not start neutral. Its saved state
+  (`fullState["Controller State"]`) holds a full preset archive, and on load
+  SEM V2 contained the factory **"Acid Binge"** (an arpeggiated sequence patch)
+  and Prophet V3 **"Fascination"** (a pad). The name "Untitled" hid this.
+- The first two passes layered guessed overrides on top of those patches, and
+  probed the overrides by trial, so the SEM results were meaningless.
+- Each instrument now loads an init preset **whole**: `render_au` puts
+  Arturia's own preset file into the AU state in memory, then reads the preset
+  name back. There are no parameter overrides, so routing, voice count, play
+  mode and MIDI channel are the preset's own:
+  - SEM V2: "Init Voice 1 (Sawtooth Wave)", 8 voices.
+  - Prophet V3: "Default", 5 voices like the original. An 8-note chord sounds
+    only the newest 5.
+- Reproduce with `tools/reference_render/run_comparison.sh` inside a workload
+  job.
 
-**Validity:**
-- Prophet V3 Default produces a clean sawtooth (harmonics −6.8, −9.3, −11.8 dB
-  …), so its results are valid.
-- SEM V2 does **not** run normally in this host. From the init preset, a held
-  note is a quiet click train with a flat spectrum (RMS 0.0025), and an 8-note
-  chord is completely silent.
-- Possible causes, none confirmed: licence or demo state, or behaviour specific
-  to this host. Yan can check by playing SEM V2 in Arturia's own app or a DAW.
-  SEM figures are excluded below.
+**Aliasing.** Init sawtooth patches as saved. Inharmonic energy from 20 Hz to
+16 kHz relative to harmonic energy, with energy below the fundamental in
+brackets; lower is cleaner.
 
-**Aliasing.** Inharmonic energy, 20 Hz–16 kHz, relative to harmonic energy;
-lower is cleaner.
-
-| Note | Prophet V3 (Default) | Optisynth, Draft 1× | Normal 2× | High 4× |
-| --- | --- | --- | --- | --- |
-| C4 (262 Hz) | −38.4 dB | −45.8 | −46.0 | −46.2 |
-| C6 (1047 Hz) | −43.4 | −43.1 | −43.5 | −43.9 |
-| C7 (2093 Hz) | **−48.3** | −40.3 | −40.7 | −41.1 |
-
-Energy folded below the fundamental at C7: Prophet −65.9 dB, Optisynth −59.5 dB.
+| Note | SEM V2 init | Prophet V3 Default | Optisynth (Normal 2×) |
+| --- | --- | --- | --- |
+| C4 | −46.3 (−69.3) | −38.5 (−61.2) | −46.0 (−74.2) |
+| C6 | −44.3 (−75.8) | −43.6 (−61.8) | −43.5 (−62.1) |
+| C7 | −41.2 (−71.1) | **−48.3** (−65.9) | −40.7 (**−59.5**) |
 
 What this shows:
-- Optisynth is cleaner at C4, level at C6, and about 7.5 dB worse at C7.
-- Filter oversampling changes aliasing by under 1 dB; the remaining aliasing
-  comes from the oscillator's two-sample PolyBLEP. The fix is oscillator
-  band-limiting, not more filter quality.
+- Optisynth is level with SEM V2 on overall inharmonic energy.
+- At C7, Optisynth leaves the most folded energy below the fundamental: SEM is
+  about 12 dB cleaner there, Prophet about 6 dB.
+- Optisynth's Draft and High quality levels differ from Normal by under 1 dB,
+  so the cause is the oscillator's PolyBLEP, not the filter.
 
-**CPU.** 8-note chord, 10 s, effects off, share of one core:
-- Prophet V3 Default: 6.2%.
-- Optisynth OB voice (two VCOs, filter at 2×, two envelopes, VCA): 6.2%.
+**CPU.** 10 s chords at each instrument's own voice count, effects as saved:
 
-They are equal. The earlier SEM V2 figure (2.0%) came from an unverified state;
-from the init preset SEM was silent (0.28%). Neither is a valid voice cost.
+| | Voices | Share of one core | Per voice |
+| --- | --- | --- | --- |
+| SEM V2 init | 8 | 3.6% | 0.45% |
+| Prophet V3 Default | 5 | 4.0% | 0.81% |
+| Optisynth OB voice (2 VCOs, filter at 2×, 2 envelopes, VCA) | 8 / 5 | 6.0% / 4.2% | 0.75% / 0.84% |
 
-**Pitch spread.** Eight successive A4 notes, init presets unchanged:
-- Prophet V3 Default: 0.17 cents range, which is the analysis resolution. Its
-  Default has Voices Detune at 0.
-- Optisynth at drift 0.45: 3.98 cents range (σ 1.5), deliberately
-  hardware-like.
+Optisynth costs about the same per voice as Prophet V3, and about 1.7× SEM V2.
+The init voices differ in content, so this is a guide, not like-for-like.
 
-**Latency:**
-- Prophet V3 and Matrix-12 V2 report 32 samples (0.67 ms); SEM reports the same.
-- Optisynth's filter adds 0, 15 or 22 samples at Draft, Normal or High.
+**Pitch spread.** Both init presets measure 0.17 cents range, which is the
+analysis resolution: no per-voice variation by default. Optisynth at drift
+0.45 spans 3.98 cents.
 
-**Network and side effects:**
-- `lsof` showed no open sockets in the test process at mid-run or at the end
-  (point-in-time checks only).
+**Latency.** All three report 32 samples (0.67 ms). Optisynth's filter adds 0,
+15 or 22 samples at Draft, Normal or High.
+
+**Side effects.**
+- `lsof` showed no sockets at mid-run or at the end of each render.
 - No audio or MIDI device was opened.
+- Preset loading changes only the in-memory plugin state. Arturia's own
+  preference and database files were updated today, either by its standalone
+  app or by plugin loads; no preset files changed.
 
-## Next actions from these results
+## Next actions
 
-1. Oscillator anti-aliasing: aim for at least −48 dB inharmonic at C7.
-2. Profile the Optisynth voice. CPU now matches Prophet V3; no cheaper valid
-   reference exists yet.
-3. SEM V2: Yan to confirm it plays normally in Arturia's own app. If it does,
-   investigate offline-host behaviour before repeating SEM measurements.
+1. Oscillator band-limiting. Target: energy below the fundamental at C7 down
+   from −59.5 dB to SEM's ≈ −71 dB, and inharmonic energy at C7 at or below
+   −48 dB.
+2. Profile the Optisynth voice. SEM shows about 0.45% per voice is achievable.

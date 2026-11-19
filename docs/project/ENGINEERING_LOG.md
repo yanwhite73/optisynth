@@ -911,3 +911,28 @@ reasons: threading, SIMD, CPU-budget stealing.
   behavioural checks before trusting it. Every pause boundary hides state.
 - Starter IDs are shared with the concurrent session's menu: map new starters
   explicitly rather than by range.
+
+## Requests 66–70: Arturia reference comparison — lessons (19 November 2026, Claude session)
+
+**What happened.** The first comparison passes started from each Audio Unit's
+load state, which is not neutral. Arturia keeps a whole preset in the AU state:
+SEM V2 loaded the arpeggiated "Acid Binge" and Prophet V3 the pad "Fascination",
+both labelled "Untitled". Guessed overrides were then layered on top and probed
+by trial. SEM produced silence, and wrong conclusions were drafted.
+
+**Yan's corrections:**
+- "are you starting with init patches?"
+- "dont make blanket assumptions and then run tests on them. Init should give a
+  good idea of what the routing needs for each synth"
+
+**The fix.** Read the init preset first. It showed Mono/Poly, polyphony, play
+mode and MIDI channel, none of which can be set through AU parameters. Then
+inspect the AU state structure and load the preset whole.
+
+**Prevention.** For any reference instrument:
+1. Identify and load its init or default patch whole, and verify the loaded
+   preset name in the output.
+2. Read that patch to decide the test configuration, rather than overriding
+   parameters whose meaning has not been read.
+3. Record per-instrument facts that change comparisons, such as Prophet's
+   5-voice limit.
