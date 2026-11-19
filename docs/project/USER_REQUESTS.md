@@ -658,3 +658,9 @@ Saved listening reference: `patches/lush ambient space.optisynth` (local), Perfo
 ```text
 use one of my /Users/yanwhite/Documents/Art/2025/code\ based/optimystery/luckydip/screenshots/v2 images for the desktop icon, or a detail so it can be seen, and an O (serif)
 ```
+
+## 63 — Icon visibility and stable app location
+
+```text
+hasnt updated. Dont be moving the build around
+```

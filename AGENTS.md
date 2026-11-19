@@ -28,6 +28,10 @@ location when a build tool fails. `tools/build_app.sh` compiles in
 `build/app-candidate`, then uses `tools/deliver_app.py` to verify/copy the bundle,
 archive the previous app under `build/app-archive`, and write the adjacent
 `Optisynth-build.json` with version, hash and actual qualification status.
+Keep the installed .app directory and its filesystem identity in place on updates.
+Copy the previous version to the archive, exchange only Contents, touch the
+bundle, and refresh Launch Services for that exact Release path. For icon
+changes inspect the icon returned by NSWorkspace for the installed app.
 Fallback compilation must use the same delivery helper. A failed build/copy must
 preserve the previous delivery. Never label a preview as UI-qualified, and never
 launch, quit or replace a running user's process as part of delivery.

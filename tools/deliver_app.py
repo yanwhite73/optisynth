@@ -5,10 +5,12 @@ File delivery only: no compilation, app launch, audio, installation or network.
 Build/test callers run within their existing agent-workload reservation.
 """
 import argparse
+import ctypes
 from datetime import datetime, timezone
 import fcntl
 import hashlib
 import json
+import os
 from pathlib import Path
 import plistlib
 import shutil
@@ -34,6 +36,17 @@ def inspect(bundle):
         'version': metadata['CFBundleShortVersionString'],
         'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
     }
+
+
+def swap_contents(staged, installed):
+    """Atomically exchange Contents on macOS while retaining the installed folder ID."""
+    swap = ctypes.CDLL(None, use_errno=True).renamex_np
+    swap.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint)
+    swap.restype = ctypes.c_int
+    rename_swap = 2  # Darwin stdio.h RENAME_SWAP
+    if swap(os.fsencode(staged / 'Contents'), os.fsencode(installed / 'Contents'), rename_swap):
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err))
 
 
 def copy_delivery(source, note):
@@ -62,15 +75,22 @@ def copy_delivery(source, note):
         if archive:
             if RECEIPT.exists():
                 shutil.copy2(RECEIPT, archive / RECEIPT.name)
-            APP.rename(archive / APP.name)
-        try:
+            shutil.copytree(APP, archive / APP.name, symlinks=True)
+            if inspect(archive / APP.name) != previous:
+                raise ValueError('Previous app backup failed verification')
+            swap_contents(staged, APP)
+        else:
             staged.rename(APP)
+        try:
+            if inspect(APP) != details:
+                raise ValueError('Installed bundle failed verification')
+            APP.touch()
             staged_receipt.replace(RECEIPT)
         except BaseException:
-            if not staged.exists() and APP.exists():
-                APP.rename(staged)
             if archive:
-                (archive / APP.name).rename(APP)
+                swap_contents(staged, APP)
+            else:
+                APP.rename(staged)
             raise
     print(json.dumps(record, indent=2))
 
@@ -80,6 +100,12 @@ def deliver(source, note):
     with (RELEASE / '.delivery.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         copy_delivery(source, note)
+        # A copied bundle can retain the old directory timestamp and cached icon.
+        # Advertise only the canonical app, after the signed update is installed.
+        registrar = '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
+        result = subprocess.run([registrar, '-f', str(APP)], check=False)
+        if result.returncode:
+            print(f'App delivered. Launch Services registration returned {result.returncode}.')
 
 
 if __name__ == '__main__':

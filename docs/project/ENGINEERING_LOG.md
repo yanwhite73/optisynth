@@ -853,3 +853,16 @@ sizes. [Icon preview](../../app/Artwork/Optisynth-preview.png).
 Both standalone build paths embed the ICNS before final signing. The icon was
 decoded into all ten macOS representations and the 256, 32 and 16 pixel versions
 were inspected. The signed 0.0.13 delivery contains the verified icon resource.
+
+## Request 63 — generic icon on the installed app
+
+The Dock bookmark and Launch Services both resolved the canonical Release app.
+Its icon file matched the committed artwork, but NSWorkspace returned the gray
+generic application icon. Touching the existing app directory and force-registering
+that same path changed the system icon to the violet and mint O, verified by a
+second NSWorkspace read. The installed app stayed in place throughout the fix.
+
+The old delivery helper renamed the previous .app into the archive and installed
+a new directory with the copied bundle timestamp. Updates now copy the backup,
+exchange the signed Contents directories atomically, and keep the installed .app
+directory identity. The helper refreshes its timestamp and registration.
