@@ -2,6 +2,12 @@
 
 ## Current delivery — standalone 0.0.7 sequencers
 
+User feedback, request 46: the first pass works but feels underwhelming. The
+current technical slice is not yet the desired musical/editor experience. Next
+product pass should prioritise richer evolving sequencing, more direct editing
+and compelling ambient/Berlin School patches with time effects; see the verbatim
+request record and `SOUND_GOALS.md`. No such enhancement is claimed complete.
+
 Request 43 adds three playable first-party modules: Pattern (16 stored steps),
 Euclidean (up to 32 steps, hits/rotation) and Stage (eight variable-duration
 Repeat/Hold/Rest stages). Their contextual editors share transport and a selected

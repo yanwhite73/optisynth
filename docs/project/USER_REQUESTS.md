@@ -397,3 +397,34 @@ targets: Robert Rich / Steve Roach-style ambient, psychedelic Berlin School
 sequencing; organic, detailed, slowly evolving sounds; lush Oberheim / Prophet-
 style analog pads and swells. These steer sequencer, modulation, voice and
 effects priorities; they do not cancel request 43's sequencer build.
+
+## 45 — Sequencer delivery appears to be an older app
+
+```text
+I dont see it. That looks like 0.0.4
+```
+
+19 November 2026: investigate the running app and bundle location rather than
+assuming the user reached the newly built binary. Verify the delivery version,
+resolve the launch path and make the sequencer starter directly visible. Preserve
+the user's current app/session state; no Live interaction or new DSP work needed.
+
+Resolved handoff: verified bundle version 0.0.7 and the qualified executable hash,
+then opened the exact build with `--sequencer-demo`. Confirmed its running process
+path. The earlier 0.0.4 appearance was not reproduced or attributed to a specific
+old copy. The next feedback confirms the user reached the new sequencer.
+
+## 46 — First sequencer pass feels underwhelming
+
+```text
+mm ok its a start, a bit underwhelming
+```
+
+19 November 2026: technical qualification and a playable first slice have not yet
+delivered the musical depth or interaction quality the user expects. Treat this as
+an unmet product-quality goal, not an endorsement of the minimal editors. The
+next proposed pass should combine direct sequence editing with independent lane
+lengths/directions, probability/ratchets and evolving patterns, plus convincing
+ambient/Berlin School starter patches using delay/reverb. Keep the independent
+arp and voice-group roadmap visible. These are proposed priorities, not features
+implemented by this feedback entry.
