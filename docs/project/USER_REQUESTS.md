@@ -443,3 +443,18 @@ schematics, chip datasheets), commercial plugin emulations and open-source
 implementations exist, with direct sources and licence notes, as the first
 decision input for the analog pad voice. Research only; no code or downloads
 are implied as adopted.
+
+## 50 — Arturia owned; plugin scan; commercial intent
+
+```text
+I have arturia, you could just scaan my plugins folder. Ultimately commercial btu we could learn from other projects
+```
+
+19 November 2026 (Claude session; recorded concurrently with requests 48–49 to
+the Codex session). Answers request 47's two questions. (1) Yan
+owns Arturia instruments; scan the local plugin folders read-only to establish
+which emulations are installed (listing and bundle metadata only; no plugin is
+loaded, run or modified). (2) Optisynth is ultimately intended as a commercial
+product. Other projects (including GPL ones) may be studied to learn techniques
+and behaviour, but adopted code must be licence-compatible with closed
+commercial distribution. Record the resulting licence policy.

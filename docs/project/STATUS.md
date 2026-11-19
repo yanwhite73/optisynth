@@ -63,6 +63,11 @@ models and a Prophet-5 Rev 3.0 driver. OB-Xf and Odin 2 are GPL-3, so treat
 them as references only until Optisynth's licence is decided. Next: download and
 hash the remaining manuals and datasheets, then analyse the Xpander voice card.
 Research only.
+
+Request 50: Optisynth is aimed at commercial release. [LICENSING.md](LICENSING.md)
+lists the adopt and study-only licences, the installed Arturia and Valhalla
+reference plugins, and three pre-release items: a JUCE commercial licence,
+removing Mutable names from user-facing text, and a review of the Spectral name.
 Documentation only: no code changed, nothing built or tested for this request.
 
 Request 40: documentation is sorted into project, architecture, UI, research,
