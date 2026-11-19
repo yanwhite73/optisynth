@@ -481,8 +481,8 @@ GraphSpec padPatch(int model) {
     if (model == 3) ampEnv = {{"attack", 6}, {"decay", 8}, {"sustain", .95f}, {"release", 24}, {"velocity", .1f}};
     Values voices = {{"spread", .85f}, {"level", .42f}};
     if (prophet) voices = {{"spread", .55f}, {"level", 1.25f}};                     // 4-pole path is ~10 dB quieter
-    if (xpander) voices = {{"voices", 16}, {"unison", 2}, {"detune", 14}, {"glide", .12f}, {"spread", .9f}, {"level", .5f}};
-    if (model == 3) voices = {{"tuning", 4}, {"root", 2}, {"glide", .35f}, {"spread", .9f}, {"level", .4f}};
+    if (xpander) voices = {{"voices", 16}, {"unison", 2}, {"detune", 14}, {"glide", .12f}, {"spread", .9f}, {"level", 2.f}};   // HP2+LP1 removes ~13 dB
+    if (model == 3) voices = {{"tuning", 4}, {"root", 2}, {"glide", .35f}, {"spread", .9f}, {"level", .2f}};
     GraphSpec g;
     g.nodes = {{"vco1", "analog.vco", vco1}, {"vco2", "analog.vco", vco2}, {"osc_mix", "utility.mix", {{"gain_a", .7f}, {"gain_b", .7f}}},
                {"filter", "analog.filter", filter}, {"filter_env", "analog.env", filterEnv}, {"amp_env", "analog.env", ampEnv},

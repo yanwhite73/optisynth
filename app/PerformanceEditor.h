@@ -267,7 +267,7 @@ private:
 };
 class PerformanceWindow final : public juce::DocumentWindow {
 public:
-    explicit PerformanceWindow(PerformanceEditor* editor):DocumentWindow("Optisynth 0.0.10 / Performance sequencer",juce::Colour(0xff172326),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1260,900);}
+    explicit PerformanceWindow(PerformanceEditor* editor):DocumentWindow("Optisynth "+juce::JUCEApplication::getInstance()->getApplicationVersion()+" / Performance sequencer",juce::Colour(0xff172326),DocumentWindow::closeButton){setUsingNativeTitleBar(true);setContentOwned(editor,true);setResizable(true,false);setResizeLimits(1120,800,1800,1200);centreWithSize(1260,900);}
     void closeButtonPressed()override{setVisible(false);}
 };
 class PerformanceLauncher final : public juce::Component,private juce::Timer {
