@@ -33,11 +33,12 @@ public:
         for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position,
             &prevPreset,&nextPreset,&favouriteButton,&presetDisplay,&savePreset,&panelViewButton,&modularViewButton,&viewMenu,&zoomOut,&zoomLabel,&zoomIn,&zoomFit,&synthPanel})addAndMakeVisible(c);
         addChildComponent(browser);
-        rackView.setViewedComponent(&zoomHost,false);zoomHost.addAndMakeVisible(hardware);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
-        hardware.zoom=float(std::clamp(prefs.number("zoom",1.),.5,2.));
-        zoomHost.magnified=[this](float scale){if(currentView!="panel")setZoom(hardware.zoom*scale);};
-        zoomOut.onClick=[this]{setZoom(stepZoom(-1));};zoomIn.onClick=[this]{setZoom(stepZoom(1));};zoomLabel.onClick=[this]{setZoom(1);};zoomFit.onClick=[this]{fitZoom();};
-        zoomOut.setTooltip("Zoom out (Cmd -). Pinch on a trackpad also zooms.");zoomIn.setTooltip("Zoom in (Cmd =)");zoomLabel.setTooltip("Reset to 100% (Cmd 0)");zoomFit.setTooltip("Fit the whole rack in view");
+        rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
+        hardware.knob=std::clamp(int(prefs.number("rackKnob",44)),densityKnobs.front(),densityKnobs.back());
+        hardware.magnified=[this](float scale){if(currentView!="panel"&&std::abs(scale-1.f)>.08f)setDensity(stepDensity(scale>1?1:-1));};
+        zoomOut.onClick=[this]{setDensity(stepDensity(-1));};zoomIn.onClick=[this]{setDensity(stepDensity(1));};zoomLabel.onClick=[this]{setDensity(44);};zoomFit.onClick=[this]{fitDensity();};
+        zoomOut.setTooltip("Denser rack: smaller knobs and spacing; text keeps its size (Cmd -, or pinch)");zoomIn.setTooltip("Roomier rack (Cmd =)");
+        zoomLabel.setTooltip("Back to Normal (Cmd 0)");zoomFit.setTooltip("Largest knob size that shows the whole rack");
         prevPreset.onClick=[this]{stepPreset(-1);};nextPreset.onClick=[this]{stepPreset(1);};
         prevPreset.setTooltip("Previous preset in the browser's current list");nextPreset.setTooltip("Next preset in the browser's current list");
         favouriteButton.onClick=[this]{browser.toggleFavourite(presetKey);updatePresetDisplay();};favouriteButton.setTooltip("Favourite this preset");
@@ -125,7 +126,7 @@ public:
         g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
         const String summary=currentView=="panel"
             ?String(int(synthPanel.controlCount()))+" panel controls in "+String(int(synthPanel.sectionCount()))+" sections  |  "+(synthPanel.isCurated()?"layout saved with the patch":"automatic layout: one section per module")+"   |   Patching and module changes are in the Modular view."
-            :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch; unpatched notes use keyboard.   |   Zoom: Cmd - / = / 0 or pinch.";
+            :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch.   |   Right-click a module (or its dots button) for rows.   |   Size: Cmd - / = / 0 or pinch.";
         g.drawText(summary,24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
@@ -146,7 +147,7 @@ public:
         const int y3=110;
         for(auto* c:std::initializer_list<juce::Component*>{&addChoice,&add,&remove,&output,&matrixButton,&focusMode,&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setVisible(modular);
         addChoice.setBounds(24,y3,190,30);add.setBounds(222,y3,90,30);remove.setBounds(318,y3,84,30);output.setBounds(474,y3,200,30);
-        zoomFit.setBounds(w-24-48,y3,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,y3,30,30);zoomLabel.setBounds(zoomIn.getX()-58,y3,58,30);zoomOut.setBounds(zoomLabel.getX()-30,y3,30,30);
+        zoomFit.setBounds(w-24-48,y3,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,y3,30,30);zoomLabel.setBounds(zoomIn.getX()-76,y3,76,30);zoomOut.setBounds(zoomLabel.getX()-30,y3,30,30);
         focusMode.setBounds(zoomOut.getX()-16-124,y3,124,30);matrixButton.setBounds(focusMode.getX()-6-80,y3,80,30);
         const bool zoomable=modular&&!focused;for(auto* c:{&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setEnabled(zoomable);
         // Body.
@@ -161,13 +162,18 @@ public:
         keyboard.setBounds(24,getHeight()-113,getWidth()-48,89);keyboard.setKeyWidth(float(getWidth()-48)/43.f);
     }
     bool keyPressed(const KeyPress& key) override {
+        // Left / right step presets like the header arrows (browser closed, no modifiers).
+        if(!browser.isVisible()&&key.getModifiers().isAnyModifierKeyDown()==false){
+            if(key==KeyPress::leftKey){stepPreset(-1);return true;}
+            if(key==KeyPress::rightKey){stepPreset(1);return true;}
+        }
         if(!key.getModifiers().isCommandDown())return false;
         const int code=key.getKeyCode();
         if(code=='S'||code=='s'){showSaveForm();return true;}
         if(currentView=="panel"||focusMode.getToggleState())return false;
-        if(code=='='||code=='+'){setZoom(stepZoom(1));return true;}
-        if(code=='-'||code=='_'){setZoom(stepZoom(-1));return true;}
-        if(code=='0'){setZoom(1);return true;}
+        if(code=='='||code=='+'){setDensity(stepDensity(1));return true;}
+        if(code=='-'||code=='_'){setDensity(stepDensity(-1));return true;}
+        if(code=='0'){setDensity(44);return true;}
         return false;
     }
     // Native smoke checks and screenshots; no audio device is opened.
@@ -208,12 +214,16 @@ public:
         require(hardware.find("filter")->jacks[0]->getTooltip().contains("mixer.out"),"Socket cycle retains prior source");
         require(replaceModule("source","osc.sine"),"Replace module");
         require(hardware.find("source")->current=="osc.sine"&&hardware.find("source")->knobs.size()==2,"Contextual replacement panel");
-        for(const auto& spec:panels()){
-            ModulePanel test("all");Values values;test.instance="layout";test.show(spec.type,values,{});test.setSize(panelWidth(spec.type),421);
+        // Request 72: every module card at three densities. Controls sit inside the card's grid area,
+        // never overlap, and are at least as wide as their label and every value they can show.
+        for(const auto& spec:panels())for(int density:{32,44,60}){
+            ModulePanel test("all");Values values;test.instance="layout";test.knob=density;test.show(spec.type,values,{});test.setSize(test.naturalSize().getWidth(),test.naturalSize().getHeight());
             for(size_t i=0;i<test.knobs.size();++i){if(!test.knobs[i]->isVisible())continue;const auto bounds=test.knobs[i]->getBounds();
-                require(bounds.getY()>=147&&bounds.getBottom()<=384&&bounds.getX()>=12&&bounds.getRight()<=test.getWidth()-12,"Module control bounds");
+                require(bounds.getY()>=test.dividerY&&bounds.getBottom()<=test.getHeight()-ModulePanel::footerHeight&&bounds.getX()>=ModulePanel::pad-1&&bounds.getRight()<=test.getWidth()-ModulePanel::pad+1,"Module control bounds");
+                if(bounds.getWidth()<test.knobs[i]->textWidth())throw std::runtime_error("Module control text fits: "+spec.type+" / "+test.knobs[i]->label.getText().toStdString()+" width "+std::to_string(bounds.getWidth())+" < "+std::to_string(test.knobs[i]->textWidth())+" at knob "+std::to_string(density));
                 for(size_t j=i+1;j<test.knobs.size();++j)if(test.knobs[j]->isVisible())require(!bounds.intersects(test.knobs[j]->getBounds()),"Module controls overlap");
             }
+            for(const auto& jack:test.jacks)require(test.getLocalBounds().contains(jack->getBounds())&&jack->getBottom()<=test.dividerY,"Module sockets inside the card header");
         }
         // Exercise explicit old-format import using the actual 0.0.2 keys.
         const auto legacy=JSON::parse(R"({"format":"optisynth.instrument","version":1,"source":"modal.voice","envelope":"spectral.ahdsfr","filter":"spectral.lowpass","amplitudeEnvelope":true,"filterEnvelope":true,"gain":0.25,"parameters":{"modal.voice":{"decay":0.7},"spectral.lowpass":{"cutoff_hz":1800}}})");
@@ -424,7 +434,7 @@ public:
         require(loadFactory(16),"Prophet for saving");showSaveForm();
         browser.setFormFields("My Prophet sweep","Pad"," Warm, Berlin School, poly_mod","Saved by the native check");capture("browser-save.png");
         require(browser.saveFromForm(false).empty()&&!browser.isSaving(),"Save to library");
-        const auto savedFile=browser.libraryFolder().getChildFile("My Prophet sweep.optisynth");
+        const auto savedFile=browser.userFolder().getChildFile("My Prophet sweep.optisynth");
         require(savedFile.existsAsFile()&&presetKey=="user:"+savedFile.getFullPathName().toStdString()&&!presetDirty,"Library file written and becomes the current preset");
         const auto savedDocument=readRack(JSON::parse(savedFile));
         require(savedDocument.info.tags==std::vector<std::string>{"warm","berlin-school","poly-mod"}&&savedDocument.view=="panel"&&!savedDocument.panel.sections.empty()&&savedDocument.info.category=="Pad","Saved metadata, view and curated panel");
@@ -455,21 +465,63 @@ public:
         require(replaceModule("vco2","osc.sine"),"Replace oscillator B");
         {bool stale=false,sound=true;for(const auto& section:document.panel.sections)for(const auto& c:section.controls){stale|=c.node=="vco2"&&c.parameter=="saw";sound&=panelControlValid(document,c);}
          require(!stale&&sound&&synthPanel.control("vco2","transpose")!=nullptr,"Replacing a module prunes stale panel controls and keeps shared ones");}
-        // Zoom.
-        require(loadFactory(15),"OB swell for zoom");setView("modular",true);setZoom(1);
-        require(zoomHost.getWidth()>rackView.getWidth(),"At 100% the 12-module pad scrolls sideways");
-        fitZoom();require(hardware.zoom<1&&zoomHost.getWidth()<=rackView.getWidth()&&zoomHost.getHeight()<=rackView.getHeight(),"Fit shows the whole rack without scrolling");
-        capture("rack-zoom-fit.png");
-        setZoom(.6f);capture("rack-zoom-60.png");
-        setZoom(1.5f);require(zoomHost.getWidth()>rackView.getWidth()&&std::abs(hardware.zoom-1.5f)<1e-6,"150% scrolls");
-        selectNode("reverb");require(rackView.getViewArea().intersects(hardware.scaledBounds(*hardware.find("reverb"))),"Selected module scrolled into view at 150%");
-        capture("rack-zoom-150.png");
-        {Preferences reread(prefs.file());require(std::abs(reread.number("zoom",0)-1.5)<1e-6,"Zoom saved as a preference");}
-        setZoom(1);zoomHost.magnified(1.3f);require(std::abs(hardware.zoom-1.3f)<1e-4,"Pinch zooms the rack");
-        require(stepZoom(1)>hardware.zoom&&stepZoom(-1)<hardware.zoom,"Zoom steps");
-        setZoom(1);setSize(1120,800);resized();fitZoom();require(zoomHost.getWidth()<=rackView.getWidth()&&zoomHost.getHeight()<=rackView.getHeight(),"Fit at minimum window size");
-        capture("rack-zoom-fit-minimum.png");setZoom(1);setSize(1440,940);resized();
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 21-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; zoom fit/60%/150%, scroll-into-view, pinch, steps and saved preference; 13 native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        // Request 72: density (not scaling), rows, arrows, keyboard with a kept sequencer, user presets.
+        require(loadFactory(15),"OB swell for density");setView("modular",true);setDensity(44);
+        auto fontsFixed=[&]{for(const auto& m:hardware.modules)for(const auto& k:m->knobs)if(k->isVisible()&&(std::abs(k->label.getFont().getHeight()-text::label)>.01f))return false;return true;};
+        auto equalRowHeights=[&]{for(const auto& a:hardware.modules)for(const auto& b:hardware.modules)if(a->getY()==b->getY()&&a->getHeight()!=b->getHeight())return false;return true;};
+        require(hardware.getTransform().isIdentity()&&fontsFixed()&&equalRowHeights(),"Normal density: no transform, fixed text, cards in a row share its height");
+        const auto normalHeight=hardware.getHeight();const int normalVco=hardware.find("vco1")->getWidth();
+        capture("rack-normal.png");
+        const int normalVcoHeight=hardware.find("vco1")->getHeight();
+        // Text sets the column widths, so compact cards get shorter (smaller knobs, tighter rows), not narrower.
+        setDensity(32);require(hardware.find("vco1")->getWidth()<=normalVco&&hardware.find("vco1")->getHeight()<normalVcoHeight&&hardware.getHeight()<normalHeight&&fontsFixed(),"Compact: smaller knobs and spacing, same text size");
+        capture("rack-compact.png");
+        // Fit: the largest density that shows everything; when nothing does (12 modules, readable text), the most compact.
+        fitDensity();require(hardware.knob==32,"Fit falls back to Compact when the whole rack cannot be shown");
+        {const auto saved=document;require(commit(RackDocument{rackPreset(3),.25f,{}},"source"),"Six-module rack for Fit");fitDensity();
+         require(hardware.getWidth()<=rackView.getWidth()&&hardware.getHeight()<=rackView.getHeight()-rackView.getScrollBarThickness()&&hardware.knob>32,"Fit shows a six-module rack whole at a roomier density");
+         capture("rack-fit.png");require(commit(saved,"filter"),"Back to the OB rack");}
+        setDensity(60);capture("rack-large.png");
+        selectNode("reverb");require(rackView.getViewArea().intersects(hardware.find("reverb")->getBounds()),"Selected module scrolled into view");
+        {Preferences reread(prefs.file());require(int(reread.number("rackKnob",0))==60,"Density saved as a preference");}
+        hardware.magnified(1.3f);require(hardware.knob==60,"Pinch past the largest size stays there");hardware.magnified(.7f);require(hardware.knob==52,"Pinch in steps density down");
+        setSize(1120,800);resized();fitDensity();capture("rack-fit-minimum.png");setSize(1440,940);resized();setDensity(44);
+        // Rows chosen by hand, saved with the patch.
+        editRows("filter",1);
+        require(document.rows.size()>=2&&document.rows[1].front()=="filter"&&hardware.find("filter")->getX()<=HardwareRack::margin+HardwareRack::gap,"Start a new row with the filter");
+        editRows("vca",1);editRows("vco1",4);
+        require(readRack(rackJSON(document)).rows==document.rows,"Rows saved in the patch");
+        require(hardware.find("vco1")->getX()>hardware.find("vco2")->getX(),"Move right reorders within a row");
+        capture("rack-rows.png");
+        {auto removed=document;removed.graph.modulations.erase(std::remove_if(removed.graph.modulations.begin(),removed.graph.modulations.end(),[](const Modulation& m){return m.source.node=="breath";}),removed.graph.modulations.end());
+         removed.graph.nodes.erase(std::remove_if(removed.graph.nodes.begin(),removed.graph.nodes.end(),[](const NodeSpec& n){return n.id=="breath";}),removed.graph.nodes.end());
+         require(commit(removed,"vco1"),"Remove a module from hand-made rows");
+         bool gone=true;for(const auto& row:document.rows)for(const auto& id:row)gone&=id!="breath";require(gone,"Removed modules leave the rows");}
+        editRows("vco1",5);require(document.rows.empty(),"Automatic rows again");
+        // Header arrows, arrow keys, browser keys.
+        loadFactory(17);drain();
+        nextPreset.onClick();drain();require(presetKey=="factory:18","Header next arrow loads the next preset");
+        prevPreset.onClick();drain();require(presetKey=="factory:17","Header previous arrow");
+        keyPressed(KeyPress(KeyPress::rightKey));drain();require(presetKey=="factory:18","Right arrow key: next preset");
+        keyPressed(KeyPress(KeyPress::leftKey));drain();require(presetKey=="factory:17","Left arrow key: previous preset");
+        {PresetFilter f;f.collection="favourites";browser.filter=f;browser.applyFilter();}
+        nextPreset.onClick();drain();require(presetKey!="factory:17","Arrows still step when the current preset is outside the browser's filter");
+        browser.filter=PresetFilter{};browser.applyFilter();
+        showBrowser(true);browser.selectKey("factory:0");browser.keyPressed(KeyPress(KeyPress::downKey));
+        require(browser.visibleEntry(1).key=="factory:1"&&browser.keyPressed(KeyPress(KeyPress::returnKey))&&presetKey=="factory:1","Browser: down arrow then Return loads the next row");
+        showBrowser(false);
+        // User presets in Presets/User are found (request 73).
+        require(browser.userFolder().getChildFile("Lush test.optisynth").replaceWithText(JSON::toString(rackJSON(factoryDocument(15,.25f)))),"User preset fixture");
+        browser.rescan();require(browser.entry("user:"+browser.userFolder().getChildFile("Lush test.optisynth").getFullPathName().toStdString())!=nullptr,"Presets/User is listed");
+        // Keyboard plays a pad that a kept sequencer drives (the reported silence).
+        browser.setKeepSequence(true);loadFactory(17);drain();require(loadFactory(15),"OB swell keeps the sequencer");drain();
+        {bool driven=false;for(const auto& c:document.graph.connections)driven|=c.destination.node=="voices"&&c.destination.port=="notes";require(driven,"Sequencer drives the pad's voices");
+         player.playing=false;std::array<float,480> block{};for(int i=0;i<4;++i){player.collect();player.render(block.data(),480);}
+         keys.noteOn(1,60,.8f);float peak=0;for(int i=0;i<300;++i){player.collect();player.render(block.data(),480);for(float x:block)peak=std::max(peak,std::abs(x));}
+         keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
+        require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
+        browser.setKeepSequence(false);
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 21-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
@@ -483,7 +535,7 @@ private:
     Registry registry=moduleRegistry();
     MidiKeyboardState keys;MidiKeyboardComponent keyboard;TypingKeyboard typing;
     ListBox rack;ModulePanel editor{"all"};Values panelValues;
-    ZoomHost zoomHost;HardwareRack hardware;Viewport rackView;SynthPanelView synthPanel;TextButton focusMode{"Focus module"};TooltipWindow tips{this,700};
+    HardwareRack hardware;Viewport rackView;SynthPanelView synthPanel;TextButton focusMode{"Focus module"};TooltipWindow tips{this,700};
     std::map<std::string,std::shared_ptr<Controls>> handles;
     std::vector<std::unique_ptr<InputRow>> inputs;
     std::vector<std::string> addTypes;std::vector<Endpoint> outputPorts;
@@ -493,7 +545,7 @@ private:
     PresetDisplay presetDisplay;
     TextButton prevPreset{String::fromUTF8("\xe2\x80\xb9")},nextPreset{String::fromUTF8("\xe2\x80\xba")},favouriteButton{starOff},savePreset{"Save"};
     TextButton panelViewButton{"Panel"},modularViewButton{"Modular"},viewMenu{String::fromUTF8("\xe2\x96\xbe")};
-    TextButton zoomOut{String::fromUTF8("\xe2\x88\x92")},zoomLabel{"100%"},zoomIn{"+"},zoomFit{"Fit"};
+    TextButton zoomOut{String::fromUTF8("\xe2\x88\x92")},zoomLabel{"Normal"},zoomIn{"+"},zoomFit{"Fit"};
     std::string currentView="modular",presetKey,pendingPreset;bool presetDirty=false;
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
@@ -505,7 +557,7 @@ private:
     void showBrowser(bool show){
         if(show){browser.rescan();browser.setCurrent(presetKey);}
         browser.setVisible(show);presetDisplay.setToggleState(show,dontSendNotification);
-        if(show){browser.toFront(false);browser.grabKeyboardFocus();}else grabKeyboardFocus();
+        if(show){browser.toFront(false);browser.focusList();}else grabKeyboardFocus();
     }
     void showSaveForm(){showBrowser(true);browser.showSaveForm(document.info,currentView=="panel");}
     bool loadFactory(int index){
@@ -523,7 +575,7 @@ private:
     void loadPreset(const PresetEntry& e){if(e.factory())loadFactory(e.starter);else loadUserFile(e.file);}
     void stepPreset(int delta){if(const auto* e=browser.step(presetKey,delta)){const auto copy=*e;loadPreset(copy);}}
     std::string saveToLibrary(const PresetInfo& info,bool panelView,bool overwrite){
-        const auto file=presetFileFor(browser.libraryFolder(),info.name);
+        const auto file=presetFileFor(browser.userFolder(),info.name);
         if(file.exists()&&!overwrite)return "exists";
         try{auto saved=document;saved.info=info;saved.view=panelView?"panel":"modular";writePresetFile(file,rackJSON(saved));
             document.info=info;document.view=saved.view;presetKey="user:"+file.getFullPathName().toStdString();presetDirty=false;
@@ -535,6 +587,7 @@ private:
     void setView(const std::string& view,bool byHand){
         currentView=view=="panel"?"panel":"modular";if(byHand)document.view=currentView;
         panelViewButton.setToggleState(currentView=="panel",dontSendNotification);modularViewButton.setToggleState(currentView!="panel",dontSendNotification);
+        if(status.getText().startsWith("Ready"))message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");
         resized();repaint();
     }
     void applyViewPolicy(){
@@ -556,22 +609,49 @@ private:
         favouriteButton.setColour(TextButton::textColourOffId,favourite?orange:paper);favouriteButton.setEnabled(!presetKey.empty());
         browser.setCurrent(presetKey);
     }
-    static constexpr std::array<float,11> zoomSteps{.5f,.6f,.67f,.75f,.85f,1.f,1.15f,1.3f,1.5f,1.75f,2.f};
-    float stepZoom(int direction) const {
-        if(direction>0){for(float z:zoomSteps)if(z>hardware.zoom+.001f)return z;return zoomSteps.back();}
-        for(auto it=zoomSteps.rbegin();it!=zoomSteps.rend();++it)if(*it<hardware.zoom-.001f)return *it;return zoomSteps.front();
+    // Request 72: rack density. Knob size and spacing change; text sizes never do.
+    static constexpr std::array<int,5> densityKnobs{32,38,44,52,60};
+    static String densityName(int knob){return knob<=32?"Compact":knob<=38?"Snug":knob<=44?"Normal":knob<=52?"Roomy":"Large";}
+    int stepDensity(int direction) const {
+        if(direction>0){for(int k:densityKnobs)if(k>hardware.knob)return k;return densityKnobs.back();}
+        for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it)if(*it<hardware.knob)return *it;return densityKnobs.front();
     }
-    // Keeps the centre of the view steady while the scale changes.
-    void setZoom(float zoom){
-        zoom=std::clamp(zoom,.5f,2.f);const float before=hardware.zoom;const auto view=rackView.getViewArea();
-        const float cx=(view.getCentreX())/before,cy=(view.getCentreY())/before;
-        hardware.zoom=zoom;prefs.set("zoom",double(zoom));arrangeRack();
-        rackView.setViewPosition(int(cx*zoom-view.getWidth()*.5f),int(cy*zoom-view.getHeight()*.5f));
+    void setDensity(int knob){hardware.knob=std::clamp(knob,densityKnobs.front(),densityKnobs.back());prefs.set("rackKnob",hardware.knob);arrangeRack();}
+    // Largest density at which the whole rack is visible without scrolling (else the most compact).
+    void fitDensity(){
+        const int w=rackView.getWidth()-rackView.getScrollBarThickness(),h=rackView.getHeight()-rackView.getScrollBarThickness();int chosen=densityKnobs.front();
+        for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it){hardware.knob=*it;const auto size=hardware.arrange(w);if(size.getWidth()<=w&&size.getHeight()<=h){chosen=*it;break;}}
+        setDensity(chosen);
     }
-    void fitZoom(){setZoom(hardware.fitZoom(rackView.getWidth()-rackView.getScrollBarThickness(),rackView.getHeight()-rackView.getScrollBarThickness()));}
     void arrangeRack(){
-        const auto size=hardware.arrange(rackView.getWidth()-rackView.getScrollBarThickness(),rackView.getHeight()-rackView.getScrollBarThickness());
-        zoomHost.setSize(size.getWidth(),size.getHeight());zoomLabel.setButtonText(String(int(std::lround(hardware.zoom*100)))+"%");
+        hardware.rows=document.rows;hardware.arrange(rackView.getWidth()-rackView.getScrollBarThickness());
+        zoomLabel.setButtonText(densityName(hardware.knob));
+    }
+    // Rows: start a new row here, join the row above, move left / right, or wrap automatically.
+    void showRowMenu(const std::string& id){
+        auto rows=document.rows.empty()?hardware.shownRows():document.rows;
+        size_t r=0,c=0;bool found=false;for(size_t i=0;i<rows.size()&&!found;++i)for(size_t j=0;j<rows[i].size();++j)if(rows[i][j]==id){r=i;c=j;found=true;break;}
+        if(!found)return;
+        PopupMenu menu;menu.addSectionHeader(String(id)+"  /  rack rows");
+        menu.addItem(1,"Start a new row with this module",c>0);
+        menu.addItem(2,"Join the row above",c==0&&r>0);
+        menu.addItem(3,"Move left",c>0);menu.addItem(4,"Move right",c+1<rows[r].size());
+        menu.addSeparator();menu.addItem(5,"Automatic rows (wrap to the window)",true,document.rows.empty());
+        menu.showMenuAsync(PopupMenu::Options(),[safe=SafePointer<RackSynth>(this),id](int result){if(safe&&result>0)safe->editRows(id,result);});
+    }
+    void editRows(const std::string& id,int action){
+        auto rows=document.rows.empty()?hardware.shownRows():document.rows;
+        for(size_t r=0;r<rows.size();++r)for(size_t c=0;c<rows[r].size();++c)if(rows[r][c]==id){
+            auto& row=rows[r];
+            if(action==1&&c>0){std::vector<std::string> tail(row.begin()+long(c),row.end());row.erase(row.begin()+long(c),row.end());rows.insert(rows.begin()+long(r)+1,tail);}
+            else if(action==2&&c==0&&r>0){rows[r-1].insert(rows[r-1].end(),row.begin(),row.end());rows.erase(rows.begin()+long(r));}
+            else if(action==3&&c>0)std::swap(row[c],row[c-1]);
+            else if(action==4&&c+1<row.size())std::swap(row[c],row[c+1]);
+            else if(action==5)rows.clear();
+            document.rows=rows;if(!presetDirty){presetDirty=true;updatePresetDisplay();}
+            arrangeRack();if(auto* p=hardware.find(id))rackView.setViewPosition(rackView.getViewPositionX(),std::max(0,p->getY()-8));
+            return;
+        }
     }
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
@@ -624,7 +704,8 @@ private:
     void rebuildHardware() {
         hardware.clear();
         for(const auto& node:document.graph.nodes){
-            auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;
+            auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;p->knob=hardware.knob;
+            p->rowMenu=[this,id=node.id]{MessageManager::callAsync([safe=SafePointer<RackSynth>(this),id]{if(safe)safe->showRowMenu(id);});};
             auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
             p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);bindSamplePanel(*p,node.id);bindSpectralPanel(*p,node.id);
             bindSequencePanel(*p);
@@ -663,7 +744,7 @@ private:
     bool commit(RackDocument next,const std::string& preferred,const std::string& presetLoad={}) {
         cancelLoading();const auto target=preferred;
         try {
-            validateRack(next.graph);pruneSampleReferences(next);prunePanel(next);
+            validateRack(next.graph);pruneSampleReferences(next);prunePanel(next);pruneRows(next);
             if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;pendingPreset=presetLoad;message("Preparing patch... current sound stays ready");return true;}
             prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target,presetLoad);return true;
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
@@ -734,7 +815,7 @@ private:
         int row=0;for(size_t i=0;i<document.graph.nodes.size();++i)if(document.graph.nodes[i].id==id)row=int(i);
         refreshing=true;rack.selectRow(row);refreshing=false;
         if(!document.graph.nodes.empty()){selected=document.graph.nodes[size_t(row)].id;showSelected();
-            if(auto* p=hardware.find(selected)){const auto r=hardware.scaledBounds(*p);const auto view=rackView.getViewArea();int x=view.getX(),y=view.getY();
+            if(auto* p=hardware.find(selected)){const auto r=p->getBounds();const auto view=rackView.getViewArea();int x=view.getX(),y=view.getY();
                 if(r.getX()<x||r.getWidth()>view.getWidth())x=r.getX();else if(r.getRight()>view.getRight())x=r.getRight()-view.getWidth()+8;
                 if(r.getY()<y||r.getHeight()>view.getHeight())y=r.getY();else if(r.getBottom()>view.getBottom())y=r.getBottom()-view.getHeight()+8;
                 rackView.setViewPosition(x,y);}}
@@ -746,7 +827,7 @@ private:
         if(editor.sequencerWindowOpen())
             if(auto* card=hardware.find(editor.instance);card && card->current==editor.current && !card->sequencerWindowOpen())
                 card->openSequencerWindow();
-        editor.instance=node.id;
+        editor.instance=node.id;editor.knob=60;
         editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});bindSequencePanel(editor);
         bindSamplePanel(editor,node.id);
         bindSpectralPanel(editor,node.id);

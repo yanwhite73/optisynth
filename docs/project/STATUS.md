@@ -1,5 +1,29 @@
 # Optisynth status — 20 November 2026
 
+## 0.0.17 readable density layout, rows, preset/arrow/keyboard fixes — requests 72–73
+
+**Candidate only.** It is built and passes the native checks in
+`build/app-candidate`. It is **not delivered**, because Yan's 0.0.16 app was
+running from the delivery path. `tools/deliver_app.py` now refuses delivery
+while the app runs. Next action: when Optisynth is closed, run
+`python3 tools/deliver_app.py build/app-candidate/Optisynth.app --qualification ...`.
+
+**Changes:**
+- The transform zoom is replaced by a JUCE Grid/FlexBox density layout. Text
+  stays fixed; knob size and spacing change.
+- Rows can be set by hand and are saved in the patch.
+- User presets live in `~/Music/Optisynth/Presets/User`.
+- Arrows fixed: header arrows, Left/Right keys, and browser list keys.
+- The keyboard plays a sequencer-driven pad.
+
+**Checks.**
+- DSP: 1,194 core, 28 graph, 329 modular (normal and ASan) and 47 timing.
+- Native: ui, sequencer, pad and panel/browser receipts.
+
+Details: [SYNTH_PANEL_AND_PRESETS.md](../ui/SYNTH_PANEL_AND_PRESETS.md#request-72-rework-0017).
+Framework survey: [JUCE_UI_OPTIONS.md](../research/platforms/JUCE_UI_OPTIONS.md).
+
+
 ## 0.0.16 interface: preset browser, synth-panel view, rack zoom — request 71
 
 App: `app/Builds/MacOSX/build/Release/Optisynth.app` (receipt
@@ -88,7 +112,7 @@ rack change. Rack rebuilds reopen expanded editors for surviving sequencer IDs
 and models. Runtime playhead, editor undo and temporary snapshots can restart.
 
 Yan heard the current sound starting to come together musically and called the sequencer
-options a good start (feedback 61). The saved reference is `patches/lush ambient space.optisynth` (local),
+options a good start (feedback 61). The saved reference is `~/Music/Optisynth/Presets/User/lush ambient space.optisynth` (moved from `patches/` on 20 November, request 73),
 with the Performance sequencer driving an analog pad at 118 BPM.
 
 ## Previous delivery — Probability and Orbit, request 59, 0.0.12

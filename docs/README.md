@@ -14,7 +14,7 @@ Current sequencer implementation: [Probability and Orbit](architecture/REFERENCE
 with [native visual evidence](ui/REFERENCE_SEQUENCERS_REVIEW.md), [four-track Performance sequencer](architecture/PERFORMANCE_SEQUENCER.md),
 [Pattern / Motion](architecture/PATTERN_MOTION.md), and the
 [Pattern, Euclidean and Stage foundation](architecture/FIRST_SEQUENCERS.md).
-Interface (request 71): [rack zoom, synth-panel view and preset browser](ui/SYNTH_PANEL_AND_PRESETS.md).
+Interface (requests 71–72): [rack density, synth-panel view and preset browser](ui/SYNTH_PANEL_AND_PRESETS.md); [existing JUCE UI frameworks and code](research/platforms/JUCE_UI_OPTIONS.md).
 Sound goals (request 44): [ambient Berlin School and analog pads](project/SOUND_GOALS.md);
 [project review, 19 November](project/PROJECT_REVIEW_20261119.md).
 

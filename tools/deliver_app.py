@@ -49,7 +49,18 @@ def swap_contents(staged, installed):
         raise OSError(err, os.strerror(err))
 
 
+def running_from_release():
+    """PIDs of processes executing from the delivered app (AGENTS: never replace a running user's app)."""
+    import subprocess
+    out = subprocess.run(['/usr/bin/pgrep', '-f', str(APP / 'Contents/MacOS/')], capture_output=True, text=True).stdout
+    return [int(x) for x in out.split()]
+
+
 def copy_delivery(source, note):
+    running = running_from_release()
+    if running:
+        raise RuntimeError(f'Optisynth is running from the delivery path (pid {running}); quit it before delivery. '
+                           'The candidate stays in build/app-candidate.')
     source = source.resolve(strict=True)
     if source == APP.resolve():
         raise ValueError('Build in staging; do not overwrite the delivered app in place')

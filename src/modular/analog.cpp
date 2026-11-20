@@ -426,7 +426,9 @@ std::vector<Panel> analogPanels() {
         {"glide", "Glide", "s", 0, 5, 0}, {"unison", "Unison", "", 1, 8, 1, false, 1}, {"detune", "Detune", "ct", 0, 50, 10},
         {"steal", "Steal", "", 0, 1, 1, false, 1, {"Off", "On"}},
         {"tuning", "Tuning", "", 0, 4, 0, false, 1, {"Equal", "Just 5-limit", "Just 7-limit", "Pythagorean", "Harmonic series"}},
-        {"root", "Root", "", 0, 11, 0, false, 1, {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}}}});
+        {"root", "Root", "", 0, 11, 0, false, 1, {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}},
+        // Request 72: when a sequencer drives the voices, the keyboard can still play them.
+        {"keyboard", "Keyboard", "", 0, 1, 1, false, 1, {"Seq only", "Plays too"}}}});
     p.push_back({"analog.polymod", "Poly-mod", "Prophet-style per-voice mix of oscillator B and filter envelope for FM / PWM / filter", "utility", {
         {"osc_amount", "Osc B", "", -1, 1, 1}, {"env_amount", "Filter env", "", -1, 1, 0}}});
     p.push_back({"mod.wheel", "Wheel / bend", "Hardware MIDI mod wheel and pitch bend as control sources", "modulator", {

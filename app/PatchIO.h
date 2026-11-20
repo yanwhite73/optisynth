@@ -16,7 +16,8 @@ struct PanelControl { std::string node,parameter,label; };   // empty parameter:
 struct PanelSection { std::string title; std::vector<PanelControl> controls; };
 struct PanelLayout { std::string style; std::vector<PanelSection> sections; };
 struct RackDocument { GraphSpec graph; float gain=.25f; std::map<std::string,SampleReference> samples; SpectralBank spectral; float tempo=120;
-    PresetInfo info; std::string view; PanelLayout panel; };
+    PresetInfo info; std::string view; PanelLayout panel;
+    std::vector<std::vector<std::string>> rows; };   // request 72: rack rows chosen by hand; empty = wrap to the window
 inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id){
     auto state=d.spectral.find(id);if(state==d.spectral.end()||!state->second)return {};
     auto patch=state->second->patch;auto values=partials::liveValues(patch);const auto& specs=panel("spectral.engine").parameters;
@@ -265,6 +266,14 @@ inline PanelLayout autoPanel(const RackDocument& d) {
 inline const PanelLayout& effectivePanel(const RackDocument& d,PanelLayout& scratch) {
     if(!d.panel.sections.empty())return d.panel;scratch=autoPanel(d);return scratch;
 }
+// Rows keep only existing modules; new modules join the last row.
+inline void pruneRows(RackDocument& d) {
+    if(d.rows.empty())return;std::set<std::string> placed;
+    for(auto& row:d.rows)row.erase(std::remove_if(row.begin(),row.end(),[&](const std::string& id){
+        return placed.count(id)||std::none_of(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;})||!placed.insert(id).second;}),row.end());
+    d.rows.erase(std::remove_if(d.rows.begin(),d.rows.end(),[](const auto& row){return row.empty();}),d.rows.end());
+    for(const auto& n:d.graph.nodes)if(!placed.count(n.id)){if(d.rows.empty())d.rows.emplace_back();d.rows.back().push_back(n.id);}
+}
 // Module replacement or removal can orphan curated controls; drop them.
 inline void prunePanel(RackDocument& d) {
     for(auto& s:d.panel.sections)s.controls.erase(std::remove_if(s.controls.begin(),s.controls.end(),[&](const PanelControl& c){return !panelControlValid(d,c);}),s.controls.end());
@@ -337,7 +346,10 @@ inline juce::var rackJSON(const RackDocument& document) {
     for(const auto& section:document.panel.sections){auto* row=new juce::DynamicObject;row->setProperty("title",juce::String(section.title));juce::Array<juce::var> controls;
         for(const auto& c:section.controls){auto* control=new juce::DynamicObject;control->setProperty("node",juce::String(c.node));control->setProperty("parameter",juce::String(c.parameter));control->setProperty("label",juce::String(c.label));controls.add(control);}
         row->setProperty("controls",controls);sections.add(row);}
-    layout->setProperty("sections",sections);root->setProperty("panel",juce::var(layout));return root;
+    layout->setProperty("sections",sections);root->setProperty("panel",juce::var(layout));
+    auto* rack=new juce::DynamicObject;juce::Array<juce::var> rows;
+    for(const auto& row:document.rows){juce::Array<juce::var> ids;for(const auto& id:row)ids.add(juce::String(id));rows.add(ids);}
+    rack->setProperty("rows",rows);root->setProperty("rack",juce::var(rack));return root;
 }
 inline std::string boundedText(const juce::var& v,int maximum,const char* what) {
     if(v.isVoid())return {};
@@ -370,6 +382,12 @@ inline void readPresetFields(const juce::var& value,RackDocument& d) {
                 section.controls.push_back({identifier(c["node"]),boundedText(c["parameter"],128,"panel parameter"),boundedText(c["label"],40,"panel label")});}
             d.panel.sections.push_back(std::move(section));
         }
+    }
+    const auto& rack=value["rack"];
+    if(!rack.isVoid()){
+        auto* rows=rack["rows"].getArray();if(!rack.isObject()||!rows||rows->size()>kMaximumNodes)throw std::invalid_argument("Invalid rack rows");
+        for(const auto& row:*rows){auto* ids=row.getArray();if(!ids||ids->size()>kMaximumNodes)throw std::invalid_argument("Invalid rack row");
+            std::vector<std::string> list;for(const auto& id:*ids)list.push_back(identifier(id));d.rows.push_back(std::move(list));}
     }
 }
 inline RackDocument readRack(const juce::var& value) {
@@ -436,6 +454,8 @@ inline RackDocument readRack(const juce::var& value) {
         if(int(value["version"])>=6)readPresetFields(value,d);
     } else throw std::invalid_argument("Not an Optisynth patch");
     validateRack(d.graph);
+    {std::set<std::string> seen;for(const auto& row:d.rows)for(const auto& id:row)
+        if(!seen.insert(id).second||std::none_of(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;}))throw std::invalid_argument("Rack row lists a missing or repeated module: "+id);}
     for(const auto& section:d.panel.sections)for(const auto& c:section.controls)
         if(!panelControlValid(d,c))throw std::invalid_argument("Panel control refers to a missing module or parameter: "+c.node+"."+c.parameter);
     return d;

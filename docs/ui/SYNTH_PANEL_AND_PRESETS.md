@@ -1,4 +1,11 @@
-# Rack zoom, synth-panel view and preset browser
+# Rack density, synth-panel view and preset browser
+
+> **Superseded in part by request 72 (0.0.17).** The transform zoom described
+> below shrank text with everything else. It was replaced by a density control
+> built on JUCE Grid/FlexBox: knob size and spacing change, text sizes never do.
+> Rows can now be set by hand and are saved in the patch (`rack.rows`). User
+> presets live in `~/Music/Optisynth/Presets/User`. See the request 72 section
+> at the end.
 
 Request 71, 20 November 2026. This note was written before implementation. It
 records the mechanism, the file format and the success criteria. The results
@@ -187,3 +194,67 @@ delivered binary. The existing UI, sequencer and pad checks also still pass.
 - **The minimum window size** needs a vertical scroll for a full pad panel.
 - **Untested by a person:** keyboard browsing in the table, the overwrite
   dialog, Add folder and Reveal. None of these was clicked through by a person.
+
+## Request 72 rework (0.0.17)
+
+**What was wrong in 0.0.16** (Yan's hands-on review):
+- Uniform transform scaling made the text tiny when zoomed out.
+- Modules could not be put in rows.
+- The browser did not list a preset saved in the repository's `patches/` folder.
+- "The arrows don't work".
+- The keyboard was silent.
+
+**What changed:**
+- **Layout.** Cards use JUCE `Grid`, each column as wide as its widest
+  text: label, range ends, every choice and the current value. Sockets use a
+  wrapping `FlexBox`. The rack is a wrapping `FlexBox`, and cards in a row
+  share the row's height.
+- **Text.** Fixed sizes everywhere: labels 11, values 12.5, sockets 10,
+  headers 10.5.
+- **Density.** Five steps, Compact to Large (knobs 32–60 px), set by −, +,
+  Fit, Cmd − / = / 0 or pinch. Fit picks the largest step that shows the
+  whole rack; when none does, it uses Compact and scrolls.
+- **Rows.** Right-click a card, or use its ⋯ button:
+  - start a new row;
+  - join the row above;
+  - move left or right;
+  - return to automatic rows.
+
+  Hand-set rows are saved in the patch. Removed modules leave the rows and new
+  modules join the last row.
+- **Synth panel.** The same `Grid`/`FlexBox` approach, with no stretched
+  spacing. A sequencer the curated layout omits gets its own section first.
+- **Presets.** The browser scans `~/Music/Optisynth/Presets` and saves into
+  `Presets/User`. Yan's patch was moved there (request 73).
+- **Arrows:**
+  - Header arrows step through all presets when the current one is outside
+    the browser's filter.
+  - Left/Right keys step presets.
+  - The browser list takes focus on opening, so up/down and Return work.
+- **Keyboard.** Diagnosed by reproduction. Keep current sequence (on by
+  default, request 60) wired the startup sequencer into the pad's voice mixer,
+  which cut the keyboard off. The voice mixer now merges live keys with
+  sequencer notes, via a new parameter *Keyboard: Plays too* (default) or
+  *Seq only*. Keyboard notes carry their own source tag, so sequencer note-offs
+  and resets leave held keys alone. There are 5 new DSP checks.
+
+**Checks.** `panel-browser-check.txt` adds the following:
+- every module card at three densities: in bounds, no overlap, text fits;
+- fixed text sizes and equal row heights;
+- Compact shorter than Normal;
+- Fit behaviour;
+- hand-set rows saved and pruned;
+- pinch steps;
+- header arrows and arrow keys, including outside the filter;
+- browser down/Return;
+- `Presets/User` listed;
+- the keyboard plays a sequencer-driven pad.
+
+Captures in `build/ui-review-72/` were inspected. That inspection caught
+"Normal 2x" clipped by the value box's inner padding and a stale status line;
+both are fixed.
+
+**Not verified by a person yet:**
+- real trackpad pinch;
+- right-click on a card;
+- the overwrite dialog.

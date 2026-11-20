@@ -4,6 +4,7 @@
 #include "../plugin/Source/TypingKeyboard.h"
 #include <ApplicationServices/ApplicationServices.h>
 #include <map>
+#include <set>
 #include "SequencerEditor.h"
 #include "PerformanceEditor.h"
 #include "ReferenceSequencerEditor.h"
@@ -45,8 +46,13 @@ int panelWidth(const std::string& id) {
     if(id=="utility.mix"||id=="osc.sine")return 200;
     return id=="modal.resonator"?270:250;
 }
+// Request 72: layout uses JUCE Grid and FlexBox. Text sizes are fixed so they stay
+// readable at every density; density changes knob size and spacing only.
+namespace text { constexpr float label=11.f,value=12.5f,jack=10.f,header=10.5f,footer=10.f; }
 struct KnobLook : LookAndFeel_V4 {
     Colour markings=ink;
+    // Value text: fixed size, no inner padding (the layout reserves its full width), never squashed.
+    Label* createSliderTextBox(Slider& slider) override {auto* l=LookAndFeel_V4::createSliderTextBox(slider);l->setFont(font(text::value));l->setBorderSize({0,0,0,0});l->setMinimumHorizontalScale(1.f);return l;}
     void drawLinearSlider(Graphics& g,int x,int y,int width,int height,float pos,float,float,Slider::SliderStyle style,Slider&) override {
         const bool vertical=style==Slider::LinearVertical;const float centre=vertical?x+width*.5f:y+height*.5f;
         g.setColour(Colour(0xff151718));
@@ -59,7 +65,7 @@ struct KnobLook : LookAndFeel_V4 {
         g.setColour(paper);if(vertical)g.drawLine(centre-18,pos,centre+18,pos,2);else g.drawLine(pos,centre-4,pos,centre+4,2);
     }
     void drawRotarySlider(Graphics& g,int x,int y,int width,int height,float position,float start,float end,Slider&) override {
-        auto r=Rectangle<float>(float(x),float(y),float(width),float(height)).reduced(3);
+        auto r=Rectangle<float>(float(x),float(y),float(width),float(height)).reduced(2);
         const float diameter=std::min(r.getWidth(),r.getHeight());r=r.withSizeKeepingCentre(diameter,diameter);
         const auto c=r.getCentre();const float radius=diameter*.5f;
         for(int i=0;i<=10;++i){const float a=start+(end-start)*i/10.f;g.setColour(markings.withAlpha(.7f));
@@ -73,14 +79,17 @@ struct KnobLook : LookAndFeel_V4 {
         g.setColour(paper);g.drawLine(c.x+std::sin(a)*outer*.68f,c.y-std::cos(a)*outer*.68f,c.x+std::sin(a)*outer,c.y-std::cos(a)*outer,2.3f);
     }
 };
+// One parameter: label, knob (or trim slider / switch) and value, stacked tightly.
 struct Control : juce::Component {
+    static constexpr int labelHeight=15,valueHeight=18;
     Label label;Slider slider;ToggleButton toggle;bool isSwitch=false;
     Control(const Parameter& p,float value,std::function<void(float)> changed,KnobLook& look,Colour text,bool fader=false,bool compactTrim=false) {
-        label.setText(String(p.label).toUpperCase(),dontSendNotification);label.setFont(font(11));label.setColour(Label::textColourId,text);label.setJustificationType(Justification::centred);
+        label.setText(String(p.label).toUpperCase(),dontSendNotification);label.setFont(font(text::label));label.setColour(Label::textColourId,text);label.setJustificationType(Justification::centred);
+        label.setBorderSize({0,0,0,0});label.setMinimumHorizontalScale(.85f);
         const bool trim=compactTrim||p.id.find("_curve")!=std::string::npos||p.id=="fade"||p.id=="mod_rate_hz"||p.id=="mod_depth"||p.id=="start"||p.id=="end";
         slider.setScrollWheelEnabled(false);
         slider.setSliderStyle(fader?Slider::LinearVertical:trim?Slider::LinearHorizontal:Slider::RotaryHorizontalVerticalDrag);
-        slider.setTextBoxStyle(Slider::TextBoxBelow,false,88,20);
+        slider.setTextBoxStyle(Slider::TextBoxBelow,false,80,valueHeight);
         slider.setColour(Slider::textBoxTextColourId,text);slider.setColour(Slider::textBoxBackgroundColourId,Colours::transparentBlack);
         slider.setColour(Slider::textBoxOutlineColourId,Colours::transparentBlack);slider.setColour(Slider::trackColourId,teal);
         slider.setColour(Slider::thumbColourId,paper);slider.setColour(Slider::backgroundColourId,Colour(0xff151718));
@@ -88,7 +97,7 @@ struct Control : juce::Component {
         if(p.logarithmic)slider.setSkewFactorFromMidPoint(p.minimum>0?std::sqrt(p.minimum*p.maximum):.3);
         slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.step>=1?0:p.unit=="Hz"?1:p.unit=="st"?2:3);
         if(p.id=="root_note")slider.setTextValueSuffix(" MIDI");
-        if(p.unit=="Hz")slider.textFromValueFunction=[](double v){return String(v,v<1?3:v<10?2:1);};   // slow LFOs read 0.030 Hz, not 0.0 Hz (suffix added by Slider)
+        if(p.unit=="Hz")slider.textFromValueFunction=[](double v){return String(v,v<1?3:v<10?2:1);};   // slow LFOs read 0.030 Hz (suffix added by Slider)
         if(!p.choices.empty()){
             slider.setTextValueSuffix("");
             slider.textFromValueFunction=[choices=p.choices](double v){return String(choices[size_t(std::clamp(int(std::lround(v)),0,int(choices.size())-1))]);};
@@ -98,8 +107,9 @@ struct Control : juce::Component {
             slider.textFromValueFunction=[](double v){const char* names[]={"Sine","Triangle","Ramp","Pulse"};return String(names[std::clamp(int(std::round(v)),0,3)]);};
             slider.valueFromTextFunction=[](const String& t){return t.equalsIgnoreCase("Triangle")?1.:t.equalsIgnoreCase("Ramp")?2.:t.equalsIgnoreCase("Pulse")?3.:0.;};
         }
+        slider.setLookAndFeel(&look);
         slider.setValue(value,dontSendNotification);slider.updateText();slider.setDoubleClickReturnValue(true,p.initial);
-        slider.setTooltip(p.label+" / double-click to reset");slider.setLookAndFeel(&look);
+        slider.setTooltip(p.label+" / double-click to reset");
         slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
         if(p.id=="loop"||p.id=="retrigger"){
             isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(p.id=="loop"?"Loop while held":"Reset on note");
@@ -109,27 +119,60 @@ struct Control : juce::Component {
     }
     void setValue(float v){slider.setValue(v,dontSendNotification);toggle.setToggleState(v>=.5f,dontSendNotification);}
     ~Control() override {slider.setLookAndFeel(nullptr);}
+    // Widest text this control must show: its label and its current value.
+    // Covers the range ends, every stepped value (choices) and the current value, so text never clips.
+    int textWidth() const {
+        if(isSwitch)return int(std::ceil(GlyphArrangement::getStringWidth(font(text::label),toggle.getButtonText())))+28;
+        float w=GlyphArrangement::getStringWidth(font(text::label),label.getText());
+        auto& s=const_cast<Slider&>(slider);   // getTextFromValue is not const in JUCE; it does not modify the slider
+        auto measure=[&](double v){w=std::max(w,GlyphArrangement::getStringWidth(font(text::value),s.getTextFromValue(v)));};
+        const auto range=slider.getRange();measure(range.getStart());measure(range.getEnd());measure(slider.getValue());
+        if(slider.getInterval()>=1&&range.getLength()<=16)for(double v=range.getStart();v<=range.getEnd();v+=slider.getInterval())measure(v);
+        return int(std::ceil(w))+4;   // a little air either side so text never touches the next column
+    }
     void resized() override {
         if(isSwitch){toggle.setBounds(getLocalBounds());return;}
-        const bool compact=slider.isRotary()&&getHeight()<90&&getWidth()>=105;
-        const auto position=compact?Slider::TextBoxRight:Slider::TextBoxBelow;
-        if(slider.getTextBoxPosition()!=position)slider.setTextBoxStyle(position,false,compact?64:88,20);
-        label.setBounds(0,0,getWidth(),19);slider.setBounds(0,18,getWidth(),getHeight()-18);
+        if(slider.getTextBoxWidth()!=getWidth())slider.setTextBoxStyle(Slider::TextBoxBelow,false,getWidth(),valueHeight);
+        label.setBounds(0,0,getWidth(),labelHeight);slider.setBounds(0,labelHeight-1,getWidth(),getHeight()-labelHeight+1);
     }
 };
 struct Jack : Button {
+    static constexpr int size=38;
     Port port;bool output=false,connected=false;Colour text=paper;
     Jack(Port p,bool out):Button(String(p.id)+(out?" output":" input")),port(std::move(p)),output(out){}
     void paintButton(Graphics& g,bool over,bool down) override {
-        const float cx=getWidth()*.5f,cy=17;
-        g.setColour(Colour(0xff16181a));g.fillEllipse(cx-12,cy-12,24,24);
-        g.setColour(over||down?Colour(0xfff0c76c):Colour(0xffc2c3bd));g.drawEllipse(cx-10,cy-10,20,20,2.8f);
-        g.setColour(connected?(port.type==SignalType::Control?Colour(0xfff0c76c):teal):Colour(0xff080a0c));g.fillEllipse(cx-5,cy-5,10,10);
-        g.setColour(text);g.setFont(font(9));g.drawText(String(port.id).toUpperCase(),0,32,getWidth(),15,Justification::centred);
-        if(output){g.setColour(text.withAlpha(.6f));g.drawLine(cx-10,48,cx+10,48,1);}
+        const float cx=getWidth()*.5f,cy=12;
+        g.setColour(Colour(0xff16181a));g.fillEllipse(cx-10,cy-10,20,20);
+        g.setColour(over||down?Colour(0xfff0c76c):Colour(0xffc2c3bd));g.drawEllipse(cx-8.5f,cy-8.5f,17,17,2.4f);
+        g.setColour(connected?(port.type==SignalType::Control?Colour(0xfff0c76c):teal):Colour(0xff080a0c));g.fillEllipse(cx-4,cy-4,8,8);
+        g.setColour(text);g.setFont(font(text::jack));g.drawFittedText(String(port.id).toUpperCase(),0,23,getWidth(),13,Justification::centred,1,.8f);
+        if(output){g.setColour(text.withAlpha(.6f));g.drawLine(cx-9,getHeight()-1.f,cx+9,getHeight()-1.f,1);}
     }
 };
+// Parameter rows per module, read left to right. Modules without an entry flow into rows of three.
+inline std::vector<std::vector<std::string>> controlRows(const std::string& type) {
+    static const std::map<std::string,std::vector<std::vector<std::string>>> rows{
+        {"analog.vco",{{"transpose","fine","drift"},{"saw","pulse","triangle"},{"pulse_width","pwm_depth","fm_depth","level"}}},
+        {"analog.filter",{{"cutoff_hz","resonance","env_octaves","key_track"},{"mode","drive","fm_depth","quality"},{"band","poles","pole_mix"}}},
+        {"analog.env",{{"attack","decay","sustain"},{"release","velocity"}}},
+        {"voice.mix",{{"voices","unison","detune"},{"glide","spread","level"},{"tuning","root","steal","keyboard"}}},
+        {"spectral.adsr",{{"attack","decay"},{"sustain","release"}}},
+        {"spectral.ahdsfr",{{"attack","hold","decay"},{"sustain","release","fade"},{"attack_curve","decay_curve","release_curve"}}},
+        {"osc.variable",{{"transpose","sync","shape"},{"pulse_width","level"}}},
+        {"modal.resonator",{{"transpose","input_gain","structure"},{"brightness","decay"}}},
+        {"drum.analog",{{"transpose","tone","decay"},{"attack_fm","self_fm"}}},
+        {"mod.lfo",{{"rate","depth"},{"wave","retrigger"}}},
+    };
+    const auto& ps=panel(type).parameters;std::vector<std::vector<std::string>> out;std::set<std::string> used;
+    if(auto it=rows.find(type);it!=rows.end())
+        for(const auto& row:it->second){std::vector<std::string> kept;for(const auto& id:row)if(std::any_of(ps.begin(),ps.end(),[&](const Parameter& x){return x.id==id;})){kept.push_back(id);used.insert(id);}if(!kept.empty())out.push_back(kept);}
+    std::vector<std::string> rest;for(const auto& x:ps)if(!used.count(x.id))rest.push_back(x.id);
+    const size_t width=rest.size()==4?2:3;
+    for(size_t i=0;i<rest.size();i+=width)out.emplace_back(rest.begin()+long(i),rest.begin()+long(std::min(rest.size(),i+width)));
+    return out;
+}
 struct ModulePanel : juce::Component, FileDragAndDropTarget {
+    static constexpr int pad=8,gap=4,headerHeight=50,footerHeight=16;
     std::unique_ptr<optiui::SequencerEditor> sequence;
     std::unique_ptr<optiui::PerformanceLauncher> performance;
     std::unique_ptr<optiui::ReferenceSequenceLauncher> referenceSequence;
@@ -138,24 +181,30 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     std::function<void()> choosePreset;std::vector<std::vector<int>> pages;
     std::vector<std::unique_ptr<Jack>> jacks;std::vector<std::string> types;
     std::string current,family,instance;bool routed=true,highlighted=false;
-    std::function<void()> selectionChanged,activated;
+    std::function<void()> selectionChanged,activated,rowMenu;
     std::function<void(const Port&,bool,juce::Component*)> portClicked;
-    TextButton sampleButton{"Load WAV..."};Label sampleName;SamplePtr sample;std::string samplePath;
+    TextButton sampleButton{"Load WAV..."},menuButton{String::fromUTF8("\xe2\x8b\xaf")};Label sampleName;SamplePtr sample;std::string samplePath;
     std::function<void()> chooseSample;std::function<void(const File&)> sampleDropped;
+    int knob=44;   // density: knob diameter in pixels
+    Rectangle<int> content,waveArea;int dividerY=0;
     ModulePanel(std::string group):family(std::move(group)) {
         choice.setColour(ComboBox::backgroundColourId,Colour(0xff232527));choice.setColour(ComboBox::textColourId,paper);
         choice.setColour(ComboBox::outlineColourId,Colours::transparentBlack);
         for(const auto& p:panels())if(family=="all"||p.family==family){types.push_back(p.type);choice.addItem(p.name,int(types.size()));}
         addAndMakeVisible(choice);choice.onChange=[this]{if(selectionChanged)selectionChanged();};addMouseListener(this,true);
+        addChildComponent(menuButton);menuButton.setTooltip("Rows: start a new row here, move this module left or right");menuButton.onClick=[this]{if(rowMenu)rowMenu();};
         addChildComponent(sampleButton);addChildComponent(sampleName);sampleButton.onClick=[this]{if(chooseSample)chooseSample();};
-        sampleName.setFont(font(11));sampleName.setColour(Label::textColourId,ink);
+        sampleName.setFont(font(text::label));sampleName.setColour(Label::textColourId,ink);
         addChildComponent(section);addChildComponent(presetButton);addChildComponent(presetName);addChildComponent(more);
         more.onClick=[this]{++subpage;resized();repaint();};
         presetButton.onClick=[this]{if(choosePreset)choosePreset();};section.onChange=[this]{subpage=0;resized();repaint();};
         presetName.setFont(font(12));presetName.setColour(Label::textColourId,ink);
     }
     ~ModulePanel() override {removeMouseListener(this);}
-    void mouseDown(const MouseEvent&) override {if(activated)activated();}
+    void mouseDown(const MouseEvent& e) override {
+        if(activated)activated();
+        if(e.mods.isPopupMenu()&&e.eventComponent==this&&rowMenu)rowMenu();   // right-click on the card body or header
+    }
     bool isInterestedInFileDrag(const StringArray& files) override {return current=="sample.player"&&files.size()==1&&files[0].endsWithIgnoreCase(".wav");}
     void filesDropped(const StringArray& files,int,int) override {
         if(!isInterestedInFileDrag(files))return;
@@ -175,8 +224,8 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
             if(isSequencer(type)||type=="seq.performance"||isReferenceSequencer(type))continue;
-            auto knob=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),(family=="envelope"&&p.id=="sustain")||type=="utility.mix",family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
-            addAndMakeVisible(*knob);knobs.push_back(std::move(knob));}
+            auto knobControl=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),false,family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
+            addAndMakeVisible(*knobControl);knobs.push_back(std::move(knobControl));}
         if(isReferenceSequencer(type)){referenceSequence=std::make_unique<optiui::ReferenceSequenceLauncher>(type,state[type],controls);referenceSequence->parameterChanged=changed;addAndMakeVisible(*referenceSequence);}
         if(type=="seq.performance"){performance=std::make_unique<optiui::PerformanceLauncher>(controls,state[type]);performance->parameterChanged=changed;addAndMakeVisible(*performance);}
         if(isSequencer(type)){
@@ -201,6 +250,8 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
                 jack->setTooltip(String(instance)+"."+String(p.id)+(output?" / output":" / choose input source"));
                 jack->onClick=[this,p,output,ptr]{if(portClicked)portClicked(p,output,ptr);};addAndMakeVisible(*jack);jacks.push_back(std::move(jack));};
             for(const auto& p:t.inputs)add(p,false);for(const auto& p:t.outputs)add(p,true);}
+        menuButton.setVisible(bool(rowMenu));
+        spectralTextWidth=0;if(spectral)for(const auto& k:knobs)spectralTextWidth=std::max(spectralTextWidth,k->textWidth());
         resized();repaint();
     }
     void setSpectral(SpectralPtr state,const GraphSpec& graph){
@@ -238,151 +289,147 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         else if (sequence) sequence->openPerformanceEditor();
     }
     void setValue(const std::string& id,float value){if(referenceSequence){referenceSequence->setValue(id,value);return;}if(performance){performance->setValue(id,value);return;}if(sequence){sequence->setValue(id,value);return;}const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setValue(value);if(current=="sample.player")repaint();}
+    // Cell size follows density, but never below what the label and value text need.
+    int spectralTextWidth=0;   // widest label/value over all paged Spectral controls, measured once in show()
+    int cellWidth() const {return current=="spectral.engine"?std::max(knob+12,spectralTextWidth+6):std::max(knob+12,64);}   // Spectral: one width for every page
+    // Each grid column is as wide as the widest text in it (labels, values, choices), so text never clips
+    // and narrow columns stay narrow.
+    std::vector<int> columnWidths(const std::vector<std::vector<Control*>>& rows) const {
+        std::vector<int> widths;
+        for(const auto& r:rows){if(widths.size()<r.size())widths.resize(r.size(),cellWidth());
+            for(size_t c=0;c<r.size();++c)if(r[c]&&current!="spectral.engine")widths[c]=std::max(widths[c],r[c]->textWidth()+6);}
+        return widths;
+    }
+    std::vector<std::vector<Control*>> gridRows() const {
+        if(current=="sample.player")return {{control("transpose"),control("root_note"),control("level")},{control("start"),control("end")}};
+        std::vector<std::vector<Control*>> rows;for(const auto& r:controlRows(current)){rows.emplace_back();for(const auto& id:r)rows.back().push_back(control(id));}
+        return rows;
+    }
+    static int total(const std::vector<int>& widths){int w=0;for(int x:widths)w+=x;return w+std::max(0,int(widths.size())-1)*gap;}
+    int cellHeight() const {return knob+Control::labelHeight+Control::valueHeight;}
+    bool editorContent() const {return sequence||performance||referenceSequence;}
+    Control* control(const std::string& id) const {const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size()&&i<knobs.size();++i)if(ps[i].id==id)return knobs[i].get();return nullptr;}
+    Rectangle<int> contentSize() const {
+        const int cw=cellWidth(),ch=cellHeight();
+        if(editorContent())return {0,0,panelWidth(current)-2*pad,300};   // sequencer editors keep their own layouts
+        if(current=="spectral.engine")return {0,0,3*cw+2*gap,28+gap+28+gap+2*ch+gap};
+        if(current=="sample.player")return {0,0,std::max(total(columnWidths(gridRows())),3*cw+2*gap),26+gap+18+gap+44+gap+2*ch+gap};
+        if(knobs.empty())return {0,0,150,48};
+        const auto rows=gridRows();
+        return {0,0,total(columnWidths(rows)),int(rows.size())*ch+int(rows.size()-1)*gap};
+    }
+    int innerWidth() const {return std::max({contentSize().getWidth(),156,std::min(int(jacks.size()),current=="spectral.engine"?10:8)*Jack::size});}
+    int jackRows(int inner) const {const int perRow=std::max(1,inner/Jack::size);return jacks.empty()?0:(int(jacks.size())+perRow-1)/perRow;}
+    Rectangle<int> naturalSize() const {
+        const int inner=innerWidth();
+        return {0,0,inner+2*pad,headerHeight+jackRows(inner)*Jack::size+gap+4+contentSize().getHeight()+gap+footerHeight+4};
+    }
     void paint(Graphics& g) override {
-        if(current.empty())return;auto r=getLocalBounds().toFloat();const auto text=panelInk(current);
-        g.setColour(panelColour(current));g.fillRoundedRectangle(r,3);g.setColour(highlighted?Colour(0xfff0c76c):text.withAlpha(.6f));g.drawRoundedRectangle(r.reduced(1),3,highlighted?2:1);
-        g.setFont(font(10));g.setColour(text);g.drawText(String(instance).toUpperCase()+"  /  "+String(family).toUpperCase(),12,10,getWidth()-24,18,Justification::centredLeft);
-        g.setColour(routed?Colour(0xffcbe0a8):Colour(0xff7b7b70));g.fillEllipse(float(getWidth()-19),14,6,6);
-        g.setColour(text.withAlpha(.35f));g.drawLine(12,current=="spectral.engine"?184.f:135.f,float(getWidth()-12),current=="spectral.engine"?184.f:135.f,.7f);
+        if(current.empty())return;auto r=getLocalBounds().toFloat();const auto ink2=panelInk(current);
+        g.setColour(panelColour(current));g.fillRoundedRectangle(r,3);g.setColour(highlighted?Colour(0xfff0c76c):ink2.withAlpha(.6f));g.drawRoundedRectangle(r.reduced(1),3,highlighted?2:1);
+        g.setFont(font(text::header));g.setColour(ink2);g.drawText(String(instance).toUpperCase()+"  /  "+String(family).toUpperCase(),pad,4,getWidth()-2*pad-14,15,Justification::centredLeft,true);
+        g.setColour(routed?Colour(0xffcbe0a8):Colour(0xff7b7b70));g.fillEllipse(float(getWidth()-pad-6),8,6,6);
+        g.setColour(ink2.withAlpha(.35f));g.drawHorizontalLine(dividerY,float(pad),float(getWidth()-pad));
         if(current=="sample.player"){
-            auto wave=Rectangle<float>(16,204,float(getWidth()-32),40);g.setColour(ink);g.fillRoundedRectangle(wave,2);
-            if(sample){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());
+            const auto wave=waveArea.toFloat();g.setColour(ink);g.fillRoundedRectangle(wave,2);
+            if(sample&&knobs.size()>3){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());const float mid=wave.getCentreY(),half=wave.getHeight()*.45f;
                 g.setColour(Colour(0xffd7ca96).withAlpha(.18f));g.fillRect(wave.withX(wave.getX()+start*wave.getWidth()).withWidth(std::max(0.f,end-start)*wave.getWidth()));
-                g.setColour(Colour(0xffd7ca96));for(size_t i=0;i<sample->peaks.size();++i){float x=wave.getX()+(i+.5f)*wave.getWidth()/128,amplitude=std::min(1.f,sample->peaks[i])*18;g.drawLine(x,224-amplitude,x,224+amplitude,1);}
-                g.setColour(teal);g.drawVerticalLine(int(wave.getX()+start*wave.getWidth()),204,244);g.drawVerticalLine(int(wave.getX()+end*wave.getWidth()),204,244);
-            }else{g.setColour(paper.withAlpha(.6f));g.setFont(font(11));g.drawText(samplePath.empty()?"LOAD OR DROP A WAV":"CONNECT TO LOAD SAMPLE",wave,Justification::centred);}
+                g.setColour(Colour(0xffd7ca96));for(size_t i=0;i<sample->peaks.size();++i){float x=wave.getX()+(i+.5f)*wave.getWidth()/128,amplitude=std::min(1.f,sample->peaks[i])*half;g.drawLine(x,mid-amplitude,x,mid+amplitude,1);}
+                g.setColour(teal);g.drawVerticalLine(int(wave.getX()+start*wave.getWidth()),wave.getY(),wave.getBottom());g.drawVerticalLine(int(wave.getX()+end*wave.getWidth()),wave.getY(),wave.getBottom());
+            }else{g.setColour(paper.withAlpha(.6f));g.setFont(font(text::label));g.drawText(samplePath.empty()?"LOAD OR DROP A WAV":"CONNECT TO LOAD SAMPLE",waveArea,Justification::centred);}
         }
-        if(knobs.empty()&&!sequence&&!performance&&!referenceSequence){g.setColour(text);g.setFont(font(16));g.drawFittedText(current=="utility.vca"?"AUDIO\nx\nCONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL\nTHROUGH",15,195,getWidth()-30,100,Justification::centred,3);}
-        g.setColour(text.withAlpha(.8f));g.setFont(font(10));g.drawFittedText(routed?panel(current).description:"UNROUTED / connect to activate",12,getHeight()-37,getWidth()-24,29,Justification::centred,2);
+        if(knobs.empty()&&!editorContent()){g.setColour(ink2);g.setFont(font(13));g.drawFittedText(current=="utility.vca"?"AUDIO x CONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL THROUGH",content,Justification::centred,2);}
+        g.setColour(ink2.withAlpha(.8f));g.setFont(font(text::footer));
+        g.drawText(routed?panel(current).description:"UNROUTED / connect to activate",pad,getHeight()-footerHeight-3,getWidth()-2*pad,footerHeight,Justification::centred,true);
     }
     void resized() override {
-        choice.setBounds(12,35,getWidth()-24,31);
-        const int columns=current=="spectral.engine"?10:std::max(1,int(jacks.size()));
-        for(size_t i=0;i<jacks.size();++i){const int w=(getWidth()-24)/columns;jacks[i]->setBounds(12+int(i)%columns*w,77+int(i)/columns*53,w,53);}
+        const int inner=getWidth()-2*pad;
+        choice.setBounds(pad,21,inner-(menuButton.isVisible()?28:0),24);menuButton.setBounds(getWidth()-pad-24,21,24,24);
+        // Jacks: a wrapping FlexBox row.
+        FlexBox sockets;sockets.flexWrap=FlexBox::Wrap::wrap;sockets.justifyContent=FlexBox::JustifyContent::flexStart;
+        for(auto& j:jacks)sockets.items.add(FlexItem(*j).withWidth(float(Jack::size)).withHeight(float(Jack::size)));
+        const int jackHeight=jackRows(inner)*Jack::size;sockets.performLayout(Rectangle<int>(pad,headerHeight,inner,jackHeight));
+        dividerY=headerHeight+jackHeight+gap;
+        const auto size=contentSize();content={pad+std::max(0,(inner-size.getWidth())/2),dividerY+4,std::min(inner,size.getWidth()),size.getHeight()};
         if(current.empty())return;
-        if(referenceSequence){referenceSequence->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
-        if(performance){performance->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
-        if(sequence){sequence->setBounds(12,143,getWidth()-24,getHeight()-184);return;}
-        const auto& ps=panel(current).parameters;const float w=float(getWidth()-24),h=float(std::max(220,getHeight()-190));
-        auto put=[&](const char* id,float x,float y,float width,float height){for(size_t i=0;i<ps.size();++i)if(ps[i].id==id)knobs[i]->setBounds(12+int(x*w),147+int(y*h),int(width*w),int(height*h));};
+        if(referenceSequence){referenceSequence->setBounds(content);return;}
+        if(performance){performance->setBounds(content);return;}
+        if(sequence){sequence->setBounds(content);return;}
+        const int ch=cellHeight();
+        auto grid=[&](const std::vector<std::vector<Control*>>& rows,Rectangle<int> area){
+            Grid g;g.columnGap=g.rowGap=Grid::Px(gap);
+            for(int w:columnWidths(rows))g.templateColumns.add(Grid::TrackInfo(Grid::Px(w)));
+            for(size_t r=0;r<rows.size();++r)g.templateRows.add(Grid::TrackInfo(Grid::Px(ch)));
+            for(size_t r=0;r<rows.size();++r)for(size_t c=0;c<rows[r].size();++c)if(rows[r][c]){rows[r][c]->setVisible(true);g.items.add(GridItem(*rows[r][c]).withArea(int(r)+1,int(c)+1));}
+            g.performLayout(area);
+        };
         if(current=="spectral.engine"){
-            presetButton.setBounds(14,193,190,28);presetName.setBounds(213,193,getWidth()-227,28);
-            section.setBounds(14,228,getWidth()-124,28);more.setBounds(getWidth()-102,228,88,28);
-            for(auto& knob:knobs)knob->setVisible(false);
+            auto area=content;presetButton.setBounds(area.removeFromTop(28).removeFromLeft(area.getWidth()*45/100));
+            presetName.setBounds(presetButton.getRight()+gap,content.getY(),content.getRight()-presetButton.getRight()-gap,28);area.removeFromTop(gap);
+            auto row=area.removeFromTop(28);more.setBounds(row.removeFromRight(70));row.removeFromRight(gap);section.setBounds(row);area.removeFromTop(gap);
+            for(auto& k:knobs)k->setVisible(false);
             const int page=section.getSelectedId()-1;
             if(page>=0&&page<int(pages.size())){
                 const auto& visible=pages[size_t(page)];const int parts=std::max(1,(int(visible.size())+5)/6);subpage%=parts;
                 more.setEnabled(parts>1);more.setButtonText(String(subpage+1)+" / "+String(parts)+" >");
-                const int first=subpage*6,count=std::min(6,int(visible.size())-first),cols=getHeight()<530?6:3,rows=std::max(1,(count+cols-1)/cols);
-                const int cell=std::max(32,(getHeight()-307)/rows);
-                for(int i=0;i<count;++i){auto& knob=*knobs[size_t(visible[size_t(first+i)])];knob.setVisible(true);knob.setBounds(12+i%cols*int(w/cols),266+i/cols*cell,int(w/cols),cell);}
+                std::vector<std::vector<Control*>> rows(2);
+                for(int i=0;i<6&&subpage*6+i<int(visible.size());++i)rows[size_t(i/3)].push_back(knobs[size_t(visible[size_t(subpage*6+i)])].get());
+                if(rows[1].empty())rows.pop_back();grid(rows,area);
             }
-        }else if(current=="sample.player"){
-            sampleButton.setBounds(16,147,int(w*.48f),28);sampleName.setBounds(12,178,getWidth()-24,23);
-            const int row=std::max(80,int((getHeight()-291)*.62f));
-            for(size_t i=0;i<ps.size();++i){const auto& id=ps[i].id;
-                if(id=="loop")knobs[i]->setBounds(12+int(w*.51f),147,int(w*.49f),28);
-                else if(id=="start"||id=="end")knobs[i]->setBounds(12+(id=="end"?int(w*.5f):0),252+row,int(w*.5f),getHeight()-289-row);
-                else {int col=id=="transpose"?0:id=="root_note"?1:2;knobs[i]->setBounds(12+int(col*w/3),252,int(w/3),row);}
-            }
-        }else if(current=="spectral.adsr"){
-            put("attack",0,0,.5f,.33f);put("decay",0,.33f,.5f,.33f);put("release",0,.66f,.5f,.33f);put("sustain",.55f,0,.4f,.99f);
-        }else if(current=="spectral.ahdsfr"){
-            put("attack",0,0,.34f,.39f);put("hold",.34f,0,.34f,.39f);put("decay",0,.40f,.34f,.39f);put("release",.34f,.40f,.34f,.39f);
-            put("sustain",.70f,0,.28f,.58f);put("fade",.70f,.59f,.28f,.21f);
-            put("attack_curve",0,.80f,.33f,.20f);put("decay_curve",.33f,.80f,.33f,.20f);put("release_curve",.66f,.80f,.33f,.20f);
-        }else if(current=="analog.filter"){
-            put("cutoff_hz",0,0,.5f,.34f);put("resonance",.5f,0,.5f,.34f);
-            put("mode",0,.34f,.34f,.24f);put("env_octaves",.34f,.34f,.33f,.24f);put("key_track",.67f,.34f,.33f,.24f);
-            put("drive",0,.58f,.25f,.21f);put("fm_depth",.25f,.58f,.25f,.21f);put("band",.5f,.58f,.25f,.21f);put("poles",.75f,.58f,.25f,.21f);
-            put("pole_mix",0,.79f,.6f,.21f);put("quality",.6f,.79f,.4f,.21f);
-        }else if(current=="voice.mix"){
-            put("voices",0,0,.34f,.34f);put("unison",.34f,0,.33f,.34f);put("detune",.67f,0,.33f,.34f);
-            put("glide",0,.34f,.34f,.33f);put("spread",.34f,.34f,.33f,.33f);put("level",.67f,.34f,.33f,.33f);
-            put("tuning",0,.67f,.5f,.33f);put("root",.5f,.67f,.25f,.33f);put("steal",.75f,.67f,.25f,.33f);
-        }else if(current=="analog.vco"){
-            put("transpose",0,0,.34f,.3f);put("fine",.34f,0,.33f,.3f);put("drift",.67f,0,.33f,.3f);
-            put("saw",0,.3f,.34f,.3f);put("pulse",.34f,.3f,.33f,.3f);put("triangle",.67f,.3f,.33f,.3f);
-            put("pulse_width",0,.6f,.25f,.4f);put("pwm_depth",.25f,.6f,.25f,.4f);put("fm_depth",.5f,.6f,.25f,.4f);put("level",.75f,.6f,.25f,.4f);
-        }else if(current=="analog.env"){
-            put("attack",0,0,.5f,.5f);put("decay",.5f,0,.5f,.5f);
-            put("sustain",0,.5f,.34f,.5f);put("release",.34f,.5f,.33f,.5f);put("velocity",.67f,.5f,.33f,.5f);
-        }else if(family=="filter"){
-            put("cutoff_hz",.17f,0,.66f,.49f);put("resonance",0,.50f,.5f,.34f);
-            if(current.rfind("mutable.",0)==0)put("env_octaves",.5f,.50f,.5f,.34f);
-            else {put("cutoff_hz",.17f,0,.66f,.40f);put("saturation",.5f,.41f,.5f,.36f);put("resonance",0,.41f,.5f,.36f);put("env_octaves",0,.78f,.33f,.22f);put("mod_rate_hz",.33f,.78f,.33f,.22f);put("mod_depth",.66f,.78f,.33f,.22f);}
-        }else if(current=="osc.variable"){
-            put("transpose",0,0,.5f,.33f);put("sync",.5f,0,.5f,.33f);put("shape",0,.34f,.5f,.33f);put("pulse_width",.5f,.34f,.5f,.33f);put("level",.25f,.68f,.5f,.32f);
-        }else if(current=="modal.resonator"){
-            put("transpose",0,0,.5f,.28f);put("input_gain",.5f,0,.5f,.28f);put("structure",.23f,.28f,.54f,.37f);put("brightness",0,.65f,.5f,.34f);put("decay",.5f,.65f,.5f,.34f);
-        }else if(current=="drum.analog"){
-            put("transpose",0,0,.5f,.32f);put("tone",.5f,0,.5f,.32f);put("decay",.22f,.32f,.56f,.36f);put("attack_fm",0,.69f,.5f,.30f);put("self_fm",.5f,.69f,.5f,.30f);
-        }else if(current=="utility.mix"){
-            put("gain_a",0,0,.5f,.95f);put("gain_b",.5f,0,.5f,.95f);
-        }else if(current=="osc.sine"){
-            put("transpose",.15f,0,.7f,.47f);put("level",.15f,.5f,.7f,.47f);
-        }else{
-            const int cols=2,rows=std::max(1,(int(knobs.size())+1)/2);
-            for(size_t i=0;i<knobs.size();++i)knobs[i]->setBounds(12+int(i)%cols*int(w/cols),147+int(i)/cols*int(h/rows),int(w/cols),int(h/rows));
+            return;
         }
+        if(current=="sample.player"){
+            auto area=content;auto top=area.removeFromTop(26);
+            if(auto* loop=control("loop")){const int w=std::min(top.getWidth()/2,loop->textWidth());loop->setBounds(top.removeFromRight(w));top.removeFromRight(gap);}
+            sampleButton.setBounds(top);
+            area.removeFromTop(gap);sampleName.setBounds(area.removeFromTop(18));area.removeFromTop(gap);waveArea=area.removeFromTop(44);area.removeFromTop(gap);
+            grid(gridRows(),area);
+            return;
+        }
+        grid(gridRows(),content);
     }
 };
-// Request 71: the rack lays cards out at logical size (view / zoom) in rows, like a
-// multi-row case, then scales itself with a component transform. Rows that do not
-// fit vertically scroll sideways; zooming out adds rows instead of shrinking one row.
+// Request 72: the rack is a JUCE FlexBox. Cards keep their natural size (knob density plus
+// fixed, readable text) and wrap into rows; a patch can instead fix its rows by hand.
 struct HardwareRack : juce::Component {
-    static constexpr int minimumRow=421,maximumRow=760,gap=6,margin=8;
+    static constexpr int gap=6,margin=6;
     std::map<std::string,Values> values;
     std::vector<std::unique_ptr<ModulePanel>> modules;
-    float zoom=1;
+    std::vector<std::vector<std::string>> rows;   // empty: wrap to the window width
+    int knob=44;std::function<void(float)> magnified;
     void clear(){modules.clear();values.clear();}
-    std::vector<std::vector<ModulePanel*>> partition(int width,int height) const {
-        std::vector<std::vector<ModulePanel*>> greedy;int x=0;const int usable=width-2*margin;
-        for(const auto& m:modules){const int w=panelWidth(m->current);
-            if(greedy.empty()||(!greedy.back().empty()&&x+gap+w>usable)){greedy.emplace_back();x=-gap;}
-            greedy.back().push_back(m.get());x+=gap+w;}
-        const int fit=std::max(1,(height-2*margin+gap)/(minimumRow+gap));
-        if(int(greedy.size())<=fit)return greedy;
-        int total=0;for(const auto& m:modules)total+=panelWidth(m->current);
-        const float target=float(total)/float(fit);float filled=0;
-        std::vector<std::vector<ModulePanel*>> rows(1);
-        for(const auto& m:modules){const int w=panelWidth(m->current);
-            if(!rows.back().empty()&&int(rows.size())<fit&&filled+w*.5f>target){rows.emplace_back();filled=0;}
-            rows.back().push_back(m.get());filled+=float(w);}
-        return rows;
-    }
-    // Returns the scaled size the zoom host must take.
-    Rectangle<int> arrange(int viewWidth,int viewHeight){
-        const int width=std::max(240,int(viewWidth/zoom)),height=std::max(minimumRow+2*margin,int(viewHeight/zoom));
-        const auto rows=partition(width,height);const int count=std::max(1,int(rows.size()));
-        const int rowHeight=std::clamp((height-2*margin-(count-1)*gap)/count,minimumRow,maximumRow);
-        int y=margin,right=0;
-        for(const auto& row:rows){
-            int natural=0;for(auto* m:row)natural+=panelWidth(m->current);
-            const int gaps=gap*(int(row.size())-1);
-            const float stretch=std::clamp(float(width-2*margin-gaps)/float(std::max(1,natural)),1.f,1.6f);
-            int x=margin;for(auto* m:row){const int w=int(panelWidth(m->current)*stretch);m->setBounds(x,y,w,rowHeight);x+=w+gap;}
-            right=std::max(right,x-gap+margin);y+=rowHeight+gap;
-        }
-        const int w=std::max(width,right),h=std::max(height,y-gap+margin);
-        setTransform({});setSize(w,h);setTransform(AffineTransform::scale(zoom));
-        return {0,0,int(std::ceil(w*zoom)),int(std::ceil(h*zoom))};
-    }
-    // Largest zoom (50-100%) at which every card is visible without scrolling.
-    float fitZoom(int viewWidth,int viewHeight){
-        const float previous=zoom;float best=.5f;
-        for(int step=100;step>=50;step-=5){zoom=step/100.f;const auto size=arrange(viewWidth,viewHeight);if(size.getWidth()<=viewWidth&&size.getHeight()<=viewHeight){best=zoom;break;}}
-        zoom=previous;return best;
-    }
-    // Card bounds in the zoom host's (scaled) coordinates.
-    Rectangle<int> scaledBounds(const juce::Component& card) const {return card.getBounds().toFloat().transformedBy(getTransform()).getSmallestIntegerContainer();}
     ModulePanel* find(const std::string& id){for(auto& m:modules)if(m->instance==id)return m.get();return nullptr;}
+    // Lays the cards out for a view of this width; returns the rack's size.
+    Rectangle<int> arrange(int width){
+        for(auto& m:modules){m->knob=knob;}
+        auto item=[&](ModulePanel& m){const auto s=m.naturalSize();return FlexItem(m).withWidth(float(s.getWidth())).withMinHeight(float(s.getHeight())).withMargin(FlexItem::Margin(gap*.5f));};
+        int right=0,bottom=0;
+        if(rows.empty()){
+            FlexBox box;box.flexWrap=FlexBox::Wrap::wrap;box.justifyContent=FlexBox::JustifyContent::flexStart;
+            box.alignContent=FlexBox::AlignContent::flexStart;box.alignItems=FlexBox::AlignItems::stretch;
+            for(auto& m:modules)box.items.add(item(*m));
+            box.performLayout(Rectangle<float>(float(margin),float(margin),float(std::max(200,width-2*margin)),1.0e6f));
+        }else{
+            float y=float(margin);
+            for(const auto& row:rows){
+                FlexBox box;box.flexWrap=FlexBox::Wrap::noWrap;box.justifyContent=FlexBox::JustifyContent::flexStart;box.alignItems=FlexBox::AlignItems::stretch;
+                float height=0;for(const auto& id:row)if(auto* m=find(id)){box.items.add(item(*m));height=std::max(height,float(m->naturalSize().getHeight())+gap);}
+                box.performLayout(Rectangle<float>(float(margin),y,1.0e6f,height));y+=height;
+            }
+        }
+        for(const auto& m:modules){right=std::max(right,m->getRight());bottom=std::max(bottom,m->getBottom());}
+        setSize(std::max(width,right+margin+gap/2),bottom+margin+gap/2);
+        return getLocalBounds();
+    }
+    // The rows as currently shown (used to start editing rows from the automatic layout).
+    std::vector<std::vector<std::string>> shownRows() const {
+        std::vector<std::vector<std::string>> out;int top=-1;
+        std::vector<const ModulePanel*> sorted;for(const auto& m:modules)sorted.push_back(m.get());
+        std::stable_sort(sorted.begin(),sorted.end(),[](const ModulePanel* a,const ModulePanel* b){return a->getY()!=b->getY()?a->getY()<b->getY():a->getX()<b->getX();});
+        for(const auto* m:sorted){if(m->getY()!=top){out.emplace_back();top=m->getY();}out.back().push_back(m->instance);}
+        return out;
+    }
     void highlight(const std::string& id){for(auto& m:modules){m->highlighted=m->instance==id;m->repaint();}}
-    void paint(Graphics& g) override {g.fillAll(Colour(0xff17191b));}
-};
-// Scrolled by the viewport; holds the transformed rack. Trackpad pinch zooms (navigation only).
-struct ZoomHost : juce::Component {
-    std::function<void(float)> magnified;
     void mouseMagnify(const MouseEvent&,float scale) override {if(magnified)magnified(scale);}
     void paint(Graphics& g) override {g.fillAll(Colour(0xff17191b));}
 };

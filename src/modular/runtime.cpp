@@ -257,7 +257,10 @@ void Runtime::updateTuning(int scale,int root) noexcept {
     }
 }
 
-void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note& performance) noexcept {
+// Keyboard notes merged into a sequencer-driven voice group carry this source bit, so
+// sequencer note-offs and transport resets never release the player's held keys.
+constexpr uint32_t keyboardSource=0x40000000u;
+void Runtime::allocate(const NoteEventBlock* events,const NoteEventBlock* keyboard,int n,int voices,const Note& performance) noexcept {
     auto& mixer=nodes_[size_t(mixer_)];
     computeParameters(mixer);
     const float* mp=mixer.effective.data();
@@ -277,16 +280,24 @@ void Runtime::allocate(const NoteEventBlock* events,int n,int voices,const Note&
         changeCount_[size_t(v)]=0;
         if(v>=voices){if(slot.active){slot.active=false;slot.note.gate=false;slot.released=++voiceClock_;pushChange(v,0,slot.note);}slot.awake=false;}
     }
-    if(!events)return;
+    if(keyboard&&(mp[9]<.5f||keyboard->failed()||keyboard->size()==0))keyboard=nullptr;
+    if(!events&&!keyboard)return;
     auto release=[&](int v,int offset){
         auto& slot=slots_[size_t(v)];
         slot.active=false;slot.note.gate=false;slot.note.trigger=false;slot.released=++voiceClock_;
         pushChange(v,offset,slot.note);
     };
-    if(events->failed()){for(int v=0;v<voices;++v)if(slots_[size_t(v)].active)release(v,0);return;}
-    for(const auto& e:*events){
+    auto fromKeyboard=[](const VoiceSlot& s){return (s.source&keyboardSource)!=0;};
+    if(events&&events->failed()){for(int v=0;v<voices;++v)if(slots_[size_t(v)].active&&!fromKeyboard(slots_[size_t(v)]))release(v,0);events=nullptr;}
+    // Both lists are offset-ordered; merge them so each voice's changes stay in time order.
+    const NoteEvent* a=events?events->begin():nullptr;const NoteEvent* aEnd=events?events->end():nullptr;
+    const NoteEvent* b=keyboard?keyboard->begin():nullptr;const NoteEvent* bEnd=keyboard?keyboard->end():nullptr;
+    while(a!=aEnd||b!=bEnd){
+        const bool takeKeyboard=a==aEnd||(b!=bEnd&&b->offset<a->offset);
+        NoteEvent e=takeKeyboard?*b++:*a++;
+        if(takeKeyboard)e.source|=keyboardSource;
         const int offset=std::clamp(int(e.offset),0,n-1);
-        if(e.kind==NoteEventKind::Reset){for(int v=0;v<voices;++v)if(slots_[size_t(v)].active)release(v,offset);continue;}
+        if(e.kind==NoteEventKind::Reset){for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.active&&fromKeyboard(s)==takeKeyboard)release(v,offset);}continue;}
         if(e.kind==NoteEventKind::Off){
             for(int v=0;v<voices;++v){const auto& s=slots_[size_t(v)];if(s.active&&s.source==e.source&&s.noteId==e.noteId)release(v,offset);}
             continue;
@@ -341,7 +352,7 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
             auto& node=nodes_[size_t(i)];
             if(voiceMixer_&&!allocated&&(voiceNode_[size_t(i)]||i==mixer_)){
                 const auto* bus=node.noteInput?node.noteInput:nodes_[size_t(mixer_)].noteInput;
-                allocate(bus?bus:(first?keys:nullptr),n,voices,note);
+                allocate(bus?bus:(first?keys:nullptr),bus&&first?keys:nullptr,n,voices,note);
                 allocated=true;
             }
             if(voiceMixer_&&voiceNode_[size_t(i)]){for(int v=0;v<voices;++v)if(slots_[size_t(v)].awake)processVoice(instance(i,v),n,time,v);continue;}

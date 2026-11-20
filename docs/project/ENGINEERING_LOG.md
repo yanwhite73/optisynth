@@ -969,3 +969,53 @@ All four were fixed and rechecked.
 **Lesson.** Passing layout checks prove only that controls are in bounds and do
 not overlap. Readability and state visibility need the captures to be looked
 at, and here that look found four issues the checks could not.
+
+## Request 72: 0.0.16 review — "embarrassingly bad" (20 November 2026, Claude session)
+
+**User cost.** Yan installed and used 0.0.16 and found:
+- the zoomed rack's text unreadable;
+- no rows;
+- his saved preset missing from the browser;
+- arrows not working;
+- the keyboard silent.
+
+He then had to ask whether JUCE has a UI toolkit, and said: "I have to
+continually prod and poke to remind you agents to use existing frameworks and
+open source code" and "Why do I have to explain everything that should be
+obvious?"
+
+**Causes, with evidence:**
+- **Zoom.** I scaled the whole rack with a component transform instead of laying
+  out with JUCE Grid/FlexBox. Text shrank with everything else. My checks tested
+  bounds and overlap only, and I judged the 65% capture acceptable.
+- **Preset location.** The browser looked only in a new folder that nothing had
+  been saved to. Yan's patch was in the repository's `patches/` folder, saved by
+  the old Save dialog. I did not check where he actually saves.
+- **Keyboard.** Reproduced with a probe. Keep sequence (on by default) wired the
+  startup sequencer into the pad's voice mixer, which cut the keyboard off. The
+  panel view hid the sequencer entirely.
+- **Arrows.** The browser gave focus to its container rather than its list, so
+  the up/down keys I had advertised did nothing. The header arrow code worked.
+  A first probe wrongly reported it broken: JUCE hit-tests injected mouse and
+  pen events at the real cursor, not the injected point. That is visible in
+  `juce_MouseInputSourceImpl.h`.
+- **Delivery near-miss.** `tools/build_app.sh` would have replaced the app while
+  Yan was running it. Nothing checked for a running process.
+
+**Prevention:**
+- **Survey first.** Before any UI or infrastructure feature, write the
+  existing-options note (JUCE built-ins and licence-checked open source). See
+  [JUCE_UI_OPTIONS.md](../research/platforms/JUCE_UI_OPTIONS.md) and the session
+  memory `use-existing-frameworks-first`.
+- **Layout.** Never transform-scale for density. Text sizes are fixed
+  constants, and checks assert that every control is at least as wide as its
+  widest text.
+- **Test as a player.**
+  - Load presets the way the UI does.
+  - Play the keyboard and confirm audio.
+  - Press the arrows and keys.
+  - Look for files where the user saves them.
+- **Simulated input.** Use touch type or call handlers directly. Never trust
+  injected mouse events for buttons.
+- **Delivery guard.** `deliver_app.py` refuses while a process runs from the
+  Release app. Builds for testing go to `build/app-candidate` only.

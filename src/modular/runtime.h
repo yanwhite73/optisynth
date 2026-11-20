@@ -110,7 +110,8 @@ private:
     void computeParameters(NodeBuffers&) noexcept;
     void processNode(NodeBuffers&,int frames,const ClockFrame*,const Note&) noexcept;
     void processVoice(NodeBuffers&,int frames,const ClockFrame*,int voice) noexcept;
-    void allocate(const NoteEventBlock*,int frames,int voices,const Note& performance) noexcept;
+    // keyboard: live keys merged with a sequencer-driven note input (voice mixer "Keyboard: Plays too").
+    void allocate(const NoteEventBlock*,const NoteEventBlock* keyboard,int frames,int voices,const Note& performance) noexcept;
     void updateTuning(int scale,int root) noexcept;
     float tuned(int midi) const noexcept { return float(midi)+tuning_[size_t(std::clamp(midi,0,127))]; }
     void pushChange(int voice,int offset,const Note&) noexcept;

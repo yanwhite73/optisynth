@@ -84,11 +84,13 @@ public:
     std::function<void()> requestSaveForm;
     std::vector<juce::File> folders() const {std::vector<juce::File> f{library};for(const auto& extra:prefs.list("libraryFolders"))f.emplace_back(extra);return f;}
     const juce::File& libraryFolder() const {return library;}
+    juce::File userFolder() const {return library.getChildFile("User");}   // request 73: user presets live in Presets/User
+    void focusList(){table.grabKeyboardFocus();}
     bool keepCurrentSequence() const {return keepSequence.getToggleState();}
     void setKeepSequence(bool keep){keepSequence.setToggleState(keep,dontSendNotification);prefs.set("keepSequence",keep);}
     void rescan(){
         problems.clear();entries=scanPresets(folders(),&problems);
-        folderLabel.setText("Library: "+library.getFullPathName()+(folders().size()>1?"  +"+String(int(folders().size())-1)+" folder(s)":"")+(problems.empty()?"":"  |  "+String(int(problems.size()))+" unreadable file(s)"),dontSendNotification);
+        folderLabel.setText("Presets: "+library.getFullPathName()+(folders().size()>1?"  +"+String(int(folders().size())-1)+" folder(s)":"")+(problems.empty()?"":"  |  "+String(int(problems.size()))+" unreadable file(s)"),dontSendNotification);
         folderLabel.setTooltip(problems.empty()?String():String(joinLines(problems)));
         applyFilter();
     }
@@ -117,12 +119,16 @@ public:
     size_t visibleCount() const {return visibleRows.size();}
     const PresetEntry& visibleEntry(size_t i) const {return entries[visibleRows[i]];}
     const PresetEntry* entry(const std::string& key) const {for(const auto& e:entries)if(e.key==key)return &e;return nullptr;}
-    // Previous / next through the filtered, sorted list; wraps.
+    // Previous / next through the filtered, sorted list; wraps. When the current preset is
+    // not in that list (or the list is empty) it steps through every preset instead.
     const PresetEntry* step(const std::string& from,int delta){
-        if(visibleRows.empty())return nullptr;int at=-1;
-        for(size_t i=0;i<visibleRows.size();++i)if(entries[visibleRows[i]].key==from)at=int(i);
-        const int n=int(visibleRows.size());const int next=at<0?(delta>0?0:n-1):((at+delta)%n+n)%n;
-        selectKey(entries[visibleRows[size_t(next)]].key);return &entries[visibleRows[size_t(next)]];
+        std::vector<size_t> all(entries.size());for(size_t i=0;i<all.size();++i)all[i]=i;
+        auto contains=[&](const std::vector<size_t>& rows){return std::any_of(rows.begin(),rows.end(),[&](size_t i){return entries[i].key==from;});};
+        const auto& rows=!visibleRows.empty()&&(contains(visibleRows)||!contains(all))?visibleRows:all;
+        if(rows.empty())return nullptr;int at=-1;
+        for(size_t i=0;i<rows.size();++i)if(entries[rows[i]].key==from)at=int(i);
+        const int n=int(rows.size());const int next=at<0?(delta>0?0:n-1):((at+delta)%n+n)%n;
+        const auto index=rows[size_t(next)];selectKey(entries[index].key);return &entries[index];
     }
     void setCurrent(const std::string& key){current=key;if(!saving)selectKey(key);table.repaint();}
     bool isFavourite(const std::string& key) const {return favourites.count(key)>0;}
@@ -150,7 +156,18 @@ public:
         nameEdit.setText(name,false);setCategory(category);tagsEdit.setText(tags,false);notesEdit.setText(notes,false);
     }
     void toggleTag(const std::string& tag){if(!filter.tags.erase(tag))filter.tags.insert(tag);applyFilter();}
-    bool keyPressed(const KeyPress& key) override {if(key==KeyPress::escapeKey){if(close)close();return true;}return false;}
+    // Arrow keys and Return always reach the list, wherever focus is in the browser (not while typing).
+    bool keyPressed(const KeyPress& key) override {
+        if(key==KeyPress::escapeKey){if(close)close();return true;}
+        const bool listKey=key==KeyPress::upKey||key==KeyPress::downKey||key==KeyPress::pageUpKey||key==KeyPress::pageDownKey||key==KeyPress::returnKey;
+        const bool typing=dynamic_cast<TextEditor*>(juce::Component::getCurrentlyFocusedComponent())!=nullptr;
+        if(listKey&&!typing){
+            if(!table.hasKeyboardFocus(true))table.grabKeyboardFocus();
+            if(table.getSelectedRow()<0&&!visibleRows.empty()&&key!=KeyPress::returnKey){table.selectRow(0);return true;}
+            return table.keyPressed(key);
+        }
+        return false;
+    }
     void paint(Graphics& g) override {
         g.fillAll(Colour(0xff1f2427));
         g.setColour(Colour(0xff2b3236));g.drawVerticalLine(sideWidth,10,float(getHeight()-footer-6));g.drawVerticalLine(getWidth()-detailWidth-6,10,float(getHeight()-footer-6));

@@ -14,9 +14,23 @@ PanelTheme panelTheme(const std::string& style) {
     return {Colour(0xff25282b),Colour(0xff2e3236),paper,teal,Colour(0xff8fd0c2),false};
 }
 class SynthPanelView final : public juce::Component {
+    // A titled group: JUCE Grid of two rows, each column as wide as its widest text.
     struct Section final : juce::Component {
-        std::string title;const PanelTheme* theme=nullptr;std::vector<juce::Component*> items;int columns=1;
-        static constexpr int titleHeight=26,pad=8;
+        std::string title;const PanelTheme* theme=nullptr;std::vector<juce::Component*> items;int columns=1,knob=60;
+        static constexpr int titleHeight=26,pad=8,gap=4;
+        Control* controlAt(size_t i) const {return dynamic_cast<Control*>(items[i]);}
+        bool isLauncher() const {return items.size()==1&&dynamic_cast<TextButton*>(items[0]);}
+        std::vector<int> columnWidths() const {
+            std::vector<int> w(size_t(columns),std::max(knob+12,64));
+            for(size_t i=0;i<items.size();++i)if(auto* c=controlAt(i))w[i%size_t(columns)]=std::max(w[i%size_t(columns)],c->textWidth()+6);
+            return w;
+        }
+        int cellHeight() const {return knob+Control::labelHeight+Control::valueHeight;}
+        Rectangle<int> naturalSize() const {
+            if(isLauncher())return {0,0,2*pad+236,titleHeight+2*pad+2*cellHeight()+gap};
+            int w=0;for(int x:columnWidths())w+=x;
+            return {0,0,2*pad+w+(columns-1)*gap,titleHeight+2*pad+2*cellHeight()+gap};
+        }
         void paint(Graphics& g) override {
             auto r=getLocalBounds().toFloat().reduced(.5f);
             g.setColour(theme->section);g.fillRoundedRectangle(r,4);
@@ -25,13 +39,15 @@ class SynthPanelView final : public juce::Component {
             g.setColour(theme->legend);g.setFont(font(11).boldened());
             g.drawText(String(title),pad,4,getWidth()-2*pad,titleHeight-8,Justification::centredLeft);
         }
-        void resized() override {
-            const int count=int(items.size());if(count==0)return;
-            const int rows=2,w=(getWidth()-2*pad)/columns,h=(getHeight()-titleHeight-2*pad)/rows;
-            if(count==1&&dynamic_cast<TextButton*>(items[0])){const int w=std::min(getWidth()-4*pad,220);
-                items[0]->setBounds(getX()+(getWidth()-w)/2,getY()+titleHeight+(getHeight()-titleHeight-34)/2,w,34);return;}
-            for(int i=0;i<count;++i){const int row=i/columns,column=i%columns;
-                items[size_t(i)]->setBounds(getX()+pad+column*w,getY()+titleHeight+pad+row*h,w,h);}
+        // Items are children of the face, so they are placed in the face's coordinates.
+        void layoutItems() {
+            if(items.empty())return;
+            if(isLauncher()){items[0]->setBounds(getX()+pad*2,getY()+titleHeight+(getHeight()-titleHeight-34)/2,getWidth()-pad*4,34);return;}
+            Grid grid;grid.columnGap=grid.rowGap=Grid::Px(gap);
+            for(int w:columnWidths())grid.templateColumns.add(Grid::TrackInfo(Grid::Px(w)));
+            for(int r=0;r<2;++r)grid.templateRows.add(Grid::TrackInfo(Grid::Px(cellHeight())));
+            for(size_t i=0;i<items.size();++i)grid.items.add(GridItem(*items[i]).withArea(int(i)/columns+1,int(i)%columns+1));
+            grid.performLayout(getBounds().withTrimmedTop(titleHeight+pad).withTrimmedLeft(pad).withTrimmedRight(pad));
         }
     };
     struct Face final : juce::Component {
@@ -45,7 +61,12 @@ public:
     ~SynthPanelView() override {controls.clear();launchers.clear();sections.clear();viewport.setViewedComponent(nullptr,false);}
     void build(const RackDocument& d) {
         controls.clear();launchers.clear();sections.clear();keys.clear();
-        PanelLayout scratch;const auto& layout=effectivePanel(d,scratch);
+        PanelLayout scratch;auto layout=effectivePanel(d,scratch);
+        // A sequencer the curated layout does not mention still drives the sound: show it first.
+        for(auto n=d.graph.nodes.rbegin();n!=d.graph.nodes.rend();++n)if(isSequencerModule(n->type)){
+            bool shown=false;for(const auto& sec:layout.sections)for(const auto& c:sec.controls)shown|=c.node==n->id;
+            if(!shown)layout.sections.insert(layout.sections.begin(),{"SEQUENCER  /  "+panelTitle(n->id),{{n->id,"",""}}});
+        }
         curated=!d.panel.sections.empty();theme=panelTheme(layout.style);look.markings=theme.legend;
         title=d.info.name.empty()?"Untitled patch":d.info.name;
         subtitle=d.info.category;for(const auto& t:d.info.tags)subtitle+=(subtitle.empty()?"":"  ·  ")+t;
@@ -69,7 +90,7 @@ public:
             }
             if(section->items.empty())continue;
             const bool launcher=section->items.size()==1&&dynamic_cast<TextButton*>(section->items[0]);
-            section->columns=launcher?3:std::max(1,(int(section->items.size())+1)/2);
+            section->columns=launcher?1:std::max(1,(int(section->items.size())+1)/2);
             face.addAndMakeVisible(*section);section->toBack();sections.push_back(std::move(section));
         }
         resized();repaint();
@@ -89,6 +110,7 @@ public:
     bool layoutSound() const {
         for(const auto& s:sections){
             if(!face.getLocalBounds().contains(s->getBounds()))return false;
+            for(size_t i=0;i<s->items.size();++i)if(auto* c=s->controlAt(i))if(c->getWidth()<c->textWidth())return false;   // text never clips
             for(size_t i=0;i<s->items.size();++i){const auto r=s->items[i]->getBounds();
                 if(!s->getBounds().contains(r)||r.getWidth()<40||r.getHeight()<30)return false;
                 for(size_t j=i+1;j<s->items.size();++j)if(r.intersects(s->items[j]->getBounds()))return false;}
@@ -111,33 +133,21 @@ public:
         layoutFace(viewport.getWidth(),viewport.getHeight());
     }
 private:
-    static constexpr int header=58,margin=14,gap=10;
+    static constexpr int header=58,margin=14,gap=8;
+    // Sections flow in a wrapping JUCE FlexBox. Knob size is the largest (44-72 px) that fits
+    // the window; text sizes never change; spare space is not spread between controls.
     void layoutFace(int width,int height) {
-        const int usable=width-2*margin-10;
-        std::vector<std::vector<Section*>> rows;int sectionHeight=0,total=0;
-        for(knob=96;knob>=60;knob-=4){
-            const int cellW=knob+12,cellH=knob+40;sectionHeight=Section::titleHeight+2*Section::pad+2*cellH;
-            rows.clear();int x=0;
-            for(auto& s:sections){const int w=2*Section::pad+s->columns*cellW;
-                if(rows.empty()||(!rows.back().empty()&&x+gap+w>usable)){rows.emplace_back();x=-gap;}
-                rows.back().push_back(s.get());x+=gap+w;}
-            total=header+int(rows.size())*(sectionHeight+gap)-gap+margin;
-            if(total<=height)break;
-            if(knob==60)break;
+        const int usable=std::max(200,width-2*margin-10);int bottom=header;
+        for(knob=72;knob>=44;knob-=4){
+            FlexBox box;box.flexWrap=FlexBox::Wrap::wrap;box.justifyContent=FlexBox::JustifyContent::flexStart;box.alignContent=FlexBox::AlignContent::flexStart;
+            for(auto& s:sections){s->knob=knob;const auto size=s->naturalSize();box.items.add(FlexItem(*s).withWidth(float(size.getWidth())).withHeight(float(size.getHeight())).withMargin(FlexItem::Margin(0,float(gap),float(gap),0)));}
+            box.performLayout(Rectangle<float>(float(margin),float(header),float(usable),1.0e6f));
+            bottom=header;for(const auto& s:sections)bottom=std::max(bottom,s->getBottom());
+            if(bottom+margin<=height)break;
         }
-        // Spare height spreads the rows (up to 35% taller sections) instead of collecting at the bottom.
-        if(!rows.empty()&&total<height)sectionHeight=std::min(int(sectionHeight*1.35f),(height-header-margin-gap*(int(rows.size())-1))/int(rows.size()));
-        total=header+int(rows.size())*(sectionHeight+gap)-gap+margin;
-        const int cellW=knob+12;int y=header;
-        for(const auto& row:rows){
-            int natural=0;for(auto* s:row)natural+=2*Section::pad+s->columns*cellW;
-            const int gaps=gap*(int(row.size())-1);
-            const float stretch=std::clamp(float(usable-gaps)/float(std::max(1,natural)),1.f,1.5f);
-            int x=margin;
-            for(auto* s:row){const int w=int((2*Section::pad+s->columns*cellW)*stretch);s->setBounds(x,y,w,sectionHeight);s->resized();x+=w+gap;}
-            y+=sectionHeight+gap;
-        }
-        face.setSize(width,std::max(height,total));
+        knob=std::max(knob,44);
+        for(auto& s:sections)s->layoutItems();
+        face.setSize(width,std::max(height,bottom+margin));
     }
     void paintFace(Graphics& g) {
         g.fillAll(theme.face);

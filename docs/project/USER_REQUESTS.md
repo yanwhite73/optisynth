@@ -743,3 +743,57 @@ Claude session, 20 November 2026. Four parts:
   patch, or overridden by a user preference.
 - A preset browser to replace the flat starter menu: categories, tags,
   favourites, search, and saving into a library.
+
+## 72 — 0.0.16 review: uniform scaling is wrong; rows; missing user preset; arrows; keyboard
+
+```text
+This is embrassingly bad. You dont just scale everything uniformly. Use a frontend framework properly and keep text readable, decreasing space between controls.
+allow rows for modules.
+there is a user preset, which I saved recently.
+the arrows dont work
+the keyboard seems to be not working now
+```
+
+Correction to request 71's rack zoom: a transform shrank text with everything
+else. Zooming out must tighten spacing and control size while text stays
+readable, using real layout (JUCE FlexBox/Grid) rather than a transform. Modules
+need rows. Defects reported in hands-on use: a recently saved user preset is not
+in the browser; the previous/next arrows do nothing; the keyboard no longer
+plays.
+
+## 73 — Move the saved preset into the user preset folder
+
+```text
+move it to  ~/Music/Optisynth/Presets/User
+```
+
+Done 20 November: `patches/lush ambient space.optisynth` (untracked) moved to
+`~/Music/Optisynth/Presets/User/` after a byte-identical copy check. User presets
+now live in `Presets/User`; the browser scans `~/Music/Optisynth/Presets`.
+
+## 74 — Use the JUCE UI toolkit
+
+```text
+isnt there a Juce UI toolkit?
+```
+
+Yes: JUCE itself (Grid, FlexBox, LookAndFeel, TableListBox). Request 72's rework
+uses it; options surveyed in `docs/research/platforms/JUCE_UI_OPTIONS.md`.
+
+## 75 — Use existing frameworks and open source without being reminded
+
+```text
+I have to continually prod and poke to remind you agents to use existing frameworks and open source code
+```
+
+Standing rule recorded (engineering log request 72; session memory): survey JUCE
+built-ins and licence-checked open source before building UI or infrastructure.
+
+## 76 — Obvious expectations should not need explaining
+
+```text
+Why do I have to explain everything that should be obvious?
+```
+
+Recorded with request 72's lessons: test as a player (keyboard sounds, arrows,
+readable text, presets where the user saves them), not only bounds and recall.

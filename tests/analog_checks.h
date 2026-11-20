@@ -196,6 +196,25 @@ void analogChecks(){
         for(size_t i=0;i<x.size();i+=quantum){r.render(x.data()+i,std::vector<float>(quantum).data(),quantum,Note{});for(int v=0;v<maximumVoices;++v)gated|=r.voiceNote(v).gate;}
         check(gated,"Sequencer notes allocate voices");
     }
+    // Request 72: with a sequencer patched into the voice mixer the keyboard still plays
+    // ("Keyboard: Plays too"); "Seq only" restores the old behaviour.
+    {
+        auto g=padPatch(0);g.nodes.push_back({"seq","seq.euclidean",{{"hits",4},{"length",8}}});
+        g.connections.push_back({{"seq","notes"},{"voices","notes"}});
+        auto gates=[](Runtime& r,int pitch){int n=0;for(int v=0;v<maximumVoices;++v)n+=r.voiceNote(v).gate&&(pitch<0||r.voiceNote(v).midi==pitch)?1:0;return n;};
+        Runtime stopped(g);
+        check(rms(renderKeys(stopped,{keyEvent(60,true)},3),48000*2)>.01&&gates(stopped,60)==1,"Keyboard plays a sequencer-driven voice group while the sequencer is stopped");
+        renderKeys(stopped,{keyEvent(60,false)},.1);
+        check(gates(stopped,-1)==0,"Key release frees the keyboard voice");
+        Runtime running(g);running.clock.play(true);
+        renderKeys(running,{keyEvent(30,true)},2);
+        check(gates(running,30)==1,"A held key survives the sequencer's own note-offs");
+        running.clock.play(false);renderKeys(running,{},.2);
+        check(gates(running,30)==1,"Stopping the sequencer does not release held keys");
+        for(auto& n:g.nodes)if(n.id=="voices")n.parameters.push_back({"keyboard",0});
+        Runtime seqOnly(g);
+        check(rms(renderKeys(seqOnly,{keyEvent(60,true)},3),48000*2)<1e-6&&gates(seqOnly,-1)==0,"Keyboard: Seq only leaves the voices to the sequencer");
+    }
     // Rendering a full chord allocates nothing and costs little.
     {
         Runtime r(padPatch(0));

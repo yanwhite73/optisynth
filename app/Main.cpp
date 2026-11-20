@@ -4,7 +4,7 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.16";}
+    const String getApplicationVersion() override {return "0.0.17";}
     void initialise(const String& args) override {
         // Native checks keep their settings and preset library inside the snapshot folder,
         // starting empty each run; the user's own files are never touched.
@@ -13,6 +13,7 @@ public:
         if(snapshot){snapshotFolder.getChildFile("settings").deleteRecursively();snapshotFolder.getChildFile("library").deleteRecursively();}
         const File settings=snapshot?snapshotFolder.getChildFile("settings/Optisynth.settings")
             :File::getSpecialLocation(File::userApplicationDataDirectory).getChildFile("Application Support/Optisynth/Optisynth.settings");
+        // Presets root, scanned recursively; user presets are saved into Presets/User (request 73).
         const File library=snapshot?snapshotFolder.getChildFile("library"):File::getSpecialLocation(File::userMusicDirectory).getChildFile("Optisynth/Presets");
         window=std::make_unique<Window>(getApplicationName()+" "+getApplicationVersion(),settings,library);
         if(args=="--spectral-demo")window->synth->showSpectralDemo();
