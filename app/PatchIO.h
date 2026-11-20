@@ -4,12 +4,19 @@
 #include "../src/modular/sequencer.h"
 #include "../src/modular/pattern.h"
 #include "../src/modular/analog.h"
+#include "../src/modular/reference_sequencers.h"
 #include "PerformanceStateIO.h"
 #include <set>
 
 namespace optisynth {
 struct SampleReference { std::string path,fingerprint;SamplePtr data; };
-struct RackDocument { GraphSpec graph; float gain=.25f; std::map<std::string,SampleReference> samples; SpectralBank spectral; float tempo=120; };
+// Request 71: browser metadata, preferred view and synth-panel layout travel with the patch.
+struct PresetInfo { std::string name,category,description; std::vector<std::string> tags; };
+struct PanelControl { std::string node,parameter,label; };   // empty parameter: open the module's editor
+struct PanelSection { std::string title; std::vector<PanelControl> controls; };
+struct PanelLayout { std::string style; std::vector<PanelSection> sections; };
+struct RackDocument { GraphSpec graph; float gain=.25f; std::map<std::string,SampleReference> samples; SpectralBank spectral; float tempo=120;
+    PresetInfo info; std::string view; PanelLayout panel; };
 inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id){
     auto state=d.spectral.find(id);if(state==d.spectral.end()||!state->second)return {};
     auto patch=state->second->patch;auto values=partials::liveValues(patch);const auto& specs=panel("spectral.engine").parameters;
@@ -18,6 +25,83 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
         if(p!=specs.end()&&size_t(p-specs.begin())<values.size())values[size_t(p-specs.begin())]=v.second;
     }
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
+}
+inline const std::vector<std::string>& presetCategories() {
+    static const std::vector<std::string> c{"Pad","Keys","Lead","Bass","Percussion","Sequence","Texture","Drone","Template"};return c;
+}
+inline const std::vector<std::string>& panelStyles() {static const std::vector<std::string> s{"graphite","slate","walnut","ivory"};return s;}
+// Tags are lower-case words joined by hyphens, at most 32 characters, 16 per preset.
+inline std::string normaliseTag(const std::string& text) {
+    std::string t;bool gap=false;
+    for(unsigned char c:text){
+        if(std::isalnum(c)){if(gap&&!t.empty())t+='-';gap=false;t+=char(std::tolower(c));}
+        else if(c=='-'||c=='_'||c==' '||c=='+'||c=='.')gap=true;
+    }
+    return t.substr(0,32);
+}
+inline std::vector<std::string> parseTags(const std::string& text) {
+    std::vector<std::string> tags;size_t start=0;
+    while(start<=text.size()){
+        const auto end=std::min(text.find(',',start),text.size());auto tag=normaliseTag(text.substr(start,end-start));
+        if(!tag.empty()&&std::find(tags.begin(),tags.end(),tag)==tags.end()&&tags.size()<16)tags.push_back(tag);
+        start=end+1;
+    }
+    return tags;
+}
+inline bool isSequencerModule(const std::string& type){return isSequencer(type)||type=="seq.performance"||isReferenceSequencer(type);}
+// Curated front panels for the four pad starters (padPatch node IDs).
+inline PanelLayout padPanel(int model) {
+    const bool prophet=model==1,xpander=model==2,drone=model==3;
+    PanelLayout l;l.style=prophet?"walnut":model==0?"slate":xpander?"graphite":"ivory";
+    auto vco=[](const char* title,const char* node){PanelSection s{title,{}};
+        for(const char* p:{"transpose","fine","saw","pulse","triangle","pulse_width","drift"})s.controls.push_back({node,p,""});return s;};
+    l.sections.push_back(vco("OSCILLATOR A","vco1"));l.sections.push_back(vco("OSCILLATOR B","vco2"));
+    l.sections.push_back({"MIXER",{{"osc_mix","gain_a","Osc A"},{"osc_mix","gain_b","Osc B"}}});
+    if(prophet)l.sections.push_back({"POLY-MOD",{{"polymod","osc_amount","Osc B"},{"polymod","env_amount","Filter env"},{"vco1","fm_depth","Freq A"},{"vco1","pwm_depth","PW A"},{"filter","fm_depth","Filter"}}});
+    PanelSection f{"FILTER",{{"filter","cutoff_hz",""},{"filter","resonance",""},{"filter","env_octaves",""},{"filter","key_track",""},{"filter","drive",""}}};
+    f.controls.push_back({"filter",prophet?"poles":xpander?"pole_mix":"mode",""});f.controls.push_back({"filter","quality",""});
+    l.sections.push_back(f);
+    auto env=[](const char* title,const char* node){return PanelSection{title,{{node,"attack",""},{node,"decay",""},{node,"sustain",""},{node,"release",""},{node,"velocity",""}}};};
+    l.sections.push_back(env("FILTER ENVELOPE","filter_env"));l.sections.push_back(env("AMP ENVELOPE","amp_env"));
+    PanelSection v{"VOICES",{{"voices","voices",""},{"voices","unison",""},{"voices","detune",""},{"voices","glide",""},{"voices","spread",""},{"voices","level",""}}};
+    if(drone){v.controls.push_back({"voices","tuning",""});v.controls.push_back({"voices","root",""});}
+    l.sections.push_back(v);
+    l.sections.push_back({"MODULATION",{{"breath","rate","LFO rate"},{"breath","depth","LFO depth"},{"wheel","amount","Wheel"}}});
+    PanelSection fx{"EFFECTS",{}};
+    if(prophet)fx.controls={{"delay","mix","Delay"},{"delay","time_l_ms",""},{"delay","feedback",""}};
+    else fx.controls={{"chorus","mix","Chorus"},{"chorus","rate_hz",""}};
+    for(const char* p:{"mix","time_s","damping"})fx.controls.push_back({"reverb",p,std::string(p)=="mix"?"Reverb":""});
+    l.sections.push_back(fx);return l;
+}
+struct FactoryPreset { int starter; PresetInfo info; std::string view; };
+// Browser order follows the former starter menu: instrument sounds, pads, then sequencer racks.
+inline const std::vector<FactoryPreset>& factoryPresets() {
+    static const std::vector<FactoryPreset> list{
+        {0,{"VA oscillator + filter","Template","Variable-shape oscillator, envelope-swept low-pass filter and VCA. A plain subtractive starting point.",{"subtractive","starter"}},"modular"},
+        {1,{"Modal percussion","Percussion","A struck bank of 24 resonant modes with an AHDSFR envelope.",{"modal","physical-model","struck"}},"modular"},
+        {2,{"Drum into resonator","Percussion","Analog-style drum exciting a modal resonator, then a band-pass filter.",{"drum","resonator","physical-model"}},"modular"},
+        {3,{"Two oscillators + shared filter","Template","Two variable oscillators a fifth apart, mixed into one filter.",{"subtractive","starter","detuned"}},"modular"},
+        {4,{"Sample into resonator","Percussion","The built-in click sample exciting a modal resonator. Drop a WAV on the sample player.",{"sample","resonator","physical-model"}},"modular"},
+        {5,{"Sample attack + resonator","Keys","The sample attack blended with its resonated tail.",{"sample","resonator","layered"}},"modular"},
+        {6,{"Spectral stereo + external LFO","Texture","The full spectral engine in stereo, its filter swept by a rack LFO.",{"spectral","stereo","evolving"}},"modular"},
+        {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
+        {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
+        {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
+        {19,{"Xpander unison glide","Pad","Xpander-style HP2 + LP1 pole mix, 16 voices with unison 2 and glide.",{"analog","xpander","unison","glide","bright"}},"panel"},
+        {20,{"Just-intonation harmonic drone","Drone","Harmonic-series tuning on D, very slow envelopes and an 18 s reverb.",{"analog","just-intonation","drone","ambient","evolving"}},"panel"},
+        {8,{"Pattern / melodic voice","Sequence","Step pattern sequencer playing a filtered oscillator voice.",{"pattern","melodic","step"}},"modular"},
+        {9,{"Euclidean / modal percussion","Sequence","Euclidean rhythm generator striking modal percussion.",{"euclidean","percussion","modal"}},"modular"},
+        {10,{"Stage / pulsing voice","Sequence","Stage sequencer with per-stage pulses driving a voice.",{"stage","pulsing","step"}},"modular"},
+        {11,{"Motion / Night current","Sequence","Berlin-school motion sequence on the spectral engine; CV lanes move filter cutoff and wave mix.",{"berlin-school","motion","spectral","evolving","dark"}},"modular"},
+        {12,{"Motion / Glass tide","Sequence","Brighter, higher motion sequence with an 11-step pitch lane against a 32-step loop.",{"berlin-school","motion","spectral","bright"}},"modular"},
+        {13,{"Performance / Four currents","Sequence","Four-track performance sequencer: bass voice, spectral, glass and drum.",{"performance","multi-track","berlin-school"}},"modular"},
+        {14,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
+        {17,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
+        {18,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"}};
+    return list;
+}
+inline const FactoryPreset* factoryPreset(int starter) {
+    for(const auto& f:factoryPresets())if(f.starter==starter)return &f;return nullptr;
 }
 inline RackDocument starterDocument(int which,float gain) {
     if(which==17){auto d=starterDocument(11,gain);d.tempo=108;for(auto& n:d.graph.nodes)if(n.id=="sequence"){n.type="seq.probability";n.parameters={{"octave",4},{"density",.9f},{"swing",.12f}};n.performance.reset();}
@@ -89,10 +173,17 @@ inline RackDocument starterDocument(int which,float gain) {
     }
     return d;
 }
+// A factory starter with its browser metadata, preferred view and curated panel.
+inline RackDocument factoryDocument(int which,float gain) {
+    auto d=starterDocument(which,gain);
+    if(const auto* f=factoryPreset(which)){d.info=f->info;d.view=f->view;}
+    if(which==15||which==16||which==19||which==20)d.panel=padPanel(which<19?which-15:which-17);
+    return d;
+}
 // Instrument starters provide a new sound graph. Carry the edited note generator
 // into that graph when requested. Sequencer starters supply their own patterns.
 inline RackDocument chooseStarter(const RackDocument& current, int index, bool keepSequence) {
-    auto next = starterDocument(index, current.gain);
+    auto next = factoryDocument(index, current.gain);
     auto isSequence = [](const NodeSpec& n) { return n.type.rfind("seq.", 0) == 0; };
     if (!keepSequence || std::any_of(next.graph.nodes.begin(), next.graph.nodes.end(), isSequence))
         return next;
@@ -136,6 +227,49 @@ inline void pruneSampleReferences(RackDocument& d) {
             n.parameters.push_back({specs[i].id,std::clamp(values[i],specs[i].minimum,specs[i].maximum)});
     }
 }
+// "vco1" -> "VCO 1", "filter_env" -> "FILTER ENV".
+inline std::string panelTitle(const std::string& id) {
+    std::string t;
+    for(size_t i=0;i<id.size();++i){const unsigned char c=static_cast<unsigned char>(id[i]);
+        if(c=='_'||c=='-'||c=='.'){t+=' ';continue;}
+        if(std::isdigit(c)&&i>0&&std::isalpha(static_cast<unsigned char>(id[i-1])))t+=' ';
+        t+=char(std::toupper(c));}
+    return t;
+}
+inline const Parameter* findParameter(const std::string& type,const std::string& id) {
+    for(const auto& p:panel(type).parameters)if(p.id==id)return &p;return nullptr;
+}
+inline bool panelControlValid(const RackDocument& d,const PanelControl& c) {
+    const auto n=std::find_if(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& x){return x.id==c.node;});
+    if(n==d.graph.nodes.end())return false;
+    return c.parameter.empty()?isSequencerModule(n->type):findParameter(n->type,c.parameter)!=nullptr;
+}
+// Patches without a curated layout: one section per module in rack order.
+inline PanelLayout autoPanel(const RackDocument& d) {
+    PanelLayout l{"graphite",{}};
+    for(const auto& n:d.graph.nodes){
+        PanelSection s{panelTitle(n.id),{}};
+        if(isSequencerModule(n.type))s.controls.push_back({n.id,"",""});
+        else if(n.type=="spectral.engine"){
+            for(const char* p:{"main_volume","osc1_wave_mix","osc1_filter_cutoff","osc1_filter_resonance","osc1_filter_envelope","lfo1_rate"})s.controls.push_back({n.id,p,""});
+        } else for(const auto& p:panel(n.type).parameters){
+            PanelControl c{n.id,p.id,""};
+            if(n.type=="utility.mix"||n.type=="utility.stereo_mix"){const std::string port=p.id=="gain_a"?"a":"b";
+                for(const auto& link:d.graph.connections)if(link.destination.node==n.id&&link.destination.port==port)c.label=panelTitle(link.source.node);}
+            s.controls.push_back(std::move(c));
+        }
+        if(!s.controls.empty())l.sections.push_back(std::move(s));
+    }
+    return l;
+}
+inline const PanelLayout& effectivePanel(const RackDocument& d,PanelLayout& scratch) {
+    if(!d.panel.sections.empty())return d.panel;scratch=autoPanel(d);return scratch;
+}
+// Module replacement or removal can orphan curated controls; drop them.
+inline void prunePanel(RackDocument& d) {
+    for(auto& s:d.panel.sections)s.controls.erase(std::remove_if(s.controls.begin(),s.controls.end(),[&](const PanelControl& c){return !panelControlValid(d,c);}),s.controls.end());
+    d.panel.sections.erase(std::remove_if(d.panel.sections.begin(),d.panel.sections.end(),[](const PanelSection& s){return s.controls.empty();}),d.panel.sections.end());
+}
 inline SampleBank sampleBank(const RackDocument& d) {
     SampleBank b;for(const auto& s:d.samples)if(s.second.data)b[s.first]=s.second.data;return b;
 }
@@ -174,7 +308,7 @@ inline Endpoint readEndpoint(const juce::var& v) {
     return {identifier(v["node"]),identifier(v["port"])};
 }
 inline juce::var rackJSON(const RackDocument& document) {
-    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",5);root->setProperty("gain",document.gain);root->setProperty("tempo",document.tempo);
+    auto* root=new juce::DynamicObject;root->setProperty("format","optisynth.rack");root->setProperty("version",6);root->setProperty("gain",document.gain);root->setProperty("tempo",document.tempo);
     auto* assets=new juce::DynamicObject;
     for(const auto& s:document.samples){auto* ref=new juce::DynamicObject;ref->setProperty("path",juce::String(s.second.path));ref->setProperty("fingerprint",juce::String(s.second.fingerprint));assets->setProperty(juce::Identifier(s.first),juce::var(ref));}
     root->setProperty("samples",juce::var(assets));
@@ -194,10 +328,52 @@ inline juce::var rackJSON(const RackDocument& document) {
     }
     for(const auto& c:document.graph.connections){auto* link=new juce::DynamicObject;link->setProperty("from",endpointJSON(c.source));link->setProperty("to",endpointJSON(c.destination));links.add(link);}
     for(const auto& e:document.graph.outputs)outputs.add(endpointJSON(e));
-    root->setProperty("nodes",nodes);root->setProperty("connections",links);root->setProperty("outputs",outputs);return root;
+    root->setProperty("nodes",nodes);root->setProperty("connections",links);root->setProperty("outputs",outputs);
+    auto* info=new juce::DynamicObject;info->setProperty("name",juce::String(document.info.name));info->setProperty("category",juce::String(document.info.category));
+    info->setProperty("description",juce::String(document.info.description));
+    juce::Array<juce::var> tags;for(const auto& t:document.info.tags)tags.add(juce::String(t));info->setProperty("tags",tags);
+    root->setProperty("info",juce::var(info));root->setProperty("view",juce::String(document.view));
+    auto* layout=new juce::DynamicObject;layout->setProperty("style",juce::String(document.panel.style));juce::Array<juce::var> sections;
+    for(const auto& section:document.panel.sections){auto* row=new juce::DynamicObject;row->setProperty("title",juce::String(section.title));juce::Array<juce::var> controls;
+        for(const auto& c:section.controls){auto* control=new juce::DynamicObject;control->setProperty("node",juce::String(c.node));control->setProperty("parameter",juce::String(c.parameter));control->setProperty("label",juce::String(c.label));controls.add(control);}
+        row->setProperty("controls",controls);sections.add(row);}
+    layout->setProperty("sections",sections);root->setProperty("panel",juce::var(layout));return root;
+}
+inline std::string boundedText(const juce::var& v,int maximum,const char* what) {
+    if(v.isVoid())return {};
+    if(!v.isString()||v.toString().length()>maximum)throw std::invalid_argument(std::string("Invalid ")+what);
+    return v.toString().toStdString();
+}
+// Version 6: browser metadata, preferred view, synth-panel layout. All optional.
+inline void readPresetFields(const juce::var& value,RackDocument& d) {
+    const auto& info=value["info"];
+    if(!info.isVoid()){
+        if(!info.isObject())throw std::invalid_argument("Invalid preset info");
+        d.info.name=boundedText(info["name"],80,"preset name");d.info.category=boundedText(info["category"],32,"preset category");
+        d.info.description=boundedText(info["description"],2000,"preset description");
+        if(!info["tags"].isVoid()){auto* tags=info["tags"].getArray();if(!tags||tags->size()>16)throw std::invalid_argument("Invalid preset tags");
+            for(const auto& t:*tags){const auto tag=normaliseTag(boundedText(t,32,"preset tag"));if(tag.empty())throw std::invalid_argument("Empty preset tag");
+                if(std::find(d.info.tags.begin(),d.info.tags.end(),tag)==d.info.tags.end())d.info.tags.push_back(tag);}}
+    }
+    d.view=boundedText(value["view"],16,"view");
+    if(!d.view.empty()&&d.view!="panel"&&d.view!="modular")throw std::invalid_argument("Unknown view");
+    const auto& layout=value["panel"];
+    if(!layout.isVoid()){
+        if(!layout.isObject())throw std::invalid_argument("Invalid panel layout");
+        d.panel.style=boundedText(layout["style"],16,"panel style");
+        if(!d.panel.style.empty()&&std::find(panelStyles().begin(),panelStyles().end(),d.panel.style)==panelStyles().end())throw std::invalid_argument("Unknown panel style");
+        auto* sections=layout["sections"].getArray();if(!sections||sections->size()>24)throw std::invalid_argument("Invalid panel sections");
+        for(const auto& v:*sections){
+            auto* controls=v["controls"].getArray();if(!v.isObject()||!controls||controls->size()>48)throw std::invalid_argument("Invalid panel section");
+            PanelSection section{boundedText(v["title"],40,"panel title"),{}};
+            for(const auto& c:*controls){if(!c.isObject())throw std::invalid_argument("Invalid panel control");
+                section.controls.push_back({identifier(c["node"]),boundedText(c["parameter"],128,"panel parameter"),boundedText(c["label"],40,"panel label")});}
+            d.panel.sections.push_back(std::move(section));
+        }
+    }
 }
 inline RackDocument readRack(const juce::var& value) {
-    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>5)throw std::invalid_argument("Unsupported patch version");
+    if(!value.isObject()||!value["version"].isInt()||int(value["version"])<1||int(value["version"])>6)throw std::invalid_argument("Unsupported patch version");
     RackDocument d;d.gain=number(value["gain"]);
     if(int(value["version"])>=4){d.tempo=number(value["tempo"]);if(d.tempo<20||d.tempo>300)throw std::invalid_argument("Tempo outside range");}
     if(d.gain<0||d.gain>1)throw std::invalid_argument("Output gain outside range");
@@ -257,7 +433,11 @@ inline RackDocument readRack(const juce::var& value) {
             for(const auto& m:*modulation)d.graph.modulations.push_back({readEndpoint(m["from"]),readEndpoint(m["to"]),number(m["amount"])});
             for(const auto& n:d.graph.nodes)if(n.type=="spectral.engine"&&!d.spectral.count(n.id))throw std::invalid_argument("Missing Spectral engine state");
         }
+        if(int(value["version"])>=6)readPresetFields(value,d);
     } else throw std::invalid_argument("Not an Optisynth patch");
-    validateRack(d.graph);return d;
+    validateRack(d.graph);
+    for(const auto& section:d.panel.sections)for(const auto& c:section.controls)
+        if(!panelControlValid(d,c))throw std::invalid_argument("Panel control refers to a missing module or parameter: "+c.node+"."+c.parameter);
+    return d;
 }
 }

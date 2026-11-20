@@ -1,5 +1,8 @@
 # Interface and visual research
 
+- [Rack zoom, synth-panel view and preset browser](SYNTH_PANEL_AND_PRESETS.md)
+  (request 71): mechanism, patch format version 6, storage locations, success
+  criteria and native results.
 - [Probability and Orbit: native editors](REFERENCE_SEQUENCERS_REVIEW.md): weighted
   pitch grid and four Euclidean rings, reference mapping and actual captures.
 

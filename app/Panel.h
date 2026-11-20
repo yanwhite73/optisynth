@@ -88,6 +88,7 @@ struct Control : juce::Component {
         if(p.logarithmic)slider.setSkewFactorFromMidPoint(p.minimum>0?std::sqrt(p.minimum*p.maximum):.3);
         slider.setTextValueSuffix(p.unit.empty()?"":" "+String(p.unit));slider.setNumDecimalPlacesToDisplay(p.step>=1?0:p.unit=="Hz"?1:p.unit=="st"?2:3);
         if(p.id=="root_note")slider.setTextValueSuffix(" MIDI");
+        if(p.unit=="Hz")slider.textFromValueFunction=[](double v){return String(v,v<1?3:v<10?2:1);};   // slow LFOs read 0.030 Hz, not 0.0 Hz (suffix added by Slider)
         if(!p.choices.empty()){
             slider.setTextValueSuffix("");
             slider.textFromValueFunction=[choices=p.choices](double v){return String(choices[size_t(std::clamp(int(std::lround(v)),0,int(choices.size())-1))]);};
@@ -326,15 +327,63 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         }
     }
 };
+// Request 71: the rack lays cards out at logical size (view / zoom) in rows, like a
+// multi-row case, then scales itself with a component transform. Rows that do not
+// fit vertically scroll sideways; zooming out adds rows instead of shrinking one row.
 struct HardwareRack : juce::Component {
+    static constexpr int minimumRow=421,maximumRow=760,gap=6,margin=8;
     std::map<std::string,Values> values;
     std::vector<std::unique_ptr<ModulePanel>> modules;
+    float zoom=1;
     void clear(){modules.clear();values.clear();}
-    void arrange(int availableWidth,int height){int natural=16+int(modules.size())*6;for(const auto& m:modules)natural+=panelWidth(m->current);
-        const float stretch=std::max(1.f,float(availableWidth-16-int(modules.size())*6)/float(std::max(1,natural-16-int(modules.size())*6)));
-        int x=8;for(auto& m:modules){const int w=int(panelWidth(m->current)*stretch);m->setBounds(x,8,w,height-16);x+=w+6;}setSize(std::max(availableWidth,x+8),height);}
+    std::vector<std::vector<ModulePanel*>> partition(int width,int height) const {
+        std::vector<std::vector<ModulePanel*>> greedy;int x=0;const int usable=width-2*margin;
+        for(const auto& m:modules){const int w=panelWidth(m->current);
+            if(greedy.empty()||(!greedy.back().empty()&&x+gap+w>usable)){greedy.emplace_back();x=-gap;}
+            greedy.back().push_back(m.get());x+=gap+w;}
+        const int fit=std::max(1,(height-2*margin+gap)/(minimumRow+gap));
+        if(int(greedy.size())<=fit)return greedy;
+        int total=0;for(const auto& m:modules)total+=panelWidth(m->current);
+        const float target=float(total)/float(fit);float filled=0;
+        std::vector<std::vector<ModulePanel*>> rows(1);
+        for(const auto& m:modules){const int w=panelWidth(m->current);
+            if(!rows.back().empty()&&int(rows.size())<fit&&filled+w*.5f>target){rows.emplace_back();filled=0;}
+            rows.back().push_back(m.get());filled+=float(w);}
+        return rows;
+    }
+    // Returns the scaled size the zoom host must take.
+    Rectangle<int> arrange(int viewWidth,int viewHeight){
+        const int width=std::max(240,int(viewWidth/zoom)),height=std::max(minimumRow+2*margin,int(viewHeight/zoom));
+        const auto rows=partition(width,height);const int count=std::max(1,int(rows.size()));
+        const int rowHeight=std::clamp((height-2*margin-(count-1)*gap)/count,minimumRow,maximumRow);
+        int y=margin,right=0;
+        for(const auto& row:rows){
+            int natural=0;for(auto* m:row)natural+=panelWidth(m->current);
+            const int gaps=gap*(int(row.size())-1);
+            const float stretch=std::clamp(float(width-2*margin-gaps)/float(std::max(1,natural)),1.f,1.6f);
+            int x=margin;for(auto* m:row){const int w=int(panelWidth(m->current)*stretch);m->setBounds(x,y,w,rowHeight);x+=w+gap;}
+            right=std::max(right,x-gap+margin);y+=rowHeight+gap;
+        }
+        const int w=std::max(width,right),h=std::max(height,y-gap+margin);
+        setTransform({});setSize(w,h);setTransform(AffineTransform::scale(zoom));
+        return {0,0,int(std::ceil(w*zoom)),int(std::ceil(h*zoom))};
+    }
+    // Largest zoom (50-100%) at which every card is visible without scrolling.
+    float fitZoom(int viewWidth,int viewHeight){
+        const float previous=zoom;float best=.5f;
+        for(int step=100;step>=50;step-=5){zoom=step/100.f;const auto size=arrange(viewWidth,viewHeight);if(size.getWidth()<=viewWidth&&size.getHeight()<=viewHeight){best=zoom;break;}}
+        zoom=previous;return best;
+    }
+    // Card bounds in the zoom host's (scaled) coordinates.
+    Rectangle<int> scaledBounds(const juce::Component& card) const {return card.getBounds().toFloat().transformedBy(getTransform()).getSmallestIntegerContainer();}
     ModulePanel* find(const std::string& id){for(auto& m:modules)if(m->instance==id)return m.get();return nullptr;}
     void highlight(const std::string& id){for(auto& m:modules){m->highlighted=m->instance==id;m->repaint();}}
+    void paint(Graphics& g) override {g.fillAll(Colour(0xff17191b));}
+};
+// Scrolled by the viewport; holds the transformed rack. Trackpad pinch zooms (navigation only).
+struct ZoomHost : juce::Component {
+    std::function<void(float)> magnified;
+    void mouseMagnify(const MouseEvent&,float scale) override {if(magnified)magnified(scale);}
     void paint(Graphics& g) override {g.fillAll(Colour(0xff17191b));}
 };
 }

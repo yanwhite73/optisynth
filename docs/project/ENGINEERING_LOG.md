@@ -936,3 +936,36 @@ inspect the AU state structure and load the preset whole.
    parameters whose meaning has not been read.
 3. Record per-instrument facts that change comparisons, such as Prophet's
    5-voice limit.
+
+## Request 71: preset browser, synth-panel view, rack zoom (20 November 2026, Claude session)
+
+**Design choices:**
+- **Synth panel.** It is a second view over the same parameters, not a
+  second engine. Its knobs call the same `setParameter` path as the rack
+  cards, so DSP handles, the cards, the focus editor and the saved patch stay
+  in one place.
+- **Metadata location.** Patch metadata (category, tags, view, panel layout)
+  goes in the patch file. Per-user state (favourites, zoom, view preference,
+  extra folders) goes in a settings file.
+- **Native-check isolation.** Snapshot mode points both the settings and the
+  library at the snapshot folder, and empties them first, so qualification
+  cannot touch Yan's files.
+- **Zoom.** It is a component transform on the rack, not a relayout. The
+  card layouts use fixed pixel offsets, and the transform keeps text and knobs
+  vector-sharp. The rack still lays cards out in rows at the zoomed logical
+  width, so zooming out shows more modules.
+- **Metadata edits.** Editing a user preset's metadata changes only `info`
+  inside the existing JSON. The result is validated with the full reader and
+  written through a temporary sibling.
+
+**Found by inspecting captures** (all native checks already passed):
+- The Panel / Modular radio buttons had no visible on state.
+- Slow LFO rates displayed as 0.0 Hz.
+- The preset table showed a horizontal scrollbar.
+- Panel sections left spare height at the bottom.
+
+All four were fixed and rechecked.
+
+**Lesson.** Passing layout checks prove only that controls are in bounds and do
+not overlap. Readability and state visibility need the captures to be looked
+at, and here that look found four issues the checks could not.

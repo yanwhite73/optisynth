@@ -1,4 +1,44 @@
-# Optisynth status — 19 November 2026
+# Optisynth status — 20 November 2026
+
+## 0.0.16 interface: preset browser, synth-panel view, rack zoom — request 71
+
+App: `app/Builds/MacOSX/build/Release/Optisynth.app` (receipt
+`Optisynth-build.json`, native checks passed). Design and results:
+[SYNTH_PANEL_AND_PRESETS.md](../ui/SYNTH_PANEL_AND_PRESETS.md).
+
+- **Header.**
+  - Preset bar: previous / next, a favourite star, the preset name with its
+    category and tags, and Save.
+  - Panel | Modular switch, with a menu for which view a patch opens in.
+  - Transport and status on the second row; rack tools and zoom on the third
+    row, in Modular only.
+- **Preset browser,** replacing the Starter patches menu.
+  - Collections: All, Favourites, Factory and User, plus categories with counts.
+  - Search, tag chips (combined with AND) and a sortable table.
+  - Details pane with metadata editing for user presets; Save to library.
+  - Import / Export file, Add folder and Keep current sequence.
+  - All 21 factory starters now have a category, tags and a description.
+- **Synth-panel view.**
+  - One front panel of the patch's playing controls, kept in sync with the
+    rack cards and the audio thread.
+  - The four pads carry curated layouts and open in this view. Other patches
+    get an automatic panel, one section per module, with sequencers as editor
+    buttons.
+  - Original colour schemes: slate, walnut, ivory and graphite.
+- **Rack zoom,** 50–200%.
+  - Use −, + and Fit, Cmd − / = / 0, or pinch. The scroll wheel still only
+    scrolls.
+  - Zooming out adds rows rather than shrinking one row.
+- **Storage.**
+  - The patch format is now version 6, adding `info`, `view` and `panel`;
+    versions 1–5 still load.
+  - Favourites, zoom and the view preference are stored in
+    `~/Library/Application Support/Optisynth/`.
+  - The user library is `~/Music/Optisynth/Presets/`, created on first save.
+
+Not yet: editing a panel layout by hand, or modulation depths as panel
+controls. Pinch, keyboard browsing and dialogs still need hands-on use.
+
 
 ## 0.0.15 pad voice: 16 voices, glide, unison, tuning, Xpander modes — requests 64–65
 

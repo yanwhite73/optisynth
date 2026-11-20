@@ -3,41 +3,65 @@
 #include "PatchIO.h"
 #include "SampleLoader.h"
 #include "ModulationEditor.h"
+#include "SynthPanel.h"
+#include "PresetBrowser.h"
 #include <chrono>
 #include <fstream>
 
 namespace {
+// Header preset display: name, modified mark, category and tags; click to browse.
+struct PresetDisplay final : Button {
+    String title="Untitled",detail;bool modified=false;
+    PresetDisplay():Button("Preset"){setTooltip("Browse presets: categories, tags, favourites, search");}
+    void paintButton(Graphics& g,bool over,bool) override {
+        auto r=getLocalBounds().toFloat().reduced(.5f);
+        g.setColour(Colour(0xff111416));g.fillRoundedRectangle(r,4);
+        g.setColour(getToggleState()||over?teal:Colour(0xff3c4449));g.drawRoundedRectangle(r,4,1.2f);
+        g.setColour(Colour(0xff8fd0c2));g.setFont(font(15));g.drawText(title+(modified?"  *":""),12,3,getWidth()-46,19,Justification::centredLeft,true);
+        g.setColour(paper.withAlpha(.55f));g.setFont(font(10.5f));g.drawText(detail,12,21,getWidth()-46,14,Justification::centredLeft,true);
+        Path arrow;const float x=float(getWidth()-24),y=getHeight()*.5f;
+        if(getToggleState())arrow.addTriangle(x,y+3,x+10,y+3,x+5,y-3);else arrow.addTriangle(x,y-3,x+10,y-3,x+5,y+3);
+        g.setColour(paper.withAlpha(.7f));g.fillPath(arrow);
+    }
+};
 class RackSynth final : public AudioAppComponent, private Timer,
                         private MidiKeyboardState::Listener, private ListBoxModel, private MidiInputCallback {
 public:
-    RackSynth() : keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
+    RackSynth(const File& settingsFile,const File& libraryFolder) : prefs(settingsFile), browser(prefs,libraryFolder),
+        keyboard(keys,MidiKeyboardComponent::horizontalKeyboard), rack("Modules",this) {
         setWantsKeyboardFocus(true);setSize(1440,940);
-        for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,
-            &starter,&keepSequence,&save,&load,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position})addAndMakeVisible(c);
-        rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(false,true);rackView.setScrollBarThickness(12);
+        for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position,
+            &prevPreset,&nextPreset,&favouriteButton,&presetDisplay,&savePreset,&panelViewButton,&modularViewButton,&viewMenu,&zoomOut,&zoomLabel,&zoomIn,&zoomFit,&synthPanel})addAndMakeVisible(c);
+        addChildComponent(browser);
+        rackView.setViewedComponent(&zoomHost,false);zoomHost.addAndMakeVisible(hardware);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
+        hardware.zoom=float(std::clamp(prefs.number("zoom",1.),.5,2.));
+        zoomHost.magnified=[this](float scale){if(currentView!="panel")setZoom(hardware.zoom*scale);};
+        zoomOut.onClick=[this]{setZoom(stepZoom(-1));};zoomIn.onClick=[this]{setZoom(stepZoom(1));};zoomLabel.onClick=[this]{setZoom(1);};zoomFit.onClick=[this]{fitZoom();};
+        zoomOut.setTooltip("Zoom out (Cmd -). Pinch on a trackpad also zooms.");zoomIn.setTooltip("Zoom in (Cmd =)");zoomLabel.setTooltip("Reset to 100% (Cmd 0)");zoomFit.setTooltip("Fit the whole rack in view");
+        prevPreset.onClick=[this]{stepPreset(-1);};nextPreset.onClick=[this]{stepPreset(1);};
+        prevPreset.setTooltip("Previous preset in the browser's current list");nextPreset.setTooltip("Next preset in the browser's current list");
+        favouriteButton.onClick=[this]{browser.toggleFavourite(presetKey);updatePresetDisplay();};favouriteButton.setTooltip("Favourite this preset");
+        presetDisplay.onClick=[this]{showBrowser(!browser.isVisible());};
+        savePreset.onClick=[this]{showSaveForm();};savePreset.setTooltip("Save the current sound to the preset library (Cmd S)");
+        for(auto* b:{&panelViewButton,&modularViewButton}){b->setRadioGroupId(71);b->setClickingTogglesState(true);
+            b->setColour(TextButton::buttonOnColourId,teal);b->setColour(TextButton::textColourOnId,ink);}
+        panelViewButton.onClick=[this]{setView("panel",true);};modularViewButton.onClick=[this]{setView("modular",true);};
+        panelViewButton.setTooltip("Synth panel: the patch's playing controls on one front panel");modularViewButton.setTooltip("Modular rack: every module, socket and route");
+        viewMenu.onClick=[this]{showViewMenu();};viewMenu.setTooltip("Which view opens when a patch loads");
+        synthPanel.changed=[this](const std::string& node,const std::string& key,float value){setParameter(node,key,value);};
+        synthPanel.openEditor=[this](const std::string& node){if(auto* card=hardware.find(node))card->openSequencerWindow();};
+        browser.load=[this](const PresetEntry& e){loadPreset(e);};
+        browser.close=[this]{showBrowser(false);};
+        browser.importFile=[this]{chooseFile(false);};browser.exportFile=[this]{chooseFile(true);};
+        browser.saveCurrent=[this](const PresetInfo& info,bool panelView,bool overwrite){return saveToLibrary(info,panelView,overwrite);};
+        browser.requestSaveForm=[this]{showSaveForm();};
+        browser.infoEdited=[this](const std::string& key,const PresetInfo& info){if(key==presetKey){document.info=info;synthPanel.build(document);updatePresetDisplay();}};
+        browser.favouritesChanged=[this]{updatePresetDisplay();};
         focusMode.setClickingTogglesState(true);focusMode.onClick=[this]{showSelected();};
         rack.setRowHeight(62);rack.setColour(ListBox::backgroundColourId,Colour(0xff25343a));
         rack.setColour(ListBox::outlineColourId,Colours::transparentBlack);
         int i=0;for(const auto& p:panels()){addTypes.push_back(p.type);addChoice.addItem(p.name,++i);}
         addChoice.setSelectedId(1,dontSendNotification);
-        const char* names[]={"VA oscillator + filter","Modal percussion","Drum into resonator","Two oscillators + shared filter","Sample into resonator","Sample attack + resonator","Spectral stereo + external LFO","Spectral audio + LFO into resonator","Pattern / melodic voice","Euclidean / modal percussion","Stage / pulsing voice","Motion / Night current","Motion / Glass tide","Performance / Four currents","Performance / Clockwork garden","Pad / OB swell (8 voices)","Pad / Prophet 4-pole + poly-mod","Probability / Glass branches","Orbit / Four satellites","Pad / Xpander mode, unison + glide","Pad / Just-intonation harmonic drone"};
-        const int order[]={0,1,2,3,4,5,6,7,15,16,19,20,8,9,10,11,12,13,14,17,18};   // menu order; IDs stay index+1
-        for(int k=0;k<21;++k){
-            if(k==0) starter.addSectionHeading("Instrument sounds");
-            if(k==12) starter.addSectionHeading("Sequencer racks");
-            starter.addItem(names[order[k]],order[k]+1);
-        }
-        keepSequence.setToggleState(true,dontSendNotification);
-        keepSequence.setTooltip("Keep the current pattern and tempo when choosing an instrument sound. Sequencer racks load their own patterns.");
-        starter.setTextWhenNothingSelected("Starter patches");
-        starter.onChange=[this]{
-            const int id=starter.getSelectedId();
-            if(refreshing || id<=0) return;
-            try {
-                auto next=chooseStarter(document,id-1,keepSequence.getToggleState());
-                commit(std::move(next),id==16 || id==17 || id==20 || id==21 ? "filter" : id>=9 ? "sequence" : "source");
-            } catch(const std::exception& e){message(e.what(),true);}
-        };
         add.onClick=[this]{addModule(addTypes[size_t(addChoice.getSelectedId()-1)]);};
         remove.onClick=[this]{removeSelected();};
         editor.selectionChanged=[this]{
@@ -49,7 +73,6 @@ public:
             const int index=output.getSelectedId()-1;if(refreshing||index<0)return;
             auto next=document;next.graph.outputs={outputPorts[size_t(index)]};commit(std::move(next),selected);
         };
-        save.onClick=[this]{chooseFile(true);};load.onClick=[this]{chooseFile(false);};
         matrixButton.onClick=[this]{showMatrix();};
         audio.onClick=[this]{toggleAudio();};silence.onClick=[this]{stopAudio();};
         play.onClick=[this]{player.playing.store(!player.playing.load());updateTransport();};
@@ -68,15 +91,15 @@ public:
         routes.setColour(TextEditor::outlineColourId,Colours::transparentBlack);routes.setFont(font(12));
         status.setFont(font(13));status.setColour(Label::textColourId,paper);
         keyboardHelp.setFont(font(12));keyboardHelp.setColour(Label::textColourId,paper.withAlpha(.8f));
-        commit({rackPreset(0),.25f},"source");startTimerHz(60);
+        loadFactory(0);startTimerHz(60);
     }
     ~RackSynth() override {stopTimer();deviceManager.removeMidiInputDeviceCallback({},this);shutdownAudio();keys.removeListener(this);rack.setModel(nullptr);rackView.setViewedComponent(nullptr,false);}
     void prepareToPlay(int,double rate) override {converter.prepare(rate);}
     void releaseResources() override {}
-    void showSampleDemo(){starter.setSelectedId(5,sendNotificationSync);}
-    void showSpectralDemo(){starter.setSelectedId(7,sendNotificationSync);}
-    void showReferenceDemo(){openReferenceWhenReady=true;starter.setSelectedId(18,sendNotificationSync);}
-    void showSequencerDemo(){openPerformanceWhenReady=true;starter.setSelectedId(14,sendNotificationSync);}
+    void showSampleDemo(){loadFactory(4);}
+    void showSpectralDemo(){loadFactory(6);}
+    void showReferenceDemo(){openReferenceWhenReady=true;loadFactory(17);}
+    void showSequencerDemo(){openPerformanceWhenReady=true;loadFactory(13);}
     void getNextAudioBlock(const AudioSourceChannelInfo& block) override {
         if(block.buffer->getNumChannels()<1)return;
         if(block.buffer->getNumChannels()>1)converter.render(player,block.buffer->getWritePointer(0,block.startSample),block.buffer->getWritePointer(1,block.startSample),block.numSamples);
@@ -84,38 +107,68 @@ public:
         for(int c=2;c<block.buffer->getNumChannels();++c)block.buffer->clear(c,block.startSample,block.numSamples);
     }
     void paint(Graphics& g) override {
-        g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,16,230,35,Justification::centredLeft);
-        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  "+JUCEApplication::getInstance()->getApplicationVersion(),25,53,300,20,Justification::centredLeft);
-        const int right=getWidth()-324;
+        g.fillAll(Colour(0xff222426));g.setColour(paper);g.setFont(font(29));g.drawText("OPTISYNTH",24,14,200,35,Justification::centredLeft);
+        g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  "+JUCEApplication::getInstance()->getApplicationVersion(),25,50,200,18,Justification::centredLeft);
+        const int right=getWidth()-324,top=bodyTop();
         g.setColour(paper);g.setFont(font(12));
-        g.drawText("OUTPUT",530,125,75,24,Justification::centredLeft);
-        if(focusMode.getToggleState()){
-            g.drawText("INPUTS  /  "+String(selected),right,169,300,20,Justification::centredLeft);
-            g.drawText("CONNECTIONS",right,337,300,20,Justification::centredLeft);
+        if(currentView!="panel"){
+            g.drawText("OUTPUT",414,110,58,30,Justification::centredLeft);
+            if(focusMode.getToggleState()){
+                g.drawText("INPUTS  /  "+String(selected),right,top+5,300,20,Justification::centredLeft);
+                g.drawText("CONNECTIONS",right,top+173,300,20,Justification::centredLeft);
+            }
         }
         g.drawText("OUTPUT",24,getHeight()-158,75,26,Justification::centredLeft);
         const float peak=player.peak.load(std::memory_order_relaxed);
         g.setColour(Colour(0xff34464c));g.fillRoundedRectangle(340.f,float(getHeight()-150),160,8,4);
         g.setColour(peak>.9f?orange:teal);g.fillRoundedRectangle(340.f,float(getHeight()-150),160*std::min(1.f,peak),8,4);
         g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
-        g.drawText(String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch; unpatched notes use keyboard.",24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
+        const String summary=currentView=="panel"
+            ?String(int(synthPanel.controlCount()))+" panel controls in "+String(int(synthPanel.sectionCount()))+" sections  |  "+(synthPanel.isCurated()?"layout saved with the patch":"automatic layout: one section per module")+"   |   Patching and module changes are in the Modular view."
+            :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch; unpatched notes use keyboard.   |   Zoom: Cmd - / = / 0 or pinch.";
+        g.drawText(summary,24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
-        const int right=getWidth()-324,bottom=bodyBottom();const bool focused=focusMode.getToggleState();
-        starter.setBounds(24,82,235,32);keepSequence.setBounds(263,82,132,32);save.setBounds(400,82,85,32);load.setBounds(493,82,85,32);
-        audio.setBounds(getWidth()-258,24,145,36);silence.setBounds(getWidth()-105,24,81,36);
-        play.setBounds(315,22,86,34);restart.setBounds(409,22,75,34);tempo.setBounds(494,24,206,30);position.setBounds(710,24,std::max(80,getWidth()-978),30);
-        status.setBounds(595,76,getWidth()-619,45);
-        addChoice.setBounds(24,122,250,30);add.setBounds(286,122,105,30);remove.setBounds(403,122,105,30);
-        output.setBounds(602,122,230,30);focusMode.setBounds(getWidth()-180,122,156,30);
-        matrixButton.setBounds(getWidth()-278,122,90,30);
-        rack.setBounds(24,169,220,bottom-169);editor.setBounds(260,169,right-276,bottom-169);
-        rack.setVisible(focused);editor.setVisible(focused);routes.setVisible(focused);rackView.setVisible(!focused);
-        int y=198;for(size_t i=0;i<inputs.size();++i){auto& row=*inputs[i];const bool visible=focused&&!selected.empty()&&i<type(editor.current).inputs.size();row.label.setVisible(visible);row.choice.setVisible(visible);row.label.setBounds(right,y,300,20);row.choice.setBounds(right,y+23,300,32);y+=65;}
-        routes.setBounds(right,364,300,std::max(40,bottom-364));
-        rackView.setBounds(24,164,getWidth()-48,bottom-164);hardware.arrange(rackView.getWidth(),rackView.getHeight()-14);
+        const int w=getWidth(),right=w-324,bottom=bodyBottom(),top=bodyTop();
+        const bool modular=currentView!="panel",focused=modular&&focusMode.getToggleState();
+        // Preset bar, view switch, audio.
+        const int y1=16;
+        audio.setBounds(w-258,y1,145,34);silence.setBounds(w-105,y1,81,34);
+        viewMenu.setBounds(w-258-14-30,y1,30,34);modularViewButton.setBounds(viewMenu.getX()-86,y1,86,34);panelViewButton.setBounds(modularViewButton.getX()-72,y1,72,34);
+        prevPreset.setBounds(230,y1,30,34);nextPreset.setBounds(262,y1,30,34);favouriteButton.setBounds(298,y1,34,34);
+        savePreset.setBounds(panelViewButton.getX()-14-70,y1,70,34);
+        presetDisplay.setBounds(340,y1-2,std::max(160,savePreset.getX()-8-340),38);
+        // Transport and status.
+        const int y2=64;
+        play.setBounds(230,y2,86,32);restart.setBounds(322,y2,75,32);tempo.setBounds(405,y2+1,206,30);position.setBounds(619,y2,170,32);
+        status.setBounds(797,y2-6,std::max(100,w-797-24),44);
+        // Rack tools (modular view only).
+        const int y3=110;
+        for(auto* c:std::initializer_list<juce::Component*>{&addChoice,&add,&remove,&output,&matrixButton,&focusMode,&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setVisible(modular);
+        addChoice.setBounds(24,y3,190,30);add.setBounds(222,y3,90,30);remove.setBounds(318,y3,84,30);output.setBounds(474,y3,200,30);
+        zoomFit.setBounds(w-24-48,y3,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,y3,30,30);zoomLabel.setBounds(zoomIn.getX()-58,y3,58,30);zoomOut.setBounds(zoomLabel.getX()-30,y3,30,30);
+        focusMode.setBounds(zoomOut.getX()-16-124,y3,124,30);matrixButton.setBounds(focusMode.getX()-6-80,y3,80,30);
+        const bool zoomable=modular&&!focused;for(auto* c:{&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setEnabled(zoomable);
+        // Body.
+        rack.setBounds(24,top+5,220,bottom-top-5);editor.setBounds(260,top+5,right-276,bottom-top-5);
+        rack.setVisible(focused);editor.setVisible(focused);routes.setVisible(focused);rackView.setVisible(modular&&!focused);
+        int y=top+34;for(size_t i=0;i<inputs.size();++i){auto& row=*inputs[i];const bool visible=focused&&!selected.empty()&&i<type(editor.current).inputs.size();row.label.setVisible(visible);row.choice.setVisible(visible);row.label.setBounds(right,y,300,20);row.choice.setBounds(right,y+23,300,32);y+=65;}
+        routes.setBounds(right,top+200,300,std::max(40,bottom-top-200));
+        rackView.setBounds(24,top,w-48,bottom-top);arrangeRack();
+        synthPanel.setVisible(!modular);synthPanel.setBounds(24,top,w-48,bottom-top);
+        browser.setBounds(24,106,w-48,bottom-106);
         gain.setBounds(98,getHeight()-158,220,27);keyboardHelp.setBounds(525,getHeight()-163,getWidth()-549,38);
         keyboard.setBounds(24,getHeight()-113,getWidth()-48,89);keyboard.setKeyWidth(float(getWidth()-48)/43.f);
+    }
+    bool keyPressed(const KeyPress& key) override {
+        if(!key.getModifiers().isCommandDown())return false;
+        const int code=key.getKeyCode();
+        if(code=='S'||code=='s'){showSaveForm();return true;}
+        if(currentView=="panel"||focusMode.getToggleState())return false;
+        if(code=='='||code=='+'){setZoom(stepZoom(1));return true;}
+        if(code=='-'||code=='_'){setZoom(stepZoom(-1));return true;}
+        if(code=='0'){setZoom(1);return true;}
+        return false;
     }
     // Native smoke checks and screenshots; no audio device is opened.
     void snapshots(const File& directory) {
@@ -315,10 +368,113 @@ public:
             require(writer&&writer->writeFromAudioSampleBuffer(buffer,0,frames),"Write pad WAV");
         }
         require(directory.getChildFile("pad-check.txt").replaceWithText("PASS: all four pad starters (OB, Prophet poly-mod, Xpander unison/glide, harmonic drone) load and display; five-note chord held 8 s then released; identical stereo audio after JSON recall; audible without clipping; WAVs written. No audio device opened.\n"),"Write pad receipt");
+        // Request 71: preset catalogue and browser, synth-panel view, rack zoom.
+        setSize(1440,940);resized();
+        require(prefs.file().isAChildOf(directory)&&browser.libraryFolder().isAChildOf(directory),"Snapshot settings and library stay inside the snapshot folder");
+        browser.setKeepSequence(false);prefs.set("viewPolicy",String("patch"));
+        {std::set<int> starters;
+            for(const auto& f:factoryPresets()){starters.insert(f.starter);
+                require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
+                for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
+            require(factoryPresets().size()==21&&starters.size()==21&&*starters.begin()==0&&*starters.rbegin()==20,"Factory catalogue lists every starter once");}
+        for(int pad:{15,16,19,20}){const auto d=factoryDocument(pad,.25f);require(!d.panel.sections.empty()&&d.view=="panel","Pad has a curated panel and opens in it");
+            for(const auto& section:d.panel.sections)for(const auto& c:section.controls)require(panelControlValid(d,c),"Curated pad control resolves to a real parameter");}
+        require(render(factoryDocument(3,.25f).graph)==render(starterDocument(3,.25f).graph),"Catalogue load keeps starter audio");
+        require(parseTags(" Warm, Berlin School ,poly_mod,warm,, ")==std::vector<std::string>{"warm","berlin-school","poly-mod"},"Tag normalisation and de-duplication");
+        auto filterCount=[&](PresetFilter f){browser.filter=std::move(f);browser.applyFilter();return browser.visibleCount();};
+        {PresetFilter f;f.category="Pad";require(filterCount(f)==3,"Pad category");}
+        {PresetFilter f;f.tags={"berlin-school"};require(filterCount(f)==3,"Tag filter");}
+        {PresetFilter f;f.tags={"analog","ambient"};require(filterCount(f)==2,"Tags combine with AND");}
+        {PresetFilter f;f.search="prophet";require(filterCount(f)==1&&browser.visibleEntry(0).starter==16,"Search by name");}
+        {PresetFilter f;f.search="EUCLIDEAN sequence";require(filterCount(f)==2,"Search words across tags and category");}
+        browser.toggleFavourite("factory:16");browser.toggleFavourite("factory:20");
+        {PresetFilter f;f.collection="favourites";require(filterCount(f)==2,"Favourites collection");}
+        {Preferences reread(prefs.file());require(reread.list("favourites").size()==2,"Favourites persist in the settings file");}
+        {const auto* e=browser.step("factory:16",1);require(e&&e->key=="factory:20","Next follows the filtered list");
+         e=browser.step("factory:20",1);require(e&&e->key=="factory:16","Next wraps");e=browser.step("factory:16",-1);require(e&&e->key=="factory:20","Previous wraps");}
+        presetKey.clear();stepPreset(1);
+        require(presetKey=="factory:16"&&currentView=="panel"&&synthPanel.isVisible()&&!rackView.isVisible(),"Header next loads the first favourite in its saved panel view");
+        require(synthPanel.isCurated()&&synthPanel.layoutSound(),"Prophet panel layout");
+        auto* cutoff=synthPanel.control("filter","cutoff_hz");require(cutoff!=nullptr,"Panel shows the filter cutoff");
+        const auto& filterParameters=panel("analog.filter").parameters;
+        const size_t cutoffIndex=size_t(std::find_if(filterParameters.begin(),filterParameters.end(),[](const Parameter& x){return x.id=="cutoff_hz";})-filterParameters.begin());
+        cutoff->slider.setValue(1500,sendNotificationSync);
+        require(handles.at("filter")->values[cutoffIndex].load()==1500&&std::abs(hardware.find("filter")->knobs[cutoffIndex]->slider.getValue()-1500)<1e-3,"Panel edit reaches the DSP handle and the rack card");
+        hardware.find("filter")->knobs[cutoffIndex]->slider.setValue(900,sendNotificationSync);
+        require(std::abs(cutoff->slider.getValue()-900)<1e-3,"Rack card edit moves the panel knob");
+        auto valueOf=[&](const std::string& node,const std::string& key){for(const auto& n:document.graph.nodes)if(n.id==node)for(const auto& v:n.parameters)if(v.first==key)return v.second;return -1.f;};
+        require(valueOf("filter","cutoff_hz")==900&&presetDirty,"Panel edits are saved in the patch and mark it modified");
+        for(int pad:{15,16,19,20}){
+            require(loadFactory(pad),"Pad preset loads");drain();
+            require(currentView=="panel"&&synthPanel.isCurated()&&synthPanel.layoutSound()&&!presetDirty,"Pad opens in a sound panel layout");
+            capture(String(pad==15?"panel-ob-swell":pad==16?"panel-prophet":pad==19?"panel-xpander":"panel-drone")+".png");
+        }
+        setSize(1120,800);resized();require(synthPanel.layoutSound(),"Panel layout at minimum window size");capture("panel-minimum.png");setSize(1440,940);resized();
+        require(commit(RackDocument{rackPreset(3),.25f,{}},"source"),"Two-oscillator rack");setView("panel",true);
+        require(!synthPanel.isCurated()&&synthPanel.sectionCount()==5&&synthPanel.layoutSound()&&synthPanel.control("mixer","gain_b")!=nullptr,"Automatic panel: one section per module with parameters");
+        capture("panel-automatic.png");
+        require(document.view=="panel"&&readRack(rackJSON(document)).view=="panel","Manual view switch is saved with the patch");
+        require(commit(starterDocument(8,.25f),"sequence"),"Pattern rack");require(synthPanel.launcherCount()==1,"Sequencer appears as an editor launcher");
+        prefs.set("viewPolicy",String("modular"));require(loadFactory(15),"OB swell");require(currentView=="modular","Always-modular preference overrides the patch view");
+        prefs.set("viewPolicy",String("panel"));require(loadFactory(0),"VA starter");require(currentView=="panel","Always-panel preference overrides the patch view");
+        prefs.set("viewPolicy",String("patch"));
+        // Library: save, overwrite guard, in-place metadata edit, older files, unreadable files.
+        auto padAudio=[](const RackDocument& d){Runtime r(d.graph);std::vector<float> l(48000),rr(48000);NoteEventBlock on;on.begin(quantum);on.push({0,1,61,NoteEventKind::On,60,.7f});
+            for(int i=0;i<48000;i+=quantum)r.render(l.data()+i,rr.data()+i,quantum,Note{},nullptr,i==0?&on:nullptr);l.insert(l.end(),rr.begin(),rr.end());return l;};
+        require(loadFactory(16),"Prophet for saving");showSaveForm();
+        browser.setFormFields("My Prophet sweep","Pad"," Warm, Berlin School, poly_mod","Saved by the native check");capture("browser-save.png");
+        require(browser.saveFromForm(false).empty()&&!browser.isSaving(),"Save to library");
+        const auto savedFile=browser.libraryFolder().getChildFile("My Prophet sweep.optisynth");
+        require(savedFile.existsAsFile()&&presetKey=="user:"+savedFile.getFullPathName().toStdString()&&!presetDirty,"Library file written and becomes the current preset");
+        const auto savedDocument=readRack(JSON::parse(savedFile));
+        require(savedDocument.info.tags==std::vector<std::string>{"warm","berlin-school","poly-mod"}&&savedDocument.view=="panel"&&!savedDocument.panel.sections.empty()&&savedDocument.info.category=="Pad","Saved metadata, view and curated panel");
+        require(padAudio(savedDocument)==padAudio(document),"Saved preset sounds the same");
+        require(saveToLibrary(document.info,true,false)=="exists","An existing name needs confirmation before replacing");
+        browser.filter=PresetFilter{};browser.applyFilter();browser.selectKey(presetKey);
+        browser.setFormFields("My Prophet sweep","Texture","dark, slow","Edited by the native check");
+        require(browser.saveFromForm(false).empty(),"Edit user preset metadata");
+        const auto edited=readRack(JSON::parse(savedFile));
+        require(edited.info.category=="Texture"&&edited.info.tags==std::vector<std::string>{"dark","slow"}&&padAudio(edited)==padAudio(savedDocument)&&edited.panel.sections.size()==savedDocument.panel.sections.size(),"Edited metadata only; same sound and panel");
+        require(document.info.category=="Texture"&&presetDisplay.detail.startsWith("Texture"),"Editing the loaded preset updates the header");
+        auto older=rackJSON({rackPreset(0),.25f,{}});for(const char* k:{"info","view","panel"})older.getDynamicObject()->removeProperty(k);older.getDynamicObject()->setProperty("version",5);
+        require(browser.libraryFolder().getChildFile("Old rack.optisynth").replaceWithText(JSON::toString(older))&&browser.libraryFolder().getChildFile("Broken.optisynth").replaceWithText("{not json"),"Library fixtures");
+        browser.rescan();{PresetFilter f;f.collection="user";require(filterCount(f)==2,"User collection lists readable files only");}
+        {const auto* old=browser.entry("user:"+browser.libraryFolder().getChildFile("Old rack.optisynth").getFullPathName().toStdString());
+         require(old&&old->info.name=="Old rack"&&old->category()=="Uncategorised","Version 5 file listed by file name");
+         updatePresetInfo(old->file,{"Old rack","Template","",{"legacy"}});const auto upgraded=readRack(JSON::parse(browser.libraryFolder().getChildFile("Old rack.optisynth")));
+         require(upgraded.info.tags==std::vector<std::string>{"legacy"}&&render(upgraded.graph)==render(rackPreset(0)),"Older file upgraded with its sound unchanged");}
+        browser.rescan();browser.filter=PresetFilter{};browser.applyFilter();browser.selectKey(presetKey);capture("browser.png");
+        setSize(1120,800);resized();capture("browser-minimum.png");setSize(1440,940);resized();showBrowser(false);
+        // Format: version 6 round trip, version 5 compatibility, strict panel references, pruning.
+        {const auto again=readRack(rackJSON(document));
+         require(again.info.name==document.info.name&&again.info.tags==document.info.tags&&again.view==document.view&&again.panel.sections.size()==document.panel.sections.size()&&again.panel.style==document.panel.style,"Version 6 round trip");
+         auto v5=rackJSON(document);v5.getDynamicObject()->setProperty("version",5);const auto five=readRack(v5);require(five.info.name.empty()&&five.panel.sections.empty(),"Version 5 ignores version 6 fields");
+         auto bad=rackJSON(document);auto* sections=bad.getDynamicObject()->getProperty("panel").getDynamicObject()->getProperty("sections").getArray();
+         (*(*sections)[0].getDynamicObject()->getProperty("controls").getArray())[0].getDynamicObject()->setProperty("parameter","no_such_parameter");
+         bool rejected=false;try{readRack(bad);}catch(const std::exception&){rejected=true;}require(rejected,"Panel control with a missing parameter rejected on read");}
+        require(replaceModule("vco2","osc.sine"),"Replace oscillator B");
+        {bool stale=false,sound=true;for(const auto& section:document.panel.sections)for(const auto& c:section.controls){stale|=c.node=="vco2"&&c.parameter=="saw";sound&=panelControlValid(document,c);}
+         require(!stale&&sound&&synthPanel.control("vco2","transpose")!=nullptr,"Replacing a module prunes stale panel controls and keeps shared ones");}
+        // Zoom.
+        require(loadFactory(15),"OB swell for zoom");setView("modular",true);setZoom(1);
+        require(zoomHost.getWidth()>rackView.getWidth(),"At 100% the 12-module pad scrolls sideways");
+        fitZoom();require(hardware.zoom<1&&zoomHost.getWidth()<=rackView.getWidth()&&zoomHost.getHeight()<=rackView.getHeight(),"Fit shows the whole rack without scrolling");
+        capture("rack-zoom-fit.png");
+        setZoom(.6f);capture("rack-zoom-60.png");
+        setZoom(1.5f);require(zoomHost.getWidth()>rackView.getWidth()&&std::abs(hardware.zoom-1.5f)<1e-6,"150% scrolls");
+        selectNode("reverb");require(rackView.getViewArea().intersects(hardware.scaledBounds(*hardware.find("reverb"))),"Selected module scrolled into view at 150%");
+        capture("rack-zoom-150.png");
+        {Preferences reread(prefs.file());require(std::abs(reread.number("zoom",0)-1.5)<1e-6,"Zoom saved as a preference");}
+        setZoom(1);zoomHost.magnified(1.3f);require(std::abs(hardware.zoom-1.3f)<1e-4,"Pinch zooms the rack");
+        require(stepZoom(1)>hardware.zoom&&stepZoom(-1)<hardware.zoom,"Zoom steps");
+        setZoom(1);setSize(1120,800);resized();fitZoom();require(zoomHost.getWidth()<=rackView.getWidth()&&zoomHost.getHeight()<=rackView.getHeight(),"Fit at minimum window size");
+        capture("rack-zoom-fit-minimum.png");setZoom(1);setSize(1440,940);resized();
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 21-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; zoom fit/60%/150%, scroll-into-view, pinch, steps and saved preference; 13 native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
     struct InputRow { Label label;ComboBox choice;std::vector<Endpoint> ports; };
+    Preferences prefs;PresetBrowser browser;
     Player player;OutputConverter converter;RackDocument document{rackPreset(0),.25f};
     SampleLoader sampleLoader;bool loading=false;
     std::shared_ptr<RouteControls> routeHandles;
@@ -327,19 +483,96 @@ private:
     Registry registry=moduleRegistry();
     MidiKeyboardState keys;MidiKeyboardComponent keyboard;TypingKeyboard typing;
     ListBox rack;ModulePanel editor{"all"};Values panelValues;
-    HardwareRack hardware;Viewport rackView;TextButton focusMode{"Focus module"};TooltipWindow tips{this,700};
+    ZoomHost zoomHost;HardwareRack hardware;Viewport rackView;SynthPanelView synthPanel;TextButton focusMode{"Focus module"};TooltipWindow tips{this,700};
     std::map<std::string,std::shared_ptr<Controls>> handles;
     std::vector<std::unique_ptr<InputRow>> inputs;
     std::vector<std::string> addTypes;std::vector<Endpoint> outputPorts;
     std::vector<int> held;std::set<int> sustained;bool sustain=false;std::string selected;int activeCount=0;
-    ComboBox addChoice,starter,output;
-    ToggleButton keepSequence{"Keep sequence"};
-    TextButton add{"Add module"},remove{"Remove"},save{"Save"},load{"Open"},audio{"Start audio"},silence{"Silence"};
+    ComboBox addChoice,output;
+    TextButton add{"Add module"},remove{"Remove"},audio{"Start audio"},silence{"Silence"};
+    PresetDisplay presetDisplay;
+    TextButton prevPreset{String::fromUTF8("\xe2\x80\xb9")},nextPreset{String::fromUTF8("\xe2\x80\xba")},favouriteButton{starOff},savePreset{"Save"};
+    TextButton panelViewButton{"Panel"},modularViewButton{"Modular"},viewMenu{String::fromUTF8("\xe2\x96\xbe")};
+    TextButton zoomOut{String::fromUTF8("\xe2\x88\x92")},zoomLabel{"100%"},zoomIn{"+"},zoomFit{"Fit"};
+    std::string currentView="modular",presetKey,pendingPreset;bool presetDirty=false;
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
     std::unique_ptr<FileChooser> chooser;
     bool refreshing=false,running=false,openPatternWhenReady=false,openPerformanceWhenReady=false,openReferenceWhenReady=false;
     int bodyBottom() const {return getHeight()-185;}
+    int bodyTop() const {return currentView=="panel"?106:152;}
+    // Request 71: presets, views and zoom.
+    void showBrowser(bool show){
+        if(show){browser.rescan();browser.setCurrent(presetKey);}
+        browser.setVisible(show);presetDisplay.setToggleState(show,dontSendNotification);
+        if(show){browser.toFront(false);browser.grabKeyboardFocus();}else grabKeyboardFocus();
+    }
+    void showSaveForm(){showBrowser(true);browser.showSaveForm(document.info,currentView=="panel");}
+    bool loadFactory(int index){
+        try{auto next=chooseStarter(document,index,browser.keepCurrentSequence());
+            return commit(std::move(next),index==15||index==16||index==19||index==20?"filter":index>=8?"sequence":"source","factory:"+std::to_string(index));
+        }catch(const std::exception& e){message(e.what(),true);return false;}
+    }
+    bool loadUserFile(const File& file){
+        try{if(file.getSize()>2*1024*1024)throw std::runtime_error("Patch file too large");
+            auto next=readRack(JSON::parse(file));if(next.info.name.empty())next.info.name=file.getFileNameWithoutExtension().toStdString();
+            if(!commit(std::move(next),"","user:"+file.getFullPathName().toStdString()))return false;
+            if(!loading)message("Opened "+file.getFileName());return true;
+        }catch(const std::exception& e){message(String(file.getFileName())+": "+e.what(),true);return false;}
+    }
+    void loadPreset(const PresetEntry& e){if(e.factory())loadFactory(e.starter);else loadUserFile(e.file);}
+    void stepPreset(int delta){if(const auto* e=browser.step(presetKey,delta)){const auto copy=*e;loadPreset(copy);}}
+    std::string saveToLibrary(const PresetInfo& info,bool panelView,bool overwrite){
+        const auto file=presetFileFor(browser.libraryFolder(),info.name);
+        if(file.exists()&&!overwrite)return "exists";
+        try{auto saved=document;saved.info=info;saved.view=panelView?"panel":"modular";writePresetFile(file,rackJSON(saved));
+            document.info=info;document.view=saved.view;presetKey="user:"+file.getFullPathName().toStdString();presetDirty=false;
+            browser.rescan();synthPanel.build(document);updatePresetDisplay();
+            message("Saved "+file.getFileName()+" to the preset library"+(document.samples.empty()?"":" - WAV files remain external"));return {};
+        }catch(const std::exception& e){return e.what();}
+    }
+    // byHand: the user chose the view, so the patch remembers it for the next save.
+    void setView(const std::string& view,bool byHand){
+        currentView=view=="panel"?"panel":"modular";if(byHand)document.view=currentView;
+        panelViewButton.setToggleState(currentView=="panel",dontSendNotification);modularViewButton.setToggleState(currentView!="panel",dontSendNotification);
+        resized();repaint();
+    }
+    void applyViewPolicy(){
+        const auto policy=prefs.text("viewPolicy","patch");
+        setView(policy=="panel"||policy=="modular"?policy.toStdString():document.view,false);
+    }
+    void showViewMenu(){
+        PopupMenu menu;const auto policy=prefs.text("viewPolicy","patch");menu.addSectionHeader("When a patch loads, open");
+        menu.addItem(1,"The view saved with the patch",true,policy=="patch");menu.addItem(2,"Always the modular view",true,policy=="modular");menu.addItem(3,"Always the synth panel",true,policy=="panel");
+        menu.showMenuAsync(PopupMenu::Options().withTargetComponent(&viewMenu),[safe=SafePointer<RackSynth>(this)](int result){
+            if(!safe||result==0)return;safe->prefs.set("viewPolicy",String(result==1?"patch":result==2?"modular":"panel"));safe->applyViewPolicy();});
+    }
+    void updatePresetDisplay(){
+        presetDisplay.title=document.info.name.empty()?"Untitled patch":String(document.info.name);presetDisplay.modified=presetDirty;
+        String detail=document.info.category.empty()?String("No category"):String(document.info.category);
+        for(size_t i=0;i<document.info.tags.size()&&i<4;++i)detail+="  /  "+String(document.info.tags[i]);
+        presetDisplay.detail=detail;presetDisplay.repaint();
+        const bool favourite=browser.isFavourite(presetKey);favouriteButton.setButtonText(favourite?starOn:starOff);
+        favouriteButton.setColour(TextButton::textColourOffId,favourite?orange:paper);favouriteButton.setEnabled(!presetKey.empty());
+        browser.setCurrent(presetKey);
+    }
+    static constexpr std::array<float,11> zoomSteps{.5f,.6f,.67f,.75f,.85f,1.f,1.15f,1.3f,1.5f,1.75f,2.f};
+    float stepZoom(int direction) const {
+        if(direction>0){for(float z:zoomSteps)if(z>hardware.zoom+.001f)return z;return zoomSteps.back();}
+        for(auto it=zoomSteps.rbegin();it!=zoomSteps.rend();++it)if(*it<hardware.zoom-.001f)return *it;return zoomSteps.front();
+    }
+    // Keeps the centre of the view steady while the scale changes.
+    void setZoom(float zoom){
+        zoom=std::clamp(zoom,.5f,2.f);const float before=hardware.zoom;const auto view=rackView.getViewArea();
+        const float cx=(view.getCentreX())/before,cy=(view.getCentreY())/before;
+        hardware.zoom=zoom;prefs.set("zoom",double(zoom));arrangeRack();
+        rackView.setViewPosition(int(cx*zoom-view.getWidth()*.5f),int(cy*zoom-view.getHeight()*.5f));
+    }
+    void fitZoom(){setZoom(hardware.fitZoom(rackView.getWidth()-rackView.getScrollBarThickness(),rackView.getHeight()-rackView.getScrollBarThickness()));}
+    void arrangeRack(){
+        const auto size=hardware.arrange(rackView.getWidth()-rackView.getScrollBarThickness(),rackView.getHeight()-rackView.getScrollBarThickness());
+        zoomHost.setSize(size.getWidth(),size.getHeight());zoomLabel.setButtonText(String(int(std::lround(hardware.zoom*100)))+"%");
+    }
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
     void setParameter(const std::string& id,const std::string& key,float value) {
@@ -347,6 +580,8 @@ private:
         for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
         if(auto* p=hardware.find(id)){hardware.values[id][p->current][key]=value;p->setValue(key,value);}
         if(editor.instance==id){panelValues[editor.current][key]=value;editor.setValue(key,value);}
+        synthPanel.setValue(id,key,value);
+        if(!presetDirty){presetDirty=true;updatePresetDisplay();}
         auto handle=handles.find(id);if(handle!=handles.end()&&handle->second){
             auto node=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;});
             if(node!=document.graph.nodes.end()){const auto& ps=panel(node->type).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==key)handle->second->values[i]=value;}
@@ -424,25 +659,30 @@ private:
             if(safe)safe->applySocketChoice(node,port,isOutput,result,endpoints);
         });
     }
-    bool commit(RackDocument next,const std::string& preferred) {
+    // presetLoad: the preset key when this commit loads a preset (applies its view; clears the modified mark).
+    bool commit(RackDocument next,const std::string& preferred,const std::string& presetLoad={}) {
         cancelLoading();const auto target=preferred;
         try {
-            validateRack(next.graph);pruneSampleReferences(next);
-            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;message("Preparing patch... current sound stays ready");return true;}
-            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target);return true;
+            validateRack(next.graph);pruneSampleReferences(next);prunePanel(next);
+            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;pendingPreset=presetLoad;message("Preparing patch... current sound stays ready");return true;}
+            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target,presetLoad);return true;
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
     }
-    void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target) {
+    void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target,const std::string& presetLoad={}) {
         std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
         routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
         player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
         player.tempo.store(document.tempo);tempo.setValue(document.tempo,dontSendNotification);
-        refresh(target);if(matrixWindow)matrixWindow->editor->refresh(document);message("Ready - select a module to edit");
+        if(!presetLoad.empty()){presetKey=presetLoad;presetDirty=false;}else presetDirty=true;
+        refresh(target);if(!presetLoad.empty())applyViewPolicy();
+        if(matrixWindow)matrixWindow->editor->refresh(document);
+        message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");updatePresetDisplay();
     }
-    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;message("Pending patch load cancelled by edit");}}
+    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;pendingPreset.clear();message("Pending patch load cancelled by edit");}}
     void collectSamples(){if(auto r=sampleLoader.take()){
         loading=false;if(!r->error.empty())message(String("Patch unchanged: ")+r->error,true);
-        else install(std::move(r->document),std::move(r->runtime),r->preferred);
+        else install(std::move(r->document),std::move(r->runtime),r->preferred,pendingPreset);
+        pendingPreset.clear();
     }}
     void loadSample(const std::string& id,const File& file){
         auto next=document;
@@ -484,7 +724,7 @@ private:
         };
         remember(editor);
         for(const auto& card:hardware.modules)remember(*card);
-        rebuildHardware();
+        rebuildHardware();synthPanel.build(document);
         selectNode(preferred);
         for(const auto& [id,model]:openEditors)
             if(auto* card=hardware.find(id);card && card->current==model)card->openSequencerWindow();
@@ -494,7 +734,10 @@ private:
         int row=0;for(size_t i=0;i<document.graph.nodes.size();++i)if(document.graph.nodes[i].id==id)row=int(i);
         refreshing=true;rack.selectRow(row);refreshing=false;
         if(!document.graph.nodes.empty()){selected=document.graph.nodes[size_t(row)].id;showSelected();
-            if(auto* p=hardware.find(selected)){const int left=rackView.getViewPositionX();if(p->getX()<left)rackView.setViewPosition(p->getX(),0);else if(p->getRight()>left+rackView.getWidth())rackView.setViewPosition(p->getRight()-rackView.getWidth()+8,0);}}
+            if(auto* p=hardware.find(selected)){const auto r=hardware.scaledBounds(*p);const auto view=rackView.getViewArea();int x=view.getX(),y=view.getY();
+                if(r.getX()<x||r.getWidth()>view.getWidth())x=r.getX();else if(r.getRight()>view.getRight())x=r.getRight()-view.getWidth()+8;
+                if(r.getY()<y||r.getHeight()>view.getHeight())y=r.getY();else if(r.getBottom()>view.getBottom())y=r.getBottom()-view.getHeight()+8;
+                rackView.setViewPosition(x,y);}}
     }
     void showSelected() {
         auto it=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==selected;});
@@ -536,12 +779,12 @@ private:
     }
     void selectedRowsChanged(int row) override {if(!refreshing&&row>=0&&row<getNumRows()){selected=document.graph.nodes[size_t(row)].id;showSelected();}}
     void chooseFile(bool writing) {
-        chooser=std::make_unique<FileChooser>(writing?"Save Optisynth rack":"Open Optisynth patch",File::getSpecialLocation(File::userDocumentsDirectory),"*.optisynth");
+        chooser=std::make_unique<FileChooser>(writing?"Export Optisynth patch":"Import Optisynth patch",File::getSpecialLocation(File::userDocumentsDirectory),"*.optisynth");
         const int flags=writing?FileBrowserComponent::saveMode|FileBrowserComponent::canSelectFiles|FileBrowserComponent::warnAboutOverwriting:FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles;
         chooser->launchAsync(flags,[safe=SafePointer<RackSynth>(this),writing](const FileChooser& c){
             if(!safe)return;auto f=c.getResult();if(f==File())return;
             try{if(writing){f=f.withFileExtension("optisynth");if(!f.replaceWithText(JSON::toString(rackJSON(safe->document))))throw std::runtime_error("Could not save file");safe->message("Saved "+f.getFileName()+(safe->document.samples.empty()?"":" - WAV files remain external"));}
-                else{if(f.getSize()>2*1024*1024)throw std::runtime_error("Patch file too large");if(safe->commit(readRack(JSON::parse(f)),"")&&!safe->loading)safe->message("Opened "+f.getFileName());}}
+                else safe->loadUserFile(f);}
             catch(const std::exception& e){safe->message(e.what(),true);}
         });
     }

@@ -727,3 +727,19 @@ dont make blanket assumptions and then run tests on them. Init should give a goo
 ```
 
 Correction: stop applying guessed overrides and probing them by trial. Read each init preset as the description of that synth's routing and voice settings, and derive the test configuration from it.
+
+## 71 — Scalable modular view, a synth-panel view, and a richer preset browser
+
+```text
+Improve the UI, allow scaling of modular view, an alternate 'synth panel' view dependent on patch or preference.
+Improve and enhance preset view, with tags, categories, favourites
+```
+
+Claude session, 20 November 2026. Four parts:
+- General UI improvement of the standalone app.
+- Zoom (scaling) for the modular rack view.
+- A second "synth panel" view: a fixed, hardware-style front panel of the
+  patch's playing controls, with no sockets. Which view opens is chosen by the
+  patch, or overridden by a user preference.
+- A preset browser to replace the flat starter menu: categories, tags,
+  favourites, search, and saving into a library.
