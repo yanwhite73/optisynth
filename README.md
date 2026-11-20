@@ -119,6 +119,9 @@ output. Unrouted modules remain editable without consuming DSP. Patches use
 `.optisynth` JSON files. No audio input is opened. Starting audio enables available hardware MIDI inputs;
 no MIDI output is sent.
 
+Once an update is delivered, quit Optisynth and reopen it from the same Dock icon.
+You can keep using the current session until you are ready to quit.
+
 Builds compile in `build/app-candidate`. `tools/deliver_app.py` verifies and copies
 the result to the same app location above, preserving the previous app under
 `build/app-archive`. Fallback builds use this same delivery step. Temporary build

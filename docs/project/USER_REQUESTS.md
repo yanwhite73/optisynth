@@ -812,3 +812,9 @@ It is not updating
 ```
 
 Delivered at the existing pinned path. See STATUS for independent readback.
+
+## 78 — Quit and reopen to use updates
+
+```text
+can we prevent annoyances like this happening in future? Every time the synth is updated I expect to be able to just quit and reopen
+```

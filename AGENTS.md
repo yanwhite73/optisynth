@@ -32,6 +32,14 @@ Keep the installed .app directory and its filesystem identity in place on update
 Copy the previous version to the archive, exchange only Contents, touch the
 bundle, and refresh Launch Services for that exact Release path. For icon
 changes inspect the icon returned by NSWorkspace for the installed app.
+Install each finished standalone update before reporting it ready, including
+while an earlier version is open. The signed Contents exchange applies to the
+next launch. Leave the user's running process and musical session under their
+control. Quit and reopen from the same Dock tile is the entire activation step.
+Verify the version and executable hash on disk against the delivered candidate.
+An exit watcher, a pending candidate or a request to confirm quitting does not
+fulfil delivery. Exercise this contract with tools/check_app_delivery.py when
+changing the updater.
 Fallback compilation must use the same delivery helper. A failed build/copy must
 preserve the previous delivery. Never label a preview as UI-qualified, and never
 launch, quit or replace a running user's process as part of delivery.

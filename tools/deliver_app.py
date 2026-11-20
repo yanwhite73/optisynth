@@ -49,25 +49,16 @@ def swap_contents(staged, installed):
         raise OSError(err, os.strerror(err))
 
 
-def running_from_release():
-    """PIDs of processes executing from the delivered app (AGENTS: never replace a running user's app)."""
-    import subprocess
-    out = subprocess.run(['/usr/bin/pgrep', '-f', str(APP / 'Contents/MacOS/')], capture_output=True, text=True).stdout
-    return [int(x) for x in out.split()]
-
-
 def copy_delivery(source, note):
-    running = running_from_release()
-    if running:
-        raise RuntimeError(f'Optisynth is running from the delivery path (pid {running}); quit it before delivery. '
-                           'The candidate stays in build/app-candidate.')
+    # The synth executable is self-contained. Exchange complete signed trees
+    # so macOS keeps the old executable mapping alive until the user quits.
     source = source.resolve(strict=True)
     if source == APP.resolve():
         raise ValueError('Build in staging; do not overwrite the delivered app in place')
     details = inspect(source)
     RELEASE.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
-    # Copy and verify BEFORE moving the previous app. A failed copy leaves it intact.
+    # Finish the staged copy and verification before publishing it at the launch path.
     with tempfile.TemporaryDirectory(prefix='.app-delivery-', dir=RELEASE) as temporary:
         staged = Path(temporary) / 'Optisynth.app'
         shutil.copytree(source, staged, symlinks=True)

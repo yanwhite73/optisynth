@@ -1031,3 +1031,19 @@ the signed executable at the user's pinned path.
 The process had exited by this check. The foreground helper installed 0.0.17 on
 20 November at 10:30 UTC. Readback confirmed the bundle version, matching
 candidate binary SHA-256, unchanged folder ID and matching Dock URL.
+
+## Request 78 — updates ready on the next launch
+
+The 0.0.17 delay came from a process check added to the delivery helper. It
+treated an open session as a reason to withhold the signed update. Yan then had
+to coordinate quitting with the installer. Removed that check from the shared
+normal and fallback delivery path. A finished update is installed and verified
+at the existing pinned path while the old process continues.
+
+The updater prepares a separate signed tree and atomically exchanges Contents.
+It retains the app folder ID and keeps the running executable's file mapping
+intact. On 20 November, the delivery regression launched a signed v1 test app,
+installed signed v2 while v1 waited for input, then verified v1 still answered
+as v1 and exited normally. Reopening the same executable path immediately ran
+v2. The existing real-bundle signature, backup and rollback checks passed too.
+The installed synth remains the verified 0.0.17 binary.

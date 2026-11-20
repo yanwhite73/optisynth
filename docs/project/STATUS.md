@@ -7,6 +7,9 @@ pinned Release path matches the checked candidate (SHA-256
 `a8a218152977ba5f21c0eb76dfa9573a5ab76d831c02ff3dc3cb645b9dd8b437`).
 The Dock URL resolves to the same folder, whose filesystem ID stayed 176340452.
 
+Future standalone deliveries install while the old session runs. Once an update is
+reported ready, quit and reopen from the same Dock icon to use it (request 78).
+
 **Changes:**
 - The transform zoom is replaced by a JUCE Grid/FlexBox density layout. Text
   stays fixed; knob size and spacing change.
