@@ -1019,3 +1019,15 @@ obvious?"
   injected mouse events for buttons.
 - **Delivery guard.** `deliver_app.py` refuses while a process runs from the
   Release app. Builds for testing go to `build/app-candidate` only.
+
+## Request 77 — missed installation after the watcher stopped
+
+At preflight the Release receipt was 0.0.16 while the checked candidate was
+0.0.17. Yan had to report the missing update again. The earlier watcher had
+stopped when its owning turn ended. Check the running process afresh and keep
+any necessary wait in the active turn. Only report delivery after reading back
+the signed executable at the user's pinned path.
+
+The process had exited by this check. The foreground helper installed 0.0.17 on
+20 November at 10:30 UTC. Readback confirmed the bundle version, matching
+candidate binary SHA-256, unchanged folder ID and matching Dock URL.

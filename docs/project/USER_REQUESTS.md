@@ -797,3 +797,18 @@ Why do I have to explain everything that should be obvious?
 
 Recorded with request 72's lessons: test as a player (keyboard sounds, arrows,
 readable text, presets where the user saves them), not only bounds and recall.
+
+## 77 — Install the pending 0.0.17 update at the existing location
+
+```text
+I DONT SEE ANY CHANGE. HAVE YOU MOVED THE BUILD AGAIN?
+```
+
+Yan supplied the prior delivery conversation, including its cancelled watcher
+and the report that 0.0.16 was still installed.
+
+```text
+It is not updating
+```
+
+Delivered at the existing pinned path. See STATUS for independent readback.

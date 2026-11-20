@@ -2,11 +2,10 @@
 
 ## 0.0.17 readable density layout, rows, preset/arrow/keyboard fixes — requests 72–73
 
-**Candidate only.** It is built and passes the native checks in
-`build/app-candidate`. It is **not delivered**, because Yan's 0.0.16 app was
-running from the delivery path. `tools/deliver_app.py` now refuses delivery
-while the app runs. Next action: when Optisynth is closed, run
-`python3 tools/deliver_app.py build/app-candidate/Optisynth.app --qualification ...`.
+**Installed 20 November at 10:30 UTC.** The signed 0.0.17 executable at the
+pinned Release path matches the checked candidate (SHA-256
+`a8a218152977ba5f21c0eb76dfa9573a5ab76d831c02ff3dc3cb645b9dd8b437`).
+The Dock URL resolves to the same folder, whose filesystem ID stayed 176340452.
 
 **Changes:**
 - The transform zoom is replaced by a JUCE Grid/FlexBox density layout. Text
