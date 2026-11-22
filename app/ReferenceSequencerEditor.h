@@ -1,4 +1,5 @@
 #pragma once
+#include "PlayingKeys.h"
 #include <JuceHeader.h>
 #include "../src/modular/reference_sequencers.h"
 #include <map>
@@ -98,7 +99,7 @@ public:
     void mouseDrag(const juce::MouseEvent& e)override{if(drawingGrid_)paintCell(e.position);if(drawingLane_)paintLane(e.position);if(drawingRing_)rotateRing(e.position);}
     void mouseUp(const juce::MouseEvent&)override{drawingGrid_=drawingLane_=drawingRing_=false;finish();}
     void mouseWheelMove(const juce::MouseEvent& e,const juce::MouseWheelDetails& w)override{if(!orbit_&&grid().contains(e.position)&&std::abs(w.deltaX)>std::abs(w.deltaY)){page_=w.deltaX<0?1:0;repaint();}else juce::Component::mouseWheelMove(e,w);}
-    bool keyPressed(const juce::KeyPress& k)override{if(k.getModifiers().isCommandDown()&&(k.getTextCharacter()=='z'||k.getTextCharacter()=='Z')){if(k.getModifiers().isShiftDown())redo();else undo();return true;}return false;}
+    bool keyPressed(const juce::KeyPress& k)override{if(k.getModifiers().isCommandDown()&&(k.getTextCharacter()=='z'||k.getTextCharacter()=='Z')){if(k.getModifiers().isShiftDown())redo();else undo();return true;}return optiui::handlesPlayingKey(k);}
 private:
     std::string type_;const Panel& spec_;std::shared_ptr<Controls> controls_;bool orbit_,active_=false,refreshing_=false,gesture_=false,drawingGrid_=false,drawingLane_=false,drawingRing_=false,strokeErase_=false;
     int page_=0,step_=0,row_=0,ring_=0,tool_=0,brushValue_=100,layer_=0;

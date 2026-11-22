@@ -35,10 +35,11 @@ public:
         addChildComponent(browser);
         rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
         hardware.knob=std::clamp(int(prefs.number("rackKnob",44)),densityKnobs.front(),densityKnobs.back());
-        hardware.magnified=[this](float scale){if(currentView!="panel"&&std::abs(scale-1.f)>.08f)setDensity(stepDensity(scale>1?1:-1));};
+        synthPanel.preferKnob(std::clamp(int(prefs.number("panelKnob",0)),0,72));
+        hardware.magnified=[this](float scale){pinch(scale);};
         zoomOut.onClick=[this]{setDensity(stepDensity(-1));};zoomIn.onClick=[this]{setDensity(stepDensity(1));};zoomLabel.onClick=[this]{setDensity(44);};zoomFit.onClick=[this]{fitDensity();};
-        zoomOut.setTooltip("Denser rack: smaller knobs and spacing; text keeps its size (Cmd -, or pinch)");zoomIn.setTooltip("Roomier rack (Cmd =)");
-        zoomLabel.setTooltip("Back to Normal (Cmd 0)");zoomFit.setTooltip("Largest knob size that shows the whole rack");
+        zoomOut.setTooltip("Denser controls: smaller knobs and spacing; text keeps its size (Cmd -, or pinch)");zoomIn.setTooltip("Roomier controls (Cmd =)");
+        zoomLabel.setTooltip("Back to Normal (Cmd 0)");zoomFit.setTooltip("Fit controls to the available space");
         prevPreset.onClick=[this]{stepPreset(-1);};nextPreset.onClick=[this]{stepPreset(1);};
         prevPreset.setTooltip("Previous preset in the browser's current list");nextPreset.setTooltip("Next preset in the browser's current list");
         favouriteButton.onClick=[this]{browser.toggleFavourite(presetKey);updatePresetDisplay();};favouriteButton.setTooltip("Favourite this preset");
@@ -145,11 +146,12 @@ public:
         status.setBounds(797,y2-6,std::max(100,w-797-24),44);
         // Rack tools (modular view only).
         const int y3=110;
-        for(auto* c:std::initializer_list<juce::Component*>{&addChoice,&add,&remove,&output,&matrixButton,&focusMode,&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setVisible(modular);
+        for(auto* c:std::initializer_list<juce::Component*>{&addChoice,&add,&remove,&output,&matrixButton,&focusMode})c->setVisible(modular);
         addChoice.setBounds(24,y3,190,30);add.setBounds(222,y3,90,30);remove.setBounds(318,y3,84,30);output.setBounds(474,y3,200,30);
-        zoomFit.setBounds(w-24-48,y3,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,y3,30,30);zoomLabel.setBounds(zoomIn.getX()-76,y3,76,30);zoomOut.setBounds(zoomLabel.getX()-30,y3,30,30);
+        const int zoomY=modular?y3:y2;
+        zoomFit.setBounds(w-24-48,zoomY,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,zoomY,30,30);zoomLabel.setBounds(zoomIn.getX()-76,zoomY,76,30);zoomOut.setBounds(zoomLabel.getX()-30,zoomY,30,30);
+        if(!modular)status.setBounds(797,y2-6,std::max(0,zoomOut.getX()-805),44);
         focusMode.setBounds(zoomOut.getX()-16-124,y3,124,30);matrixButton.setBounds(focusMode.getX()-6-80,y3,80,30);
-        const bool zoomable=modular&&!focused;for(auto* c:{&zoomOut,&zoomLabel,&zoomIn,&zoomFit})c->setEnabled(zoomable);
         // Body.
         rack.setBounds(24,top+5,220,bottom-top-5);editor.setBounds(260,top+5,right-276,bottom-top-5);
         rack.setVisible(focused);editor.setVisible(focused);routes.setVisible(focused);rackView.setVisible(modular&&!focused);
@@ -161,16 +163,17 @@ public:
         gain.setBounds(98,getHeight()-158,220,27);keyboardHelp.setBounds(525,getHeight()-163,getWidth()-549,38);
         keyboard.setBounds(24,getHeight()-113,getWidth()-48,89);keyboard.setKeyWidth(float(getWidth()-48)/43.f);
     }
+    void mouseMagnify(const MouseEvent&,float scale) override {pinch(scale);}
     bool keyPressed(const KeyPress& key) override {
         // Left / right step presets like the header arrows (browser closed, no modifiers).
         if(!browser.isVisible()&&key.getModifiers().isAnyModifierKeyDown()==false){
             if(key==KeyPress::leftKey){stepPreset(-1);return true;}
             if(key==KeyPress::rightKey){stepPreset(1);return true;}
         }
-        if(!key.getModifiers().isCommandDown())return false;
+        if(!key.getModifiers().isCommandDown())return !browser.isVisible() && optiui::handlesPlayingKey(key);
         const int code=key.getKeyCode();
         if(code=='S'||code=='s'){showSaveForm();return true;}
-        if(currentView=="panel"||focusMode.getToggleState())return false;
+        if(browser.isVisible())return false;
         if(code=='='||code=='+'){setDensity(stepDensity(1));return true;}
         if(code=='-'||code=='_'){setDensity(stepDensity(-1));return true;}
         if(code=='0'){setDensity(44);return true;}
@@ -180,6 +183,13 @@ public:
     void snapshots(const File& directory) {
         stopTimer();directory.createDirectory();
         auto require=[](bool ok,const char* why){if(!ok)throw std::runtime_error(why);};
+        TextEditor typingField;
+        for(char c:std::string(TypingKeyboard::keys)+"ZX")
+            require(optiui::handlesPlayingKey(KeyPress(c),true,this),"Performance note or octave key fell through to macOS");
+        require(!optiui::handlesPlayingKey(KeyPress('A'),false,this)
+                && !optiui::handlesPlayingKey(KeyPress('A'),true,&typingField)
+                && !optiui::handlesPlayingKey(KeyPress('S',ModifierKeys::commandModifier,0),true,this)
+                && !optiui::handlesPlayingKey(KeyPress('B'),true,this),"Typing gate consumed text, shortcut or unmapped key");
         require(commit({rackPreset(3),.25f},"source"),"Load two-oscillator starter");
         const auto second=handles.at("second")->values[0].load();
         editor.knobs[0]->slider.setValue(2,sendNotificationSync);
@@ -405,6 +415,12 @@ public:
         presetKey.clear();stepPreset(1);
         require(presetKey=="factory:16"&&currentView=="panel"&&synthPanel.isVisible()&&!rackView.isVisible(),"Header next loads the first favourite in its saved panel view");
         require(synthPanel.isCurated()&&synthPanel.layoutSound(),"Prophet panel layout");
+        zoomLabel.onClick();const int normalPanelHeight=synthPanel.control("filter","cutoff_hz")->getHeight();
+        zoomOut.onClick();
+        require(zoomOut.isShowing() && !zoomOut.getBounds().intersects(status.getBounds()) && synthPanel.knobSize()==38
+                && synthPanel.control("filter","cutoff_hz")->getHeight()<normalPanelHeight && synthPanel.layoutSound(),"Panel minus shrinks real controls");
+        zoomIn.onClick();require(synthPanel.knobSize()==44,"Panel plus restores density");
+        zoomFit.onClick();require(synthPanel.automaticDensity()&&synthPanel.layoutSound(),"Panel Fit restores responsive layout");
         auto* cutoff=synthPanel.control("filter","cutoff_hz");require(cutoff!=nullptr,"Panel shows the filter cutoff");
         const auto& filterParameters=panel("analog.filter").parameters;
         const size_t cutoffIndex=size_t(std::find_if(filterParameters.begin(),filterParameters.end(),[](const Parameter& x){return x.id=="cutoff_hz";})-filterParameters.begin());
@@ -484,6 +500,10 @@ public:
         setDensity(60);capture("rack-large.png");
         selectNode("reverb");require(rackView.getViewArea().intersects(hardware.find("reverb")->getBounds()),"Selected module scrolled into view");
         {Preferences reread(prefs.file());require(int(reread.number("rackKnob",0))==60,"Density saved as a preference");}
+        for(int i=0;i<10;++i)hardware.magnified(.99f);
+        require(hardware.knob==52,"Incremental trackpad pinch reduces rack density");
+        for(int i=0;i<10;++i)hardware.magnified(1.01f);
+        require(hardware.knob==60,"Incremental outward pinch restores density");
         hardware.magnified(1.3f);require(hardware.knob==60,"Pinch past the largest size stays there");hardware.magnified(.7f);require(hardware.knob==52,"Pinch in steps density down");
         setSize(1120,800);resized();fitDensity();capture("rack-fit-minimum.png");setSize(1440,940);resized();setDensity(44);
         // Rows chosen by hand, saved with the patch.
@@ -585,6 +605,7 @@ private:
     }
     // byHand: the user chose the view, so the patch remembers it for the next save.
     void setView(const std::string& view,bool byHand){
+        pinchDistance=0;
         currentView=view=="panel"?"panel":"modular";if(byHand)document.view=currentView;
         panelViewButton.setToggleState(currentView=="panel",dontSendNotification);modularViewButton.setToggleState(currentView!="panel",dontSendNotification);
         if(status.getText().startsWith("Ready"))message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");
@@ -613,19 +634,50 @@ private:
     static constexpr std::array<int,5> densityKnobs{32,38,44,52,60};
     static String densityName(int knob){return knob<=32?"Compact":knob<=38?"Snug":knob<=44?"Normal":knob<=52?"Roomy":"Large";}
     int stepDensity(int direction) const {
-        if(direction>0){for(int k:densityKnobs)if(k>hardware.knob)return k;return densityKnobs.back();}
-        for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it)if(*it<hardware.knob)return *it;return densityKnobs.front();
+        const bool panel=currentView=="panel";
+        const int current=panel?synthPanel.knobSize():hardware.knob;
+        if(panel && direction>0 && current>=60)return 72;
+        if(panel && direction<0 && current>60)return 60;
+        if(direction>0){for(int k:densityKnobs)if(k>current)return k;return densityKnobs.back();}
+        for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it)if(*it<current)return *it;return densityKnobs.front();
     }
-    void setDensity(int knob){hardware.knob=std::clamp(knob,densityKnobs.front(),densityKnobs.back());prefs.set("rackKnob",hardware.knob);arrangeRack();}
+    float pinchDistance=0;
+    double lastPinchMs=0;
+    void pinch(float scale){
+        if(browser.isVisible() || !(scale>0))return;
+        const auto now=Time::getMillisecondCounterHiRes();
+        const float delta=std::log(scale);
+        if(now-lastPinchMs>350 || delta*pinchDistance<0)pinchDistance=0;
+        lastPinchMs=now;pinchDistance+=delta;
+        if(std::abs(pinchDistance)<0.08f)return;
+        setDensity(stepDensity(pinchDistance>0?1:-1));pinchDistance=0;
+    }
+    void setDensity(int knob){
+        if(currentView=="panel"){
+            synthPanel.preferKnob(knob);prefs.set("panelKnob",knob);
+            zoomLabel.setButtonText(knob?String(knob)+" px":"Auto");
+        }else{
+            hardware.knob=std::clamp(knob,densityKnobs.front(),densityKnobs.back());prefs.set("rackKnob",hardware.knob);
+            editor.knob=hardware.knob;editor.resized();arrangeRack();
+        }
+    }
     // Largest density at which the whole rack is visible without scrolling (else the most compact).
     void fitDensity(){
+        if(currentView=="panel"){setDensity(0);return;}
+        if(focusMode.getToggleState()){
+            for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it){
+                editor.knob=*it;const auto size=editor.naturalSize();
+                if(editor.getLocalBounds().contains(size)){setDensity(*it);return;}
+            }
+            setDensity(densityKnobs.front());return;
+        }
         const int w=rackView.getWidth()-rackView.getScrollBarThickness(),h=rackView.getHeight()-rackView.getScrollBarThickness();int chosen=densityKnobs.front();
         for(auto it=densityKnobs.rbegin();it!=densityKnobs.rend();++it){hardware.knob=*it;const auto size=hardware.arrange(w);if(size.getWidth()<=w&&size.getHeight()<=h){chosen=*it;break;}}
         setDensity(chosen);
     }
     void arrangeRack(){
         hardware.rows=document.rows;hardware.arrange(rackView.getWidth()-rackView.getScrollBarThickness());
-        zoomLabel.setButtonText(densityName(hardware.knob));
+        zoomLabel.setButtonText(currentView=="panel"?(synthPanel.automaticDensity()?"Auto":String(synthPanel.knobSize())+" px"):densityName(hardware.knob));
     }
     // Rows: start a new row here, join the row above, move left / right, or wrap automatically.
     void showRowMenu(const std::string& id){
@@ -827,7 +879,7 @@ private:
         if(editor.sequencerWindowOpen())
             if(auto* card=hardware.find(editor.instance);card && card->current==editor.current && !card->sequencerWindowOpen())
                 card->openSequencerWindow();
-        editor.instance=node.id;editor.knob=60;
+        editor.instance=node.id;editor.knob=hardware.knob;
         editor.show(node.type,panelValues,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});bindSequencePanel(editor);
         bindSamplePanel(editor,node.id);
         bindSpectralPanel(editor,node.id);
@@ -913,16 +965,14 @@ private:
         if(openPerformanceWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->performance){card->performance->openEditor();openPerformanceWhenReady=false;}}
         updateTransport();
         auto* focus=juce::Component::getCurrentlyFocusedComponent();
-        bool textEditing=false;for(auto* c=focus;c;c=c->getParentComponent())if(dynamic_cast<TextEditor*>(c)||dynamic_cast<ComboBox*>(c))textEditing=true;
-        const auto mods=ModifierKeys::getCurrentModifiersRealtime();
-        const bool caps=(CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState)&kCGEventFlagMaskAlphaShift)!=0;
         bool noteFocus=hasKeyboardFocus(true)||(editor.sequence&&editor.sequence->performanceHasFocus());
         for(const auto& card:hardware.modules)noteFocus|=card->sequence&&card->sequence->performanceHasFocus();
         noteFocus|=editor.performance&&editor.performance->hasEditorFocus();
         noteFocus|=editor.referenceSequence&&editor.referenceSequence->hasEditorFocus();
         for(const auto& card:hardware.modules)noteFocus|=card->referenceSequence&&card->referenceSequence->hasEditorFocus();
         for(const auto& card:hardware.modules)noteFocus|=card->performance&&card->performance->hasEditorFocus();
-        const bool enabled=caps&&Process::isForegroundProcess()&&noteFocus&&!textEditing&&!mods.isCommandDown()&&!mods.isCtrlDown()&&!mods.isAltDown();
+        const bool enabled=noteFocus && Process::isForegroundProcess() && !browser.isVisible()
+            && optiui::canPlayTypingKeys(optiui::capsLockOn(), ModifierKeys::getCurrentModifiersRealtime(), focus);
         std::array<bool,18> down{};for(size_t i=0;i<down.size();++i)down[i]=KeyPress::isKeyCurrentlyDown(TypingKeyboard::keys[i]);
         typing.update(enabled,down,KeyPress::isKeyCurrentlyDown('Z'),KeyPress::isKeyCurrentlyDown('X'),[this](int n){keys.noteOn(1,n,.8f);},[this](int n){keys.noteOff(1,n,0);});
         MidiBuffer discard;keys.processNextMidiBuffer(discard,0,1,false);

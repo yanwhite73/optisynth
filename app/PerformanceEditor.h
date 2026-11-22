@@ -1,4 +1,5 @@
 #pragma once
+#include "PlayingKeys.h"
 #include <JuceHeader.h>
 #include "../src/modular/performance.h"
 #include "../src/modular/pattern.h"
@@ -172,7 +173,7 @@ public:
     bool keyPressed(const juce::KeyPress& key)override{
         if(key.getModifiers().isCommandDown()){const auto c=key.getTextCharacter();if(c=='z'||c=='Z'){if(key.getModifiers().isShiftDown())redo();else undo();return true;}}
         if(key.getKeyCode()==juce::KeyPress::leftKey||key.getKeyCode()==juce::KeyPress::rightKey){selectStep(selected_+(key.getKeyCode()==juce::KeyPress::rightKey?1:-1));return true;}
-        if(key.getKeyCode()==juce::KeyPress::deleteKey||key.getKeyCode()==juce::KeyPress::backspaceKey){selectedEdit([](PerformanceStep& s){s.on=false;});return true;}return false;
+        if(key.getKeyCode()==juce::KeyPress::deleteKey||key.getKeyCode()==juce::KeyPress::backspaceKey){selectedEdit([](PerformanceStep& s){s.on=false;});return true;}return optiui::handlesPlayingKey(key);
     }
 private:
     PerformanceData data_,before_;

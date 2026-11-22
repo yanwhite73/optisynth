@@ -1,4 +1,5 @@
 #pragma once
+#include "PlayingKeys.h"
 #include <JuceHeader.h>
 #include "../src/modular/pattern.h"
 #include <map>
@@ -131,7 +132,7 @@ public:
     bool keyPressed(const juce::KeyPress& key)override{
         if(key.getModifiers().isCommandDown()){const auto c=key.getTextCharacter();if(c=='z'||c=='Z'){if(key.getModifiers().isShiftDown())redo();else undo();return true;}if(c=='c'){copy();return true;}if(c=='v'){paste();return true;}if(c=='a'){selection_.clear();for(int i=first();i<=last();++i)selection_.insert(i);refresh();return true;}}
         if(key.getKeyCode()==juce::KeyPress::leftKey||key.getKeyCode()==juce::KeyPress::rightKey){selectStep(selected_+(key.getKeyCode()==juce::KeyPress::rightKey?1:-1));return true;}
-        if(key.getKeyCode()==juce::KeyPress::deleteKey||key.getKeyCode()==juce::KeyPress::backspaceKey){editSelection(optisynth::On,0);return true;}return false;
+        if(key.getKeyCode()==juce::KeyPress::deleteKey||key.getKeyCode()==juce::KeyPress::backspaceKey){editSelection(optisynth::On,0);return true;}return optiui::handlesPlayingKey(key);
     }
 private:
     Values values_,before_,snapshotValues_;std::vector<Values> undoStack_,redoStack_;

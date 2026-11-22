@@ -1047,3 +1047,23 @@ installed signed v2 while v1 waited for input, then verified v1 still answered
 as v1 and exited normally. Reopening the same executable path immediately ran
 v2. The existing real-bundle signature, backup and rollback checks passed too.
 The installed synth remains the verified 0.0.17 binary.
+
+## Request 79 — macOS typing alert and sizing controls
+
+Playing a Caps Lock note generated audio through polling, but the editor still
+returned the native key-down to AppKit as unhandled. The Mac JUCE peer passes
+that event to its superclass. The main synth and three floating performance
+editors now claim mapped keys including repeats, leaving note edges with the
+existing poller. The native regression covers the full mapping, Caps Lock off,
+a text field, an unused letter and a command shortcut. The listening result
+still needs confirmation in the user's audio setup.
+
+The panel hid the size buttons and the focused module disabled them. On the Mac
+trackpad small individual magnifications also fell below the old threshold.
+The buttons now operate on the visible layout. Panel groups wrap columns to
+available width, single-row sections use their actual height and Fit follows
+window size. Incremental magnifications accumulate. Screen captures from the
+native checks show control geometry at 1440×940 and 1120×800. Exercise panel
+buttons directly as well as gestures and key handling in future UI checks.
+The installed bundle retained folder ID 176340452. Native receipts and
+screenshots are in `build/ui-review-79`.

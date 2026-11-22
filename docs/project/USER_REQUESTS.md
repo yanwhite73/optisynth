@@ -818,3 +818,18 @@ Delivered at the existing pinned path. See STATUS for independent readback.
 ```text
 can we prevent annoyances like this happening in future? Every time the synth is updated I expect to be able to just quit and reopen
 ```
+
+## 79 — Keyboard alert and scaling
+
+```text
+claude did absolutely terrible work on this. The scaling doesnt work at all
+THE KEYBOARD
+```
+
+```text
+now works but with system pops
+```
+
+```text
+pinch? Im not using an ipad?!
+```

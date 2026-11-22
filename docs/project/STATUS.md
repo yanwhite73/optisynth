@@ -1,4 +1,18 @@
-# Optisynth status — 20 November 2026
+# Optisynth status — 22 November 2026
+
+## 0.0.18 Mac keyboard and sizing controls
+
+Installed at the pinned Release app on 22 November. Quit and reopen from the
+Dock. The panel, modular rack and focused module now expose the size buttons.
+Use **−** or **+** to adjust controls with fixed text sizes, or **Fit** to size
+them to the available space. The panel remembers its own density.
+
+Caps Lock note and octave presses are consumed by the instrument and the three
+floating performance editors. The native suite checked the mapping and its
+exceptions, control geometry and preset behaviour. Normal and minimum panel
+captures were inspected. Audible confirmation on the user's Mac is outstanding.
+The installed executable matched the candidate at SHA-256
+`bb6a6dc6a323d4408903bd3bef2d2a93ef38d0dad8c3f06baeea3e333be6bf91`.
 
 ## 0.0.17 readable density layout, rows, preset/arrow/keyboard fixes — requests 72–73
 
