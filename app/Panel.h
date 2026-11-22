@@ -120,6 +120,18 @@ struct Control : juce::Component {
             toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
         }
     }
+    String patchedFmLabel;
+    void showFilterFmSource(const GraphSpec& graph,const std::string& node){
+        const auto link=std::find_if(graph.connections.begin(),graph.connections.end(),[&](const auto& c){
+            return c.destination.node==node && c.destination.port=="fm";
+        });
+        const bool patched=link!=graph.connections.end();
+        const String tip=patched?"Filter FM source: "+String(link->source.node)+"."+String(link->source.port)
+                                :"Patch an audio output to the OB filter FM input in Modular.";
+        if(patchedFmLabel.isEmpty())patchedFmLabel=label.getText();
+        label.setText(patched?patchedFmLabel:"FM / NO INPUT",dontSendNotification);
+        label.setTooltip(tip);slider.setTooltip(tip);slider.setEnabled(patched);setAlpha(patched?1.f:.6f);
+    }
     void setValue(float v){slider.setValue(v,dontSendNotification);toggle.setToggleState(v>=.5f,dontSendNotification);}
     ~Control() override {slider.setLookAndFeel(nullptr);}
     // Widest text this control must show: its label and its current value.
@@ -279,6 +291,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         resized();
     }
     void setConnections(const GraphSpec& graph) {
+        if(current=="analog.filter")if(auto* fm=control("fm_depth"))fm->showFilterFmSource(graph,instance);
         for(auto& j:jacks){j->connected=false;String links;
             for(const auto& c:graph.connections){const auto& e=j->output?c.source:c.destination;if(e.node==instance&&e.port==j->port.id){j->connected=true;const auto& other=j->output?c.destination:c.source;links+="\n"+String(other.node)+"."+String(other.port);}}
             if(j->output)for(const auto& c:graph.modulations)if(c.source.node==instance&&c.source.port==j->port.id){j->connected=true;links+="\nModulates "+String(c.destination.node)+"."+String(c.destination.port);}

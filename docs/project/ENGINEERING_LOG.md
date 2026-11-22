@@ -1085,3 +1085,49 @@ the editor and the Hold switch changed the live DSP parameter in both directions
 Normal and minimum panel captures and stereo audio are in `build/ui-review-81`.
 Hardware listening comparisons remain open. Implementation boundaries and
 audition instructions are in the [device study](../research/modules/GATE_AND_LOOP_DELAY.md).
+
+## Request 82 — envelope in the playable voice chain
+
+In 0.0.19 the two new percussive voices went straight to the voice mixer.
+Reed's filter envelope shaped brightness, and Glass relied on resonator decay.
+Neither patch gave the player a four-stage amplitude envelope. The string
+patch had one, but only exposed attack and release.
+
+All three factory panels now group the four stages under AMP ADSR. Reed and
+Glass use a per-voice analog envelope and a linear VCA. Reed also has a small
+opening on gate A for held notes. The native regression reads each serialized
+factory graph, drives a note on and off, varies one stage at a time and compares
+energy in the corresponding time window at the voice mixer. This catches a
+visible envelope whose output never reaches the playing voice.
+
+## Request 83 — visible signal flow
+
+The Signal flow button below the instrument name opens the patch diagram in
+both Panel and Modular. Arrows follow explicit audio, control, note and matrix
+routes to their destinations. Selecting a module highlights its direct routes
+and lists the socket or parameter names. Matrix depths update as they are
+edited. The diagram includes dormant nodes, marked Unrouted, and a Rack output
+node for the graph's output sockets. It reads the saved connections and their
+compiled reachability on the UI thread. The existing output meter continues
+to show the main audio level.
+
+## Request 84 — OB filter FM depth
+
+The OB filter adds its FM input times the depth in octaves to cutoff on each
+sample. An empty socket supplies zero. The original OB swell factory patch
+left this socket empty, so moving the rack knob produced identical audio.
+Prophet poly-mod already supplied a source. For the other factory analog pads
+oscillator B now feeds filter FM with depth initially zero. Reed uses its sub
+oscillator. Both the rack and the synth panel give the connected source in the
+depth tooltip. Graphs with an empty socket show **FM / NO INPUT**.
+
+The regression compares dry single-note renders at zero and two octaves of FM
+on each of the four pad models. It disconnects the FM socket and repeats both
+renders. The native checks disconnect and reconnect the Reed source, then
+check the depth control and signal-flow diagram against the edited graph.
+
+At two octaves, the OB swell dry render differed from its zero-depth reference
+by 0.380 times the reference RMS. The respective differences for Prophet,
+Xpander and harmonic drone were 0.470, 1.378 and 0.178. In each model the
+disconnected depth renders matched sample for sample. These are waveform
+differences measured on a single played note.

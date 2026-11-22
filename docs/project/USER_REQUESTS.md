@@ -845,3 +845,21 @@ organic squelch, tinkly delay lines, string-like swells, what do we need to buil
 ```text
 with these references perhaps you should just build clones of the make noise and 4ms or mutable devices that would contain these features
 ```
+
+## 82 — Playable amplitude envelope
+
+```text
+there should be an adsr in the chain
+```
+
+## 83 — Signal flow
+
+```text
+I need a way to see signal flow
+```
+
+## 84 — OB filter FM depth
+
+```text
+not sure fm depth is working in ob filter?
+```

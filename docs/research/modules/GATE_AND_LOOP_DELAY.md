@@ -54,3 +54,19 @@ Clock outputs, external feedback inserts, movable loop windows,
 over-unity regeneration and the hardware's nearly three-minute memory per
 channel remain possible extensions. The module uses only the existing rack audio,
 note and clock interfaces. It opens no ports and loads no external firmware.
+
+## Amp ADSR in the factory patches
+
+From 0.0.20, **AMP ADSR** on each front panel controls the amplitude of each
+played voice. Reed squelch routes the sum of its optical gates through an
+envelope-controlled VCA. The reed gate sits slightly open so sustained notes
+have a pitched body after the strike fades. Glass loops routes its modal voice
+through the VCA before the stereo voice mix and delay. Its Ring control still
+sets the resonator's own decay. String afterglow exposes the existing voice
+envelope's Attack, Decay, Sustain and Release together. Its chorus, reverb and
+delay follow the voice mixer, allowing their tails to continue after release.
+
+Reed squelch also connects its sub oscillator to the OB filter's FM socket.
+Turn up **FM depth** to bend cutoff at the sub oscillator's frequency. Zero
+depth gives the original unmodulated cutoff. **Signal flow** shows both uses
+of the sub signal.

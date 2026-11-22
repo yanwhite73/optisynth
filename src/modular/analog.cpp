@@ -601,6 +601,9 @@ GraphSpec padPatch(int model) {
         for (Connection c : std::vector<Connection>{{{"vco2", "out"}, {"polymod", "osc"}}, {{"filter_env", "out"}, {"polymod", "env"}},
                                                      {{"polymod", "fm"}, {"vco1", "fm"}}, {{"polymod", "pw"}, {"vco1", "pwm"}}, {{"polymod", "fm"}, {"filter", "fm"}}})
             g.connections.push_back(c);
+    } else {
+        // The depth starts at zero. Oscillator B is ready when the player turns it up.
+        g.connections.push_back({{"vco2","out"},{"filter","fm"}});
     }
     g.modulations = {{{"wheel", "out"}, {"filter", "cutoff_hz"}, .3f}, {{"breath", "out"}, {"filter", "cutoff_hz"}, model == 3 ? .1f : .05f}};
     g.outputs = {{"reverb", "out"}};

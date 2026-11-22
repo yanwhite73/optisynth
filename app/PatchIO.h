@@ -60,6 +60,7 @@ inline PanelLayout padPanel(int model) {
     l.sections.push_back({"MIXER",{{"osc_mix","gain_a","Osc A"},{"osc_mix","gain_b","Osc B"}}});
     if(prophet)l.sections.push_back({"POLY-MOD",{{"polymod","osc_amount","Osc B"},{"polymod","env_amount","Filter env"},{"vco1","fm_depth","Freq A"},{"vco1","pwm_depth","PW A"},{"filter","fm_depth","Filter"}}});
     PanelSection f{"FILTER",{{"filter","cutoff_hz",""},{"filter","resonance",""},{"filter","env_octaves",""},{"filter","key_track",""},{"filter","drive",""}}};
+    if(!prophet)f.controls.push_back({"filter","fm_depth","FM depth"});
     f.controls.push_back({"filter",prophet?"poles":xpander?"pole_mix":"mode",""});f.controls.push_back({"filter","quality",""});
     l.sections.push_back(f);
     auto env=[](const char* title,const char* node){return PanelSection{title,{{node,"attack",""},{node,"decay",""},{node,"sustain",""},{node,"release",""},{node,"velocity",""}}};};
@@ -111,16 +112,22 @@ inline RackDocument starterDocument(int which,float gain) {
     if(which>=21 && which<=23) {
         RackDocument d;
         d.gain=gain;
+        const PanelSection ampEnvelope{"AMP ADSR",{{"amp_env","attack","Attack"},{"amp_env","decay","Decay"},
+                                                   {"amp_env","sustain","Sustain"},{"amp_env","release","Release"}}};
         if(which==21) {
             d.graph.nodes={{"reed","analog.vco",{{"level",.9f}}},{"sub","osc.sine",{{"transpose",-12},{"level",.5f}}},
                 {"sweep","analog.env",{{"attack",.002f},{"decay",.17f},{"sustain",0},{"release",.12f},{"velocity",.8f}}},
                 {"filter","analog.filter",{{"cutoff_hz",380},{"resonance",.8f},{"env_octaves",3.2f},{"drive",.36f}}},
-                {"gate","analog.dual_lpg",{{"a_damp",.23f},{"b_damp",.65f},{"b_keys",.75f}}},
+                {"amp_env","analog.env",{{"attack",.003f},{"decay",.24f},{"sustain",.7f},{"release",.14f},{"velocity",0}}},
+                {"vca","utility.vca",{}},
+                {"gate","analog.dual_lpg",{{"a_control",.16f},{"a_damp",.23f},{"b_damp",.65f},{"b_keys",.75f}}},
                 {"voices","voice.mix",{{"voices",1},{"level",1},{"spread",0}}}};
             d.graph.connections={{{"reed","out"},{"filter","in"}},{{"sweep","out"},{"filter","mod"}},
-                {{"filter","out"},{"gate","a_in"}},{{"sub","out"},{"gate","b_in"}},{{"gate","sum"},{"voices","in"}}};
+                {{"sub","out"},{"filter","fm"}},{{"filter","out"},{"gate","a_in"}},{{"sub","out"},{"gate","b_in"}},{{"gate","sum"},{"vca","in"}},
+                {{"amp_env","out"},{"vca","gain"}},{{"vca","out"},{"voices","in"}}};
             d.graph.outputs={{"voices","out"}};
-            d.panel={"graphite",{{"REED",{{"filter","cutoff_hz","Cutoff"},{"filter","resonance","Resonance"},{"sweep","decay","Sweep decay"},{"filter","env_octaves","Sweep depth"}}}}};
+            d.panel={"graphite",{{"REED",{{"filter","cutoff_hz","Cutoff"},{"filter","resonance","Resonance"},{"sweep","decay","Sweep decay"},{"filter","env_octaves","Sweep depth"},{"filter","fm_depth","FM depth"}}}}};
+            d.panel.sections.push_back(ampEnvelope);
             for(const std::string ch : {"a","b"})
                 d.panel.sections.push_back({ch=="a"?"GATE A / REED":"GATE B / SUB",
                     {{"gate",ch+"_control","Open"},{"gate",ch+"_damp","Damp"},{"gate",ch+"_keys","Key strike"}}});
@@ -129,17 +136,21 @@ inline RackDocument starterDocument(int which,float gain) {
         if(which==22) {
             d.tempo=108;
             d.graph.nodes={{"glass","modal.voice",{{"transpose",12},{"structure",.64f},{"brightness",.74f},{"decay",.29f}}},
+                           {"amp_env","analog.env",{{"attack",.001f},{"decay",.35f},{"sustain",.85f},{"release",.65f},{"velocity",0}}},
+                           {"vca","utility.vca",{}},
                            {"voices","voice.mix",{{"voices",6},{"level",1},{"spread",.3f}}},
                            {"delay","fx.dual_loop",{{"a_mix",.49f},{"b_mix",.53f},{"b_feedback",.58f}}}};
-            d.graph.connections={{{"glass","out"},{"voices","in"}},{{"voices","out"},{"delay","in"}}};
+            d.graph.connections={{{"glass","out"},{"vca","in"}},{{"amp_env","out"},{"vca","gain"}},
+                                 {{"vca","out"},{"voices","in"}},{{"voices","out"},{"delay","in"}}};
             d.panel={"ivory",{{"STRUCK GLASS",{{"glass","structure","Material"},{"glass","brightness","Brightness"},{"glass","decay","Ring"}}}}};
         } else {
             d.graph=padPatch(0);
             d.graph.nodes.push_back({"delay","fx.dual_loop",{{"a_time",5},{"b_time",6},{"a_mix",.21f},{"b_mix",.26f}}});
             d.graph.connections.push_back({{"reverb","out"},{"delay","in"}});
-            d.panel={"slate",{{"STRINGS",{{"vco2","fine","Detune"},{"amp_env","attack","Swell"},{"filter_env","attack","Filter rise"},
-                {"amp_env","release","Release"},{"chorus","mix","Chorus"},{"reverb","mix","Reverb"}}}}};
+            d.panel={"slate",{{"STRINGS",{{"vco2","fine","Detune"},{"filter_env","attack","Filter rise"},{"filter","fm_depth","FM depth"},
+                {"chorus","mix","Chorus"},{"reverb","mix","Reverb"}}}}};
         }
+        d.panel.sections.push_back(ampEnvelope);
         d.graph.outputs={{"delay","out"}};
         for(const std::string ch : {"a","b"})
             d.panel.sections.push_back({ch=="a"?"LOOP A / LEFT":"LOOP B / RIGHT",{{"delay",ch+"_time","Division"},

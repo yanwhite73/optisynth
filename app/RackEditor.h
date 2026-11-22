@@ -4,6 +4,7 @@
 #include "SampleLoader.h"
 #include "ModulationEditor.h"
 #include "SynthPanel.h"
+#include "SignalFlow.h"
 #include "PresetBrowser.h"
 #include <chrono>
 #include <fstream>
@@ -32,6 +33,15 @@ public:
         setWantsKeyboardFocus(true);setSize(1440,940);
         for(auto* c:std::initializer_list<juce::Component*>{&rack,&editor,&addChoice,&add,&remove,&audio,&silence,&gain,&keyboard,&output,&routes,&status,&keyboardHelp,&rackView,&focusMode,&matrixButton,&play,&restart,&tempo,&position,
             &prevPreset,&nextPreset,&favouriteButton,&presetDisplay,&savePreset,&panelViewButton,&modularViewButton,&viewMenu,&zoomOut,&zoomLabel,&zoomIn,&zoomFit,&synthPanel})addAndMakeVisible(c);
+        addChildComponent(flow);
+        addAndMakeVisible(flowButton);flowButton.setClickingTogglesState(true);
+        flowButton.setColour(TextButton::buttonOnColourId,teal);
+        flowButton.setColour(TextButton::textColourOnId,ink);
+        flowButton.setTooltip("Trace audio, note and modulation connections in this patch");
+        flowButton.onClick=[this]{
+            if(flowButton.getToggleState()){showBrowser(false);flow.rebuild(document.graph,registry,selected);}
+            resized();repaint();
+        };
         addChildComponent(browser);
         rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
         hardware.knob=std::clamp(int(prefs.number("rackKnob",44)),densityKnobs.front(),densityKnobs.back());
@@ -113,7 +123,7 @@ public:
         g.setFont(font(12));g.setColour(teal);g.drawText("MODULAR INSTRUMENT  /  "+JUCEApplication::getInstance()->getApplicationVersion(),25,50,200,18,Justification::centredLeft);
         const int right=getWidth()-324,top=bodyTop();
         g.setColour(paper);g.setFont(font(12));
-        if(currentView!="panel"){
+        if(currentView!="panel" && !flow.isVisible()){
             g.drawText("OUTPUT",414,110,58,30,Justification::centredLeft);
             if(focusMode.getToggleState()){
                 g.drawText("INPUTS  /  "+String(selected),right,top+5,300,20,Justification::centredLeft);
@@ -125,14 +135,15 @@ public:
         g.setColour(Colour(0xff34464c));g.fillRoundedRectangle(340.f,float(getHeight()-150),160,8,4);
         g.setColour(peak>.9f?orange:teal);g.fillRoundedRectangle(340.f,float(getHeight()-150),160*std::min(1.f,peak),8,4);
         g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
-        const String summary=currentView=="panel"
+        const String summary=flow.isVisible()?"Select a module to trace its input and output connections.":currentView=="panel"
             ?String(int(synthPanel.controlCount()))+" panel controls in "+String(int(synthPanel.sectionCount()))+" sections  |  "+(synthPanel.isCurated()?"layout saved with the patch":"automatic layout: one section per module")+"   |   Patching and module changes are in the Modular view."
             :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch.   |   Right-click a module (or its dots button) for rows.   |   Size: Cmd - / = / 0 or pinch.";
         g.drawText(summary,24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
         const int w=getWidth(),right=w-324,bottom=bodyBottom(),top=bodyTop();
-        const bool modular=currentView!="panel",focused=modular&&focusMode.getToggleState();
+        const bool tracing=flowButton.getToggleState();
+        const bool modular=currentView!="panel" && !tracing,focused=modular&&focusMode.getToggleState();
         // Preset bar, view switch, audio.
         const int y1=16;
         audio.setBounds(w-258,y1,145,34);silence.setBounds(w-105,y1,81,34);
@@ -141,7 +152,7 @@ public:
         savePreset.setBounds(panelViewButton.getX()-14-70,y1,70,34);
         presetDisplay.setBounds(340,y1-2,std::max(160,savePreset.getX()-8-340),38);
         // Transport and status.
-        const int y2=64;
+        const int y2=64;flowButton.setBounds(24,74,120,26);
         play.setBounds(230,y2,86,32);restart.setBounds(322,y2,75,32);tempo.setBounds(405,y2+1,206,30);position.setBounds(619,y2,170,32);
         status.setBounds(797,y2-6,std::max(100,w-797-24),44);
         // Rack tools (modular view only).
@@ -150,7 +161,8 @@ public:
         addChoice.setBounds(24,y3,190,30);add.setBounds(222,y3,90,30);remove.setBounds(318,y3,84,30);output.setBounds(474,y3,200,30);
         const int zoomY=modular?y3:y2;
         zoomFit.setBounds(w-24-48,zoomY,48,30);zoomIn.setBounds(zoomFit.getX()-6-30,zoomY,30,30);zoomLabel.setBounds(zoomIn.getX()-76,zoomY,76,30);zoomOut.setBounds(zoomLabel.getX()-30,zoomY,30,30);
-        if(!modular)status.setBounds(797,y2-6,std::max(0,zoomOut.getX()-805),44);
+        for(auto* b:{&zoomOut,&zoomIn,&zoomLabel,&zoomFit})b->setVisible(!tracing);
+        if(!modular&&!tracing)status.setBounds(797,y2-6,std::max(0,zoomOut.getX()-805),44);
         focusMode.setBounds(zoomOut.getX()-16-124,y3,124,30);matrixButton.setBounds(focusMode.getX()-6-80,y3,80,30);
         // Body.
         rack.setBounds(24,top+5,220,bottom-top-5);editor.setBounds(260,top+5,right-276,bottom-top-5);
@@ -158,7 +170,8 @@ public:
         int y=top+34;for(size_t i=0;i<inputs.size();++i){auto& row=*inputs[i];const bool visible=focused&&!selected.empty()&&i<type(editor.current).inputs.size();row.label.setVisible(visible);row.choice.setVisible(visible);row.label.setBounds(right,y,300,20);row.choice.setBounds(right,y+23,300,32);y+=65;}
         routes.setBounds(right,top+200,300,std::max(40,bottom-top-200));
         rackView.setBounds(24,top,w-48,bottom-top);arrangeRack();
-        synthPanel.setVisible(!modular);synthPanel.setBounds(24,top,w-48,bottom-top);
+        flow.setVisible(tracing);flow.setBounds(24,top,w-48,bottom-top);
+        synthPanel.setVisible(!modular&&!tracing);synthPanel.setBounds(24,top,w-48,bottom-top);
         browser.setBounds(24,106,w-48,bottom-106);
         gain.setBounds(98,getHeight()-158,220,27);keyboardHelp.setBounds(525,getHeight()-163,getWidth()-549,38);
         keyboard.setBounds(24,getHeight()-113,getWidth()-48,89);keyboard.setKeyWidth(float(getWidth()-48)/43.f);
@@ -173,7 +186,7 @@ public:
         if(!key.getModifiers().isCommandDown())return !browser.isVisible() && optiui::handlesPlayingKey(key);
         const int code=key.getKeyCode();
         if(code=='S'||code=='s'){showSaveForm();return true;}
-        if(browser.isVisible())return false;
+        if(browser.isVisible()||flow.isVisible())return false;
         if(code=='='||code=='+'){setDensity(stepDensity(1));return true;}
         if(code=='-'||code=='_'){setDensity(stepDensity(-1));return true;}
         if(code=='0'){setDensity(44);return true;}
@@ -410,7 +423,57 @@ public:
                 hold->toggle.setToggleState(false,sendNotificationSync);
                 require(handles.at("delay")->values[4].load()==0,"Second click releases channel A");
             }
+            flowButton.setToggleState(true,sendNotificationSync);
+            const auto flowLinks=document.graph.connections.size()+document.graph.modulations.size()+document.graph.outputs.size();
+            require(flow.isShowing()&&!synthPanel.isVisible()&&flow.connectionCount()==int(flowLinks),"Signal flow shows every patch connection");
+            if(starter==21){
+                setSize(1120,800);resized();capture("signal-flow-reed-minimum.png");setSize(1440,940);resized();
+            }
+            if(starter==23)capture("signal-flow-strings.png");
+            flowButton.setToggleState(false,sendNotificationSync);
+            require(synthPanel.isVisible(),"Closing signal flow restores the panel");
+            if(starter==21){
+                auto* depth=synthPanel.control("filter","fm_depth");
+                require(depth&&depth->slider.isEnabled()&&depth->slider.getTooltip().contains("sub.out"),"Reed filter FM shows its modulator");
+                // An older user graph can legitimately have an unpatched FM socket.
+                const auto saved=document;
+                auto old=saved;
+                old.graph.connections.erase(std::remove_if(old.graph.connections.begin(),old.graph.connections.end(),
+                    [](const Connection& c){return c.destination.node=="filter"&&c.destination.port=="fm";}),old.graph.connections.end());
+                flowButton.setToggleState(true,sendNotificationSync);
+                require(commit(std::move(old),"filter"),"Disconnect FM");
+                require(flow.connectionCount()==int(flowLinks)-1,"Open signal flow follows repatching");
+                flowButton.setToggleState(false,sendNotificationSync);
+                require(!synthPanel.control("filter","fm_depth")->slider.isEnabled()
+                    && !hardware.find("filter")->control("fm_depth")->slider.isEnabled(),"Panel and rack identify an empty FM input");
+                require(commit(saved,"filter"),"Reconnect FM");
+                require(synthPanel.control("filter","fm_depth")->slider.isEnabled(),"Reconnected FM depth is editable");
+            }
             const auto restored=readRack(rackJSON(document));
+            // Render the actual voice mix before the effects. Compare the same
+            // performance with one changed envelope stage in its audible window.
+            auto voiceEnergy=[&](float attack,float decay,float sustain,float release,int from,int to){
+                auto graph=restored.graph;
+                graph.outputs={{"voices","out"}};
+                Runtime voice(graph);
+                auto env=voice.controls("amp_env");
+                require(env!=nullptr,"Amp ADSR must be active in the voice graph");
+                env->values[0]=attack;env->values[1]=decay;env->values[2]=sustain;env->values[3]=release;
+                std::array<float,quantum> l{},r{};double energy=0;
+                for(int i=0;i<to;i+=quantum){
+                    NoteEventBlock events;events.begin(quantum);
+                    if(i==0||i==9600)events.push({0,1,1,i==0?NoteEventKind::On:NoteEventKind::Off,60,.8f});
+                    voice.render(l.data(),r.data(),quantum,{},nullptr,&events);
+                    if(i>=from)for(float x:l)energy+=double(x)*x;
+                }
+                return energy;
+            };
+            for(auto stage:{"attack","decay","sustain","release"})
+                require(synthPanel.control("amp_env",stage)!=nullptr,"Amp ADSR exposes all four stages");
+            require(voiceEnergy(.001f,.2f,1,.2f,0,1440)>2*voiceEnergy(.5f,.2f,1,.2f,0,1440),"Amp attack shapes onset");
+            require(voiceEnergy(.001f,.5f,.1f,.2f,2400,4800)>2*voiceEnergy(.001f,.02f,.1f,.2f,2400,4800),"Amp decay shapes held notes");
+            require(voiceEnergy(.001f,.02f,1,.2f,4800,9600)>2*voiceEnergy(.001f,.02f,.1f,.2f,4800,9600),"Amp sustain sets held level");
+            require(voiceEnergy(.001f,.02f,1,.5f,10560,14400)>2*voiceEnergy(.001f,.02f,1,.01f,10560,14400),"Amp release shapes note-off");
             Runtime instrument(restored.graph);
             instrument.clock.tempo(restored.tempo);
             const int frames=48000*(starter==23?8:5);
@@ -622,7 +685,8 @@ private:
     std::unique_ptr<FileChooser> chooser;
     bool refreshing=false,running=false,openPatternWhenReady=false,openPerformanceWhenReady=false,openReferenceWhenReady=false;
     int bodyBottom() const {return getHeight()-185;}
-    int bodyTop() const {return currentView=="panel"?106:152;}
+    SignalFlow flow;TextButton flowButton{"Signal flow"};
+    int bodyTop() const {return flowButton.getToggleState()||currentView=="panel"?106:152;}
     // Request 71: presets, views and zoom.
     void showBrowser(bool show){
         if(show){browser.rescan();browser.setCurrent(presetKey);}
@@ -656,6 +720,7 @@ private:
     // byHand: the user chose the view, so the patch remembers it for the next save.
     void setView(const std::string& view,bool byHand){
         pinchDistance=0;
+        if(byHand)flowButton.setToggleState(false,dontSendNotification);
         currentView=view=="panel"?"panel":"modular";if(byHand)document.view=currentView;
         panelViewButton.setToggleState(currentView=="panel",dontSendNotification);modularViewButton.setToggleState(currentView!="panel",dontSendNotification);
         if(status.getText().startsWith("Ready"))message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");
@@ -694,7 +759,7 @@ private:
     float pinchDistance=0;
     double lastPinchMs=0;
     void pinch(float scale){
-        if(browser.isVisible() || !(scale>0))return;
+        if(browser.isVisible() || flow.isVisible() || !(scale>0))return;
         const auto now=Time::getMillisecondCounterHiRes();
         const float delta=std::log(scale);
         if(now-lastPinchMs>350 || delta*pinchDistance<0)pinchDistance=0;
@@ -772,7 +837,7 @@ private:
     void showMatrix(){
         if(!matrixWindow){matrixWindow=std::make_unique<MatrixWindow>();auto* m=matrixWindow->editor;
             m->addRoute=[this](const Endpoint& source,const Endpoint& destination,float amount){auto next=document;next.graph.modulations.push_back({source,destination,amount});return commit(std::move(next),selected);};
-            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;}};
+            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;if(flow.isVisible())flow.updateDepth(i,amount);}};
             m->removeRoute=[this](int i){MessageManager::callAsync([safe=SafePointer<RackSynth>(this),i]{if(!safe)return;auto next=safe->document;if(i>=0&&i<int(next.graph.modulations.size())){next.graph.modulations.erase(next.graph.modulations.begin()+i);safe->commit(std::move(next),safe->selected);}});};
         }
         matrixWindow->editor->refresh(document);matrixWindow->setVisible(true);matrixWindow->toFront(true);
@@ -858,6 +923,7 @@ private:
         player.tempo.store(document.tempo);tempo.setValue(document.tempo,dontSendNotification);
         if(!presetLoad.empty()){presetKey=presetLoad;presetDirty=false;}else presetDirty=true;
         refresh(target);if(!presetLoad.empty())applyViewPolicy();
+        if(flowButton.getToggleState())flow.rebuild(document.graph,registry,selected);
         if(matrixWindow)matrixWindow->editor->refresh(document);
         message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");updatePresetDisplay();
     }

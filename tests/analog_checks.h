@@ -129,6 +129,26 @@ void voiceFeatureChecks(){
     }
 }
 void analogChecks(){
+    // Compare the same dry factory voice with the FM wire patched / removed.
+    for(int model:{0,1,2,3}){
+        auto dry=padPatch(model);dry.outputs={{"voices","out"}};
+        auto withoutFm=dry;
+        withoutFm.connections.erase(std::remove_if(withoutFm.connections.begin(),withoutFm.connections.end(),
+            [](const Connection& c){return c.destination.node=="filter"&&c.destination.port=="fm";}),withoutFm.connections.end());
+        auto playFm=[](const GraphSpec& g,float depth){
+            Runtime r(g);r.controls("filter")->values[8]=depth;
+            return renderKeys(r,{keyEvent(60,true)},.5);
+        };
+        const auto baseline=playFm(dry,0),raised=playFm(dry,2);
+        check(baseline==playFm(withoutFm,0)&&baseline==playFm(withoutFm,2),"Empty filter FM socket is silent at all depths");
+        double difference=0,reference=0;
+        for(size_t i=0;i<baseline.size();++i){
+            const double delta=raised[i]-baseline[i];difference+=delta*delta;reference+=double(baseline[i])*baseline[i];
+        }
+        const double ratio=std::sqrt(difference/std::max(reference,1e-20));
+        std::printf("Factory filter FM model %d: relative RMS difference %.3f at 2 octaves\n",model,ratio);
+        check(ratio>.01,"Factory filter FM depth changes rendered audio");
+    }
     // Voice allocation from keyboard events.
     {
         Runtime r(padPatch(0));

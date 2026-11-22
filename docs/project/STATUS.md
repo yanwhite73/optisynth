@@ -1,5 +1,23 @@
 # Optisynth status — 22 November 2026
 
+## 0.0.20 signal flow, voice ADSR and OB filter FM
+
+Installed 22 November at 20:18 UTC at the pinned Release path. The signed
+executable matched the checked candidate (SHA-256
+`77708336634cc1f545b7b95832d85e2018734dc289253ff546a7cb023c6e7f36`).
+
+The **Signal flow** button beneath the instrument name opens an interactive
+patch diagram from either editor view. Select a module to inspect its exact
+socket and modulation connections. Reed squelch, Glass loops and String
+afterglow all have a per-voice **Amp ADSR**.
+
+The factory OB swell, Xpander, harmonic drone and String afterglow patches
+route oscillator B to the filter FM jack. Reed squelch uses the sub oscillator.
+The depth starts at zero on these patches. An unpatched OB filter in an older
+saved rack displays **FM / NO INPUT**. The four-model audio comparison and
+the other release modular checks passed (345 total).
+[Interface guide](../ui/SYNTH_PANEL_AND_PRESETS.md#signal-flow-in-0020).
+
 ## 0.0.19 dual gate and looping delay
 
 Installed at the pinned Release path on 22 November at 20:01 UTC. Quit and

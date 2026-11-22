@@ -258,3 +258,22 @@ both are fixed.
 - real trackpad pinch;
 - right-click on a card;
 - the overwrite dialog.
+
+## Signal flow in 0.0.20
+
+Click **Signal flow** below the Optisynth name. Read the arrows from source to
+destination. Select a module to highlight its connections and inspect the exact
+ports below the diagram. The legend identifies audio, control, note and matrix
+connections. Matrix rows include their modulation depth. Scroll the diagram for
+larger patches. Click **Signal flow** again to return to the controls.
+
+For example, open **Glass loops** and select **vca**. The glass oscillator
+feeds its audio input, **amp_env** controls gain, and its output goes to the
+voice mixer before the stereo delay. The diagram shows the patch cables.
+Keyboard note distribution within the voice mixer and DSP inside a module
+are internal to those modules.
+
+For the OB filter, inspect **filter.fm** in Signal flow or hover **FM depth**.
+OB swell uses Oscillator B, Reed squelch uses its sub, and Prophet poly-mod
+uses the poly-mod output. On an older saved patch with **FM / NO INPUT**, open
+Modular, click the filter's **FM** input jack and choose an oscillator output.
