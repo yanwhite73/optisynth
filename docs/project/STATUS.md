@@ -14,6 +14,9 @@ captures were inspected. Audible confirmation on the user's Mac is outstanding.
 The installed executable matched the candidate at SHA-256
 `bb6a6dc6a323d4408903bd3bef2d2a93ef38d0dad8c3f06baeea3e333be6bf91`.
 
+Proposed next sound-design milestone: three playable patches and tempo-linked
+stereo delay controls. [Sound goals and listening tests](SOUND_GOALS.md#next-playable-patches-for-0018).
+
 ## 0.0.17 readable density layout, rows, preset/arrow/keyboard fixes — requests 72–73
 
 **Installed 20 November at 10:30 UTC.** The signed 0.0.17 executable at the

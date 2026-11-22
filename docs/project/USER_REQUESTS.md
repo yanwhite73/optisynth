@@ -833,3 +833,9 @@ now works but with system pops
 ```text
 pinch? Im not using an ipad?!
 ```
+
+## 80 — Sound design priorities
+
+```text
+organic squelch, tinkly delay lines, string-like swells, what do we need to build next to attain these sounds?
+```

@@ -3,6 +3,42 @@
 Recorded 19 November 2026 from request 44 (verbatim in `USER_REQUESTS.md`). These
 are design targets that steer priorities. They are not implemented features.
 
+## Next playable patches for 0.0.18
+
+Request 80, 22 November 2026. The November 19 inventory below predates the
+polyphonic analog voice and rack effects. These are proposed listening tests.
+
+1. **Organic squelch.** Sequence a saw through the OB filter in four-pole
+   low-pass mode. Start around 300 Hz, with high resonance, moderate drive and
+   a positive two-to-three-octave filter envelope decaying over 100–250 ms.
+   Give the amp a longer decay so the sweep can be heard. Use step velocity on
+   the filter envelope and tie an occasional pair. Listen for an accented note
+   opening into a vowel while neighbouring notes stay short and woody. A later
+   strikeable low-pass gate could couple brightness and level as each note
+   dies away. [Optomix strike and damping](https://www.makenoisemusic.com/modules/optomix/)
+2. **Tinkly delay lines.** Start with sparse, high Plaits modal percussion hits.
+   Set the material and decay until a single dry hit rings like glass. The
+   existing stereo delay accepts independent millisecond times and has filtered
+   feedback. At 120 BPM try 250 ms and 375 ms, then leave a bar empty for the
+   echoes. First engineering priority is to expose beat divisions per side and
+   cross-feedback in the rack and feed the patch tempo to the delay. Listen for
+   the same interlocking rhythm after changing tempo during a tail. The 4ms
+   two-channel clock arrangement is a useful interface reference.
+   [4ms Dual Looping Delay manual](https://4mscompany.com/DLD/manual/DLD-manual-1.1-v5.pdf)
+3. **String-like swells.** Start from the factory OB swell. Try two saws a few
+   cents apart, a two-second amp attack and a four-second filter attack. Bring
+   the stereo chorus up with reverb down. Listen for individual chord tones
+   blooming and moving against each other, including as one chord releases
+   into the next. Compare the existing chorus with a dedicated string-machine
+   ensemble only if the held chord still lacks movement. Bow friction under
+   continuous pressure would be a separate physical-modelling target.
+   [Solina ensemble reference](https://www.arturia.com/store/solina-v)
+
+Suggested first delivery is three named patches with dry and processed example
+phrases, plus the rack delay controls. Judge the sounds at matched loudness.
+Implementation evidence is in `src/modular/analog.cpp`, `src/modular/modules.cpp`,
+`src/core/effects.cpp` and the factory entries in `app/PatchIO.h`.
+
 ## The goals
 
 1. Modular sequencing in the style of Robert Rich and Steve Roach: ambient,
