@@ -86,6 +86,9 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {5,{"Sample attack + resonator","Keys","The sample attack blended with its resonated tail.",{"sample","resonator","layered"}},"modular"},
         {6,{"Spectral stereo + external LFO","Texture","The full spectral engine in stereo, its filter swept by a rack LFO.",{"spectral","stereo","evolving"}},"modular"},
         {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
+        {21,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
+        {22,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
+        {23,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
         {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
         {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
         {19,{"Xpander unison glide","Pad","Xpander-style HP2 + LP1 pole mix, 16 voices with unison 2 and glide.",{"analog","xpander","unison","glide","bright"}},"panel"},
@@ -105,6 +108,45 @@ inline const FactoryPreset* factoryPreset(int starter) {
     for(const auto& f:factoryPresets())if(f.starter==starter)return &f;return nullptr;
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which>=21 && which<=23) {
+        RackDocument d;
+        d.gain=gain;
+        if(which==21) {
+            d.graph.nodes={{"reed","analog.vco",{{"level",.9f}}},{"sub","osc.sine",{{"transpose",-12},{"level",.5f}}},
+                {"sweep","analog.env",{{"attack",.002f},{"decay",.17f},{"sustain",0},{"release",.12f},{"velocity",.8f}}},
+                {"filter","analog.filter",{{"cutoff_hz",380},{"resonance",.8f},{"env_octaves",3.2f},{"drive",.36f}}},
+                {"gate","analog.dual_lpg",{{"a_damp",.23f},{"b_damp",.65f},{"b_keys",.75f}}},
+                {"voices","voice.mix",{{"voices",1},{"level",1},{"spread",0}}}};
+            d.graph.connections={{{"reed","out"},{"filter","in"}},{{"sweep","out"},{"filter","mod"}},
+                {{"filter","out"},{"gate","a_in"}},{{"sub","out"},{"gate","b_in"}},{{"gate","sum"},{"voices","in"}}};
+            d.graph.outputs={{"voices","out"}};
+            d.panel={"graphite",{{"REED",{{"filter","cutoff_hz","Cutoff"},{"filter","resonance","Resonance"},{"sweep","decay","Sweep decay"},{"filter","env_octaves","Sweep depth"}}}}};
+            for(const std::string ch : {"a","b"})
+                d.panel.sections.push_back({ch=="a"?"GATE A / REED":"GATE B / SUB",
+                    {{"gate",ch+"_control","Open"},{"gate",ch+"_damp","Damp"},{"gate",ch+"_keys","Key strike"}}});
+            return d;
+        }
+        if(which==22) {
+            d.tempo=108;
+            d.graph.nodes={{"glass","modal.voice",{{"transpose",12},{"structure",.64f},{"brightness",.74f},{"decay",.29f}}},
+                           {"voices","voice.mix",{{"voices",6},{"level",1},{"spread",.3f}}},
+                           {"delay","fx.dual_loop",{{"a_mix",.49f},{"b_mix",.53f},{"b_feedback",.58f}}}};
+            d.graph.connections={{{"glass","out"},{"voices","in"}},{{"voices","out"},{"delay","in"}}};
+            d.panel={"ivory",{{"STRUCK GLASS",{{"glass","structure","Material"},{"glass","brightness","Brightness"},{"glass","decay","Ring"}}}}};
+        } else {
+            d.graph=padPatch(0);
+            d.graph.nodes.push_back({"delay","fx.dual_loop",{{"a_time",5},{"b_time",6},{"a_mix",.21f},{"b_mix",.26f}}});
+            d.graph.connections.push_back({{"reverb","out"},{"delay","in"}});
+            d.panel={"slate",{{"STRINGS",{{"vco2","fine","Detune"},{"amp_env","attack","Swell"},{"filter_env","attack","Filter rise"},
+                {"amp_env","release","Release"},{"chorus","mix","Chorus"},{"reverb","mix","Reverb"}}}}};
+        }
+        d.graph.outputs={{"delay","out"}};
+        for(const std::string ch : {"a","b"})
+            d.panel.sections.push_back({ch=="a"?"LOOP A / LEFT":"LOOP B / RIGHT",{{"delay",ch+"_time","Division"},
+                {"delay",ch+"_feed","Record feed"},{"delay",ch+"_feedback","Feedback"},{"delay",ch+"_mix","Mix"},
+                {"delay",ch+"_hold","Hold"},{"delay",ch+"_reverse","Reverse"}}});
+        return d;
+    }
     if(which==17){auto d=starterDocument(11,gain);d.tempo=108;for(auto& n:d.graph.nodes)if(n.id=="sequence"){n.type="seq.probability";n.parameters={{"octave",4},{"density",.9f},{"swing",.12f}};n.performance.reset();}
         for(auto& m:d.graph.modulations)if(m.source.node=="sequence"){m.source.port="pitch";m.amount*=.4f;}return d;}
     if(which==18){auto d=starterDocument(13,gain);d.tempo=116;for(auto& n:d.graph.nodes)if(n.id=="sequence"){n.type="seq.orbit";n.parameters={{"ring2_drift",1},{"ring4_drift",-1}};n.performance.reset();}

@@ -1,5 +1,20 @@
 # Optisynth status — 22 November 2026
 
+## 0.0.19 dual gate and looping delay
+
+Installed at the pinned Release path on 22 November at 20:01 UTC. Quit and
+reopen from the Dock. The factory browser includes **Reed squelch**, **Glass
+loops** and **String afterglow**. In the Modular view both devices are also
+available from the Add menu. The [device guide](../research/modules/GATE_AND_LOOP_DELAY.md)
+lists routing, panel controls and hardware behaviours covered.
+
+The 337 modular checks passed in release and ASan/UBSan builds. The native
+suite checked the preset loads, saved controls, audible renders and panel
+geometry. Three stereo WAVs are in `build/ui-review-81`. The installed
+executable matched the candidate at SHA-256
+`decee166447af14c24d4ebb73bdae7a1312c894aca396c6cfdb6f8f068ce7d8c`.
+Hardware A/B listening remains open.
+
 ## 0.0.18 Mac keyboard and sizing controls
 
 Installed at the pinned Release app on 22 November. Quit and reopen from the

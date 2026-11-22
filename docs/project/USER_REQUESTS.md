@@ -839,3 +839,9 @@ pinch? Im not using an ipad?!
 ```text
 organic squelch, tinkly delay lines, string-like swells, what do we need to build next to attain these sounds?
 ```
+
+## 81 — Hardware-derived rack modules
+
+```text
+with these references perhaps you should just build clones of the make noise and 4ms or mutable devices that would contain these features
+```

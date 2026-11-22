@@ -1067,3 +1067,21 @@ native checks show control geometry at 1440×940 and 1120×800. Exercise panel
 buttons directly as well as gestures and key handling in future UI checks.
 The installed bundle retained folder ID 176340452. Native receipts and
 screenshots are in `build/ui-review-79`.
+
+## Request 81 — playable Optomix and DLD behaviours
+
+Built independent Dual low-pass gate and Dual looping delay modules in the
+existing graph, with channel-specific controls and patchable outputs. Feed sets
+how much new audio enters a delay, feedback sets the level of its next repeat,
+and Hold preserves the captured interval even after a tempo change. Reverse is
+available while capturing and while holding. The two delay buffers are prepared
+only for a reachable delay node. The rack shares one delay across played voices.
+
+Reed squelch, Glass loops and String afterglow load from the factory browser.
+All three use the voice mixer so the keyboard can play alongside a retained
+sequencer. Native offline renders at the saved master gain peaked at −19.7,
+−17.4 and −11.9 dBFS respectively. Controls and patch references resolved in
+the editor and the Hold switch changed the live DSP parameter in both directions.
+Normal and minimum panel captures and stereo audio are in `build/ui-review-81`.
+Hardware listening comparisons remain open. Implementation boundaries and
+audition instructions are in the [device study](../research/modules/GATE_AND_LOOP_DELAY.md).

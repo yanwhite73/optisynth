@@ -19,6 +19,8 @@ Colour panelColour(const std::string& id) {
     if(isSequencer(id))return Colour(0xffc9bf91);
     if(id=="sample.player")return Colour(0xffd7ca96);
     if(id=="spectral.engine")return Colour(0xff8ebecb);
+    if(id=="analog.dual_lpg")return Colour(0xff30383b);
+    if(id=="fx.dual_loop")return Colour(0xffb5c1be);
     if(id=="mod.lfo")return Colour(0xffd7b282);
     if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
     if(id=="drum.analog")return Colour(0xffd7b282);
@@ -111,8 +113,9 @@ struct Control : juce::Component {
         slider.setValue(value,dontSendNotification);slider.updateText();slider.setDoubleClickReturnValue(true,p.initial);
         slider.setTooltip(p.label+" / double-click to reset");
         slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
-        if(p.id=="loop"||p.id=="retrigger"){
-            isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(p.id=="loop"?"Loop while held":"Reset on note");
+        const bool loopSwitch=p.id=="a_hold"||p.id=="b_hold"||p.id=="a_reverse"||p.id=="b_reverse";
+        if(loopSwitch||p.id=="loop"||p.id=="retrigger"){
+            isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(loopSwitch?String(p.label):p.id=="loop"?"Loop while held":"Reset on note");
             toggle.setColour(ToggleButton::textColourId,text);toggle.setColour(ToggleButton::tickColourId,text);toggle.setColour(ToggleButton::tickDisabledColourId,text.withAlpha(.5f));
             toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
         }
@@ -152,6 +155,9 @@ struct Jack : Button {
 // Parameter rows per module, read left to right. Modules without an entry flow into rows of three.
 inline std::vector<std::vector<std::string>> controlRows(const std::string& type) {
     static const std::map<std::string,std::vector<std::vector<std::string>>> rows{
+        {"analog.dual_lpg",{{"a_control","a_damp","a_keys"},{"b_control","b_damp","b_keys"}}},
+        {"fx.dual_loop",{{"a_time","a_feed","a_feedback"},{"a_mix","a_hold","a_reverse"},
+                          {"b_time","b_feed","b_feedback"},{"b_mix","b_hold","b_reverse"}}},
         {"analog.vco",{{"transpose","fine","drift"},{"saw","pulse","triangle"},{"pulse_width","pwm_depth","fm_depth","level"}}},
         {"analog.filter",{{"cutoff_hz","resonance","env_octaves","key_track"},{"mode","drive","fm_depth","quality"},{"band","poles","pole_mix"}}},
         {"analog.env",{{"attack","decay","sustain"},{"release","velocity"}}},

@@ -396,13 +396,63 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==21&&starters.size()==21&&*starters.begin()==0&&*starters.rbegin()==20,"Factory catalogue lists every starter once");}
+            require(factoryPresets().size()==24&&starters.size()==24&&*starters.begin()==0&&*starters.rbegin()==23,"Factory catalogue lists every starter once");}
+        for(int starter : {21,22,23}){
+            require(loadFactory(starter),"Load new device preset");drain();
+            require(synthPanel.layoutSound()&&currentView=="panel","Playable device panel fits");
+            for(const auto& section:document.panel.sections)for(const auto& c:section.controls)
+                require(panelControlValid(document,c),"Device panel parameter resolves");
+            if(starter==22){
+                auto* hold=synthPanel.control("delay","a_hold");
+                require(hold&&hold->isSwitch,"Hold is a one-click switch");
+                hold->toggle.setToggleState(true,sendNotificationSync);
+                require(handles.at("delay")->values[4].load()==1,"One click holds channel A");
+                hold->toggle.setToggleState(false,sendNotificationSync);
+                require(handles.at("delay")->values[4].load()==0,"Second click releases channel A");
+            }
+            const auto restored=readRack(rackJSON(document));
+            Runtime instrument(restored.graph);
+            instrument.clock.tempo(restored.tempo);
+            const int frames=48000*(starter==23?8:5);
+            AudioBuffer<float> sound(2,frames);
+            float peak=0;
+            const std::array<int,8> phrase{48,55,51,60,58,51,67,55};
+            constexpr int step=14400;
+            for(int i=0;i<frames;i+=quantum){
+                NoteEventBlock keysDown;keysDown.begin(quantum);
+                auto key=[&](int pitch,bool on,float velocity){
+                    keysDown.push({0,1,uint64_t(pitch)+1,on?NoteEventKind::On:NoteEventKind::Off,pitch,velocity});
+                };
+                if(starter==23){
+                    for(int pitch : {48,55,62,65}){
+                        if(i==0)key(pitch,true,.8f);
+                        if(i==48000*4)key(pitch,false,0);
+                    }
+                }else if(i<8*step && (i%step==0 || i%step==step/2)){
+                    const int index=i/step;
+                    key(phrase[index]+(starter==22?12:0),i%step==0,index%3==0?.95f:.58f);
+                }
+                instrument.render(sound.getWritePointer(0,i),sound.getWritePointer(1,i),quantum,
+                                  {},nullptr,keysDown.size()?&keysDown:nullptr);
+            }
+            sound.applyGain(document.gain);
+            peak=sound.getMagnitude(0,frames);
+            require(std::isfinite(peak)&&peak>.001f&&peak<1.f,"Device preset produces audio at intended gain");
+            capture(String("device-")+String(starter)+"-normal.png");
+            setSize(1120,800);resized();require(synthPanel.layoutSound(),"Device panel fits minimum size");
+            capture(String("device-")+String(starter)+"-minimum.png");setSize(1440,940);resized();
+            auto wav=directory.getChildFile(String("device-")+String(starter)+".wav");
+            wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
+            std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+            if(writer)stream.release();
+            require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write device audition");
+        }
         for(int pad:{15,16,19,20}){const auto d=factoryDocument(pad,.25f);require(!d.panel.sections.empty()&&d.view=="panel","Pad has a curated panel and opens in it");
             for(const auto& section:d.panel.sections)for(const auto& c:section.controls)require(panelControlValid(d,c),"Curated pad control resolves to a real parameter");}
         require(render(factoryDocument(3,.25f).graph)==render(starterDocument(3,.25f).graph),"Catalogue load keeps starter audio");
         require(parseTags(" Warm, Berlin School ,poly_mod,warm,, ")==std::vector<std::string>{"warm","berlin-school","poly-mod"},"Tag normalisation and de-duplication");
         auto filterCount=[&](PresetFilter f){browser.filter=std::move(f);browser.applyFilter();return browser.visibleCount();};
-        {PresetFilter f;f.category="Pad";require(filterCount(f)==3,"Pad category");}
+        {PresetFilter f;f.category="Pad";require(filterCount(f)==4,"Pad category");}
         {PresetFilter f;f.tags={"berlin-school"};require(filterCount(f)==3,"Tag filter");}
         {PresetFilter f;f.tags={"analog","ambient"};require(filterCount(f)==2,"Tags combine with AND");}
         {PresetFilter f;f.search="prophet";require(filterCount(f)==1&&browser.visibleEntry(0).starter==16,"Search by name");}
@@ -541,7 +591,7 @@ public:
          keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
         require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
         browser.setKeepSequence(false);
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 21-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 24-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
@@ -582,7 +632,7 @@ private:
     void showSaveForm(){showBrowser(true);browser.showSaveForm(document.info,currentView=="panel");}
     bool loadFactory(int index){
         try{auto next=chooseStarter(document,index,browser.keepCurrentSequence());
-            return commit(std::move(next),index==15||index==16||index==19||index==20?"filter":index>=8?"sequence":"source","factory:"+std::to_string(index));
+            return commit(std::move(next),index==21?"gate":index==22||index==23?"delay":index==15||index==16||index==19||index==20?"filter":index>=8?"sequence":"source","factory:"+std::to_string(index));
         }catch(const std::exception& e){message(e.what(),true);return false;}
     }
     bool loadUserFile(const File& file){

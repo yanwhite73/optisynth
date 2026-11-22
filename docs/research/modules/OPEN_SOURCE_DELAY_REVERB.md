@@ -116,3 +116,6 @@ Qualify impulse/tail renders, stereo behaviour, rates, time modulation, freeze,
 tempo changes, maximum feedback, nonfinite input containment, save/recall and
 multiple-instance CPU/memory. Confirm no callback allocation and no truncation of
 tails during supported graph edits. None of these checks is claimed complete yet.
+
+The [0.0.19 gate and looping delay study](GATE_AND_LOOP_DELAY.md) records the
+4ms controls implemented in the rack and the patches that exercise them.

@@ -1,6 +1,7 @@
 // Analog-style voice modules. Our own implementations from the circuit study in
 // docs/research/instruments/CLASSIC_PAD_ARCHITECTURE.md; no third-party DSP code.
 #include "analog.h"
+#include "gate_delay.h"
 #include "../core/effects.h"
 #include <cmath>
 #include <stdexcept>
@@ -363,6 +364,74 @@ private:
 };
 
 // --- Stereo effects wrapping the inherited first-party library -----------------
+class DualGate final : public Base {
+public:
+    using Base::Base;
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        for (int ch = 0; ch < 2; ++ch) {
+            const int port = ch * 4, param = ch * 3;
+            const float key = b.note.trigger ? values[param + 2] * b.note.velocity : 0.f;
+            for (int i = 0; i < b.frames; ++i) {
+                const float damp = std::clamp(values[param + 1] + b.inputs[port + 3][i], 0.f, 1.f);
+                if (damp != previousDamp[ch]) {
+                    recovery[ch] = OpticalGateChannel::recovery(damp);
+                    previousDamp[ch] = damp;
+                }
+                b.outputs[ch + 1][i] = channel[ch].process(b.inputs[port][i],
+                    values[param] + b.inputs[port + 1][i], b.inputs[port + 2][i],
+                    i == 0 ? key : 0.f, recovery[ch]);
+            }
+        }
+        for (int i = 0; i < b.frames; ++i)
+            b.outputs[0][i] = b.outputs[1][i] + b.outputs[2][i] + b.inputs[8][i];
+    }
+private:
+    OpticalGateChannel channel[2];
+    float previousDamp[2]{-1,-1}, recovery[2]{};
+};
+
+constexpr std::array<double, 10> echoBeats{.125, .25, 1./3., .5, .75, 1., 1.5, 2., 4., 8.};
+class DualDelay final : public Base {
+public:
+    using Base::Base;
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        double configuredPeriod = -1;
+        for (int i = 0; i < b.frames; ++i) {
+            const bool high = b.inputs[3][i] > .1f;
+            if (high && !pingHigh) {
+                const auto interval = sample - lastPing;
+                if (seenPing && interval >= 9600 && interval <= 144000)
+                    externalPeriod = double(interval);
+                lastPing = sample;
+                seenPing = true;
+            }
+            pingHigh = high;
+            ++sample;
+            const double tempo = b.clock ? b.clock[i].tempo : 120.;
+            const double period = externalPeriod > 0 ? externalPeriod : 48000. * 60. / std::clamp(tempo, 1., 1000.);
+            for (int ch = 0; ch < 2; ++ch) {
+                const int p = ch * 6;
+                if (period != configuredPeriod) {
+                    const int samples = int(std::lround(period * echoBeats[size_t(values[p])]));
+                    channel[ch].configure(samples, values[p + 4] > .5f, values[p + 5] > .5f);
+                }
+                const float dry = (ch ? b.inputsRight[0] : b.inputs[0])[i] + b.inputs[ch + 1][i];
+                const float wet = channel[ch].process(dry, values[p + 1], values[p + 2]);
+                (ch ? b.outputsRight[0] : b.outputs[0])[i] = dry + values[p + 3] * (wet - dry);
+                b.outputs[ch + 1][i] = wet;
+            }
+            configuredPeriod = period;
+        }
+    }
+private:
+    uint64_t sample = 0, lastPing = 0;
+    double externalPeriod = 0;
+    bool seenPing = false, pingHigh = false;
+    ClockDelayChannel channel[2];
+};
+
 class Fx final : public Base {
 public:
     Fx(const NodeSpec& n, std::string type) : Base(n), kind(std::move(type)), effect(partials::makeEffect(kind)) {
@@ -433,6 +502,23 @@ std::vector<Panel> analogPanels() {
         {"osc_amount", "Osc B", "", -1, 1, 1}, {"env_amount", "Filter env", "", -1, 1, 0}}});
     p.push_back({"mod.wheel", "Wheel / bend", "Hardware MIDI mod wheel and pitch bend as control sources", "modulator", {
         {"amount", "Amount", "", 0, 1, 1}}});
+    Panel gate{"analog.dual_lpg","Dual low-pass gate","Two optical gates with separate strikes, damping and an auxiliary sum","utility",{}};
+    Panel delay{"fx.dual_loop","Dual looping delay","Two clocked delay lines with independent feed, hold, reverse and wet outputs","effect",{}};
+    for (int ch = 0; ch < 2; ++ch) {
+        const std::string prefix = ch ? "b_" : "a_", label = ch ? "B " : "A ";
+        gate.parameters.push_back({prefix+"control",label+"Control","",0,1,0});
+        gate.parameters.push_back({prefix+"damp",label+"Damp","",0,1,.4f});
+        gate.parameters.push_back({prefix+"keys",label+"Key strike","",0,1,ch?0.f:1.f});
+        delay.parameters.push_back({prefix+"time",label+"Time","",0,9,ch?4.f:3.f,false,1,
+            {"1/32","1/16","1/8 triplet","1/8","Dotted 1/8","1/4","Dotted 1/4","1/2","1 bar (4/4)","2 bars (4/4)"}});
+        delay.parameters.push_back({prefix+"feed",label+"Feed","",0,1,1});
+        delay.parameters.push_back({prefix+"feedback",label+"Feedback","",0,1,.42f});
+        delay.parameters.push_back({prefix+"mix",label+"Mix","",0,1,.38f});
+        for (const std::string action : {"hold","reverse"})
+            delay.parameters.push_back({prefix+action,label+(action=="hold"?"Hold":"Reverse"),"",0,1,0,false,1,{"Off","On"}});
+    }
+    p.push_back(std::move(gate));
+    p.push_back(std::move(delay));
     p.push_back(effectPanel("fx.reverb", "Reverb", "reverb", "Long modulated stereo reverb (inherited library)", .3f));
     p.push_back(effectPanel("fx.chorus", "Chorus", "chorus", "Stereo chorus (inherited library)", .4f));
     p.push_back(effectPanel("fx.delay", "Stereo delay", "delay_stereo", "Stereo delay with filtered feedback (inherited library)", .25f));
@@ -455,6 +541,18 @@ void analogPorts(const std::string& id, ModuleType& type) {
         type.outputs = {{"out", SignalType::Audio, false, 2}};
     } else if (id == "mod.wheel")
         type.outputs = {{"out", SignalType::Control}, {"bend", SignalType::Control}};
+    else if (id == "analog.dual_lpg") {
+        for (const std::string ch : {"a_", "b_"}) {
+            type.inputs.push_back({ch+"in", SignalType::Audio});
+            for (const std::string cv : {"cv","strike","damp"}) type.inputs.push_back({ch+cv, SignalType::Control});
+        }
+        type.inputs.push_back({"aux", SignalType::Audio});
+        type.inputs.push_back({"notes", SignalType::Event});
+        type.outputs = {{"sum",SignalType::Audio},{"a",SignalType::Audio},{"b",SignalType::Audio}};
+    } else if (id == "fx.dual_loop") {
+        type.inputs = {{"in",SignalType::Audio,false,2},{"a",SignalType::Audio},{"b",SignalType::Audio},{"ping",SignalType::Control}};
+        type.outputs = {{"out",SignalType::Audio,false,2},{"wet_a",SignalType::Audio},{"wet_b",SignalType::Audio}};
+    }
     else if (id.rfind("fx.", 0) == 0) {
         type.inputs = {{"in", SignalType::Audio, true, 2}};
         type.outputs = {{"out", SignalType::Audio, false, 2}};
@@ -518,6 +616,8 @@ std::unique_ptr<AudioModule> makeAnalog(const NodeSpec& n, const PrepareContext&
     if (id == "analog.polymod") return std::make_unique<PolyMod>(n);
     if (id == "voice.mix") return std::make_unique<VoiceMix>(n);
     if (id == "mod.wheel") return std::make_unique<Wheel>(n);
+    if (id == "analog.dual_lpg") return std::make_unique<DualGate>(n);
+    if (id == "fx.dual_loop") return std::make_unique<DualDelay>(n);
     if (id == "fx.reverb") return std::make_unique<Fx>(n, "reverb");
     if (id == "fx.chorus") return std::make_unique<Fx>(n, "chorus");
     if (id == "fx.delay") return std::make_unique<Fx>(n, "delay_stereo");
