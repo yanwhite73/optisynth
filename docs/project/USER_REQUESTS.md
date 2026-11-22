@@ -863,3 +863,13 @@ I need a way to see signal flow
 ```text
 not sure fm depth is working in ob filter?
 ```
+
+## 85 — Patch layout and cables
+
+```text
+wheres the patch layout showing connections?
+```
+
+```text
+can you also do it with patch cables?
+```

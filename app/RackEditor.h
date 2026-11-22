@@ -42,6 +42,21 @@ public:
             if(flowButton.getToggleState()){showBrowser(false);flow.rebuild(document.graph,registry,selected);}
             resized();repaint();
         };
+        addAndMakeVisible(cablesButton);
+        cablesButton.setClickingTogglesState(true);
+        hardware.showCables=prefs.number("showRackCables",1)!=0;
+        cablesButton.setToggleState(hardware.showCables,dontSendNotification);
+        cablesButton.setColour(TextButton::buttonOnColourId,teal);
+        cablesButton.setColour(TextButton::textColourOnId,ink);
+        cablesButton.setTooltip("Show patch cables between rack sockets");
+        cablesButton.onClick=[this]{
+            hardware.showCables=cablesButton.getToggleState();
+            prefs.set("showRackCables",int(hardware.showCables));hardware.repaint();
+        };
+        hardware.connect=[this](const Connection& c){
+            auto next=document;setRackConnection(next.graph,c.destination,c.source);
+            commit(std::move(next),c.destination.node);
+        };
         addChildComponent(browser);
         rackView.setViewedComponent(&hardware,false);rackView.setScrollBarsShown(true,true);rackView.setScrollBarThickness(12);
         hardware.knob=std::clamp(int(prefs.number("rackKnob",44)),densityKnobs.front(),densityKnobs.back());
@@ -137,7 +152,7 @@ public:
         g.setColour(paper.withAlpha(.6f));g.setFont(font(11));
         const String summary=flow.isVisible()?"Select a module to trace its input and output connections.":currentView=="panel"
             ?String(int(synthPanel.controlCount()))+" panel controls in "+String(int(synthPanel.sectionCount()))+" sections  |  "+(synthPanel.isCurated()?"layout saved with the patch":"automatic layout: one section per module")+"   |   Patching and module changes are in the Modular view."
-            :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Click sockets to patch.   |   Right-click a module (or its dots button) for rows.   |   Size: Cmd - / = / 0 or pinch.";
+            :String(activeCount)+" active / "+String(int(document.graph.nodes.size()))+" modules  |  stereo / independent note routes   |   Drag between sockets to patch, or click for routing.   |   Right-click a module (or its dots button) for rows.   |   Size: Cmd - / = / 0 or pinch.";
         g.drawText(summary,24,bodyBottom()+2,getWidth()-48,20,Justification::centredLeft);
     }
     void resized() override {
@@ -153,6 +168,7 @@ public:
         presetDisplay.setBounds(340,y1-2,std::max(160,savePreset.getX()-8-340),38);
         // Transport and status.
         const int y2=64;flowButton.setBounds(24,74,120,26);
+        cablesButton.setVisible(modular&&!focused);cablesButton.setBounds(150,74,73,26);
         play.setBounds(230,y2,86,32);restart.setBounds(322,y2,75,32);tempo.setBounds(405,y2+1,206,30);position.setBounds(619,y2,170,32);
         status.setBounds(797,y2-6,std::max(100,w-797-24),44);
         // Rack tools (modular view only).
@@ -254,7 +270,45 @@ public:
         for(auto& n:expected.nodes){if(n.id=="source")n.parameters={{"decay",.7f}};if(n.id=="filter")n.parameters={{"cutoff_hz",1800}};}
         require(render(imported.graph)==render(expected),"Legacy patch sound changed");
         auto capture=[&](const String& name){auto image=createComponentSnapshot(getLocalBounds());FileOutputStream stream(directory.getChildFile(name));require(stream.openedOk(),"Snapshot file");stream.setPosition(0);stream.truncate();require(PNGImageFormat().writeImageToStream(image,stream),"PNG export");};
-        commit({rackPreset(0),.25f},"source");capture("hardware-rack.png");
+        commit({rackPreset(0),.25f},"source");setView("modular",false);
+        require(cablesButton.isVisible() && hardware.showCables &&
+                hardware.cables.size()==document.graph.connections.size(),"Rack displays all socket routes by default");
+        capture("hardware-rack.png");
+        setSize(1120,800);capture("patch-cables-minimum.png");setSize(1440,940);
+        auto jack=[&](std::string node,std::string port,bool output)->Jack&{
+            for(auto& j:hardware.find(node)->jacks)if(j->port.id==port && j->output==output)return *j;
+            throw std::runtime_error("Missing test socket "+node+"."+port);
+        };
+        auto drag=[&](Jack& start,Jack& end,bool valid){
+            const auto origin=start.socket().toFloat();
+            const auto dest=start.getLocalPoint(&end,end.socket()).toFloat();
+            const auto now=Time::getCurrentTime();
+            auto event=[&](juce::Point<float> pos,bool dragged){
+                return MouseEvent(Desktop::getInstance().getMainMouseSource(),pos,ModifierKeys::leftButtonModifier,
+                                  1,0,0,0,0,&start,&start,now,origin,now,1,dragged);
+            };
+            MouseListener& mouse=start;
+            mouse.mouseDown(event(origin,false));mouse.mouseDrag(event(dest,true));
+            require(hardware.held==&start && (hardware.target==&end)==valid,"Cable drag target");
+            mouse.mouseUp(event(dest,true));hardware.flushCableEdit();
+        };
+        auto checkedPatch=JSON::toString(rackJSON(document));
+        drag(jack("source","out",true),jack("filter","mod",false),false);
+        require(JSON::toString(rackJSON(document))==checkedPatch,"Mismatched cable changed patch");
+        applySocketChoice("filter",{"mod",SignalType::Control,false},false,1,{});
+        const auto disconnected=hardware.cables.size();
+        for(bool reverse:{true,false}){
+            auto& input=jack("filter","mod",false);auto& out=jack("envelope","out",true);
+            if(reverse)drag(input,out,true);else drag(out,input,true);
+            require(hardware.cables.size()==disconnected+1 && jack("filter","mod",false).getTooltip().contains("envelope.out"),
+                    "Dragging in either direction reconnects the envelope");
+            if(reverse)applySocketChoice("filter",{"mod",SignalType::Control,false},false,1,{});
+        }
+        cablesButton.setToggleState(false,sendNotificationSync);
+        require(!hardware.showCables && hardware.cables.size()==disconnected+1,"Hiding cables preserves the patch");
+        cablesButton.setToggleState(true,sendNotificationSync);
+        require(directory.getChildFile("patch-cables-checks.txt").replaceWithText(
+            "PASS: native jack gestures in both directions, type mismatch, displayed connections, cable visibility.\n"),"Cable check receipt");
         selectNode("filter");focusMode.setToggleState(true,dontSendNotification);resized();capture("hardware-filter-focus.png");
         focusMode.setToggleState(false,dontSendNotification);commit({rackPreset(2),.25f},"resonator");capture("hardware-resonator.png");
         setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("hardware-minimum.png");
@@ -685,7 +739,7 @@ private:
     std::unique_ptr<FileChooser> chooser;
     bool refreshing=false,running=false,openPatternWhenReady=false,openPerformanceWhenReady=false,openReferenceWhenReady=false;
     int bodyBottom() const {return getHeight()-185;}
-    SignalFlow flow;TextButton flowButton{"Signal flow"};
+    SignalFlow flow;TextButton flowButton{"Signal flow"},cablesButton{"Cables"};
     int bodyTop() const {return flowButton.getToggleState()||currentView=="panel"?106:152;}
     // Request 71: presets, views and zoom.
     void showBrowser(bool show){
@@ -874,7 +928,7 @@ private:
             auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;p->knob=hardware.knob;
             p->rowMenu=[this,id=node.id]{MessageManager::callAsync([safe=SafePointer<RackSynth>(this),id]{if(safe)safe->showRowMenu(id);});};
             auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
-            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});p->setConnections(document.graph);bindSamplePanel(*p,node.id);bindSpectralPanel(*p,node.id);
+            p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});bindSamplePanel(*p,node.id);bindSpectralPanel(*p,node.id);
             bindSequencePanel(*p);
             p->activated=[this,id=node.id]{if(selected!=id)selectNode(id);};
             p->selectionChanged=[this,id=node.id,p]{
@@ -884,6 +938,7 @@ private:
             p->portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
             hardware.addAndMakeVisible(*p);hardware.modules.push_back(std::move(card));
         }
+        hardware.wireJacks(document.graph);
     }
     bool replaceModule(const std::string& id,const std::string& nextType) {
         auto next=document;for(auto& n:next.graph.nodes)if(n.id==id){n.type=nextType;n.parameters.clear();if(nextType!="seq.performance")n.performance.reset();}return commit(std::move(next),id);

@@ -1131,3 +1131,18 @@ by 0.380 times the reference RMS. The respective differences for Prophet,
 Xpander and harmonic drone were 0.470, 1.378 and 0.178. In each model the
 disconnected depth renders matched sample for sample. These are waveform
 differences measured on a single played note.
+
+## Request 85 — Patch cables on the rack
+
+Yan asked where to find the connections and then asked for patch cables. The
+Signal flow diagram required switching away from the controls to trace a route.
+The Modular rack now draws each socket connection between its actual jacks and
+uses the same endpoints for drag patching. Painting uses current component
+positions after a resize or row change. Keep socket overlays click-through so
+a cable crossing a control cannot capture knob or scroll gestures.
+
+A drop queues the two endpoint IDs on the UI thread. The existing rack graph
+validator accepts or rejects the edit after the button finishes its mouse event.
+A patch change cancels a pending cable edit before destroying its old sockets.
+Native gesture checks cover patching from either direction and rejecting a
+mismatched signal type. Existing checks cover cycle rejection and recall.

@@ -155,8 +155,30 @@ struct Jack : Button {
     static constexpr int size=38;
     Port port;bool output=false,connected=false;Colour text=paper;
     Jack(Port p,bool out):Button(String(p.id)+(out?" output":" input")),port(std::move(p)),output(out){}
+    juce::Point<int> socket() const {return {getWidth()/2,12};}
+    std::function<void(Jack&, juce::Point<int>, bool)> cableDrag;
+    std::function<void(Jack*)> cableHover;
+    bool pulling=false;
+    void mouseDrag(const MouseEvent& e) override {
+        Button::mouseDrag(e);
+        if(cableDrag && e.mods.isLeftButtonDown() && !e.mods.isPopupMenu() &&
+           (pulling || e.getDistanceFromDragStart()>=5)){
+            pulling=true;
+            beginDragAutoRepeat(55);
+            cableDrag(*this,e.getScreenPosition(),false);
+        }
+    }
+    void mouseUp(const MouseEvent& e) override {
+        Button::mouseUp(e); // onClick checks pulling while the button releases its state.
+        if(pulling){
+            pulling=false;
+            cableDrag(*this,e.getScreenPosition(),true);
+        }
+    }
+    void mouseEnter(const MouseEvent& e) override {Button::mouseEnter(e);if(cableHover)cableHover(this);}
+    void mouseExit(const MouseEvent& e) override {Button::mouseExit(e);if(cableHover)cableHover(nullptr);}
     void paintButton(Graphics& g,bool over,bool down) override {
-        const float cx=getWidth()*.5f,cy=12;
+        const auto centre=socket();const float cx=float(centre.x),cy=float(centre.y);
         g.setColour(Colour(0xff16181a));g.fillEllipse(cx-10,cy-10,20,20);
         g.setColour(over||down?Colour(0xfff0c76c):Colour(0xffc2c3bd));g.drawEllipse(cx-8.5f,cy-8.5f,17,17,2.4f);
         g.setColour(connected?(port.type==SignalType::Control?Colour(0xfff0c76c):teal):Colour(0xff080a0c));g.fillEllipse(cx-4,cy-4,8,8);
@@ -220,7 +242,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     }
     ~ModulePanel() override {removeMouseListener(this);}
     void mouseDown(const MouseEvent& e) override {
-        if(activated)activated();
+        if(activated && !dynamic_cast<Jack*>(e.eventComponent))activated();
         if(e.mods.isPopupMenu()&&e.eventComponent==this&&rowMenu)rowMenu();   // right-click on the card body or header
     }
     bool isInterestedInFileDrag(const StringArray& files) override {return current=="sample.player"&&files.size()==1&&files[0].endsWithIgnoreCase(".wav");}
@@ -266,7 +288,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         for(const auto& t:moduleRegistry())if(t.id==type){
             auto add=[&](Port p,bool output){auto jack=std::make_unique<Jack>(p,output);jack->text=panelInk(type);auto* ptr=jack.get();
                 jack->setTooltip(String(instance)+"."+String(p.id)+(output?" / output":" / choose input source"));
-                jack->onClick=[this,p,output,ptr]{if(portClicked)portClicked(p,output,ptr);};addAndMakeVisible(*jack);jacks.push_back(std::move(jack));};
+                jack->onClick=[this,p,output,ptr]{if(!ptr->pulling&&portClicked)portClicked(p,output,ptr);};addAndMakeVisible(*jack);jacks.push_back(std::move(jack));};
             for(const auto& p:t.inputs)add(p,false);for(const auto& p:t.outputs)add(p,true);}
         menuButton.setVisible(bool(rowMenu));
         spectralTextWidth=0;if(spectral)for(const auto& k:knobs)spectralTextWidth=std::max(spectralTextWidth,k->textWidth());
@@ -296,7 +318,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             for(const auto& c:graph.connections){const auto& e=j->output?c.source:c.destination;if(e.node==instance&&e.port==j->port.id){j->connected=true;const auto& other=j->output?c.destination:c.source;links+="\n"+String(other.node)+"."+String(other.port);}}
             if(j->output)for(const auto& c:graph.modulations)if(c.source.node==instance&&c.source.port==j->port.id){j->connected=true;links+="\nModulates "+String(c.destination.node)+"."+String(c.destination.port);}
             if(j->output)for(const auto& e:graph.outputs)if(e.node==instance&&e.port==j->port.id){j->connected=true;links+="\nInstrument output";}
-            j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+"\nClick to patch");j->repaint();}
+            j->setTooltip(String(instance)+"."+String(j->port.id)+(j->output?" / output":" / input")+(links.isEmpty()?"\nNot connected":links)+(j->cableDrag?"\nDrag to patch or click for routing":"\nClick to patch"));j->repaint();}
     }
     bool sequencerWindowOpen() const {
         return (referenceSequence && referenceSequence->isEditorOpen())
@@ -410,13 +432,111 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
 };
 // Request 72: the rack is a JUCE FlexBox. Cards keep their natural size (knob density plus
 // fixed, readable text) and wrap into rows; a patch can instead fix its rows by hand.
-struct HardwareRack : juce::Component {
+struct HardwareRack : juce::Component, private AsyncUpdater {
     static constexpr int gap=6,margin=6;
     std::map<std::string,Values> values;
     std::vector<std::unique_ptr<ModulePanel>> modules;
     std::vector<std::vector<std::string>> rows;   // empty: wrap to the window width
     int knob=44;std::function<void(float)> magnified;
-    void clear(){modules.clear();values.clear();}
+    struct Cable {Jack* source; Jack* destination;};
+    std::vector<Cable> cables;
+    Jack* held=nullptr;
+    Jack* target=nullptr;
+    Jack* hovered=nullptr;
+    juce::Point<int> looseEnd;
+    bool showCables=true;
+    std::function<void(const Connection&)> connect;
+    Connection pending;
+    void clear(){
+        cancelPendingUpdate();
+        held=target=hovered=nullptr;
+        cables.clear();modules.clear();values.clear();
+    }
+    static Colour cableColour(SignalType type){
+        if(type==SignalType::Event)return Colour(0xff92b5ed);
+        if(type==SignalType::Control)return Colour(0xffe2b275);
+        return Colour(0xff85c2be);
+    }
+    void wireJacks(const GraphSpec& graph){
+        using Key=std::pair<std::string,std::string>;
+        std::map<Key,Jack*> inputs,outputs;
+        for(auto& card:modules)for(auto& j:card->jacks){
+            (j->output?outputs:inputs)[{card->instance,j->port.id}]=j.get();
+            j->setViewportIgnoreDragFlag(true);
+            j->cableHover=[this](Jack* over){hovered=over;repaint();};
+            j->cableDrag=[this](Jack& start,juce::Point<int> screen,bool finish){dragCable(start,screen,finish);};
+        }
+        for(auto& card:modules)card->setConnections(graph);
+        for(const auto& c:graph.connections){
+            const auto src=outputs.find({c.source.node,c.source.port});
+            const auto dst=inputs.find({c.destination.node,c.destination.port});
+            if(src!=outputs.end() && dst!=inputs.end())cables.push_back({src->second,dst->second});
+        }
+        repaint();
+    }
+    juce::Point<int> socketPosition(Jack& j) const {return getLocalPoint(&j,j.socket());}
+    static bool matches(const Jack& a,const Jack& b){
+        return a.getParentComponent()!=b.getParentComponent() && a.output!=b.output &&
+               a.port.type==b.port.type && a.port.channels==b.port.channels;
+    }
+    static Endpoint endpoint(Jack& jack){
+        return {static_cast<ModulePanel*>(jack.getParentComponent())->instance,jack.port.id};
+    }
+    void dragCable(Jack& start,juce::Point<int> screen,bool finish){
+        auto* view=findParentComponentOfClass<Viewport>();
+        const auto inView=view?view->getLocalPoint(nullptr,screen):juce::Point<int>();
+        if(view && !finish && view->getLocalBounds().contains(inView))
+            view->autoScroll(inView.x,inView.y,24,16);
+        looseEnd=getLocalPoint(nullptr,screen);
+        auto* over=dynamic_cast<Jack*>(getComponentAt(looseEnd));
+        held=&start;
+        target=over && matches(start,*over) && (!view || view->getLocalBounds().contains(inView))?over:nullptr;
+        if(finish){
+            if(target){
+                pending={endpoint(start.output?start:*target),endpoint(start.output?*target:start)};
+                // Installing a new graph destroys these buttons. Finish mouse dispatch first.
+                triggerAsyncUpdate();
+            }
+            held=target=nullptr;
+        }
+        repaint();
+    }
+    void handleAsyncUpdate() override {
+        const auto route=pending;
+        if(connect)connect(route);
+    }
+    void flushCableEdit(){handleUpdateNowIfNeeded();}
+    static void drawLead(Graphics& g,juce::Point<int> a,juce::Point<int> b,Colour colour,float opacity){
+        auto from=a.toFloat(),to=b.toFloat();
+        const float sag=std::clamp(from.getDistanceFrom(to)*.14f,18.f,64.f);
+        Path path;path.startNewSubPath(from);
+        path.cubicTo(from.translated(0,sag),to.translated(0,sag),to);
+        g.setColour(Colour(0xff151b1e).withAlpha(opacity));
+        g.strokePath(path,PathStrokeType(5.5f,PathStrokeType::curved,PathStrokeType::rounded));
+        g.setColour(colour.withAlpha(opacity));g.strokePath(path,PathStrokeType(3.2f));
+        for(auto point:{from,to})g.fillEllipse(point.x-3.5f,point.y-3.5f,7,7);
+    }
+    void paintOverChildren(Graphics& g) override {
+        auto* trace=held?held:hovered;
+        if(showCables){
+            for(const auto& cable:cables){
+                if(trace && (trace==cable.source || trace==cable.destination))continue;
+                drawLead(g,socketPosition(*cable.source),socketPosition(*cable.destination),
+                         cableColour(cable.source->port.type),trace?.19f:.76f);
+            }
+            if(trace)for(const auto& cable:cables)if(trace==cable.source || trace==cable.destination)
+                drawLead(g,socketPosition(*cable.source),socketPosition(*cable.destination),cableColour(trace->port.type),1.f);
+        }
+        if(held){
+            const auto colour=cableColour(held->port.type);
+            for(const auto& card:modules)for(const auto& j:card->jacks)if(matches(*held,*j)){
+                const auto centre=socketPosition(*j).toFloat();
+                g.setColour(colour.withAlpha(j.get()==target?1.f:.8f));
+                g.drawEllipse(centre.x-11,centre.y-11,22,22,j.get()==target?4.f:2.f);
+            }
+            drawLead(g,socketPosition(*held),target?socketPosition(*target):looseEnd,colour,1.f);
+        }
+    }
     ModulePanel* find(const std::string& id){for(auto& m:modules)if(m->instance==id)return m.get();return nullptr;}
     // Lays the cards out for a view of this width; returns the rack's size.
     Rectangle<int> arrange(int width){

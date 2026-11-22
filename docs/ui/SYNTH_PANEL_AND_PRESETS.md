@@ -277,3 +277,17 @@ For the OB filter, inspect **filter.fm** in Signal flow or hover **FM depth**.
 OB swell uses Oscillator B, Reed squelch uses its sub, and Prophet poly-mod
 uses the poly-mod output. On an older saved patch with **FM / NO INPUT**, open
 Modular, click the filter's **FM** input jack and choose an oscillator output.
+
+### Patch cables on the Modular rack
+
+Open **Modular** to see the current patch drawn between the module jacks.
+Hover a jack to trace its cables. Teal carries audio, amber carries control
+signals and blue carries notes. Drag from either end to another jack. Matching
+sockets light up and the cable snaps to the socket under the pointer. An input
+takes one source. An output can feed several inputs. To unplug an input, click
+its jack and choose **Disconnect input**. Dropping on the rack background
+cancels the gesture.
+
+**Cables**, beside **Signal flow**, hides or shows the wiring while you adjust
+the controls. Optisynth remembers that display preference. **Signal flow** also
+shows parameter-matrix assignments and the final instrument output.

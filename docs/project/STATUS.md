@@ -1,5 +1,12 @@
 # Optisynth status — 22 November 2026
 
+## 0.0.21 — Rack patch cables
+
+Installed 22 November at 20:31 UTC at the pinned Release location. The installed executable matched the qualified candidate, SHA-256
+`5e2ed3902d77b049d631755019163c3f7203b147d06ab7a80162cf3eb526555f`.
+
+Open **Modular** to trace the patch or drag between compatible sockets in either direction. **Cables** toggles the overlay. The native application checks passed. Normal and minimum window captures are in `build/ui-review-85`.
+
 ## 0.0.20 signal flow, voice ADSR and OB filter FM
 
 Installed 22 November at 20:18 UTC at the pinned Release path. The signed
