@@ -142,6 +142,27 @@ struct Control : juce::Component {
         addAndMakeVisible(*modulationButton);
         resized();
     }
+    enum class Activity { unspecified, ready, waiting };
+    Activity activity=Activity::unspecified;
+    static void drawActivityLamp(Graphics& g,Rectangle<float> bounds,bool ready,Colour legend){
+        if(ready){
+            g.setColour(Colour(0xff244a3e));g.fillEllipse(bounds);
+            g.setColour(Colour(0xffb9f29a));g.fillEllipse(bounds.reduced(1.4f));
+        }else{
+            g.setColour(legend.withAlpha(.85f));g.drawEllipse(bounds.reduced(.8f),1.4f);
+        }
+    }
+    void showActivity(const String& reason){
+        activity=reason.isEmpty()?Activity::ready:Activity::waiting;
+        slider.setAlpha(activity==Activity::ready?1.f:.55f);
+        const auto tip=label.getText()+" — "+(reason.isEmpty()?String("Ready"):reason);
+        label.setTooltip(tip);slider.setTooltip(tip+" / double-click to reset");
+        repaint();
+    }
+    void paintOverChildren(Graphics& g) override {
+        if(activity!=Activity::unspecified)
+            drawActivityLamp(g,{3.f,float(labelHeight+2),8.f,8.f},activity==Activity::ready,label.findColour(Label::textColourId));
+    }
     String patchedFmLabel;
     void showFilterFmSource(const GraphSpec& graph,const std::string& node){
         const auto link=std::find_if(graph.connections.begin(),graph.connections.end(),[&](const auto& c){
@@ -412,6 +433,14 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         }
         if(knobs.empty()&&!editorContent()){g.setColour(ink2);g.setFont(font(13));g.drawFittedText(current=="utility.vca"?"AUDIO x CONTROL":current=="utility.downmix"?"(L + R) / 2":current=="utility.stereo"?"LEFT / RIGHT":"SIGNAL THROUGH",content,Justification::centred,2);}
         g.setColour(ink2.withAlpha(.8f));g.setFont(font(text::footer));
+        if(current=="analog.vco"){
+            const float y=float(getHeight()-footerHeight-3);
+            Control::drawActivityLamp(g,{float(pad),y+4,8,8},true,ink2);
+            Control::drawActivityLamp(g,{float(pad+55),y+4,8,8},false,ink2);
+            g.setColour(ink2);g.drawText("Ready",pad+12,int(y),42,footerHeight,Justification::centredLeft);
+            g.drawText(routed?"Waiting":"Waiting / oscillator unrouted",pad+67,int(y),getWidth()-pad-70,footerHeight,Justification::centredLeft);
+            return;
+        }
         g.drawText(routed?panel(current).description:"UNROUTED / connect to activate",pad,getHeight()-footerHeight-3,getWidth()-2*pad,footerHeight,Justification::centred,true);
     }
     void resized() override {

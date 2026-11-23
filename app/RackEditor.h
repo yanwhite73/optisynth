@@ -86,7 +86,7 @@ public:
         browser.importFile=[this]{chooseFile(false);};browser.exportFile=[this]{chooseFile(true);};
         browser.saveCurrent=[this](const PresetInfo& info,bool panelView,bool overwrite){return saveToLibrary(info,panelView,overwrite);};
         browser.requestSaveForm=[this]{showSaveForm();};
-        browser.infoEdited=[this](const std::string& key,const PresetInfo& info){if(key==presetKey){document.info=info;synthPanel.build(document);updatePresetDisplay();}};
+        browser.infoEdited=[this](const std::string& key,const PresetInfo& info){if(key==presetKey){document.info=info;synthPanel.build(document);refreshVcoActivity();updatePresetDisplay();}};
         browser.favouritesChanged=[this]{updatePresetDisplay();};
         focusMode.setClickingTogglesState(true);focusMode.onClick=[this]{showSelected();};
         rack.setRowHeight(62);rack.setColour(ListBox::backgroundColourId,Colour(0xff25343a));
@@ -516,6 +516,25 @@ public:
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
             require(factoryPresets().size()==24&&starters.size()==24&&*starters.begin()==0&&*starters.rbegin()==23,"Factory catalogue lists every starter once");}
+        {
+            require(loadFactory(23),"String afterglow for VCO activity");selectNode("vco1");
+            auto cue=[&](const char* key){return hardware.find("vco1")->control(key)->activity;};
+            const auto on=Control::Activity::ready,off=Control::Activity::waiting;
+            require(cue("pulse")==on && cue("pulse_width")==off && cue("fm_depth")==off && cue("pwm_depth")==off,
+                    "Unpatched depth controls and zero-pulse width wait");
+            editor.control("pulse")->slider.setValue(.901,sendNotificationSync);
+            require(cue("pulse_width")==on && editor.control("pulse_width")->activity==on && editor.control("fm_depth")->slider.isEnabled(),
+                    "Pulse edit updates rack and focus while waiting controls remain editable");
+            setView("modular",true);capture("string-afterglow-vco-activity.png");
+            auto next=document;setRackConnection(next.graph,{"vco1","fm"},{"vco2","out"});
+            setRackConnection(next.graph,{"vco1","pwm"},{"breath","out"});
+            require(commit(next,"vco1") && cue("fm_depth")==on && cue("pwm_depth")==on,"Cabling enables both depth indicators");
+            setParameter("vco1","pulse",0);
+            require(cue("pwm_depth")==off,"Patched PWM still needs a pulse waveform");
+            next=document;next.graph.modulations.push_back({{"breath","out"},{"vco1","pulse"},.2f});
+            require(commit(next,"vco1") && cue("pulse_width")==on,"Matrix modulation can raise a zero pulse");
+            require(loadFactory(16) && synthPanel.control("vco1","fm_depth")->activity==on,"Curated Prophet panel follows its poly-mod wiring");
+        }
         for(int starter : {21,22,23}){
             require(loadFactory(starter),"Load new device preset");drain();
             require(synthPanel.layoutSound()&&currentView=="panel","Playable device panel fits");
@@ -819,7 +838,7 @@ private:
         if(file.exists()&&!overwrite)return "exists";
         try{auto saved=document;saved.info=info;saved.view=panelView?"panel":"modular";writePresetFile(file,rackJSON(saved));
             document.info=info;document.view=saved.view;presetKey="user:"+file.getFullPathName().toStdString();presetDirty=false;
-            browser.rescan();synthPanel.build(document);updatePresetDisplay();
+            browser.rescan();synthPanel.build(document);refreshVcoActivity();updatePresetDisplay();
             message("Saved "+file.getFileName()+" to the preset library"+(document.samples.empty()?"":" - WAV files remain external"));return {};
         }catch(const std::exception& e){return e.what();}
     }
@@ -928,12 +947,43 @@ private:
     }
     const ModuleType& type(const std::string& id) const {for(const auto& t:registry)if(t.id==id)return t;throw std::invalid_argument("Unknown type");}
     void message(const String& text,bool error=false){status.setColour(Label::textColourId,error?Colour(0xffffb180):paper);status.setText(text,dontSendNotification);}
+    void updateVcoActivity(ModulePanel& card){
+        if(card.current!="analog.vco")return;
+        const auto& id=card.instance;
+        auto canRise=[&](const std::string& key){
+            if(card.control(key)->slider.getValue()>0)return true;
+            for(const auto& m:document.graph.modulations)
+                if(m.destination.node==id && m.destination.port==key && m.amount!=0)return true;
+            return false;
+        };
+        auto patched=[&](const std::string& port){
+            for(const auto& c:document.graph.connections)if(c.destination.node==id && c.destination.port==port)return true;
+            return false;
+        };
+        const bool pulse=canRise("pulse"),wave=pulse || canRise("saw") || canRise("triangle");
+        const bool level=canRise("level"),fm=patched("fm"),pwm=patched("pwm");
+        for(const auto& p:panel(card.current).parameters){
+            const auto& key=p.id;String reason;
+            if(!card.routed)reason="Route this oscillator to the instrument output.";
+            else if(key=="fm_depth" && !fm)reason="Patch an audio source to FM.";
+            else if(key=="pwm_depth" && !pwm)reason="Patch a control source to PWM.";
+            else if((key=="pulse_width" || key=="pwm_depth") && !pulse)reason="Raise Pulse or modulate its level.";
+            else if(key!="level" && !level)reason="Raise oscillator Level.";
+            else if(!wave && key!="pulse" && key!="saw" && key!="triangle")reason="Raise a waveform level.";
+            card.control(key)->showActivity(reason);
+            if(editor.instance==id && editor.current==card.current)editor.control(key)->showActivity(reason);
+            synthPanel.showActivity(id,key,reason);
+        }
+    }
+    void refreshVcoActivity(){for(auto& card:hardware.modules)updateVcoActivity(*card);}
     void setParameter(const std::string& id,const std::string& key,float value) {
         cancelLoading();
         for(auto& n:document.graph.nodes)if(n.id==id){auto it=std::find_if(n.parameters.begin(),n.parameters.end(),[&](const auto& p){return p.first==key;});if(it==n.parameters.end())n.parameters.push_back({key,value});else it->second=value;}
         if(auto* p=hardware.find(id)){hardware.values[id][p->current][key]=value;p->setValue(key,value);}
         if(editor.instance==id){panelValues[editor.current][key]=value;editor.setValue(key,value);}
         synthPanel.setValue(id,key,value);
+        if(key=="pulse" || key=="saw" || key=="triangle" || key=="level")
+            if(auto* card=hardware.find(id))updateVcoActivity(*card);
         if(!presetDirty){presetDirty=true;updatePresetDisplay();}
         auto handle=handles.find(id);if(handle!=handles.end()&&handle->second){
             auto node=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;});
@@ -960,7 +1010,7 @@ private:
     void showMatrix(){
         if(!matrixWindow){matrixWindow=std::make_unique<MatrixWindow>();auto* m=matrixWindow->editor;
             m->addRoute=[this](const Endpoint& source,const Endpoint& destination,float amount){auto next=document;next.graph.modulations.push_back({source,destination,amount});return commit(std::move(next),selected);};
-            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;if(flow.isVisible())flow.updateDepth(i,amount);}};
+            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;if(flow.isVisible())flow.updateDepth(i,amount);if(auto* card=hardware.find(document.graph.modulations[size_t(i)].destination.node))updateVcoActivity(*card);}};
             m->removeRoute=[this](int i){MessageManager::callAsync([safe=SafePointer<RackSynth>(this),i]{if(!safe)return;auto next=safe->document;if(i>=0&&i<int(next.graph.modulations.size())){next.graph.modulations.erase(next.graph.modulations.begin()+i);safe->commit(std::move(next),safe->selected);}});};
         }
         matrixWindow->editor->refresh(document);matrixWindow->setVisible(true);matrixWindow->toFront(true);
@@ -1124,6 +1174,7 @@ private:
         bindSamplePanel(editor,node.id);
         bindSpectralPanel(editor,node.id);
         editor.setConnections(document.graph);editor.portClicked=[this,id=node.id](const Port& port,bool output,juce::Component* target){socketMenu(id,port,output,target);};
+        refreshVcoActivity();
         hardware.highlight(selected);
         // Persistent rows avoid destroying the ComboBox inside its own onChange.
         const auto& ports=type(node.type).inputs;

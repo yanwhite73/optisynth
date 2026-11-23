@@ -102,6 +102,9 @@ public:
     void setValue(const std::string& node,const std::string& key,float value) {
         for(size_t i=0;i<keys.size();++i)if(keys[i].first==node&&keys[i].second==key)controls[i]->setValue(value);
     }
+    void showActivity(const std::string& node,const std::string& key,const String& reason){
+        for(size_t i=0;i<keys.size();++i)if(keys[i].first==node && keys[i].second==key)controls[i]->showActivity(reason);
+    }
     Control* control(const std::string& node,const std::string& key) {
         for(size_t i=0;i<keys.size();++i)if(keys[i].first==node&&keys[i].second==key)return controls[i].get();return nullptr;
     }

@@ -322,3 +322,11 @@ source and vco1 / Pulse width as destination with a small depth. Alternatively,
 patch breath OUT to VCO1 PWM and use PWM Depth. For oscillator FM, connect
 VCO2 OUT to VCO1 FM and bring up FM Depth from zero. The curated Strings
 panel's FM Depth controls the filter, which has its own FM input.
+
+Analog VCO knobs carry a small lamp. A filled green lamp means the control is
+ready in this patch. A hollow lamp and dimmed knob mean that a routing or level
+condition is missing. Hover over the knob for the reason. You can set its value
+before connecting the cable. The cue follows oscillator routing, FM and PWM
+inputs, waveform levels, and output level. A nonzero matrix route to a level
+counts as a way for that level to rise. The lamps describe the patch setup and
+stay steady between notes.

@@ -1,5 +1,13 @@
 # Optisynth status — 23 November 2026
 
+## 0.0.23 — Analog VCO activity lamps
+
+Installed on 23 November at 17:54 UTC at the pinned Release location. Filled
+green lamps mark ready controls. Hollow lamps mark controls waiting for a
+route or waveform level. Hover for the reason. The native UI checks passed;
+the String afterglow capture is in `build/ui-review-90`. Verified executable
+SHA-256 `171dbb0fd3eddbd3f558034d344b929effc69b735bb4f87951ba07e77788cf8e`.
+
 ## 0.0.22 — Cable editing and modal CV
 
 Installed on 23 November at 10:29 UTC at the pinned Release location. Cable

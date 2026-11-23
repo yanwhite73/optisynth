@@ -1211,3 +1211,14 @@ render loop and the matrix destination list. All ten VCO1 knobs are exposed.
 The screenshot shows Pulse at 0.901 and empty FM and PWM sockets, making eight
 knobs effective. The factory and saved copies start with pulse level zero.
 The control dependencies and two ways to patch PWM are in the synth panel guide.
+
+## Request 90 — Analog VCO control activity
+
+VCO1's depth knobs previously looked ready even with both input jacks empty.
+The oscillator now has a filled or hollow lamp per parameter in the rack, focus
+editor and curated controls. Each waiting knob retains its value and remains
+editable. The cue checks whether the oscillator reaches the output, its local
+levels, and its typed input connections. Changes to patch structure, relevant
+levels and matrix depths refresh the cue on the UI thread. Native regressions
+exercise String afterglow, a patched variation, a zero-base matrix-modulated
+pulse and the Prophet poly-mod panel.

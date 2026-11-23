@@ -905,3 +905,9 @@ site's `docs/owner-feedback.md`.
 ```text
 [Image #1] in strig afterglow are all of these controls active or accessible?
 ```
+
+## 90 — Visual cue for active oscillator controls
+
+```text
+hm yes, active controls could get a different visual cue
+```
