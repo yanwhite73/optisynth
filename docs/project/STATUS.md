@@ -1,5 +1,9 @@
 # Optisynth status — 23 November 2026
 
+## Current design study
+
+[Parameter movement](../ui/PARAMETER_MOVEMENT.md) is at interaction-design stage. The next review compares a waveform button and an outer-ring gesture on Decay and Pulse Width at minimum rack size, using the [Rich and Roach listening studies](../research/instruments/RICH_ROACH_PATCH_STRATEGIES.md). The installed app is 0.0.23.
+
 ## 0.0.23 — Analog VCO activity lamps
 
 Installed on 23 November at 17:54 UTC at the pinned Release location. Filled

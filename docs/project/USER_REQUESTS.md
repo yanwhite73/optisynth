@@ -931,3 +931,15 @@ hes definitely talked about clouds oscillators
 No, you are flattening and mixing concepts.
 I did not ask for equivalents of Rich's flute and guitar lines. I am interested in the granular details of their synthesis and modular techniques. How do each of them use berlin school tinkly delayed lines? what about in neurogenesis?
 ```
+
+## 94 — Movement at the parameter, interaction design first
+
+```text
+make sure you document all this research, and add to it the proposed design innovation of adding a movement subcontrol for each parameter that allows instant lfo assignment without patching. It needs thought design and usability wise first
+```
+
+## 95 — Continue the artist research alongside the design
+
+```text
+and continue the thread / thought process you were on too
+```

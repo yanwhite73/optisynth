@@ -15,6 +15,8 @@
 - [Sequencer model/source research](../research/sequencers/SEQUENCER_MODELS_RESEARCH.md):
   the musical methods that those editors must explain.
 
+- [Parameter movement](PARAMETER_MOVEMENT.md) studies instant LFO assignment at a knob, existing CV patches, shared sources and the listening tasks for a first usability review.
+
 ## Collected sequencer visuals
 
 **[Open the illustrated sequencer atlas](sequencers/README.md).** It contains
