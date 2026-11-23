@@ -206,3 +206,7 @@ remain explicit while the reusable components are extracted.
 Request 49: [Pattern / Motion source decision](sequencers/PATTERN_MOTION_SOURCE_STUDY.md)
 applies the full study to a 64-step performance sequencer. The engine and UI are
 first-party; incomplete firmware documentation prevented upstream code adoption.
+
+## Artist patch studies
+
+Robert Rich and Steve Roach's studio practices, reference recordings, instruments and four Optisynth listening experiments are collected in [Rich and Roach patch strategies](instruments/RICH_ROACH_PATCH_STRATEGIES.md).

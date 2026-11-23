@@ -911,3 +911,10 @@ site's `docs/owner-feedback.md`.
 ```text
 hm yes, active controls could get a different visual cue
 ```
+
+## 91 — Robert Rich and Steve Roach sound strategies
+
+```text
+I'd like some more strategies for robert rich and steve roach type of sounds, what elements can you identify?
+what pieces of equipment or modular setup/strategy?
+```
