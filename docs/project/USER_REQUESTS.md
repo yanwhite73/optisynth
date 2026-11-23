@@ -918,3 +918,16 @@ hm yes, active controls could get a different visual cue
 I'd like some more strategies for robert rich and steve roach type of sounds, what elements can you identify?
 what pieces of equipment or modular setup/strategy?
 ```
+
+## 92 — Rich's cloud oscillators
+
+```text
+hes definitely talked about clouds oscillators
+```
+
+## 93 — The synthesis of delayed lines in Rich, Roach and Neurogenesis
+
+```text
+No, you are flattening and mixing concepts.
+I did not ask for equivalents of Rich's flute and guitar lines. I am interested in the granular details of their synthesis and modular techniques. How do each of them use berlin school tinkly delayed lines? what about in neurogenesis?
+```

@@ -209,4 +209,4 @@ first-party; incomplete firmware documentation prevented upstream code adoption.
 
 ## Artist patch studies
 
-Robert Rich and Steve Roach's studio practices, reference recordings, instruments and four Optisynth listening experiments are collected in [Rich and Roach patch strategies](instruments/RICH_ROACH_PATCH_STRATEGIES.md).
+[Rich and Roach patch strategies](instruments/RICH_ROACH_PATCH_STRATEGIES.md) traces played and sequenced lines, rhythmic delay, the track tunings on *Neurogenesis*, Roach’s live Part 3–4 transition and Rich’s cloud oscillator.

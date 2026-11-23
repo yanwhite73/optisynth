@@ -1222,3 +1222,7 @@ levels, and its typed input connections. Changes to patch structure, relevant
 levels and matrix depths refresh the cue on the UI thread. Native regressions
 exercise String afterglow, a patched variation, a zero-base matrix-modulated
 pulse and the Prophet poly-mod panel.
+
+## Requests 92–93 — Track-specific synthesis research
+
+The first artist study substituted instrumental roles and generic patch suggestions for the requested explanation of repeated electronic lines. Yan had to ask again. The revised study ties each mechanism to its documented session, identifies the tuning for each Neurogenesis track, and labels illustrative patch settings. Future artist studies should trace the source of the notes, the articulation of the voice and the path of each repeat before proposing an Optisynth patch.
