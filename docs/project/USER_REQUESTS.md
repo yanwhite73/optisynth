@@ -874,6 +874,18 @@ wheres the patch layout showing connections?
 can you also do it with patch cables?
 ```
 
+## 86 — Clear controls and movable cable ends
+
+```text
+can you make it so the cables dont obscure controls and that the cables can be detached or rediverted?
+```
+
+## 87 — Module controls and LFO modulation of modal percussion decay
+
+```text
+we need much better clones or versions of modules. For example modal percussion how do i lfo the decay?
+```
+
 ## 88 — Changelog, sounds, roadmap and screenshots for the website
 
 ```text

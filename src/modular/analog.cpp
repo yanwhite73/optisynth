@@ -530,14 +530,14 @@ void analogPorts(const std::string& id, ModuleType& type) {
     if (id == "analog.vco")
         type.inputs = {{"fm", SignalType::Audio, false}, {"pwm", SignalType::Control, false}, {"sync", SignalType::Audio, false}};
     else if (id == "analog.filter")
-        type.inputs = {{"in", SignalType::Audio, true}, {"mod", SignalType::Control, false}, {"fm", SignalType::Audio, false}};
+        type.inputs = {{"in", SignalType::Audio, false}, {"mod", SignalType::Control, false}, {"fm", SignalType::Audio, false}};
     else if (id == "analog.polymod") {
         type.inputs = {{"osc", SignalType::Audio, false}, {"env", SignalType::Control, false}};
         type.outputs = {{"fm", SignalType::Audio}, {"pw", SignalType::Control}};
     } else if (id == "analog.vca")
-        type.inputs = {{"in", SignalType::Audio, true}, {"cv", SignalType::Control, true}};
+        type.inputs = {{"in", SignalType::Audio, false}, {"cv", SignalType::Control, false}};
     else if (id == "voice.mix") {
-        type.inputs = {{"in", SignalType::Audio, true}, {"notes", SignalType::Event, false}};
+        type.inputs = {{"in", SignalType::Audio, false}, {"notes", SignalType::Event, false}};
         type.outputs = {{"out", SignalType::Audio, false, 2}};
     } else if (id == "mod.wheel")
         type.outputs = {{"out", SignalType::Control}, {"bend", SignalType::Control}};
@@ -554,7 +554,7 @@ void analogPorts(const std::string& id, ModuleType& type) {
         type.outputs = {{"out",SignalType::Audio,false,2},{"wet_a",SignalType::Audio},{"wet_b",SignalType::Audio}};
     }
     else if (id.rfind("fx.", 0) == 0) {
-        type.inputs = {{"in", SignalType::Audio, true, 2}};
+        type.inputs = {{"in", SignalType::Audio, false, 2}};
         type.outputs = {{"out", SignalType::Audio, false, 2}};
     }
 }

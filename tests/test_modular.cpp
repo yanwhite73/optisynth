@@ -77,6 +77,21 @@ int main(int argc,char** argv){try {
         auto sync=plain;sync.nodes[0].parameters={{"sync",3}};
         check(render(plain)!=render(sync),"Hard sync changes oscillator sound");
     }
+    for(int preset:{1,2}){
+        const auto base=rackPreset(preset);
+        const auto dry=render(base);
+        for(const char* port:{"mat","bright","decay"}){
+            auto patch=base;
+            patch.nodes.push_back({"lfo","mod.lfo",{{"depth",0.f}}});
+            setRackConnection(patch,{preset==1?"source":"resonator",port},{"lfo","out"});
+            check(render(patch)==dry,"Zero CV preserves original modal render");
+            patch.nodes.back().parameters={{"depth",.35f}};
+            const auto wet=render(patch);
+            double difference=0;
+            for(size_t i=0;i<wet.size();++i)difference+=std::abs(wet[i]-dry[i]);
+            check(difference>0.01 && energy(wet)>0,"Modal CV input changes the rendered sound");
+        }
+    }
     for(const auto* source:{"modal.voice","drum.analog"}) {
         auto g=instrumentPatch(source,"spectral.ahdsfr","filter.bypass",false,false);
         Runtime r(g);check(r.activeModules()==2,"Dormant envelope and VCA excluded");

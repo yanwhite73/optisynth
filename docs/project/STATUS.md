@@ -1,4 +1,16 @@
-# Optisynth status — 22 November 2026
+# Optisynth status — 23 November 2026
+
+## 0.0.22 — Cable editing and modal CV
+
+Installed on 23 November at 10:29 UTC at the pinned Release location. Cable
+lanes keep controls visible. Drag a connected input to a jack to reroute it, or
+to empty rack space to unplug. The LFO button beside Decay, Material or
+Brightness creates a patched LFO on Modal Percussion and Modal Resonator.
+The CV button opens the assigned source.
+
+Native gesture, layout and modal audio recall checks passed, along with 28
+graph checks and 357 modular checks. Captures are in `build/ui-review-87`.
+Installed executable SHA-256 `232cb806152d6bff6b25d4a8db5601e9e6d6f314a99a5857e6dfed69e27f796e`.
 
 ## 0.0.21 — Rack patch cables
 

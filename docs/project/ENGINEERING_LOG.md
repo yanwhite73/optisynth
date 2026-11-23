@@ -1174,3 +1174,27 @@ to −1 dBFS peak with a 3 s end fade.
 - **Defect found:** in the Pattern/Motion editor's hint line
   (`build/ui-review-85/motion-11.png`), "·" shows as "Â·": UTF-8 text decoded as
   Latin-1 somewhere in that editor's strings. Not fixed here.
+
+## Requests 86–87 — Movable cable ends and playable modal controls
+
+The 0.0.21 cables passed mouse events through to the rack, but their curves
+crossed parameter labels. Click-through alone left those labels hard to read.
+Reserve space above each socket row and cache the cable paths after layout.
+Use the rack margin for cross-row runs. Check the paths against module control
+areas, including after changing the window size.
+
+An occupied input identifies exactly one cable, even when its source also
+feeds other modules. A drop edits both ends in a single validated graph
+transaction. An empty audio or CV input on the built-in modules uses the
+runtime's existing zero buffer. This lets a player unplug an active filter,
+VCA or mixer and save the intermediate patch. Keyboard fallback for note
+inputs and rejection of feedback cycles are handled by their existing paths.
+
+Modal Percussion calls the vendored Plaits ModalVoice and Modal Resonator
+calls Resonator directly. Material, Brightness and Decay now accept dedicated
+bipolar CV, summed with their knob values once per render slice. Structure
+keeps its existing lookup-table upper bound. The LFO action next to each of
+those controls makes the source and cable together, then selects the source
+so rate and depth are immediately editable. An assigned control opens its
+existing source. The DSP regression exercises all six new inputs and compares
+each zero-depth render with the original unpatched graph.

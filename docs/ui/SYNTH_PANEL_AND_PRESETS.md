@@ -282,12 +282,28 @@ Modular, click the filter's **FM** input jack and choose an oscillator output.
 
 Open **Modular** to see the current patch drawn between the module jacks.
 Hover a jack to trace its cables. Teal carries audio, amber carries control
-signals and blue carries notes. Drag from either end to another jack. Matching
-sockets light up and the cable snaps to the socket under the pointer. An input
-takes one source. An output can feed several inputs. To unplug an input, click
-its jack and choose **Disconnect input**. Dropping on the rack background
-cancels the gesture.
+signals and blue carries notes. Cables run above the socket labels and along
+the rack margin between rows. An output can feed several inputs.
+
+- Drag an output to an input to add a cable.
+- Grab the **patched input** for a particular cable. Drop on another input to
+  move its destination, or on an output to change its source.
+- Drop that plug on empty rack space to disconnect it. Dropping over a knob
+  or an incompatible jack cancels. Clicking a jack still opens its routing menu.
 
 **Cables**, beside **Signal flow**, hides or shows the wiring while you adjust
 the controls. Optisynth remembers that display preference. **Signal flow** also
 shows parameter-matrix assignments and the final instrument output.
+
+### Modulating modal percussion
+
+Click **LFO** beside **Decay** in the rack or on the synth panel. This adds a
+sine LFO, patches its output to the modal module's **DECAY** jack, and selects
+the LFO for editing. **Rate** sets the speed and **Depth** sets the excursion
+about the Decay knob. The initial settings are 1 Hz and 0.35 on the 0–1 decay
+range. Click **CV** beside an assigned control to select its source again.
+
+Modal Percussion and Modal Resonator expose **MAT**, **BRIGHT** and **DECAY**
+jacks for Material, Brightness and Decay. An existing LFO, envelope or sequencer
+CV output can be patched directly to any of them. Per-route signed amounts for
+parameter modulation are also available in **Matrix**.

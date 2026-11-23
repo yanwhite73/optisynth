@@ -184,7 +184,8 @@ public:
     void process(const AudioBlock& b) noexcept override {
         update(b);
         for(int i=0;i<b.frames;++i)input[i]=b.inputs[0][i]*values[4];
-        resonator.Process(noteFrequency(b,values[0]),std::min(values[1],.999999f),values[2],values[3],input.data(),b.outputs[0],b.frames);
+        resonator.Process(noteFrequency(b,values[0]),std::clamp(values[1]+b.inputs[1][0],0.f,.999999f),
+            std::clamp(values[2]+b.inputs[2][0],0.f,1.f),std::clamp(values[3]+b.inputs[3][0],0.f,1.f),input.data(),b.outputs[0],b.frames);
     }
 private:plaits::Resonator resonator;std::array<float,quantum> input{};
 };
@@ -210,7 +211,8 @@ public:
         // Interpolate reads index+1 even at a zero fractional offset. The source
         // stiffness array has 65 entries, so never pass an exact index of 64.
         voice.Render(false,b.note.trigger,std::clamp(b.note.velocity,0.f,1.f),
-            std::clamp(f,8.f/48000,.2f),std::min(values[1],.999999f),values[2],values[3],
+            std::clamp(f,8.f/48000,.2f),std::clamp(values[1]+b.inputs[0][0],0.f,.999999f),
+            std::clamp(values[2]+b.inputs[1][0],0.f,1.f),std::clamp(values[3]+b.inputs[2][0],0.f,1.f),
             temp.data(),b.outputs[0],b.outputs[1],b.frames);
     }
 private:
@@ -314,14 +316,16 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
             type.outputs={{"out",SignalType::Audio,false,2}};
             for(const auto* name:{"lfo1","lfo2","lfo3","lfo4","lfo5","mainenv","amp1","amp2","amp3","amp4","cut1","cut2","cut3","cut4","mod1","mod2","mod3"})type.outputs.push_back({name,SignalType::Control});
         }
-        if(id=="utility.downmix")type.inputs={{"in",SignalType::Audio,true,2}};
-        if(id=="utility.stereo"){type.inputs={{"left",SignalType::Audio,true},{"right",SignalType::Audio,true}};type.outputs={{"out",SignalType::Audio,false,2}};}
-        if(id=="utility.stereo_mix"){type.inputs={{"a",SignalType::Audio,true,2},{"b",SignalType::Audio,true,2}};type.outputs={{"out",SignalType::Audio,false,2}};}
+        if(id=="utility.downmix")type.inputs={{"in",SignalType::Audio,false,2}};
+        if(id=="utility.stereo"){type.inputs={{"left",SignalType::Audio,false},{"right",SignalType::Audio,false}};type.outputs={{"out",SignalType::Audio,false,2}};}
+        if(id=="utility.stereo_mix"){type.inputs={{"a",SignalType::Audio,false,2},{"b",SignalType::Audio,false,2}};type.outputs={{"out",SignalType::Audio,false,2}};}
         if (id=="modal.voice") type.outputs.push_back({"exciter",SignalType::Audio});
-        if (id=="modal.resonator") type.inputs={{"in",SignalType::Audio,true}};
-        if (p.family=="filter") type.inputs={{"in",SignalType::Audio,true},{"mod",SignalType::Control,false}};
-        if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,true},{"gain",SignalType::Control,true}};
-        if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,true},{"b",SignalType::Audio,true}};
+        if (id=="modal.resonator") type.inputs={{"in",SignalType::Audio,false}};
+        if(id=="modal.voice" || id=="modal.resonator")
+            for(const auto* cv:{"mat","bright","decay"})type.inputs.push_back({cv,SignalType::Control});
+        if (p.family=="filter") type.inputs={{"in",SignalType::Audio,false},{"mod",SignalType::Control,false}};
+        if (id=="utility.vca") type.inputs={{"in",SignalType::Audio,false},{"gain",SignalType::Control,false}};
+        if (id=="utility.mix") type.inputs={{"a",SignalType::Audio,false},{"b",SignalType::Audio,false}};
         if(isAnalog(id))analogPorts(id,type);
         if(id=="osc.variable"||id=="osc.sine")type.inputs.push_back({"bend",SignalType::Control,false});
         if(p.family=="source"||p.family=="envelope"||p.family=="engine"||p.family=="resonator"||id=="mod.lfo")type.inputs.push_back({"notes",SignalType::Event,false});
