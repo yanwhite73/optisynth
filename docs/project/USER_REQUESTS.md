@@ -873,3 +873,17 @@ wheres the patch layout showing connections?
 ```text
 can you also do it with patch cables?
 ```
+
+## 88 — Changelog, sounds, roadmap and screenshots for the website
+
+```text
+Can you edit a changelog of this project for publication on my website?
+I would like to share the work I am doing, maybe a few sound samples of favourited patches, a roadmap, screenshots etc.
+```
+
+Claude session, 23 November 2026. A review draft of an Optisynth page in the website's
+audio section: `/audio/review/optisynth/` in `~/Local Sites/yanwhite/v2`, noindex and
+not deployed. The draft holds the changelog (0.0.1–0.0.21), roadmap, five native
+captures and four offline renders of Yan's favourites
+(`tools/publication/render_presets.cpp`). Website decisions are recorded in that
+site's `docs/owner-feedback.md`.

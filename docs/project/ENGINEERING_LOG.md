@@ -1146,3 +1146,31 @@ validator accepts or rejects the edit after the button finishes its mouse event.
 A patch change cancels a pending cable edit before destroying its old sockets.
 Native gesture checks cover patching from either direction and rejecting a
 mismatched signal type. Existing checks cover cycle rejection and recall.
+
+## Request 88: website changelog, sounds and screenshots (23 November 2026, Claude session)
+
+The draft page is in the website repository at `src/pages/audio/review/optisynth/`.
+Its decisions and checks are recorded in that repository's `docs/owner-feedback.md`.
+
+**Sounds.** `tools/publication/render_presets.cpp` renders saved presets offline. It
+uses the app's own loader (`readRack`, `prepareSamples`) and the engine at a
+committed revision, so the renders don't depend on uncommitted work in the
+checkout. Run the transport for a set time, stop it, render the tail, then level
+to −1 dBFS peak with a 3 s end fade.
+- **Build:** compile against `juce_core` only, with a one-line `JuceHeader.h` shim
+  that includes `juce_core/juce_core.h`.
+- **Link:** both `juce_core.mm` and `juce_core_CompilationTime.cpp` (JUCE 8
+  splits the build time into its own unit).
+- **Renders (0.0.21):** lush ambient space, String afterglow 1 and 2, and Glass
+  loops (Yan's saved versions, which play their own sequences). Each sounds for its
+  whole length; String afterglow 1 and 2 differ, with correlation 0.07.
+
+**Screenshots** came from the existing native captures, chosen as follows:
+- **Left out:** the preset-browser capture, which shows a local folder path, and
+  the four-module rack, whose module footers read "Original Plaits DSP" and
+  "Original Mutable stmlib DSP". [LICENSING.md](LICENSING.md) says the Mutable
+  Instruments name must not appear on derivative works. Those footers need
+  renaming before any public release.
+- **Defect found:** in the Pattern/Motion editor's hint line
+  (`build/ui-review-85/motion-11.png`), "·" shows as "Â·": UTF-8 text decoded as
+  Latin-1 somewhere in that editor's strings. Not fixed here.
