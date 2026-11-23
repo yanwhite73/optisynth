@@ -1175,6 +1175,11 @@ to −1 dBFS peak with a 3 s end fade.
   (`build/ui-review-85/motion-11.png`), "·" shows as "Â·": UTF-8 text decoded as
   Latin-1 somewhere in that editor's strings. Not fixed here.
 
+**Published 23 November** at https://audio.yanwhite.com/optisynth/, with a WIP menu
+item and an Updates entry (website commits `52ba508` and `63300ce`). Yan's copy rule
+from this round: public pages say what a visitor can hear, see or use. Render,
+level and capture details stay in the logs.
+
 ## Requests 86–87 — Movable cable ends and playable modal controls
 
 The 0.0.21 cables passed mouse events through to the rack, but their curves
