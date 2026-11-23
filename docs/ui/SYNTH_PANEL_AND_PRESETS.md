@@ -307,3 +307,18 @@ Modal Percussion and Modal Resonator expose **MAT**, **BRIGHT** and **DECAY**
 jacks for Material, Brightness and Decay. An existing LFO, envelope or sequencer
 CV output can be patched directly to any of them. Per-route signed amounts for
 parameter modulation are also available in **Matrix**.
+
+### String afterglow — VCO1
+
+VCO1 OUT feeds oscillator mixer input A. Pitch, Fine, Drift, the three waveform
+levels and Level affect that oscillator. Saw, Pulse and Triangle set proportions
+when their sum exceeds one. Pulse Width affects the pulse component. The factory
+sound starts with Pulse at zero, so bring it up before auditioning Pulse Width.
+
+PWM Depth scales the signal at VCO1 PWM. FM Depth scales the signal at VCO1 FM.
+Both sockets start empty in String afterglow. The ten rack knobs are also
+destinations in Modular → Matrix. For width modulation, choose breath / out as
+source and vco1 / Pulse width as destination with a small depth. Alternatively,
+patch breath OUT to VCO1 PWM and use PWM Depth. For oscillator FM, connect
+VCO2 OUT to VCO1 FM and bring up FM Depth from zero. The curated Strings
+panel's FM Depth controls the filter, which has its own FM input.

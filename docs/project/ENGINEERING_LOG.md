@@ -1203,3 +1203,11 @@ those controls makes the source and cable together, then selects the source
 so rate and depth are immediately editable. An assigned control opens its
 existing source. The DSP regression exercises all six new inputs and compares
 each zero-depth render with the original unpatched graph.
+
+## Request 89 — String afterglow VCO1
+
+Checked the factory graph, both saved String afterglow variants, the oscillator
+render loop and the matrix destination list. All ten VCO1 knobs are exposed.
+The screenshot shows Pulse at 0.901 and empty FM and PWM sockets, making eight
+knobs effective. The factory and saved copies start with pulse level zero.
+The control dependencies and two ways to patch PWM are in the synth panel guide.

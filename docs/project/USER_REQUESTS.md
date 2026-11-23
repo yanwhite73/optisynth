@@ -899,3 +899,9 @@ not deployed. The draft holds the changelog (0.0.1–0.0.21), roadmap, five nati
 captures and four offline renders of Yan's favourites
 (`tools/publication/render_presets.cpp`). Website decisions are recorded in that
 site's `docs/owner-feedback.md`.
+
+## 89 — VCO1 control activity in String afterglow
+
+```text
+[Image #1] in strig afterglow are all of these controls active or accessible?
+```
