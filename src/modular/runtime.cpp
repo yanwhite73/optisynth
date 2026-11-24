@@ -148,10 +148,11 @@ void Runtime::render(float* out, int frames, Note note) noexcept {
     while(frames>0){const int n=std::min(frames,quantum);render(out,right.data(),n,note);note.trigger=false;out+=n;frames-=n;}
 }
 
-void Runtime::computeParameters(NodeBuffers& node) noexcept {
+void Runtime::computeParameters(NodeBuffers& node,int sampleOffset) noexcept {
     std::fill_n(node.offset.data(),node.parameters.size(),0.f);
     for(const auto& m:node.routes){
-        const float source=std::isfinite(m.source[0])?std::clamp(m.source[0],-1.f,1.f):0.f;
+        const float sample=m.source[sampleOffset];
+        const float source=std::isfinite(sample)?std::clamp(sample,-1.f,1.f):0.f;
         const float depth=routes_->amounts[size_t(m.index)].load(std::memory_order_relaxed);
         if(std::isfinite(depth))node.offset[size_t(m.parameter)]+=source*std::clamp(depth,-1.f,1.f);
     }
@@ -214,6 +215,7 @@ void Runtime::processVoice(NodeBuffers& node,int n,const ClockFrame* time,int vo
     for(int offset=0;offset<n;){
         Note use=current;
         while(k<total&&changes[size_t(k)].offset==offset){use=changes[size_t(k)].note;++k;}
+        if(offset && use.trigger && !node.routes.empty())computeParameters(node,offset);
         const int end=k<total?changes[size_t(k)].offset:n;
         for(size_t i=0;i<node.in.size();++i){node.sliceIn[i]=node.in[i]+offset;node.sliceRight[i]=node.inRight[i]+offset;}
         for(size_t i=0;i<node.out.size();++i){node.sliceOut[i]=node.out[i]+offset;node.sliceOutRight[i]=node.outRight[i]+offset;}

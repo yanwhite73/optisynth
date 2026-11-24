@@ -104,3 +104,24 @@ interval at full opening. These measurements constrain decay and bass
 movement; they do not establish overall timbral fidelity. [Compose bank
 catalogue](../../../../optimystery-compose/design/sounds/percussion-source.json) ·
 [The sound of the udu](https://www.if.ufrj.br/~carlos/artigos/PhysEd2022_udu.pdf)
+
+**Udu stroke contrast, requests 112–114.** Compared local slices of
+`instagram_samples/sliced/{udu_1,udu_2,udu_6}` in Yan’s Audiopool (208, 297
+and 358 slices). For each slice, took 50 ms of mono audio from the first
+12%-of-peak crossing, Hann-windowed it, and ranked the energy at 300–2200 Hz
+relative to 40–180 Hz. In each recording’s brightest quartile, the median
+strongest peak between 200 Hz and 3 kHz was 1007, 1098 and 1093 Hz respectively.
+These are recorded examples of the requested contrast. Mic, stroke identity
+and processing are unknown. No audio from these recordings is shipped.
+
+In 0.0.28, four strikes in the dry udu demonstration all had their strongest
+upper tone around 440–590 Hz, with the mids more than 20 dB below the bass.
+The revision weights the air mode towards the palm and the higher, longer
+shell mode towards the fingers. Uncovering the hole shortens the bass decay
+during the bend. Sequenced strike position is sampled at the note offset.
+
+In the revised factory phrase the first palm stroke measured −26 dB mids to
+bass. Steps 3, 12 and 20 (zero-based) gave +8 to +12 dB and upper peaks at
+1.03–1.37 kHz. For the first palm stroke, RMS from 100–150 ms relative to the
+first 30 ms fell from −15.0 dB to −28.3 dB. All comparisons used the same
+notes, sequence and output gain.

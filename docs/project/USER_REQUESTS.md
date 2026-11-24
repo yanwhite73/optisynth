@@ -1053,3 +1053,21 @@ where is the sort presets by date/time?
 oh ok, yes thats alright in a slightly toy sounding way - could be useful.
 what about morphing characteristics of frame drums, udu etc?
 ```
+
+## 112 — Udu ring
+
+```text
+its ok, udu is a bit ringy
+```
+
+## 113 — Character of the udu attack
+
+```text
+actually the udu sounds woody
+```
+
+## 114 — Separate the upper ring from the low thud
+
+```text
+the top of an udu has a ring generally, and the bass should have more of a thud
+```

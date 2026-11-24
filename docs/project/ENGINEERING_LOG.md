@@ -1306,3 +1306,23 @@ Delivered standalone 0.0.28 at the established Release location. The installed
 executable matched the qualified candidate. Native preset recall, live morph
 and the dry comparison passed, along with all 397 modular checks in both
 regular and address/undefined-behaviour sanitizer builds.
+
+## Requests 112–114 — Short air thud, ringing upper shell
+
+Yan heard wood in the udu and specified that the top should ring while the
+bass should thud. The old factory recording gave little tonal separation
+between palm and finger strokes. Shortening every mode would lose the upper
+ring he wanted. Compared the dry factory phrase with measured local udu
+slices, voiced the low and upper modes separately and checked both roles in
+the rendered preset. [Measurements](../research/modules/ORGANIC_PERCUSSION.md)
+
+The modulation matrix previously sampled the start of the render block
+even when a sequenced note arrived later in it. Strike position also used a
+smoothed value when exciting the modes. Polyphonic note triggers now read
+their routed CV at the event sample and the drum takes its position at
+contact. The regression plays the same finger stroke after two different
+silent CV steps and checks that the resulting audio matches.
+
+Delivered standalone 0.0.29 at the existing Release path and verified its
+executable hash against the candidate. Native recall/render and 400 modular
+checks passed, including the address/undefined-behaviour sanitizer run.

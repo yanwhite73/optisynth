@@ -52,8 +52,8 @@ int main(int argc,char** argv){try {
     auto crossings=[](const std::vector<float>& x){int n=0;for(int i=1;i<4800;++i)n+=x[i-1]<=0 && x[i]>0;return n;};
     check(std::abs(crossings(small)-2*crossings(large))<=2,"Bubble radius controls the ringing pitch");
     check(energy(small)>8*energy(shortDrop) && energy(shortDrop)>0,"Droplet damping shortens an audible strike");
-    auto handStroke=[](float body,float opening,float damp,bool lift){
-        GraphSpec g;g.nodes={{"hand","drum.skin_vessel",{{"body",body},{"opening",opening},{"damp",damp},{"lift",10},{"position",0}}}};
+    auto handStroke=[](float body,float opening,float damp,bool lift,float position=0.f){
+        GraphSpec g;g.nodes={{"hand","drum.skin_vessel",{{"body",body},{"opening",opening},{"damp",damp},{"lift",10},{"position",position}}}};
         g.outputs={{"hand","out"}};Runtime r(g);
         std::vector<float> x(24000);
         r.render(x.data(),1440,{48,.85f,true,true});
@@ -65,6 +65,35 @@ int main(int argc,char** argv){try {
     check(vessel!=sealed && vessel!=handStroke(1,1,.2f,false),"Open aperture and hand release affect the vessel tail");
     auto ringCrossings=[](const std::vector<float>& x){int n=0;for(int i=3001;i<8000;++i)n+=x[i-1]<0 && x[i]>=0;return n;};
     check(ringCrossings(vessel)>ringCrossings(sealed)+3,"Uncovering the vessel raises the air mode");
+    auto tailEnergy=[](const std::vector<float>& stroke){
+        double sum=0;
+        for(size_t i=4800;i<9600;++i)sum+=double(stroke[i])*stroke[i];
+        return sum;
+    };
+    check(tailEnergy(vessel)<.55*tailEnergy(sealed),
+          "Lifting the hand damps the pitched vessel tail after the bend");
+    const auto shellTap=handStroke(1,1,.2f,true,1);
+    check(ringCrossings(shellTap)>5*ringCrossings(vessel)
+          && tailEnergy(shellTap)/energy(shellTap)>2*tailEnergy(vessel)/energy(vessel),
+          "The higher shell tap rings past the low palm thud");
+    auto sequencedTap=[](float precedingPosition){
+        auto pattern=std::make_shared<PerformanceData>();
+        auto& steps=pattern->tracks[0].patterns[0].steps;
+        steps[0].on=false;steps[0].cv=precedingPosition;
+        steps[1].on=true;steps[1].cv=1;
+        GraphSpec g;
+        g.nodes={{"pot","drum.skin_vessel",{{"body",1},{"position",0}}},
+                 {"mix","voice.mix",{}},{"seq","seq.performance",{},pattern}};
+        g.connections={{{"pot","out"},{"mix","in"}},{{"seq","t1_notes"},{"mix","notes"}}};
+        g.modulations={{{"seq","t1_cv"},{"pot","position"},1}};
+        g.outputs={{"mix","out"}};
+        Runtime r(g);r.clock.tempo(92);r.clock.play(true);
+        std::vector<float> audio(14000);r.render(audio.data(),int(audio.size()),{});
+        return audio;
+    };
+    const auto steppedTap=sequencedTap(0);
+    check(energy(steppedTap)>0 && steppedTap==sequencedTap(1),
+          "A finger stroke takes its position from the new step at the note offset");
     check(energy(skin)>2*energy(handStroke(0,1,1,true)) && energy(vessel)>0,"Hand damping absorbs membrane energy");
     auto energySpanMs=[](const std::vector<float>& audio){
         const double total=energy(audio);double sum=0;int start=-1;

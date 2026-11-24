@@ -106,7 +106,7 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {14,1795100331,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
         {17,1795105055,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
         {18,1795105055,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"},
-        {27,1795529140,{"Skin and vessel","Percussion","Turn Frame to udu while the pattern plays. Strike position moves from palm to rim or shell. Short gates let the hand lift off the pot.",{"frame-drum","udu","physical-model","hand-percussion"}},"panel"},
+        {27,1795531650,{"Skin and vessel","Percussion","Turn Frame to udu while the pattern plays. Strike position moves from palm to rim or shell. Short gates let the hand lift off the pot.",{"frame-drum","udu","physical-model","hand-percussion"}},"panel"},
         {26,1795523931,{"Clay and water","Percussion","Four interlocking roles at 92 BPM. Fixed low strokes anchor softer rim, droplet and fingertip variations. Drop a local WAV on contact in the Modular view.",{"organic","drum-machine","physical-model","probability"}},"panel"}};
     return list;
 }

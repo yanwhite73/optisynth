@@ -107,7 +107,7 @@ private:
     struct VoiceSlot { Note note; bool active=false,awake=false,tuned=false; uint32_t source=0; uint64_t noteId=0, started=0, released=0; float pitch=0,target=0,detune=0,level=0; int quiet=0; };
     void prepareBuffers(NodeBuffers&, AudioModule*, const ModuleType&, const std::string& type);
     NodeBuffers& instance(int node,int voice) noexcept { return voice==0?nodes_[size_t(node)]:voiceCopies_[size_t(node)][size_t(voice-1)]; }
-    void computeParameters(NodeBuffers&) noexcept;
+    void computeParameters(NodeBuffers&, int sampleOffset = 0) noexcept;
     void processNode(NodeBuffers&,int frames,const ClockFrame*,const Note&) noexcept;
     void processVoice(NodeBuffers&,int frames,const ClockFrame*,int voice) noexcept;
     // keyboard: live keys merged with a sequencer-driven note input (voice mixer "Keyboard: Plays too").

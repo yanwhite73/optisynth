@@ -1,5 +1,12 @@
 # Optisynth status — 24 November 2026
 
+## 0.0.29 — Udu palm and shell
+
+In **Factory → Percussion → Skin and vessel**, turn **Frame to udu** fully
+right. Low strike positions give a short air thud with a pitch lift on release.
+Higher positions give the upper clay ring. The preset’s alternating hand
+positions use the CV on the same sequencer step as each note.
+
 ## 0.0.28 — Skin and vessel
 
 **Factory → Percussion → Skin and vessel** is a dry, playable hand-drum

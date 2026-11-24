@@ -274,7 +274,9 @@ public:
     using Module::Module;
     void process(const AudioBlock& b) noexcept override {
         update(b);
-        const float body=values[0],position=values[1],damp=values[2],hard=values[5];
+        const float body=values[0],damp=values[2],hard=values[5];
+        // Position describes this hit. Sample its CV at contact, before knob smoothing.
+        const float position=b.note.trigger && b.parameters?b.parameters[1]:values[1];
         const float velocity=std::clamp(b.note.velocity,0.f,1.f);
         if(b.note.trigger)aperture=0;
         const float openTarget=b.note.gate?0.f:values[3];
@@ -283,13 +285,16 @@ public:
         // Ratios of the first circular membrane modes; the vessel's upper
         // ratios and loss times are voicing choices for a hollow ceramic tap.
         const float head[]={1,1.593f,2.135f,2.295f,2.653f,2.918f};
-        const float pot[]={.59f*std::sqrt(1+2.9f*aperture),3.77f,5.13f,7.84f,9.42f,12.31f};
+        const float pot[]={.59f*std::sqrt(1+2.9f*aperture),8.8f,4.25f,11.7f,14.1f,17.35f};
         const float headDrive[]={1-.79f*position,.65f*position,.47f*position*position,
             .32f*std::abs(1-2.2f*position),.32f*position,.25f*position*position};
-        const float potDrive[]={1.18f-.98f*position,.14f+.47f*position,.32f*position,
-            .25f*position,.15f*position,.11f*position};
+        const float palm=1-position;
+        const float potDrive[]={.045f+1.14f*palm*palm,.045f+1.32f*position*position,
+            .23f*position,.39f*position,.21f*position,.10f*position};
         const float headTail[]={1.24f,1.55f,1.1f,.80f,.62f,.40f};
-        const float potTail[]={.85f,.29f,.20f,.16f,.11f,.075f};
+        // Trapping air gives a bass thud. Lifting the palm vents it further.
+        // A finger tap excites the separate, longer-lived upper shell mode.
+        const float potTail[]={.49f-.15f*aperture,.57f,.14f,.22f,.13f,.08f};
         std::array<float,6> cosine,sine;
         for(size_t k=0;k<modes.size();++k){
             const float frequency=base*(head[k]+body*(pot[k]-head[k]));
