@@ -149,3 +149,15 @@ Offline render checks come first. Yan's listening is a separate, later step.
 - Should pads come from polyphonic voice groups in the rack (recommended; this is
   what `../architecture/ARCHITECTURE.md` intends) or from a dedicated poly engine
   like Spectral?
+
+## Factory sounds by musical role (requests 99–102)
+
+Assign each factory sound one role and audition it unaccompanied in that role.
+
+| Role | Arrangement job | Listening check |
+| --- | --- | --- |
+| Pad | Carry harmony through sustained and overlapping notes. Give each chord time to change colour. | Hold a common tone across a chord change. The upper voice can bloom without generating a rival rhythmic line. |
+| Lead | Carry the foreground melody. Give the player control over attack, note joins and release; make articulation and pitch legible against accompaniment. | Play a phrase with a held peak, two connected notes, and a deliberate rest. Check that expressive changes read clearly. |
+| Berlin-school ostinato | Maintain a recognisable repeated cell. Variation can come from unequal accent, tone or cycle lengths. Any rhythmic echo is a deliberately placed answering event. | Repeat the same cell with a gap. Count the dry attacks and their answers separately. Mute the echo; the dry cell should still have identity and motion. |
+
+Use separate preview performances. A shared eight-note qualification phrase remains useful for comparing versions. Peak, finiteness and snapshot checks say nothing about musical usefulness. Treat player acceptance as a separate outcome.

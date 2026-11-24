@@ -28,7 +28,7 @@ inline SpectralPtr effectiveSpectral(const RackDocument& d,const std::string& id
     partials::applyLiveValues(patch,values);return spectralPreset(std::move(patch),state->second->tables);
 }
 inline const std::vector<std::string>& presetCategories() {
-    static const std::vector<std::string> c{"Pad","Keys","Lead","Bass","Percussion","Sequence","Texture","Drone","Template"};return c;
+    static const std::vector<std::string> c{"Pad","Keys","Lead","Ostinato","Bass","Percussion","Sequence","Texture","Drone","Template"};return c;
 }
 inline const std::vector<std::string>& panelStyles() {static const std::vector<std::string> s{"graphite","slate","walnut","ivory"};return s;}
 // Tags are lower-case words joined by hyphens, at most 32 characters, 16 per preset.
@@ -89,8 +89,8 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
         {21,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
         {22,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
-        {25,{"Optical vapour","Keys","Two struck optical gates excite a small shifting space. Turn down regeneration to hear the gates alone with a short tail.",{"low-pass-gate","make-noise","pitch-shift"}},"panel"},
-        {24,{"Prism afterimage","Percussion","Short glass strikes feed dotted echoes and a pitch-shifting stereo tank. Freeze a chord, then play across its tail.",{"mutable","shimmer","echo","freeze"}},"panel"},
+        {25,{"Optical vapour","Pad","An eight-voice reed chord. Hold a note for the upper octave to swell through the second optical gate.",{"low-pass-gate","polyphonic","swell"}},"panel"},
+        {24,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Leave a gap for the dotted echo.",{"mallet","modal","echo"}},"panel"},
         {23,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
         {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
         {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
@@ -111,23 +111,59 @@ inline const FactoryPreset* factoryPreset(int starter) {
     for(const auto& f:factoryPresets())if(f.starter==starter)return &f;return nullptr;
 }
 inline RackDocument starterDocument(int which,float gain) {
-    if(which==25) {
-        auto d = starterDocument(21, gain);
-        d.graph.nodes.push_back({"prism","fx.prism_tank",{{"size",.42f},{"decay",.78f},{"pitch",-7},{"shift",.56f},{"mix",.46f}}});
+    if(which==24 || which==25) {
+        RackDocument d;
+        d.gain=gain;
+        if(which==24) {
+            d.tempo=100;
+            d.graph.nodes={
+                {"body","analog.vco",{{"saw",0},{"triangle",1},{"level",.86f},{"drift",.05f},{"fm_depth",.42f}}},
+                {"harmonic","osc.sine",{{"transpose",19.02f},{"level",.87f}}},
+                {"impact","analog.env",{{"attack",.001f},{"decay",.105f},{"sustain",0},{"release",.09f},{"velocity",1}}},
+                {"fm_index","utility.vca",{}},
+                {"strike","modal.voice",{{"structure",.18f},{"brightness",.46f},{"decay",.19f}}},
+                {"blend","utility.mix",{{"gain_a",.88f},{"gain_b",.30f}}},
+                {"timbre","mod.lfo",{{"rate",.38f}}},
+                {"amp_env","analog.env",{{"attack",.006f},{"decay",.48f},{"sustain",.085f},{"release",.31f},{"velocity",.72f}}},
+                {"vca","utility.vca",{}},{"voices","voice.mix",{{"voices",6},{"level",.93f},{"spread",.19f}}},
+                {"prism","fx.prism_tank",{{"sync",3},{"mix",.26f},{"echo",1},{"feedback",0},{"tank",0},
+                    {"size",.49f},{"decay",.29f},{"diffusion",.43f},{"tone",.12f},{"shift",0},{"motion",.035f}}}};
+            d.graph.connections={{{"harmonic","out"},{"fm_index","in"}},{{"impact","out"},{"fm_index","gain"}},
+                {{"fm_index","out"},{"body","fm"}},{{"body","out"},{"blend","a"}},{{"strike","out"},{"blend","b"}},
+                {{"blend","out"},{"vca","in"}}};
+            d.graph.modulations={{{"timbre","out"},{"strike","brightness"},.22f},
+                                 {{"timbre","out"},{"blend","gain_b"},.12f}};
+            d.panel={"ivory",{{"MALLET",{{"body","fm_depth","Hardness"},{"blend","gain_b","Strike"},{"strike","structure","Material"},
+                {"strike","brightness","Brightness"},{"timbre","rate","Colour rate"}}},
+                {"DOTTED RETURN",{{"prism","sync","Division"},{"prism","mix","Echo mix"},{"prism","feedback","Repeats"}}}}};
+        } else {
+            d.tempo=80;
+            d.graph.nodes={
+                {"reed","analog.vco",{{"saw",.22f},{"pulse",.36f},{"triangle",.9f},{"pulse_width",.39f},
+                    {"pwm_depth",.14f},{"drift",.18f},{"level",.64f}}},
+                {"overtone","analog.vco",{{"transpose",12},{"fine",3.5f},{"saw",.21f},{"triangle",1},{"drift",.26f},{"level",.43f}}},
+                {"rise","analog.env",{{"attack",1.45f},{"decay",2.8f},{"sustain",.77f},{"release",1.45f},{"velocity",.33f}}},
+                {"gate","analog.dual_lpg",{{"a_control",.59f},{"a_damp",.36f},{"a_keys",.17f},
+                    {"b_control",0},{"b_damp",.27f},{"b_keys",0}}},
+                {"breath","mod.lfo",{{"rate",.16f}}},{"swell","mod.lfo",{{"rate",.093f}}},
+                {"amp_env","analog.env",{{"attack",.16f},{"decay",1.1f},{"sustain",.79f},{"release",1.65f},{"velocity",.55f}}},
+                {"vca","utility.vca",{}},{"voices","voice.mix",{{"voices",8},{"level",.73f},{"spread",.44f}}},
+                {"prism","fx.prism_tank",{{"mix",.14f},{"predelay",37},{"size",.71f},{"decay",.59f},
+                    {"echo",0},{"feedback",0},{"shift",0},{"tone",.13f},{"diffusion",.70f},{"motion",.08f}}}};
+            d.graph.connections={{{"reed","out"},{"gate","a_in"}},{{"overtone","out"},{"gate","b_in"}},
+                {{"rise","out"},{"gate","b_cv"}},{{"breath","out"},{"reed","pwm"}},{{"gate","sum"},{"vca","in"}}};
+            d.graph.modulations={{{"swell","out"},{"gate","a_control"},.19f}};
+            d.panel={"slate",{{"REED",{{"gate","a_control","Opening"},{"gate","a_damp","Damp"},{"reed","pwm_depth","Pulse motion"},
+                {"breath","rate","Pulse rate"},{"swell","rate","Gate rate"}}},
+                {"OCTAVE BLOOM",{{"overtone","level","Level"},{"rise","attack","Rise"},{"rise","release","Fade"},{"overtone","fine","Detune"}}}}};
+        }
+        d.graph.connections.push_back({{"amp_env","out"},{"vca","gain"}});
+        d.graph.connections.push_back({{"vca","out"},{"voices","in"}});
         d.graph.connections.push_back({{"voices","out"},{"prism","in"}});
-        d.graph.outputs = {{"prism","out"}};
-        d.panel.sections.push_back({"SPACE",{{"prism","mix","Mix"},{"prism","pitch","Loop pitch"},{"prism","shift","Pitch return"},{"prism","decay","Regeneration"},{"prism","freeze","Freeze"}}});
-        return d;
-    }
-    if(which==24) {
-        RackDocument d = starterDocument(22, gain);
-        d.graph.nodes.back() = {"prism","fx.prism_tank",{{"sync",3},{"mix",.44f},{"echo",.48f},{"feedback",.32f}}};
-        d.graph.connections.back().destination = {"prism","in"};
-        d.graph.outputs = {{"prism","out"}};
-        d.panel.sections.resize(2);
-        d.panel.sections.push_back({"ECHO",{{"prism","sync","Clock"},{"prism","predelay","Free time"},{"prism","feedback","Feedback"},{"prism","echo","Echo return"}}});
-        d.panel.sections.push_back({"TANK",{{"prism","size","Size"},{"prism","decay","Regeneration"},{"prism","diffusion","Diffusion"},{"prism","tone","Damping tilt"},{"prism","freeze","Freeze"}}});
-        d.panel.sections.push_back({"PITCH AND MOTION",{{"prism","pitch","Loop pitch"},{"prism","shift","Pitch return"},{"prism","rate","Motion rate"},{"prism","motion","Motion depth"},{"prism","mix","Mix"}}});
+        d.graph.outputs={{"prism","out"}};
+        d.panel.sections.push_back({"AMP ADSR",{{"amp_env","attack","Attack"},{"amp_env","decay","Decay"},
+                                                {"amp_env","sustain","Sustain"},{"amp_env","release","Release"}}});
+        if(which==25)d.panel.sections.push_back({"SPACE",{{"prism","mix","Mix"},{"prism","decay","Regeneration"},{"prism","freeze","Freeze"}}});
         return d;
     }
     if(which>=21 && which<=23) {

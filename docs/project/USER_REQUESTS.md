@@ -961,3 +961,27 @@ for example all of the important mutable and 4ms open source modules should get 
 ```text
 and make noise stuff too
 ```
+
+## 99 — Rework the two Prism factory sounds
+
+```text
+Those are both crap and unusable sounds
+```
+
+## 100 — Timbre, effects and movement in both presets
+
+```text
+unpleasant basic sound, muddy and messy effects, no sense of motion, structure or fascination
+```
+
+## 101 — Distinct musical roles
+
+```text
+know the different roles of pads, leads and ostinato berlin school delayed lines
+```
+
+## 102 — Keep the roles separate
+
+```text
+each has a different musical role and they should not be merged
+```

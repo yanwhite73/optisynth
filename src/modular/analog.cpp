@@ -480,8 +480,8 @@ public:
         }
         tank.Process(frames.data(), size_t(b.frames));
         for (int i = 0; i < b.frames; ++i) {
-            const float wetL = frames[i].l + values[13] * echoes[i];
-            const float wetR = frames[i].r + values[13] * echoes[i];
+            const float wetL = values[14] * frames[i].l + values[13] * echoes[i];
+            const float wetR = values[14] * frames[i].r + values[13] * echoes[i];
             b.outputs[0][i] = (1.f - values[0]) * b.inputs[0][i] + values[0] * wetL;
             b.outputsRight[0][i] = (1.f - values[0]) * b.inputsRight[0][i] + values[0] * wetR;
         }
@@ -590,7 +590,8 @@ std::vector<Panel> analogPanels() {
         {"freeze","Freeze","",0,1,0,false,1,{"Off","Hold"}},
         {"predelay","Free time","ms",0,1500,55},
         {"sync","Echo clock","",0,6,0,false,1,{"Free","1/16","1/8","1/8 dotted","1/4","1/4 dotted","1/2"}},
-        {"feedback","Echo feedback","",0,.94f,.18f}, {"echo","Echo return","",0,1,.22f}}});
+        {"feedback","Echo feedback","",0,.94f,.18f}, {"echo","Echo return","",0,1,.22f},
+        {"tank","Tank return","",0,1,1}}});
     p.push_back(effectPanel("fx.reverb", "Reverb", "reverb", "Long modulated stereo reverb (inherited library)", .3f));
     p.push_back(effectPanel("fx.chorus", "Chorus", "chorus", "Stereo chorus (inherited library)", .4f));
     p.push_back(effectPanel("fx.delay", "Stereo delay", "delay_stereo", "Stereo delay with filtered feedback (inherited library)", .25f));

@@ -28,9 +28,11 @@ Prism tank retains the Miverb signal path, two-head windowed pitch shifting, int
 
 The added input delay follows rack tempo or runs in milliseconds. Its feedback and audible return have separate controls. Set Echo return to zero to use it solely as the tank pre-delay. At zero wet mix, the stereo input passes directly through. The tank itself accepts the mono sum of both channels and generates a stereo field. Mix retains the original stereo dry image. The working memory includes a six-second echo buffer and one tank per reachable effect instance. Frozen audio is transient; preset recall restores configuration.
 
-**Prism afterimage.** Play a few high short notes. The first audible echo is three sixteenths later. Hold Loop pitch at +7 and raise Pitch return to hear earlier notes rise through the tail. Freeze after striking a chord, then play a new phrase. Lower Echo return to hear how much of that phrase is in the clocked echo rather than the held tank.
+**Prism afterimage, revised for 0.0.25.** A short triangle voice sets the pitch. A velocity-shaped carrier at approximately three times that frequency supplies a brief FM attack, and a quieter modal strike changes colour between hits. A free-running LFO moves its brightness and blend. Play a repeating four-note cell with space after the second note. At the factory settings each dry event produces one quieter dotted-eighth answer. Feedback, tank return and pitch shift are zero. The Tank return parameter defaults to unity for older racks.
 
-**Optical vapour.** Play low notes with alternating velocity. Increase gate A damping for shorter, darker strikes. With Mix around halfway, set Loop pitch to −7 and raise Pitch return. The moving intervals accumulate behind the gate's dry attack. This pairs the rack's existing Optomix-derived gate with the new reverb. It does not establish a sound match to Make Noise hardware.
+**Optical vapour, revised for 0.0.25.** Hold an open chord. The lower reed opens first; an upper octave enters over about 1.45 seconds. Pulse-width motion and optical-gate movement run at different speeds. Eight voices allow a common tone to continue when its neighbours change. The short pre-delay applies only to the quiet diffuse tank. Audible echo, echo feedback and pitch shift are zero.
+
+The first versions in 0.0.24 put effects over existing factory voices. Yan rejected their timbre and their use of space. [Factory role guidance](../../project/SOUND_GOALS.md)
 
 ## Coverage after this build
 

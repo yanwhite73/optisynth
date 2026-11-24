@@ -36,6 +36,12 @@ static void prismChecks() {
     auto clocked=impulse({{"mix",1},{"sync",3},{"echo",1},{"feedback",0}});
     check(std::all_of(clocked.begin(),clocked.begin()+18000,[](float v){return v==0;}) &&
           std::abs(clocked[18000])>.25f,"Dotted eighth echo at exactly 18000 samples at 120 BPM");
+    auto singleTap=impulse({{"mix",1},{"sync",3},{"echo",1},{"feedback",0},{"tank",0}});
+    for(int channel=0; channel<2; ++channel) {
+        auto first=singleTap.begin()+channel*72000;
+        check(*(first+18000)==.35f && std::count_if(first,first+72000,[](float v){return v!=0;})==1,
+              "Isolated stereo echo gives exactly one three-sixteenth answer per strike");
+    }
     auto dry=impulse({{"mix",0}});
     check(dry[0]==.7f && energy({dry.begin()+1,dry.end()})<1e-12,"Dry stereo path preserved");
     impulse({{"size",1},{"decay",1.18f},{"pitch",-12},{"shift",1},{"rate",1},{"motion",1},

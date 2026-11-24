@@ -518,9 +518,8 @@ public:
             require(factoryPresets().size()==26&&starters.size()==26&&*starters.begin()==0&&*starters.rbegin()==25,"Factory catalogue lists every starter once");}
         {
             require(loadFactory(24),"Prism afterimage loads");drain();
-            require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","freeze"),"Prism tank controls and output");
-            auto* freeze=synthPanel.control("prism","freeze");
-            require(freeze->isSwitch,"Prism Freeze is a one-click switch");
+            require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","mix"),"Ostinato echo controls");
+            require(handles.at("prism")->values[14].load()==0 && !synthPanel.control("prism","freeze"),"Ostinato isolates the clocked echo");
             capture("prism-afterimage.png");
             setSize(1120,800);resized();capture("prism-minimum.png");setSize(1440,940);resized();
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
@@ -610,48 +609,73 @@ public:
             require(voiceEnergy(.001f,.5f,.1f,.2f,2400,4800)>2*voiceEnergy(.001f,.02f,.1f,.2f,2400,4800),"Amp decay shapes held notes");
             require(voiceEnergy(.001f,.02f,1,.2f,4800,9600)>2*voiceEnergy(.001f,.02f,.1f,.2f,4800,9600),"Amp sustain sets held level");
             require(voiceEnergy(.001f,.02f,1,.5f,10560,14400)>2*voiceEnergy(.001f,.02f,1,.01f,10560,14400),"Amp release shapes note-off");
-            Runtime instrument(restored.graph);
-            instrument.clock.tempo(restored.tempo);
-            const int frames=48000*(starter==23?8:5);
-            AudioBuffer<float> sound(2,frames);
-            float peak=0;
-            const std::array<int,8> phrase{48,55,51,60,58,51,67,55};
-            constexpr int step=14400;
-            for(int i=0;i<frames;i+=quantum){
-                NoteEventBlock keysDown;keysDown.begin(quantum);
-                auto key=[&](int pitch,bool on,float velocity){
-                    keysDown.push({0,1,uint64_t(pitch)+1,on?NoteEventKind::On:NoteEventKind::Off,pitch,velocity});
-                };
-                if(starter==23){
-                    for(int pitch : {48,55,62,65}){
-                        if(i==0)key(pitch,true,.8f);
-                        if(i==48000*4)key(pitch,false,0);
-                    }
-                }else if(i<8*step && (i%step==0 || i%step==step/2)){
-                    const int index=i/step;
-                    key(phrase[index]+(starter==22?12:0),i%step==0,index%3==0?.95f:.58f);
-                }
-                instrument.render(sound.getWritePointer(0,i),sound.getWritePointer(1,i),quantum,
-                                  {},nullptr,keysDown.size()?&keysDown:nullptr);
-            }
-            sound.applyGain(document.gain);
-            peak=sound.getMagnitude(0,frames);
-            require(std::isfinite(peak)&&peak>.001f&&peak<1.f,"Device preset produces audio at intended gain");
             capture(String("device-")+String(starter)+"-normal.png");
             setSize(1120,800);resized();require(synthPanel.layoutSound(),"Device panel fits minimum size");
             capture(String("device-")+String(starter)+"-minimum.png");setSize(1440,940);resized();
-            auto wav=directory.getChildFile(String("device-")+String(starter)+".wav");
-            wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
-            std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
-            if(writer)stream.release();
-            require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write device audition");
+            struct StudyNote {int start,length,pitch;float velocity;};
+            const std::vector<StudyNote> malletStudy{
+                {0,2,62,.90f},{4,1,69,.56f},{6,2,74,.77f},{11,1,64,.48f},{14,2,69,.66f},
+                {16,2,62,.78f},{20,1,69,.53f},{22,3,77,.82f},{29,2,72,.60f},
+                {32,2,65,.89f},{36,1,69,.55f},{38,2,76,.76f},{43,1,67,.49f},{46,2,72,.62f},
+                {48,3,62,.83f},{54,2,69,.60f},{58,3,74,.74f}};
+            const std::vector<StudyNote> reedStudy{
+                {0,16,50,.74f},{1,28,57,.62f},{4,11,64,.63f},{8,16,69,.48f},
+                {16,16,53,.68f},{18,12,65,.59f},{25,6,67,.53f},
+                {32,14,48,.70f},{33,15,55,.56f},{36,18,62,.64f},{40,8,64,.50f},
+                {48,7,50,.68f},{49,7,57,.56f},{51,6,65,.48f}};
+            for (int pass=0; pass<(starter>=24?2:1); ++pass) {
+                const bool musical=pass==1;
+                Runtime instrument(restored.graph);
+                instrument.clock.tempo(restored.tempo);
+                const int frames=48000*(musical?12:starter==23?8:5);
+                AudioBuffer<float> sound(2,frames);
+                float peak=0;
+                const std::array<int,8> phrase{48,55,51,60,58,51,67,55};
+                constexpr int step=14400;
+                for(int i=0;i<frames;i+=quantum){
+                    NoteEventBlock keysDown;keysDown.begin(quantum);
+                    auto key=[&](int pitch,bool on,float velocity){
+                        keysDown.push({0,1,uint64_t(pitch)+1,on?NoteEventKind::On:NoteEventKind::Off,pitch,velocity});
+                    };
+                    if(musical) {
+                        // Score units are sixteenths. Independent note lengths allow a held
+                        // inner voice to carry through the chord change.
+                        const auto& score=starter==24?malletStudy:reedStudy;
+                        const int tickFrames=starter==24?7200:9000;
+                        if(i%tickFrames==0) {
+                            const int tick=i/tickFrames;
+                            for(const auto& n:score)if(tick==n.start+n.length)key(n.pitch,false,0);
+                            for(const auto& n:score)if(tick==n.start)key(n.pitch,true,n.velocity);
+                        }
+                    }else if(starter==23){
+                        for(int pitch : {48,55,62,65}){
+                            if(i==0)key(pitch,true,.8f);
+                            if(i==48000*4)key(pitch,false,0);
+                        }
+                    }else if(i<8*step && (i%step==0 || i%step==step/2)){
+                        const int index=i/step;
+                        key(phrase[index]+(starter==22?12:0),i%step==0,index%3==0?.95f:.58f);
+                    }
+                    instrument.render(sound.getWritePointer(0,i),sound.getWritePointer(1,i),quantum,
+                                      {},nullptr,keysDown.size()?&keysDown:nullptr);
+                }
+                sound.applyGain(document.gain);
+                peak=sound.getMagnitude(0,frames);
+                require(std::isfinite(peak)&&peak>.001f&&peak<1.f,"Device preset produces audio at intended gain");
+                auto wav=directory.getChildFile(musical?(starter==24?"Prism afterimage.wav":"Optical vapour.wav"):(String("device-")+String(starter)+".wav"));
+                wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
+                std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+                if(writer)stream.release();
+                require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write device audition");
+            }
         }
         for(int pad:{15,16,19,20}){const auto d=factoryDocument(pad,.25f);require(!d.panel.sections.empty()&&d.view=="panel","Pad has a curated panel and opens in it");
             for(const auto& section:d.panel.sections)for(const auto& c:section.controls)require(panelControlValid(d,c),"Curated pad control resolves to a real parameter");}
         require(render(factoryDocument(3,.25f).graph)==render(starterDocument(3,.25f).graph),"Catalogue load keeps starter audio");
         require(parseTags(" Warm, Berlin School ,poly_mod,warm,, ")==std::vector<std::string>{"warm","berlin-school","poly-mod"},"Tag normalisation and de-duplication");
         auto filterCount=[&](PresetFilter f){browser.filter=std::move(f);browser.applyFilter();return browser.visibleCount();};
-        {PresetFilter f;f.category="Pad";require(filterCount(f)==4,"Pad category");}
+        {PresetFilter f;f.category="Pad";require(filterCount(f)==5,"Pad category");}
+        {PresetFilter f;f.category="Ostinato";require(filterCount(f)==1&&browser.visibleEntry(0).starter==24,"Ostinato category");}
         {PresetFilter f;f.tags={"berlin-school"};require(filterCount(f)==3,"Tag filter");}
         {PresetFilter f;f.tags={"analog","ambient"};require(filterCount(f)==2,"Tags combine with AND");}
         {PresetFilter f;f.search="prophet";require(filterCount(f)==1&&browser.visibleEntry(0).starter==16,"Search by name");}

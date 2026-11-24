@@ -1,5 +1,9 @@
 # Optisynth status — 24 November 2026
 
+## 0.0.25 — Distinct factory ostinato and pad
+
+Installed in the pinned Release bundle. Prism afterimage is under Ostinato and Optical vapour under Pad. Each has its own twelve-second stereo preview in `build/ui-review-102`. Native factory load, preset recall, panel geometry, single-repeat isolation and core regression checks passed. All 384 modular checks also passed under ASan/UBSan. Device qualification is complete; the voicing changes await Yan’s listening judgment.
+
 ## 0.0.24 — Prism tank
 
 Installed at the pinned Release location. The preset browser includes **Prism afterimage** (tuned glass and clocked echoes) and **Optical vapour** (dual optical gate and descending pitched feedback). Add **Prism tank** as a stereo effect in another rack. The [space device programme](../research/modules/SPACE_DEVICES.md) records the Clouds Parasites adaptation, Make Noise references, Mutable and 4ms priorities, and the tests still needed for flagship parity. The next device study is Tapographic Delay for repeat placement, velocity and rhythm morphing.

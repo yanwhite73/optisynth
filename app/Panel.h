@@ -236,7 +236,7 @@ struct Jack : Button {
 inline std::vector<std::vector<std::string>> controlRows(const std::string& type) {
     static const std::map<std::string,std::vector<std::vector<std::string>>> rows{
         {"analog.dual_lpg",{{"a_control","a_damp","a_keys"},{"b_control","b_damp","b_keys"}}},
-        {"fx.prism_tank",{{"sync","predelay","feedback","echo"},{"size","decay","diffusion","tone"},{"pitch","shift","rate","motion"},{"freeze","mix"}}},
+        {"fx.prism_tank",{{"sync","predelay","feedback","echo"},{"size","decay","diffusion","tone"},{"pitch","shift","rate","motion"},{"freeze","tank","mix"}}},
         {"fx.dual_loop",{{"a_time","a_feed","a_feedback"},{"a_mix","a_hold","a_reverse"},
                           {"b_time","b_feed","b_feedback"},{"b_mix","b_hold","b_reverse"}}},
         {"analog.vco",{{"transpose","fine","drift"},{"saw","pulse","triangle"},{"pulse_width","pwm_depth","fm_depth","level"}}},
