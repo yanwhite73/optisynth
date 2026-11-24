@@ -1,5 +1,24 @@
 # Optisynth status — 24 November 2026
 
+## 0.0.27 — Preset chronology and the first organic drum kit
+
+The browser opens newest first and remembers the chosen column and direction.
+Updated uses the saved file’s modification time for user presets and a fixed
+sound revision time for each factory patch. Header arrows follow the sorted
+audition order.
+
+**Factory → Percussion → Clay and water** is an editable 92 BPM two-bar kit.
+Palm, wood rim, water and fingertip tracks have separate pitches, accents and
+step chances. Drop a WAV on **contact** in Modular view to play it through the
+shell resonator. The shipped kit uses a generated contact. Velocity-layered
+recorded strokes and analysis of Yan’s own playing are the next development
+steps. [Design and sample licence evidence](../research/modules/ORGANIC_PERCUSSION.md)
+
+The 0.0.27 Sample player also shows a locally measured strike-role suggestion.
+Hover over it for the acoustic description. The [percussion study](../research/modules/ORGANIC_PERCUSSION.md)
+records the limits and the one-pack check, including kick/tom confusion.
+
+
 ## 0.0.26 — Factory playback matches the two listening examples
 
 Select **Factory** in the browser. **Prism afterimage** plays a 17-note mallet

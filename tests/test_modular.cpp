@@ -41,6 +41,17 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "performance_checks.h"
 #include "reference_sequencer_checks.h"
 int main(int argc,char** argv){try {
+    // At fixed pitch, doubling bubble size halves its oscillation frequency.
+    auto drop=[](float size,float decay){
+        GraphSpec g;
+        g.nodes={{"drop","drum.droplet",{{"size",size},{"decay",decay},{"splash",0},{"rise",0}}}};
+        g.outputs={{"drop","out"}};
+        return render(g);
+    };
+    const auto small=drop(1,.5f),large=drop(2,.5f),shortDrop=drop(1,.025f);
+    auto crossings=[](const std::vector<float>& x){int n=0;for(int i=1;i<4800;++i)n+=x[i-1]<=0 && x[i]>0;return n;};
+    check(std::abs(crossings(small)-2*crossings(large))<=2,"Bubble radius controls the ringing pitch");
+    check(energy(small)>8*energy(shortDrop) && energy(shortDrop)>0,"Droplet damping shortens an audible strike");
     prismChecks();
     gateDelayChecks();
     if(argc==2 && std::string(argv[1])=="--gate-delay"){std::printf("%d device checks passed\n",checks);return 0;}

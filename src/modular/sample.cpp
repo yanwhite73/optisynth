@@ -15,6 +15,114 @@ uint16_t u16(const uint8_t* p){return uint16_t(p[0])|(uint16_t(p[1])<<8);}
 uint32_t u32(const uint8_t* p){return uint32_t(p[0])|(uint32_t(p[1])<<8)|(uint32_t(p[2])<<16)|(uint32_t(p[3])<<24);}
 void preview(SampleData& s){for(size_t i=0;i<s.mono.size();++i){auto bin=std::min(size_t(127),i*128/s.mono.size());s.peaks[bin]=std::max(s.peaks[bin],std::abs(s.mono[i]));}}
 }
+// Analyze the original mono WAV on the preparation thread. Level-relative
+// gates ignore leading/trailing silence and make the role independent of gain.
+StrikeProfile describeStrike(const std::vector<float>& mono,double rate,const CancelSample& cancelled){
+    StrikeProfile result;
+    if(mono.empty() || !(rate>=8000 && rate<=384000))return result;
+    const size_t hop=size_t(std::lround(rate*.005));
+    std::vector<double> power((mono.size()+hop-1)/hop);
+    double peakPower=0;
+    float minimum=mono[0],maximum=mono[0];
+    for(size_t j=0;j<power.size();++j){
+        if((j&63)==0)cancel(cancelled);
+        const size_t end=std::min(mono.size(),(j+1)*hop);
+        for(size_t i=j*hop;i<end;++i){
+            const float x=mono[i];
+            power[j]+=double(x)*x;
+            minimum=std::min(minimum,x);maximum=std::max(maximum,x);
+        }
+        power[j]/=end-j*hop;
+        peakPower=std::max(peakPower,power[j]);
+    }
+    if(peakPower<1e-12 || maximum-minimum<1e-6f){result.character="No measurable strike";return result;}
+    const double gate=peakPower*.001;
+    size_t first=0,last=power.size()-1;
+    while(power[first]<gate)++first;
+    while(power[last]<gate)--last;
+    const double frameMs=1000*hop/rate;
+    const auto peak=std::max_element(power.begin()+first,power.begin()+last+1);
+    result.attackMs=float((size_t(peak-power.begin())-first)*frameMs);
+    result.durationMs=float((last-first+1)*frameMs);
+
+    int quiet=0;
+    bool repeated=false;
+    for(size_t j=first;j<=last;++j){
+        if(power[j]<gate)++quiet;
+        else if(power[j]>peakPower*.04){repeated|=quiet>=8;quiet=0;}
+    }
+    if(repeated || result.durationMs>1800){
+        result.role=repeated?"Repeated hits / phrase":"Long sound";
+        result.character="Use a single strike for a drum-role suggestion";return result;
+    }
+    // One-pole band estimates and an averaged, downsampled body for a short
+    // normalized autocorrelation. Discard the first 10 ms for pitch.
+    const double lowAlpha=1-std::exp(-6.2831853*200/rate),midAlpha=1-std::exp(-6.2831853*2000/rate);
+    double low=0,mid=0,total=0,bass=0,bright=0,sum=0;
+    std::vector<float> body;
+    const size_t start=first*hop,end=std::min(mono.size(),(last+1)*hop);
+    const size_t stride=size_t(std::lround(rate/4000.));
+    for(size_t i=start;i<end;++i){
+        if((i-start)%16384==0)cancel(cancelled);
+        const double x=mono[i];
+        low+=lowAlpha*(x-low);mid+=midAlpha*(x-mid);
+        total+=x*x;bass+=low*low;bright+=(x-mid)*(x-mid);
+        if(i-start>=2*hop && i-start<26*hop){
+            sum+=x;
+            if((i-start-2*hop+1)%stride==0){body.push_back(float(sum/stride));sum=0;}
+        }
+    }
+    result.lowFraction=float(std::min(1.,bass/total));
+    result.brightFraction=float(std::min(1.,bright/total));
+    const double bodyRate=rate/stride;
+    auto ringingPitch=[&](size_t from,size_t to)->float {
+        const int maxLag=std::min(int(bodyRate/40),int((to-from)/3));
+        const int minLag=std::max(2,int(bodyRate/1000));
+        if(maxLag<=minLag+2)return 0;
+        std::vector<double> correlation(size_t(maxLag+1));
+        double best=.70;
+        for(int lag=minLag;lag<=maxLag;++lag){
+            double ab=0,aa=0,bb=0;
+            for(size_t i=from+lag;i<to;++i){
+                const double a=body[i],b=body[i-lag];ab+=a*b;aa+=a*a;bb+=b*b;
+            }
+            correlation[lag]=ab/std::sqrt(aa*bb+1e-30);
+            best=std::max(best,correlation[lag]);
+        }
+        // The high correlation at lag zero is not a period. Take the first
+        // strong interior peak to avoid preferring lower octave multiples.
+        for(int k=minLag+1;k<maxLag;++k)
+            if(correlation[k]>=std::max(.68,best*.91) && correlation[k]>correlation[k-1] && correlation[k]>=correlation[k+1])
+                return float(bodyRate/k);
+        return 0;
+    };
+    result.bodyHz=ringingPitch(0,body.size());
+    const bool lowBody=result.lowFraction>.5f;
+    const bool brightAttack=result.brightFraction>.29f;
+    const bool shortTail=result.durationMs<145;
+    if(result.lowFraction>.76f)result.role="Bass / dum-like";
+    else if(lowBody && !brightAttack && !shortTail)result.role="Tom / low head";
+    else if(result.bodyHz && result.bodyHz<420 && !brightAttack)result.role="Tom / tuned head";
+    else if(brightAttack && result.lowFraction<.10f){
+        if(result.attackMs>=15)result.role="Shaker / soft hat";
+        else result.role=shortTail?"Closed hat / tick":"Open hat / cymbal";
+    }else if(result.brightFraction>.065f && result.lowFraction>.10f && !result.bodyHz && !shortTail)
+        result.role="Snare / slap";
+    else if(shortTail && !lowBody)result.role="Rim / tak-like";
+    else if(result.bodyHz)result.role="Ringing percussion";
+    result.character=lowBody?"Low body":brightAttack?"Bright top":"Mid body";
+    result.character+=result.attackMs>=15?", swelling":", sharp attack";
+    result.character+=shortTail?", short":", sustained";
+    if(body.size()>size_t(bodyRate*.10)){
+        const float early=ringingPitch(0,body.size()/2),late=ringingPitch(body.size()/2,body.size());
+        if(early && late){
+            const float change=12*std::log2(late/early);
+            if(std::abs(change)>.8f && std::abs(change)<8)
+                result.character+=change>0?", pitch rises":", pitch falls";
+        }
+    }
+    return result;
+}
 SamplePtr decodeWave(const std::vector<uint8_t>& bytes,const CancelSample& cancelled){
     need(bytes.size()>=12&&bytes.size()<=maximumSampleBytes,"WAV must be between 12 bytes and 32 MiB");
     const auto* b=bytes.data();need(!std::memcmp(b,"RIFF",4)&&!std::memcmp(b+8,"WAVE",4),"Expected little-endian RIFF WAV");
@@ -56,7 +164,7 @@ SamplePtr decodeWave(const std::vector<uint8_t>& bytes,const CancelSample& cance
         }
         s->mono[i]=float(sum/channels);
     }
-    preview(*s);return s;
+    s->strike=describeStrike(s->mono,s->rate,cancelled);preview(*s);return s;
 }
 SamplePtr loadWave(const std::string& path,const CancelSample& cancelled){
     cancel(cancelled);std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)throw std::runtime_error("Cannot open sample: "+path);
@@ -69,6 +177,6 @@ SamplePtr demoSample(){
     auto s=std::make_shared<SampleData>();s->fingerprint="builtin-click-v1";s->mono.resize(4800);uint32_t noise=17;
     for(size_t i=0;i<s->mono.size();++i){noise=noise*1664525u+1013904223u;const double t=i/48000.;
         s->mono[i]=float((.5*std::sin(6.283185307179586*(1800*t-3500*t*t))+.3*(double(noise)/4294967295.*2-1))*std::exp(-t*95));}
-    preview(*s);return s;
+    s->strike=describeStrike(s->mono,s->rate);preview(*s);return s;
 }
 }

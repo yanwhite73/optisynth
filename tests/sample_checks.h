@@ -17,6 +17,34 @@ Bytes fixture(int bits=16,int channels=1,int rate=48000,bool floating=false,bool
     uint32_t size=uint32_t(b.size()-8);for(int i=0;i<4;++i)b[4+i]=uint8_t(size>>(i*8));return b;
 }
 void sampleChecks(){
+    {
+        std::vector<float> stroke(24000);
+        for(size_t i=0;i<stroke.size();++i){
+            const double t=double(i)/48000;
+            stroke[i]=float(std::sin(6.2831853*65*t)*std::exp(-22*t));
+        }
+        const auto bass=describeStrike(stroke,48000);
+        check(bass.role=="Bass / dum-like" && std::abs(bass.bodyHz-65)<3,"Low damped stroke role and body frequency");
+        for(auto& x:stroke)x*=.07f;
+        stroke.insert(stroke.begin(),4800,0.f);
+        check(describeStrike(stroke,48000).role==bass.role,"Gain and leading silence preserve a strike role");
+        auto phrase=stroke;phrase.insert(phrase.end(),stroke.begin(),stroke.end());
+        check(describeStrike(phrase,48000).role=="Repeated hits / phrase","Repeated hits abstain from single-stroke assignment");
+        check(describeStrike(std::vector<float>(4000,0.f),44100).role=="Unclear","Silence has no drum role");
+        uint32_t seed=17;
+        for(int soft=0;soft<2;++soft){
+            float prior=0;
+            for(size_t i=0;i<stroke.size();++i){
+                seed=1664525u*seed+1013904223u;
+                const float noise=float(seed>>8)/8388608.f-1;
+                const double t=double(i)/48000;
+                const double env=soft?std::min(1.,t/.04)*std::exp(-20*t):std::exp(-85*t);
+                stroke[i]=float((noise-prior)*env);prior=noise;
+            }
+            const auto top=describeStrike(stroke,48000);
+            check(top.role==(soft?"Shaker / soft hat":"Closed hat / tick"),"Upper-percussion suggestions reflect attack and tail");
+        }
+    }
     for(int bits:{8,16,24,32,64})for(int channels:{1,2})for(bool ext:{false,true}){
         const bool floating=bits==64;auto s=decodeWave(fixture(bits,channels,44100,floating,ext,true));
         check(s->rate==44100&&s->mono.size()==128&&s->sourceChannels==channels&&s->mono[50]==(channels==1?.5f:.125f),"WAV PCM/float/extensible/stereo/odd chunk/order");

@@ -992,3 +992,45 @@ each has a different musical role and they should not be merged
 why arent you updating the sequencer in the preset?
 wavs are ok and those sound a bot better, but I want the preset to reflect that sound
 ```
+
+## 104 — Date sorting and organic probability drum machine
+
+```text
+for now perhaps we could add a sort presets by date, which would make the auditioning process easier
+
+Then, I would like to develop an organic-sounding drum machine, with some elements of probability.
+IT could merge fm, sample, resonators, physical modelling for liquid, warm, real-world sounds.
+In terms of libraries I have:
+/Users/yanwhite/Music/Audiopool/library/drums
+/Users/yanwhite/Music/Audiopool/library/freesound
+/Users/yanwhite/Music/Audiopool/library/Push.Button.Bang.Rare.Tones.WAV
+/Users/yanwhite/Music/Audiopool/library/Organic.Loops.Frame.Drums.MULTiFORMAT
+/Users/yanwhite/Music/Audiopool/library/Big.Fish.Audio.Earth.Tone.World.Percussion.MULTIFORMAT.DVDR-AiRISO
+/Users/yanwhite/Music/Audiopool/percussion (maybe useful for patterns), as well as research in optimystery compose
+
+What can we use legally is a question, but also.. if samples are something that can be 'plugged in' where available that might work, and these samples may be disguised enough to be usable anyway?
+```
+
+## 105 — Describe imported drum samples and suggest stroke roles
+
+```text
+maybe an engine that can identify characteristics of imported samples, in relation to dum/tak, bass/snare or tom or qualities in dholak, dhrupad drums etc
+```
+
+## 106 — Include the upper percussion roles
+
+```text
+and of course, hihat, top-line percussion, shakers etc fulfilling important percussive roles
+```
+
+## 107 — Investigate the late pulse and pip in String afterglow (louder)
+
+```text
+in string afterglow (louder), its been running for about 90m, and now Im starting to hear a pulse and a high pitched pip kind of sound. Im curious has this just emerged and how?
+```
+
+## 108 — Capture the running Optisynth audio
+
+```text
+maybe capture the current audio stream if possible?
+```

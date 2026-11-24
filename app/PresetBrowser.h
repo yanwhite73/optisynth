@@ -48,6 +48,7 @@ public:
         auto& h=table.getHeader();
         h.addColumn(starOn,1,30,30,30,TableHeaderComponent::notResizableOrSortable);
         h.addColumn("Name",2,230,120,400,TableHeaderComponent::defaultFlags);
+        h.addColumn("Updated",6,105,85,160,TableHeaderComponent::defaultFlags);
         h.addColumn("Category",3,100,70,160,TableHeaderComponent::defaultFlags);
         h.addColumn("Tags",4,190,80,600,TableHeaderComponent::defaultFlags);
         h.addColumn("Source",5,70,50,140,TableHeaderComponent::defaultFlags);
@@ -78,6 +79,7 @@ public:
         keepSequence.onClick=[this]{prefs.set("keepSequence",keepSequence.getToggleState());};
         closeButton.onClick=[this]{if(close)close();};
         for(const auto& f:prefs.list("favourites"))favourites.insert(f.toStdString());
+        setSortOrder(std::clamp(int(prefs.number("presetSortColumn",6)),0,6),prefs.flag("presetSortAscending",false));
         rescan();
     }
     ~PresetBrowser() override {table.setModel(nullptr);collections.setModel(nullptr);categories.setModel(nullptr);}
@@ -85,9 +87,16 @@ public:
     std::vector<juce::File> folders() const {std::vector<juce::File> f{library};for(const auto& extra:prefs.list("libraryFolders"))f.emplace_back(extra);return f;}
     const juce::File& libraryFolder() const {return library;}
     juce::File userFolder() const {return library.getChildFile("User");}   // request 73: user presets live in Presets/User
-    void focusList(){table.grabKeyboardFocus();}
+    void focusList(){
+        table.grabKeyboardFocus();
+        if(sortColumn==6 && !visibleRows.empty())table.scrollToEnsureRowIsOnscreen(0);
+    }
     bool keepCurrentSequence() const {return keepSequence.getToggleState();}
     void setKeepSequence(bool keep){keepSequence.setToggleState(keep,dontSendNotification);prefs.set("keepSequence",keep);}
+    void setSortOrder(int column,bool ascending){
+        table.getHeader().setSortColumnId(column,ascending);
+        sortOrderChanged(column,ascending);
+    }
     void rescan(){
         problems.clear();entries=scanPresets(folders(),&problems);
         folderLabel.setText("Presets: "+library.getFullPathName()+(folders().size()>1?"  +"+String(int(folders().size())-1)+" folder(s)":"")+(problems.empty()?"":"  |  "+String(int(problems.size()))+" unreadable file(s)"),dontSendNotification);
@@ -113,7 +122,7 @@ public:
         collectionRows.refreshing=categoryRows.refreshing=false;
         const auto keep=selectedKey.empty()?current:selectedKey;
         visibleRows.clear();for(size_t i=0;i<entries.size();++i)if(presetMatches(entries[i],filter,favourites))visibleRows.push_back(i);
-        sortRows();rebuildChips();table.updateContent();table.repaint();
+        sortRows(visibleRows);rebuildChips();table.updateContent();table.repaint();
         selectKey(keep);showDetails();
     }
     size_t visibleCount() const {return visibleRows.size();}
@@ -124,6 +133,7 @@ public:
     const PresetEntry* step(const std::string& from,int delta){
         std::vector<size_t> all(entries.size());for(size_t i=0;i<all.size();++i)all[i]=i;
         auto contains=[&](const std::vector<size_t>& rows){return std::any_of(rows.begin(),rows.end(),[&](size_t i){return entries[i].key==from;});};
+        sortRows(all);
         const auto& rows=!visibleRows.empty()&&(contains(visibleRows)||!contains(all))?visibleRows:all;
         if(rows.empty())return nullptr;int at=-1;
         for(size_t i=0;i<rows.size();++i)if(entries[rows[i]].key==from)at=int(i);
@@ -211,14 +221,20 @@ private:
         e.setColour(TextEditor::outlineColourId,Colour(0xff3c4449));e.setColour(TextEditor::focusedOutlineColourId,teal);e.setIndents(8,6);}
     const PresetEntry* selectedEntry() const {return entry(selectedKey);}
     void setCategory(const std::string& c){categoryBox.setText(String(c),dontSendNotification);}
-    void sortRows(){
+    void sortRows(std::vector<size_t>& rows) const {
         if(sortColumn==0)return;   // catalogue order: factory list, then user presets by name
+        if(sortColumn==6){
+            std::stable_sort(rows.begin(),rows.end(),[&](size_t a,size_t b){
+                return sortForwards?entries[a].updated<entries[b].updated:entries[b].updated<entries[a].updated;
+            });
+            return;
+        }
         auto key=[this](size_t i)->std::string{const auto& e=entries[i];
             if(sortColumn==3){const auto& c=presetCategories();const auto at=std::find(c.begin(),c.end(),e.category())-c.begin();return char('a'+at)+lowerCase(e.info.name);}
             if(sortColumn==4)return lowerCase(joinTags(e.info.tags));
             if(sortColumn==5)return std::string(e.factory()?"0":"1")+lowerCase(e.info.name);
             return lowerCase(e.info.name);};
-        std::stable_sort(visibleRows.begin(),visibleRows.end(),[&](size_t a,size_t b){return sortForwards?key(a)<key(b):key(b)<key(a);});
+        std::stable_sort(rows.begin(),rows.end(),[&](size_t a,size_t b){return sortForwards?key(a)<key(b):key(b)<key(a);});
     }
     void rebuildChips(){
         // Tags present in the results (ignoring the tag filter), most frequent first; selected tags always shown.
@@ -316,7 +332,7 @@ private:
         g.setFont(font(13));
         if(column==1){const bool on=isFavourite(e.key);g.setColour(on?orange:paper.withAlpha(.3f));g.drawText(on?starOn:starOff,0,0,width,height,Justification::centred);return;}
         g.setColour(column==2?paper:paper.withAlpha(.65f));if(column!=2)g.setFont(font(12));
-        const String text=column==2?String(e.info.name):column==3?String(e.category()):column==4?String(joinTags(e.info.tags)):(e.factory()?String("Factory"):e.file.getParentDirectory().getFileName());
+        const String text=column==6?e.updated.formatted("%Y-%m-%d"):column==2?String(e.info.name):column==3?String(e.category()):column==4?String(joinTags(e.info.tags)):(e.factory()?String("Factory"):e.file.getParentDirectory().getFileName());
         g.drawText(text,6,0,width-10,height,Justification::centredLeft,true);
     }
     void cellClicked(int row,int column,const MouseEvent&) override {
@@ -328,6 +344,11 @@ private:
     void selectedRowsChanged(int row) override {
         if(row>=0&&row<int(visibleRows.size())){selectedKey=entries[visibleRows[size_t(row)]].key;if(saving)return;showDetails();}
     }
-    void sortOrderChanged(int column,bool forwards) override {sortColumn=column;sortForwards=forwards;applyFilter();}
+    void sortOrderChanged(int column,bool forwards) override {
+        sortColumn=column;sortForwards=forwards;
+        prefs.set("presetSortColumn",column);prefs.set("presetSortAscending",forwards);
+        applyFilter();
+        if(sortColumn==6 && !visibleRows.empty())table.scrollToEnsureRowIsOnscreen(0);
+    }
 };
 }

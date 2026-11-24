@@ -23,7 +23,7 @@ private:
     mutable juce::PropertiesFile properties;
 };
 struct PresetEntry {
-    std::string key;PresetInfo info;std::string view;int starter=-1;juce::File file;
+    std::string key;PresetInfo info;std::string view;int starter=-1;juce::File file;juce::Time updated;
     bool factory() const {return starter>=0;}
     std::string category() const {return info.category.empty()?"Uncategorised":info.category;}
 };
@@ -34,14 +34,14 @@ inline PresetEntry readPresetEntry(const juce::File& file) {
     if(file.getSize()>2*1024*1024)throw std::runtime_error("Patch file too large");
     const auto value=juce::JSON::parse(file);
     if(!value.isObject()||(value["format"].toString()!="optisynth.rack"&&value["format"].toString()!="optisynth.instrument"))throw std::runtime_error("Not an Optisynth patch");
-    PresetEntry e{"user:"+file.getFullPathName().toStdString(),{},{},-1,file};
+    PresetEntry e{"user:"+file.getFullPathName().toStdString(),{},{},-1,file,file.getLastModificationTime()};
     if(value["version"].isInt()&&int(value["version"])>=6){RackDocument d;readPresetFields(value,d);e.info=d.info;e.view=d.view;}
     if(e.info.name.empty())e.info.name=file.getFileNameWithoutExtension().toStdString();
     return e;
 }
 inline std::vector<PresetEntry> scanPresets(const std::vector<juce::File>& folders,std::vector<std::string>* problems=nullptr) {
     std::vector<PresetEntry> list;
-    for(const auto& f:factoryPresets())list.push_back({"factory:"+std::to_string(f.starter),f.info,f.view,f.starter,{}});
+    for(const auto& f:factoryPresets())list.push_back({"factory:"+std::to_string(f.starter),f.info,f.view,f.starter,{},juce::Time(f.updatedSeconds*1000)});
     std::set<std::string> seen;std::vector<PresetEntry> user;
     for(const auto& folder:folders){
         if(!folder.isDirectory())continue;

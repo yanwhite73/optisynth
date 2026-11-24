@@ -270,7 +270,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     std::string current,family,instance;bool routed=true,highlighted=false;
     std::function<void()> selectionChanged,activated,rowMenu;
     std::function<void(const Port&,bool,juce::Component*)> portClicked;
-    TextButton sampleButton{"Load WAV..."},menuButton{String::fromUTF8("\xe2\x8b\xaf")};Label sampleName;SamplePtr sample;std::string samplePath;
+    TextButton sampleButton{"Load WAV..."},menuButton{String::fromUTF8("\xe2\x8b\xaf")};Label sampleName,strokeRole;SamplePtr sample;std::string samplePath;
     std::function<void()> chooseSample;std::function<void(const File&)> sampleDropped;
     int knob=44;   // density: knob diameter in pixels
     Rectangle<int> content,waveArea;int dividerY=0;
@@ -280,7 +280,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         for(const auto& p:panels())if(family=="all"||p.family==family){types.push_back(p.type);choice.addItem(p.name,int(types.size()));}
         addAndMakeVisible(choice);choice.onChange=[this]{if(selectionChanged)selectionChanged();};addMouseListener(this,true);
         addChildComponent(menuButton);menuButton.setTooltip("Rows: start a new row here, move this module left or right");menuButton.onClick=[this]{if(rowMenu)rowMenu();};
-        addChildComponent(sampleButton);addChildComponent(sampleName);sampleButton.onClick=[this]{if(chooseSample)chooseSample();};
+        addChildComponent(sampleButton);addChildComponent(sampleName);addChildComponent(strokeRole);strokeRole.setFont(font(text::label));strokeRole.setColour(Label::textColourId,ink);sampleButton.onClick=[this]{if(chooseSample)chooseSample();};
         sampleName.setFont(font(text::label));sampleName.setColour(Label::textColourId,ink);
         addChildComponent(section);addChildComponent(presetButton);addChildComponent(presetName);addChildComponent(more);
         more.onClick=[this]{++subpage;resized();repaint();};
@@ -300,13 +300,21 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     }
     void setSample(const std::string& path,SamplePtr data){samplePath=path;sample=std::move(data);
         const String name=path.empty()?"Drop a WAV here":path=="builtin:click"?"Built-in percussive click":File(String(path)).getFileName();
+        strokeRole.setText(sample?"Suggested: "+String(sample->strike.role):String(),dontSendNotification);
+        if(sample){
+            const auto& profile=sample->strike;
+            String details=String(profile.character);
+            if(profile.durationMs>0)details+="\nAttack to peak "+String(profile.attackMs,0)+" ms / active span "+String(profile.durationMs,0)+" ms";
+            if(profile.bodyHz>0)details+="\nEstimated ringing body "+String(profile.bodyHz,0)+" Hz";
+            strokeRole.setTooltip(details);
+        }else strokeRole.setTooltip({});
         sampleName.setText(name,dontSendNotification);sampleName.setTooltip(String(path)+(sample?"\n"+String(sample->mono.size()/sample->rate,2)+" s / "+String(sample->sourceChannels)+" channel(s) to mono\nWAV files stay external to the saved patch.":"\nSample loads when this module is connected."));repaint();
     }
     std::string selected() const {int i=choice.getSelectedId()-1;return i>=0&&i<int(types.size())?types[size_t(i)]:types.front();}
     void select(const std::string& type) {auto it=std::find(types.begin(),types.end(),type);if(it==types.end())throw std::invalid_argument("Wrong module family: "+type);choice.setSelectedId(int(it-types.begin())+1,dontSendNotification);}
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
         current=type;family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();referenceSequence.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
-        sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");
+        sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");strokeRole.setVisible(type=="sample.player");
         const bool spectral=type=="spectral.engine";section.setVisible(spectral);presetButton.setVisible(spectral);presetName.setVisible(spectral);more.setVisible(spectral);subpage=0;
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
@@ -407,7 +415,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         const int cw=cellWidth(),ch=cellHeight();
         if(editorContent())return {0,0,panelWidth(current)-2*pad,300};   // sequencer editors keep their own layouts
         if(current=="spectral.engine")return {0,0,3*cw+2*gap,28+gap+28+gap+2*ch+gap};
-        if(current=="sample.player")return {0,0,std::max(total(columnWidths(gridRows())),3*cw+2*gap),26+gap+18+gap+44+gap+2*ch+gap};
+        if(current=="sample.player")return {0,0,std::max(total(columnWidths(gridRows())),3*cw+2*gap),26+gap+36+gap+44+gap+2*ch+gap};
         if(knobs.empty())return {0,0,150,48};
         const auto rows=gridRows();
         return {0,0,total(columnWidths(rows)),int(rows.size())*ch+int(rows.size()-1)*gap};
@@ -485,7 +493,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             auto area=content;auto top=area.removeFromTop(26);
             if(auto* loop=control("loop")){const int w=std::min(top.getWidth()/2,loop->textWidth());loop->setBounds(top.removeFromRight(w));top.removeFromRight(gap);}
             sampleButton.setBounds(top);
-            area.removeFromTop(gap);sampleName.setBounds(area.removeFromTop(18));area.removeFromTop(gap);waveArea=area.removeFromTop(44);area.removeFromTop(gap);
+            area.removeFromTop(gap);sampleName.setBounds(area.removeFromTop(18));strokeRole.setBounds(area.removeFromTop(18));area.removeFromTop(gap);waveArea=area.removeFromTop(44);area.removeFromTop(gap);
             grid(gridRows(),area);
             return;
         }

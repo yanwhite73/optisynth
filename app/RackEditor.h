@@ -515,7 +515,42 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==26&&starters.size()==26&&*starters.begin()==0&&*starters.rbegin()==25,"Factory catalogue lists every starter once");}
+            require(factoryPresets().size()==27&&starters.size()==27&&*starters.begin()==0&&*starters.rbegin()==26,"Factory catalogue lists every starter once");}
+        {
+            require(browser.visibleEntry(0).starter==26,"Newest factory revision comes first");
+            require(browser.step("factory:26",1)->updated<=browser.entry("factory:26")->updated,"Audition arrows follow date order");
+            require(loadFactory(26),"Open Clay and water");drain();
+            require(synthPanel.layoutSound() && synthPanel.control("water","size") && handles.at("sequence")->performance,
+                    "Drum kit exposes its model and editable sequencer");
+            auto* contact=hardware.find("contact");
+            require(contact && contact->strokeRole.getText().startsWith("Suggested: ") && contact->strokeRole.getTooltip().isNotEmpty(),
+                    "Sample card exposes the local strike analysis");
+            capture("clay-and-water.png");
+            showBrowser(true);capture("browser-newest.png");showBrowser(false);
+            auto kit=readRack(JSON::parse(JSON::toString(rackJSON(document))));
+            prepareSamples(kit);
+            require(kit.samples.size()==1 && kit.samples.at("contact").path=="builtin:click","Portable kit recalls its generated contact");
+            for(int solo=-1;solo<4;++solo){
+                Runtime engine(kit.graph,sampleBank(kit));
+                engine.clock.tempo(kit.tempo);engine.clock.play(true);
+                if(solo>=0)engine.controls("sequence")->values[performanceIndex(solo,PerfSolo)]=1;
+                AudioBuffer<float> sound(2,48000*(solo<0?12:3));
+                engine.render(sound.getWritePointer(0),sound.getWritePointer(1),sound.getNumSamples(),{});
+                sound.applyGain(kit.gain);
+                require(sound.getMagnitude(0,sound.getNumSamples())>.001f && sound.getMagnitude(0,sound.getNumSamples())<1,
+                        "Drum mix and each sequenced voice are audible with headroom");
+                if(solo<0){
+                    auto file=directory.getChildFile("Clay and water.wav");file.deleteFile();
+                    auto stream=file.createOutputStream();WavAudioFormat format;
+                    std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+                    if(writer)stream.release();
+                    require(writer && writer->writeFromAudioSampleBuffer(sound,0,sound.getNumSamples()),"Write sequenced drum audition");
+                }
+            }
+            browser.setSortOrder(6,true);
+            require(browser.visibleEntry(0).starter==0,"Oldest-first reverses the chronology");
+            browser.setSortOrder(0,true); // Exercise the original catalogue traversal below.
+        }
         {
             require(loadFactory(24),"Prism afterimage loads");drain();
             require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","mix"),"Ostinato echo controls");
@@ -756,6 +791,15 @@ public:
         auto older=rackJSON({rackPreset(0),.25f,{}});for(const char* k:{"info","view","panel"})older.getDynamicObject()->removeProperty(k);older.getDynamicObject()->setProperty("version",5);
         require(browser.libraryFolder().getChildFile("Old rack.optisynth").replaceWithText(JSON::toString(older))&&browser.libraryFolder().getChildFile("Broken.optisynth").replaceWithText("{not json"),"Library fixtures");
         browser.rescan();{PresetFilter f;f.collection="user";require(filterCount(f)==2,"User collection lists readable files only");}
+        {
+            const auto oldFile=browser.libraryFolder().getChildFile("Old rack.optisynth");
+            require(oldFile.setLastModificationTime(juce::Time(1000000000000LL)),"Set a known older file date");
+            browser.rescan();browser.setSortOrder(6,false);
+            require(browser.visibleEntry(0).file==savedFile && browser.visibleEntry(1).file==oldFile,"User files sort by modification time");
+            PresetBrowser reopened(prefs,browser.libraryFolder());
+            require(reopened.visibleEntry(0).file==savedFile,"Date sort survives browser reopen");
+            browser.setSortOrder(0,true);
+        }
         {const auto* old=browser.entry("user:"+browser.libraryFolder().getChildFile("Old rack.optisynth").getFullPathName().toStdString());
          require(old&&old->info.name=="Old rack"&&old->category()=="Uncategorised","Version 5 file listed by file name");
          updatePresetInfo(old->file,{"Old rack","Template","",{"legacy"}});const auto upgraded=readRack(JSON::parse(browser.libraryFolder().getChildFile("Old rack.optisynth")));
@@ -832,7 +876,7 @@ public:
          keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
         require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
         browser.setKeepSequence(false);
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 26-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 27-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:

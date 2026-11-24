@@ -34,6 +34,9 @@ const std::vector<Panel>& panels() {
                 {"structure","Material","",0,1,.35f},
                 {"brightness","Brightness","",0,1,.5f},
                 {"decay","Decay","",0,1,.45f}}},
+            {"drum.droplet","Water droplet","Damped bubble resonance with a short surface impact","source",{
+                {"size","Bubble size","",.4f,3,1,true},{"decay","Ring time","s",.02f,.65f,.16f,true},
+                {"rise","Pitch rise","",0,.8f,.32f},{"splash","Surface","",0,1,.22f}}},
             {"drum.analog", "Bass drum", "Pulse, bridged-T resonance and feedback", "source", {
                 {"transpose","Pitch","st",-36,36,-12},
                 {"tone","Tone","",0,1,.35f},
@@ -219,6 +222,42 @@ private:
     plaits::ModalVoice voice;
     std::array<float,quantum> temp{};
 };
+// A pitched, damped bubble mode and a short filtered impact. Keep four tails
+// so a soft second strike can ring over the first.
+class Droplet final : public Module {
+    struct Strike { float phase=0,frequency=0,amplitude=0,contact=0,noise=0; };
+    std::array<Strike,4> strikes{};
+    size_t next=0;
+    uint32_t random=71;
+public:
+    using Module::Module;
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        if(b.note.trigger){
+            auto& hit=strikes[next++%strikes.size()];
+            hit={};
+            hit.frequency=noteFrequency(b,12)/values[0];
+            hit.amplitude=std::clamp(b.note.velocity,0.f,1.f);
+            hit.contact=1;
+        }
+        const float damping=std::exp(-6.907755f/(48000*values[1]));
+        for(int i=0;i<b.frames;++i){
+            float sample=0;
+            for(auto& hit:strikes){
+                if(hit.amplitude<.00001f)continue;
+                random=1664525u*random+1013904223u;
+                hit.noise+=.22f*(float(random>>8)/8388608.f-1-hit.noise);
+                const float ring=std::sin(6.2831853f*hit.phase)*(1-hit.contact);
+                sample+=hit.amplitude*(.67f*ring+values[3]*hit.contact*hit.noise);
+                hit.phase+=std::min(.45f,hit.frequency*(1-values[2]*hit.contact));
+                hit.phase-=std::floor(hit.phase);
+                hit.contact*=.9965f;
+                hit.amplitude*=damping;
+            }
+            b.outputs[0][i]=sample;
+        }
+    }
+};
 class Drum final : public Module {
 public:
     explicit Drum(const NodeSpec& n) : Module(n) { drum.Init(); }
@@ -351,6 +390,7 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
             if(id=="osc.sine")return std::make_unique<Sine>(n);
             const char* miIds[]={"mutable.lowpass","mutable.bandpass","mutable.highpass"};
             for(int i=0;i<3;++i)if(id==miIds[i])return std::make_unique<MutableFilter>(n,i);
+            if(id=="drum.droplet")return std::make_unique<Droplet>(n);
             if(id=="drum.analog")return std::make_unique<Drum>(n);
             if(id=="spectral.ahdsfr" || id=="spectral.adsr")return std::make_unique<Env>(n);
             if(id=="filter.bypass")return std::make_unique<Utility>(n,0);

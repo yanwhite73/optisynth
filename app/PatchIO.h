@@ -75,36 +75,38 @@ inline PanelLayout padPanel(int model) {
     for(const char* p:{"mix","time_s","damping"})fx.controls.push_back({"reverb",p,std::string(p)=="mix"?"Reverb":""});
     l.sections.push_back(fx);return l;
 }
-struct FactoryPreset { int starter; PresetInfo info; std::string view; };
+// UTC revision time belongs to the sound; preserve it across unrelated app builds.
+struct FactoryPreset { int starter; int64_t updatedSeconds; PresetInfo info; std::string view; };
 // Browser order follows the former starter menu: instrument sounds, pads, then sequencer racks.
 inline const std::vector<FactoryPreset>& factoryPresets() {
     static const std::vector<FactoryPreset> list{
-        {0,{"VA oscillator + filter","Template","Variable-shape oscillator, envelope-swept low-pass filter and VCA. A plain subtractive starting point.",{"subtractive","starter"}},"modular"},
-        {1,{"Modal percussion","Percussion","A struck bank of 24 resonant modes with an AHDSFR envelope.",{"modal","physical-model","struck"}},"modular"},
-        {2,{"Drum into resonator","Percussion","Analog-style drum exciting a modal resonator, then a band-pass filter.",{"drum","resonator","physical-model"}},"modular"},
-        {3,{"Two oscillators + shared filter","Template","Two variable oscillators a fifth apart, mixed into one filter.",{"subtractive","starter","detuned"}},"modular"},
-        {4,{"Sample into resonator","Percussion","The built-in click sample exciting a modal resonator. Drop a WAV on the sample player.",{"sample","resonator","physical-model"}},"modular"},
-        {5,{"Sample attack + resonator","Keys","The sample attack blended with its resonated tail.",{"sample","resonator","layered"}},"modular"},
-        {6,{"Spectral stereo + external LFO","Texture","The full spectral engine in stereo, its filter swept by a rack LFO.",{"spectral","stereo","evolving"}},"modular"},
-        {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
-        {21,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
-        {22,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
-        {25,{"Optical vapour","Pad","An eight-voice reed chord. Play seq for overlapping reed lines, or hold keys for the octave swell.",{"low-pass-gate","polyphonic","swell"}},"panel"},
-        {24,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Play seq for the four-bar mallet phrase and dotted echo.",{"mallet","modal","echo"}},"panel"},
-        {23,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
-        {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
-        {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
-        {19,{"Xpander unison glide","Pad","Xpander-style HP2 + LP1 pole mix, 16 voices with unison 2 and glide.",{"analog","xpander","unison","glide","bright"}},"panel"},
-        {20,{"Just-intonation harmonic drone","Drone","Harmonic-series tuning on D, very slow envelopes and an 18 s reverb.",{"analog","just-intonation","drone","ambient","evolving"}},"panel"},
-        {8,{"Pattern / melodic voice","Sequence","Step pattern sequencer playing a filtered oscillator voice.",{"pattern","melodic","step"}},"modular"},
-        {9,{"Euclidean / modal percussion","Sequence","Euclidean rhythm generator striking modal percussion.",{"euclidean","percussion","modal"}},"modular"},
-        {10,{"Stage / pulsing voice","Sequence","Stage sequencer with per-stage pulses driving a voice.",{"stage","pulsing","step"}},"modular"},
-        {11,{"Motion / Night current","Sequence","Berlin-school motion sequence on the spectral engine; CV lanes move filter cutoff and wave mix.",{"berlin-school","motion","spectral","evolving","dark"}},"modular"},
-        {12,{"Motion / Glass tide","Sequence","Brighter, higher motion sequence with an 11-step pitch lane against a 32-step loop.",{"berlin-school","motion","spectral","bright"}},"modular"},
-        {13,{"Performance / Four currents","Sequence","Four-track performance sequencer: bass voice, spectral, glass and drum.",{"performance","multi-track","berlin-school"}},"modular"},
-        {14,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
-        {17,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
-        {18,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"}};
+        {0,1794935289,{"VA oscillator + filter","Template","Variable-shape oscillator, envelope-swept low-pass filter and VCA. A plain subtractive starting point.",{"subtractive","starter"}},"modular"},
+        {1,1794935289,{"Modal percussion","Percussion","A struck bank of 24 resonant modes with an AHDSFR envelope.",{"modal","physical-model","struck"}},"modular"},
+        {2,1794935289,{"Drum into resonator","Percussion","Analog-style drum exciting a modal resonator, then a band-pass filter.",{"drum","resonator","physical-model"}},"modular"},
+        {3,1794935289,{"Two oscillators + shared filter","Template","Two variable oscillators a fifth apart, mixed into one filter.",{"subtractive","starter","detuned"}},"modular"},
+        {4,1794940108,{"Sample into resonator","Percussion","The built-in click sample exciting a modal resonator. Drop a WAV on the sample player.",{"sample","resonator","physical-model"}},"modular"},
+        {5,1794940108,{"Sample attack + resonator","Keys","The sample attack blended with its resonated tail.",{"sample","resonator","layered"}},"modular"},
+        {6,1794943185,{"Spectral stereo + external LFO","Texture","The full spectral engine in stereo, its filter swept by a rack LFO.",{"spectral","stereo","evolving"}},"modular"},
+        {7,1794943185,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
+        {21,1795378702,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
+        {22,1795378702,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
+        {25,1795523516,{"Optical vapour","Pad","An eight-voice reed chord. Play seq for overlapping reed lines, or hold keys for the octave swell.",{"low-pass-gate","polyphonic","swell"}},"panel"},
+        {24,1795523516,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Play seq for the four-bar mallet phrase and dotted echo.",{"mallet","modal","echo"}},"panel"},
+        {23,1795378702,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
+        {15,1795102287,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
+        {16,1795102287,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
+        {19,1795118367,{"Xpander unison glide","Pad","Xpander-style HP2 + LP1 pole mix, 16 voices with unison 2 and glide.",{"analog","xpander","unison","glide","bright"}},"panel"},
+        {20,1795118367,{"Just-intonation harmonic drone","Drone","Harmonic-series tuning on D, very slow envelopes and an 18 s reverb.",{"analog","just-intonation","drone","ambient","evolving"}},"panel"},
+        {8,1795091315,{"Pattern / melodic voice","Sequence","Step pattern sequencer playing a filtered oscillator voice.",{"pattern","melodic","step"}},"modular"},
+        {9,1795091315,{"Euclidean / modal percussion","Sequence","Euclidean rhythm generator striking modal percussion.",{"euclidean","percussion","modal"}},"modular"},
+        {10,1795091315,{"Stage / pulsing voice","Sequence","Stage sequencer with per-stage pulses driving a voice.",{"stage","pulsing","step"}},"modular"},
+        {11,1795096264,{"Motion / Night current","Sequence","Berlin-school motion sequence on the spectral engine; CV lanes move filter cutoff and wave mix.",{"berlin-school","motion","spectral","evolving","dark"}},"modular"},
+        {12,1795096264,{"Motion / Glass tide","Sequence","Brighter, higher motion sequence with an 11-step pitch lane against a 32-step loop.",{"berlin-school","motion","spectral","bright"}},"modular"},
+        {13,1795100331,{"Performance / Four currents","Sequence","Four-track performance sequencer: bass voice, spectral, glass and drum.",{"performance","multi-track","berlin-school"}},"modular"},
+        {14,1795100331,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
+        {17,1795105055,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
+        {18,1795105055,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"},
+        {26,1795523931,{"Clay and water","Percussion","Four interlocking roles at 92 BPM. Fixed low strokes anchor softer rim, droplet and fingertip variations. Drop a local WAV on contact in the Modular view.",{"organic","drum-machine","physical-model","probability"}},"panel"}};
     return list;
 }
 inline const FactoryPreset* factoryPreset(int starter) {
@@ -151,7 +153,63 @@ inline PerformancePtr prismPerformance(bool mallet) {
         {3,8,16,69,.48f},{3,25,6,67,.53f},{3,40,8,64,.50f},{3,51,6,65,.48f}});
     return data;
 }
+inline RackDocument clayAndWater(float gain) {
+    RackDocument d;
+    d.gain=gain;
+    d.tempo=92;
+    auto data=std::make_shared<PerformanceData>();
+    const char* names[]={"Palm","Wood rim","Water","Top line"};
+    for(int t=0;t<4;++t){
+        auto& track=data->tracks[t];
+        track.name=names[t];
+        for(auto& bank:track.patterns){
+            bank.scale=0;
+            bank.last=31;
+            bank.swing=t==0?0:.065f;
+            for(auto& step:bank.steps)step.on=false;
+        }
+    }
+    auto hit=[&](int t,int at,int pitch,float velocity,float chance=1.f){
+        auto& step=data->tracks[t].patterns[0].steps[at];
+        step.on=true;step.pitch=pitch;step.velocity=velocity;step.chance=chance;
+        step.cv=velocity-.5f;
+    };
+    for(int bar:{0,16}){
+        hit(0,bar,45,.92f);hit(0,bar+10,48,.67f);
+        hit(1,bar+4,58,.72f);hit(1,bar+12,60,.78f);hit(1,bar+15,62,.29f,.48f);
+        hit(2,bar+6,65,.52f);hit(2,bar+13,69,.38f,.6f);
+        hit(3,bar+2,58,.52f);hit(3,bar+7,62,.30f,.65f);hit(3,bar+11,60,.42f);
+    }
+    hit(0,22,50,.38f,.58f);hit(2,31,72,.35f,.42f);hit(3,30,63,.34f,.55f);
+    d.graph.nodes={{"sequence","seq.performance",{},data},
+        {"palm","drum.analog",{{"transpose",-5},{"attack_fm",.26f},{"self_fm",.12f},{"decay",.24f},{"tone",.30f}}},
+        {"rim","modal.voice",{{"structure",.25f},{"brightness",.43f},{"decay",.19f}}},
+        {"water","drum.droplet",{{"size",1.15f},{"decay",.21f},{"rise",.48f},{"splash",.23f}}},
+        {"contact","sample.player",{{"root_note",60},{"level",.8f}}},
+        {"shell","modal.resonator",{{"structure",.36f},{"decay",.24f},{"brightness",.43f},{"input_gain",.9f}}},
+        {"fingers","utility.mix",{{"gain_a",.36f},{"gain_b",.8f}}},
+        {"hands","utility.mix",{{"gain_a",.73f},{"gain_b",.47f}}},
+        {"accents","utility.mix",{{"gain_a",.40f},{"gain_b",.67f}}},
+        {"kit","utility.mix",{{"gain_a",.85f},{"gain_b",.8f}}}};
+    d.samples["contact"]={"builtin:click","builtin-click-v1",{}};
+    d.graph.connections={{{"sequence","t1_notes"},{"palm","notes"}},{{"sequence","t2_notes"},{"rim","notes"}},
+        {{"sequence","t3_notes"},{"water","notes"}},{{"sequence","t4_notes"},{"contact","notes"}},
+        {{"sequence","t4_notes"},{"shell","notes"}},{{"contact","out"},{"shell","in"}},
+        {{"contact","out"},{"fingers","a"}},{{"shell","out"},{"fingers","b"}},
+        {{"palm","out"},{"hands","a"}},{{"rim","out"},{"hands","b"}},
+        {{"water","out"},{"accents","a"}},{{"fingers","out"},{"accents","b"}},
+        {{"hands","out"},{"kit","a"}},{{"accents","out"},{"kit","b"}}};
+    d.graph.modulations={{{"sequence","t2_cv"},{"rim","brightness"},.25f}};
+    d.graph.outputs={{"kit","out"}};
+    d.panel={"walnut",{
+        {"PALM",{{"hands","gain_a","Level"},{"palm","attack_fm","Attack FM"},{"palm","decay","Decay"}}},
+        {"WOOD RIM",{{"hands","gain_b","Level"},{"rim","structure","Material"},{"rim","brightness","Brightness"}}},
+        {"WATER",{{"accents","gain_a","Level"},{"water","size","Size"},{"water","rise","Pitch rise"},{"water","decay","Ring time"},{"water","splash","Surface"}}},
+        {"TOP LINE",{{"accents","gain_b","Level"},{"fingers","gain_a","Direct"},{"fingers","gain_b","Shell"},{"shell","decay","Decay"}}}}};
+    return d;
+}
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==26)return clayAndWater(gain);
     if(which==24 || which==25) {
         RackDocument d;
         d.gain=gain;

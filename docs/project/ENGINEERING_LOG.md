@@ -1249,3 +1249,42 @@ tones can cross a chord change. The mallet leaves the gaps for its dotted echo.
 The musical WAV render now starts the recalled graph’s clock and releases it
 after four bars. Both complete stereo files match the 0.0.25 previews by SHA-256.
 Future sequenced sound deliveries follow the playback check in [Sound goals](SOUND_GOALS.md).
+
+## Request 104 — Date-ordered auditions and Clay and water
+
+Use the date of the individual sound revision for factory entries. Dating
+every factory sound from the application bundle would move the whole catalogue
+on each rebuild. User files supply their filesystem modification times. Rescan,
+filtered stepping and restoring the browser preference share the same sort.
+
+Clay and water is a factory rack with four independent Performance tracks and
+an original Water droplet module. Native qualification renders the recalled
+kit and each solo lane with the saved tempo and no external notes. The library
+inventory and planned recorded articulations are in the [percussion study](../research/modules/ORGANIC_PERCUSSION.md).
+
+## Requests 105–106 — Upper percussion and stroke roles
+
+The wave decoder now computes a strike profile off the audio thread. Tests
+cover silent input, separated hits, gain and silence invariance, a known bass
+pitch and two top-line envelopes. A same-library field check found remaining
+confusion between bass and low tom, and between snare and tuned heads.
+Named bols would require labelled player examples.
+
+## Requests 107–108 — Live String afterglow capture
+
+Inspected the saved String afterglow 2 (louder) graph. It uses the evolving
+Probability grid at 108 BPM, 12% swing and density 0.9. Replaying the default
+seed 719 choices from transport start puts its top B-flat (MIDI 70) near
+4.17 seconds and 5400.71 seconds. A live session can have different transport
+history or edits. The detuned saws, breathing filter, fully wet chorus and
+11-second reverb feed quarter and dotted-quarter delays (0.556 and 0.833 s).
+Both holds default off. The saved chorus rate is 0.0015 Hz, but the inherited
+chorus clamps its first tap to at least 0.01 Hz. No timed change at 90 minutes
+was found in these settings.
+
+Captured the running Release app by PID at 13:07 GMT via a macOS app filter,
+audio only. WAV in the user's Music/Optisynth/Recordings folder, outside source
+control. Verified 30 seconds of 48 kHz, 24-bit stereo and peak −20.5 dBFS.
+Near 17.3 seconds the upper bands include simultaneous energy near 0.70 and
+1.40 kHz, consistent with pitched harmonics. A stereo capture cannot identify
+the originating patch module or prove when the listener first heard it.

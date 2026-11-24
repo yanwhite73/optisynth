@@ -212,3 +212,5 @@ first-party; incomplete firmware documentation prevented upstream code adoption.
 [Rich and Roach patch strategies](instruments/RICH_ROACH_PATCH_STRATEGIES.md) traces played and sequenced lines, rhythmic delay, the track tunings on *Neurogenesis*, Roach’s live Part 3–4 transition and Rich’s cloud oscillator.
 
 [Space device programme](modules/SPACE_DEVICES.md) tracks Mutable, 4ms and Make Noise coverage, the Prism tank source adaptation and flagship listening tests.
+
+The [organic percussion study](modules/ORGANIC_PERCUSSION.md) covers bubble synthesis, Compose groove measurements, six local percussion sources and sample rights for recordings and playable instruments.
