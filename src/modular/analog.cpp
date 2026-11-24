@@ -1,7 +1,8 @@
 // Analog-style voice modules. Our own implementations from the circuit study in
-// docs/research/instruments/CLASSIC_PAD_ARCHITECTURE.md; no third-party DSP code.
+// docs/research/instruments/CLASSIC_PAD_ARCHITECTURE.md. The Prism tank adapts Clouds Parasites.
 #include "analog.h"
 #include "gate_delay.h"
+#include "clouds/dsp/fx/oliverb.h"
 #include "../core/effects.h"
 #include <cmath>
 #include <stdexcept>
@@ -432,6 +433,68 @@ private:
     ClockDelayChannel channel[2];
 };
 
+// Mono excitation, stereo tank return, with an independently audible echo tap.
+class PrismTank final : public Base {
+public:
+    explicit PrismTank(const NodeSpec& n) : Base(n) { tank.Init(memory.data()); }
+
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        const bool freeze = values[9] >= .5f;
+        tank.set_input_gain(freeze ? 0.f : .5f);
+        tank.set_decay(freeze ? 1.f : values[2]);
+        tank.set_size(.05f + .94f * values[1]);
+        tank.set_diffusion(.3f + .5f * values[3]);
+        const float tone = values[4];
+        const float lp = .03f + .9f * std::min(1.f, 1.f + tone);
+        const float hp = .01f + .2f * std::max(0.f, tone);
+        // Map the 32 kHz one-pole coefficients to the rack's 48 kHz clock.
+        tank.set_lp(freeze ? 1.f : 1.f - std::pow(1.f - lp, 2.f / 3.f));
+        tank.set_hp(freeze ? 0.f : 1.f - std::pow(1.f - hp, 2.f / 3.f));
+        tank.set_ratio(std::exp2(values[5] / 12.f));
+        tank.set_pitch_shift_amount(values[6] * std::min(std::abs(values[5]) / .7f, 1.f));
+        tank.set_mod_rate(values[7]);
+        tank.set_mod_amount(values[8] * 450.f);
+
+        const int timing = int(values[11]);
+        const double tempo = b.clock ? std::clamp(b.clock[0].tempo, 20., 300.) : 120.;
+        constexpr double divisions[]{.25, .5, .75, 1., 1.5, 2.};
+        const float target = timing == 0 ? values[10] * 48.f :
+            float(rate * 60. / tempo * divisions[timing - 1]);
+        if (tapLength < 0) tapLength = target;
+        std::array<float, quantum> echoes{};
+        std::array<clouds::FloatFrame, quantum> frames{};
+        for (int i = 0; i < b.frames; ++i) {
+            const float dry = .5f * (b.inputs[0][i] + b.inputsRight[0][i]);
+            tapLength += .005f * (target - tapLength);
+            const int whole = int(tapLength);
+            const float frac = tapLength - float(whole);
+            const size_t near = (write + echo.size() - size_t(whole)) % echo.size();
+            const size_t far = (near + echo.size() - 1) % echo.size();
+            const float first = whole == 0 ? dry : echo[near];
+            const float tap = first + frac * (echo[far] - first);
+            echo[write] = std::clamp(dry + tap * values[12] * std::min(1.f, tapLength), -2.f, 2.f);
+            write = (write + 1) % echo.size();
+            echoes[i] = tap;
+            frames[i] = {tap, tap};
+        }
+        tank.Process(frames.data(), size_t(b.frames));
+        for (int i = 0; i < b.frames; ++i) {
+            const float wetL = frames[i].l + values[13] * echoes[i];
+            const float wetR = frames[i].r + values[13] * echoes[i];
+            b.outputs[0][i] = (1.f - values[0]) * b.inputs[0][i] + values[0] * wetL;
+            b.outputsRight[0][i] = (1.f - values[0]) * b.inputsRight[0][i] + values[0] * wetR;
+        }
+    }
+private:
+    clouds::Oliverb tank;
+    std::array<uint16_t, 32768> memory{};
+    // Two beats at 20 BPM, plus space for interpolation.
+    std::array<float, 288002> echo{};
+    size_t write = 0;
+    float tapLength = -1;
+};
+
 class Fx final : public Base {
 public:
     Fx(const NodeSpec& n, std::string type) : Base(n), kind(std::move(type)), effect(partials::makeEffect(kind)) {
@@ -519,6 +582,15 @@ std::vector<Panel> analogPanels() {
     }
     p.push_back(std::move(gate));
     p.push_back(std::move(delay));
+    p.push_back({"fx.prism_tank", "Prism tank", "Clouds Parasites Miverb tank with a playable clocked echo", "effect", {
+        {"mix","Mix","",0,1,.38f}, {"size","Size","",0,1,.65f}, {"decay","Regeneration","",0,1.18f,.82f},
+        {"diffusion","Diffusion","",0,1,.75f}, {"tone","Damping tilt","",-1,1,-.24f},
+        {"pitch","Loop pitch","st",-12,12,7}, {"shift","Pitch return","",0,1,.34f},
+        {"rate","Motion rate","",0,1,.42f}, {"motion","Motion depth","",0,1,.15f},
+        {"freeze","Freeze","",0,1,0,false,1,{"Off","Hold"}},
+        {"predelay","Free time","ms",0,1500,55},
+        {"sync","Echo clock","",0,6,0,false,1,{"Free","1/16","1/8","1/8 dotted","1/4","1/4 dotted","1/2"}},
+        {"feedback","Echo feedback","",0,.94f,.18f}, {"echo","Echo return","",0,1,.22f}}});
     p.push_back(effectPanel("fx.reverb", "Reverb", "reverb", "Long modulated stereo reverb (inherited library)", .3f));
     p.push_back(effectPanel("fx.chorus", "Chorus", "chorus", "Stereo chorus (inherited library)", .4f));
     p.push_back(effectPanel("fx.delay", "Stereo delay", "delay_stereo", "Stereo delay with filtered feedback (inherited library)", .25f));
@@ -621,6 +693,7 @@ std::unique_ptr<AudioModule> makeAnalog(const NodeSpec& n, const PrepareContext&
     if (id == "mod.wheel") return std::make_unique<Wheel>(n);
     if (id == "analog.dual_lpg") return std::make_unique<DualGate>(n);
     if (id == "fx.dual_loop") return std::make_unique<DualDelay>(n);
+    if (id == "fx.prism_tank") return std::make_unique<PrismTank>(n);
     if (id == "fx.reverb") return std::make_unique<Fx>(n, "reverb");
     if (id == "fx.chorus") return std::make_unique<Fx>(n, "chorus");
     if (id == "fx.delay") return std::make_unique<Fx>(n, "delay_stereo");

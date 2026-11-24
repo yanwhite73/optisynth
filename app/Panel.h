@@ -20,6 +20,7 @@ Colour panelColour(const std::string& id) {
     if(id=="sample.player")return Colour(0xffd7ca96);
     if(id=="spectral.engine")return Colour(0xff8ebecb);
     if(id=="analog.dual_lpg")return Colour(0xff30383b);
+    if(id=="fx.prism_tank")return Colour(0xffabb8d7);
     if(id=="fx.dual_loop")return Colour(0xffb5c1be);
     if(id=="mod.lfo")return Colour(0xffd7b282);
     if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
@@ -113,7 +114,7 @@ struct Control : juce::Component {
         slider.setValue(value,dontSendNotification);slider.updateText();slider.setDoubleClickReturnValue(true,p.initial);
         slider.setTooltip(p.label+" / double-click to reset");
         slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
-        const bool loopSwitch=p.id=="a_hold"||p.id=="b_hold"||p.id=="a_reverse"||p.id=="b_reverse";
+        const bool loopSwitch=p.id=="freeze"||p.id=="a_hold"||p.id=="b_hold"||p.id=="a_reverse"||p.id=="b_reverse";
         if(loopSwitch||p.id=="loop"||p.id=="retrigger"){
             isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(loopSwitch?String(p.label):p.id=="loop"?"Loop while held":"Reset on note");
             toggle.setColour(ToggleButton::textColourId,text);toggle.setColour(ToggleButton::tickColourId,text);toggle.setColour(ToggleButton::tickDisabledColourId,text.withAlpha(.5f));
@@ -235,6 +236,7 @@ struct Jack : Button {
 inline std::vector<std::vector<std::string>> controlRows(const std::string& type) {
     static const std::map<std::string,std::vector<std::vector<std::string>>> rows{
         {"analog.dual_lpg",{{"a_control","a_damp","a_keys"},{"b_control","b_damp","b_keys"}}},
+        {"fx.prism_tank",{{"sync","predelay","feedback","echo"},{"size","decay","diffusion","tone"},{"pitch","shift","rate","motion"},{"freeze","mix"}}},
         {"fx.dual_loop",{{"a_time","a_feed","a_feedback"},{"a_mix","a_hold","a_reverse"},
                           {"b_time","b_feed","b_feedback"},{"b_mix","b_hold","b_reverse"}}},
         {"analog.vco",{{"transpose","fine","drift"},{"saw","pulse","triangle"},{"pulse_width","pwm_depth","fm_depth","level"}}},

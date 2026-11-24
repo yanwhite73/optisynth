@@ -36,10 +36,12 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "sequencer_checks.h"
 #include "analog_checks.h"
 #include "gate_delay_checks.h"
+#include "prism_checks.h"
 #include "pattern_checks.h"
 #include "performance_checks.h"
 #include "reference_sequencer_checks.h"
 int main(int argc,char** argv){try {
+    prismChecks();
     gateDelayChecks();
     if(argc==2 && std::string(argv[1])=="--gate-delay"){std::printf("%d device checks passed\n",checks);return 0;}
     analogChecks();

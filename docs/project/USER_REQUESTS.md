@@ -943,3 +943,21 @@ make sure you document all this research, and add to it the proposed design inno
 ```text
 and continue the thread / thought process you were on too
 ```
+
+## 96 — Device recreations and original designs
+
+```text
+ok we should start with more recreations of known schematics or open source devices that support the research goals, as well as new designs where there isnt already a well documented starting point
+```
+
+## 97 — Mutable and 4ms catalogue and deep delay/reverb
+
+```text
+for example all of the important mutable and 4ms open source modules should get built, and especially complex delays and reverbs, we need at least one device as deep as starlab, sealegs, cosmic debris etc
+```
+
+## 98 — Make Noise in the device programme
+
+```text
+and make noise stuff too
+```

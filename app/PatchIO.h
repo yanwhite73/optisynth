@@ -89,6 +89,8 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
         {21,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
         {22,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
+        {25,{"Optical vapour","Keys","Two struck optical gates excite a small shifting space. Turn down regeneration to hear the gates alone with a short tail.",{"low-pass-gate","make-noise","pitch-shift"}},"panel"},
+        {24,{"Prism afterimage","Percussion","Short glass strikes feed dotted echoes and a pitch-shifting stereo tank. Freeze a chord, then play across its tail.",{"mutable","shimmer","echo","freeze"}},"panel"},
         {23,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
         {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
         {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
@@ -109,6 +111,25 @@ inline const FactoryPreset* factoryPreset(int starter) {
     for(const auto& f:factoryPresets())if(f.starter==starter)return &f;return nullptr;
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==25) {
+        auto d = starterDocument(21, gain);
+        d.graph.nodes.push_back({"prism","fx.prism_tank",{{"size",.42f},{"decay",.78f},{"pitch",-7},{"shift",.56f},{"mix",.46f}}});
+        d.graph.connections.push_back({{"voices","out"},{"prism","in"}});
+        d.graph.outputs = {{"prism","out"}};
+        d.panel.sections.push_back({"SPACE",{{"prism","mix","Mix"},{"prism","pitch","Loop pitch"},{"prism","shift","Pitch return"},{"prism","decay","Regeneration"},{"prism","freeze","Freeze"}}});
+        return d;
+    }
+    if(which==24) {
+        RackDocument d = starterDocument(22, gain);
+        d.graph.nodes.back() = {"prism","fx.prism_tank",{{"sync",3},{"mix",.44f},{"echo",.48f},{"feedback",.32f}}};
+        d.graph.connections.back().destination = {"prism","in"};
+        d.graph.outputs = {{"prism","out"}};
+        d.panel.sections.resize(2);
+        d.panel.sections.push_back({"ECHO",{{"prism","sync","Clock"},{"prism","predelay","Free time"},{"prism","feedback","Feedback"},{"prism","echo","Echo return"}}});
+        d.panel.sections.push_back({"TANK",{{"prism","size","Size"},{"prism","decay","Regeneration"},{"prism","diffusion","Diffusion"},{"prism","tone","Damping tilt"},{"prism","freeze","Freeze"}}});
+        d.panel.sections.push_back({"PITCH AND MOTION",{{"prism","pitch","Loop pitch"},{"prism","shift","Pitch return"},{"prism","rate","Motion rate"},{"prism","motion","Motion depth"},{"prism","mix","Mix"}}});
+        return d;
+    }
     if(which>=21 && which<=23) {
         RackDocument d;
         d.gain=gain;

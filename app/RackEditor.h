@@ -515,8 +515,19 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==24&&starters.size()==24&&*starters.begin()==0&&*starters.rbegin()==23,"Factory catalogue lists every starter once");}
+            require(factoryPresets().size()==26&&starters.size()==26&&*starters.begin()==0&&*starters.rbegin()==25,"Factory catalogue lists every starter once");}
         {
+            require(loadFactory(24),"Prism afterimage loads");drain();
+            require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","freeze"),"Prism tank controls and output");
+            auto* freeze=synthPanel.control("prism","freeze");
+            require(freeze->isSwitch,"Prism Freeze is a one-click switch");
+            capture("prism-afterimage.png");
+            setSize(1120,800);resized();capture("prism-minimum.png");setSize(1440,940);resized();
+            require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
+        }
+        {
+            require(loadFactory(25),"Optical vapour loads");drain();
+            require(synthPanel.control("gate","a_damp") && synthPanel.control("prism","freeze"),"Optical gate and reverb share the playable panel");
             require(loadFactory(23),"String afterglow for VCO activity");selectNode("vco1");
             auto cue=[&](const char* key){return hardware.find("vco1")->control(key)->activity;};
             const auto on=Control::Activity::ready,off=Control::Activity::waiting;
@@ -535,7 +546,7 @@ public:
             require(commit(next,"vco1") && cue("pulse_width")==on,"Matrix modulation can raise a zero pulse");
             require(loadFactory(16) && synthPanel.control("vco1","fm_depth")->activity==on,"Curated Prophet panel follows its poly-mod wiring");
         }
-        for(int starter : {21,22,23}){
+        for(int starter : {21,22,23,24,25}){
             require(loadFactory(starter),"Load new device preset");drain();
             require(synthPanel.layoutSound()&&currentView=="panel","Playable device panel fits");
             for(const auto& section:document.panel.sections)for(const auto& c:section.controls)
@@ -779,7 +790,7 @@ public:
          keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
         require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
         browser.setKeepSequence(false);
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 24-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 26-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
@@ -821,7 +832,7 @@ private:
     void showSaveForm(){showBrowser(true);browser.showSaveForm(document.info,currentView=="panel");}
     bool loadFactory(int index){
         try{auto next=chooseStarter(document,index,browser.keepCurrentSequence());
-            return commit(std::move(next),index==21?"gate":index==22||index==23?"delay":index==15||index==16||index==19||index==20?"filter":index>=8?"sequence":"source","factory:"+std::to_string(index));
+            return commit(std::move(next),index==25?"gate":index==24?"prism":index==21?"gate":index==22||index==23?"delay":index==15||index==16||index==19||index==20?"filter":index>=8?"sequence":"source","factory:"+std::to_string(index));
         }catch(const std::exception& e){message(e.what(),true);return false;}
     }
     bool loadUserFile(const File& file){

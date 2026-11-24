@@ -1,8 +1,12 @@
-# Optisynth status — 23 November 2026
+# Optisynth status — 24 November 2026
+
+## 0.0.24 — Prism tank
+
+Installed at the pinned Release location. The preset browser includes **Prism afterimage** (tuned glass and clocked echoes) and **Optical vapour** (dual optical gate and descending pitched feedback). Add **Prism tank** as a stereo effect in another rack. The [space device programme](../research/modules/SPACE_DEVICES.md) records the Clouds Parasites adaptation, Make Noise references, Mutable and 4ms priorities, and the tests still needed for flagship parity. The next device study is Tapographic Delay for repeat placement, velocity and rhythm morphing.
 
 ## Current design study
 
-[Parameter movement](../ui/PARAMETER_MOVEMENT.md) is at interaction-design stage. The next review compares a waveform button and an outer-ring gesture on Decay and Pulse Width at minimum rack size, using the [Rich and Roach listening studies](../research/instruments/RICH_ROACH_PATCH_STRATEGIES.md). The installed app is 0.0.23.
+[Parameter movement](../ui/PARAMETER_MOVEMENT.md) is at interaction-design stage. The next review compares a waveform button and an outer-ring gesture on Decay and Pulse Width at minimum rack size, using the [Rich and Roach listening studies](../research/instruments/RICH_ROACH_PATCH_STRATEGIES.md). The movement subcontrol is still at design stage.
 
 ## 0.0.23 — Analog VCO activity lamps
 
