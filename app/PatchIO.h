@@ -106,6 +106,7 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {14,1795100331,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
         {17,1795105055,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
         {18,1795105055,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"},
+        {27,1795529140,{"Skin and vessel","Percussion","Turn Frame to udu while the pattern plays. Strike position moves from palm to rim or shell. Short gates let the hand lift off the pot.",{"frame-drum","udu","physical-model","hand-percussion"}},"panel"},
         {26,1795523931,{"Clay and water","Percussion","Four interlocking roles at 92 BPM. Fixed low strokes anchor softer rim, droplet and fingertip variations. Drop a local WAV on contact in the Modular view.",{"organic","drum-machine","physical-model","probability"}},"panel"}};
     return list;
 }
@@ -209,6 +210,37 @@ inline RackDocument clayAndWater(float gain) {
     return d;
 }
 inline RackDocument starterDocument(int which,float gain) {
+    if(which==27){
+        RackDocument d;d.gain=gain;d.tempo=92;
+        auto data=std::make_shared<PerformanceData>();
+        for(auto& track:data->tracks){
+            for(auto& bank:track.patterns){
+                bank.scale=0;bank.last=31;
+                for(auto& step:bank.steps)step.on=false;
+            }
+        }
+        auto& hand=data->tracks[0];hand.name="Hand strokes";
+        for(int t=1;t<4;++t)data->tracks[t].name="Track "+std::to_string(t+1);
+        // Position CV alternates palms with fingers; the gate is hand contact time.
+        struct Hit {int step,pitch;float velocity,gate,position;};
+        for(const Hit h:std::initializer_list<Hit>{
+            {0,46,.93f,.23f,-.52f},{3,46,.42f,.68f,.58f},{6,48,.73f,.38f,-.28f},
+            {10,46,.81f,.86f,-.41f},{12,51,.54f,.28f,.68f},{15,48,.31f,.44f,.45f},
+            {16,46,.94f,.20f,-.54f},{20,51,.51f,.72f,.66f},{22,48,.70f,.34f,-.20f},
+            {26,46,.77f,.79f,-.37f},{29,51,.49f,.23f,.60f}}){
+            auto& step=hand.patterns[0].steps[h.step];step.on=true;step.pitch=h.pitch;
+            step.velocity=h.velocity;step.gate=h.gate;step.cv=h.position;
+        }
+        d.graph.nodes={{"hand","drum.skin_vessel",{{"body",.48f},{"position",.43f}}},
+            {"voices","voice.mix",{{"voices",5},{"spread",.1f},{"level",.9f}}},
+            {"sequence","seq.performance",{},data}};
+        d.graph.connections={{{"hand","out"},{"voices","in"}},{{"sequence","t1_notes"},{"voices","notes"}}};
+        d.graph.modulations={{{"sequence","t1_cv"},{"hand","position"},.54f}};
+        d.graph.outputs={{"voices","out"}};
+        d.panel={"walnut",{{"BODY",{{"hand","body","Frame to udu"},{"hand","position","Strike position"},{"hand","damp","Hand damping"}}},
+            {"TOUCH",{{"hand","touch","Hardness"},{"hand","opening","Hole opening"},{"hand","lift","Hand lift"}}}}};
+        return d;
+    }
     if(which==26)return clayAndWater(gain);
     if(which==24 || which==25) {
         RackDocument d;

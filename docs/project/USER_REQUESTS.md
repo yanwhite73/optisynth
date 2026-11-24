@@ -1034,3 +1034,22 @@ in string afterglow (louder), its been running for about 90m, and now Im startin
 ```text
 maybe capture the current audio stream if possible?
 ```
+
+## 109 — Source of the reported pip
+
+```text
+It was a phone alarm.. I got confused!
+```
+
+## 110 — Find the date and time sort
+
+```text
+where is the sort presets by date/time?
+```
+
+## 111 — Morphing frame drum and udu characteristics
+
+```text
+oh ok, yes thats alright in a slightly toy sounding way - could be useful.
+what about morphing characteristics of frame drums, udu etc?
+```

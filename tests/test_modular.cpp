@@ -52,6 +52,33 @@ int main(int argc,char** argv){try {
     auto crossings=[](const std::vector<float>& x){int n=0;for(int i=1;i<4800;++i)n+=x[i-1]<=0 && x[i]>0;return n;};
     check(std::abs(crossings(small)-2*crossings(large))<=2,"Bubble radius controls the ringing pitch");
     check(energy(small)>8*energy(shortDrop) && energy(shortDrop)>0,"Droplet damping shortens an audible strike");
+    auto handStroke=[](float body,float opening,float damp,bool lift){
+        GraphSpec g;g.nodes={{"hand","drum.skin_vessel",{{"body",body},{"opening",opening},{"damp",damp},{"lift",10},{"position",0}}}};
+        g.outputs={{"hand","out"}};Runtime r(g);
+        std::vector<float> x(24000);
+        r.render(x.data(),1440,{48,.85f,true,true});
+        r.render(x.data()+1440,int(x.size())-1440,{48,.85f,!lift,false});
+        return x;
+    };
+    auto skin=handStroke(0,1,.2f,true),vessel=handStroke(1,1,.2f,true),sealed=handStroke(1,0,.2f,true);
+    check(skin==handStroke(0,0,.2f,true),"Aperture leaves the frame endpoint alone");
+    check(vessel!=sealed && vessel!=handStroke(1,1,.2f,false),"Open aperture and hand release affect the vessel tail");
+    auto ringCrossings=[](const std::vector<float>& x){int n=0;for(int i=3001;i<8000;++i)n+=x[i-1]<0 && x[i]>=0;return n;};
+    check(ringCrossings(vessel)>ringCrossings(sealed)+3,"Uncovering the vessel raises the air mode");
+    check(energy(skin)>2*energy(handStroke(0,1,1,true)) && energy(vessel)>0,"Hand damping absorbs membrane energy");
+    auto energySpanMs=[](const std::vector<float>& audio){
+        const double total=energy(audio);double sum=0;int start=-1;
+        for(int i=0;i<int(audio.size());++i){
+            sum+=double(audio[i])*audio[i];
+            if(start<0 && sum>=total*.05)start=i;
+            if(sum>=total*.95)return (i-start)/48.;
+        }
+        return 0.;
+    };
+    const auto openSpan=energySpanMs(handStroke(0,1,.04f,true));
+    const auto mutedSpan=energySpanMs(handStroke(0,1,.64f,true));
+    check(openSpan>=193 && openSpan<=287 && mutedSpan>=100 && mutedSpan<=141,
+          "Open and damped frame strokes reach measured VCSL energy-duration ranges");
     prismChecks();
     gateDelayChecks();
     if(argc==2 && std::string(argv[1])=="--gate-delay"){std::printf("%d device checks passed\n",checks);return 0;}

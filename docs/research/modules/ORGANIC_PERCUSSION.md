@@ -61,3 +61,46 @@ articulation. This measures same-pack consistency only. Shaker, tak and named
 Indian strokes still need real labelled listening examples. Synthetic fixtures
 also exercise damping, leading silence, level changes, silence and repeated
 hits. No pack audio is included in the project.
+
+## Skin and vessel
+
+Yan described the first kit as potentially useful but slightly toy-sounding.
+This second factory sound keeps a single expressive voice dry so its strike
+and decay can be judged on their own. The two-bar sequence alternates palm
+and finger positions and varies the gate length. The same gestures work all
+the way across the body control. Its six parameters can also be routed in
+the regular modulation matrix.
+
+**Frame.** A membrane has several inharmonic modes. A strike at the centre
+favours axisymmetric modes. Moving off-centre excites modes with a nodal
+diameter that passes through the centre. The model approximates these
+position weights and uses the first six ideal circular mode frequencies.
+Hand damping increases loss and shortens the ringing tail. The weights,
+decays and finger noise are original voicing choices. [Daniel Russell’s
+circular membrane demonstrations](https://www.acs.psu.edu/drussell/demos/membranecircle/circle.html)
+
+**Vessel.** Vieira and Aguiar measured an udu as an air cavity with two
+openings. Closing one opening leaves a bass resonance; exposing the second
+raises its frequency. The model keeps one neck open. Holding the key mostly
+seals the other opening; release moves towards the Hole opening setting at
+the Hand lift rate. Position weights the air thump against the shorter clay
+tap. This endpoint represents a family of strokes. Its shell modes and opening
+range are approximate. [The sound of the udu](https://www.if.ufrj.br/~carlos/artigos/PhysEd2022_udu.pdf)
+
+**Between them.** Six ringing states retain their energy while Body changes
+their frequencies and decay times. Strike position and hardness determine
+where the next hit puts energy. Halfway gives a yielding bass beneath a skin
+and shell attack. The saved comparison plays the same eleven strokes dry at
+frame, halfway and vessel, without random note selection or a level change.
+
+**Voicing check.** Measured the interval containing the middle 90% of stereo
+signal energy in the CC0 large-frame recordings from Compose’s VCSL bank.
+Four open hits spanned 193–287 ms, four muted hits 100–141 ms. The first
+prototype’s main sequenced stroke gave only 40 ms. The revised membrane uses
+longer modal decays and a damping range informed by those recordings. Table 1
+in Vieira and Aguiar reports 68 Hz with the neck alone and 136 Hz with both
+holes open on their measured vessel. The model targets approximately that
+interval at full opening. These measurements constrain decay and bass
+movement; they do not establish overall timbral fidelity. [Compose bank
+catalogue](../../../../optimystery-compose/design/sounds/percussion-source.json) ·
+[The sound of the udu](https://www.if.ufrj.br/~carlos/artigos/PhysEd2022_udu.pdf)

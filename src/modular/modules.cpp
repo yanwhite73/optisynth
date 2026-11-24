@@ -34,6 +34,10 @@ const std::vector<Panel>& panels() {
                 {"structure","Material","",0,1,.35f},
                 {"brightness","Brightness","",0,1,.5f},
                 {"decay","Decay","",0,1,.45f}}},
+            {"drum.skin_vessel","Skin and vessel","Hand percussion: membrane, air cavity and clay shell","source",{
+                {"body","Frame to udu","",0,1,.5f},{"position","Strike position","",0,1,.32f},
+                {"damp","Hand damping","",0,1,.3f},{"opening","Hole opening","",0,1,.85f},
+                {"lift","Hand lift","ms",5,250,55,true},{"touch","Hardness","",0,1,.4f}}},
             {"drum.droplet","Water droplet","Damped bubble resonance with a short surface impact","source",{
                 {"size","Bubble size","",.4f,3,1,true},{"decay","Ring time","s",.02f,.65f,.16f,true},
                 {"rise","Pitch rise","",0,.8f,.32f},{"splash","Surface","",0,1,.22f}}},
@@ -258,6 +262,64 @@ public:
         }
     }
 };
+// The lowest mode develops into the vessel's air resonance. Upper membrane
+// modes move towards short shell resonances. Rotations preserve state during
+// a pitch sweep, including when the player's hand uncovers the side hole.
+class SkinVessel final : public Module {
+    struct Mode { float x=0,y=0; };
+    std::array<Mode,6> modes{};
+    float aperture=0,contact=0,noise=0;
+    uint32_t seed=913;
+public:
+    using Module::Module;
+    void process(const AudioBlock& b) noexcept override {
+        update(b);
+        const float body=values[0],position=values[1],damp=values[2],hard=values[5];
+        const float velocity=std::clamp(b.note.velocity,0.f,1.f);
+        if(b.note.trigger)aperture=0;
+        const float openTarget=b.note.gate?0.f:values[3];
+        aperture+=(openTarget-aperture)*(-std::expm1(-b.frames/(48.f*values[4])));
+        const float base=noteFrequency(b,0);
+        // Ratios of the first circular membrane modes; the vessel's upper
+        // ratios and loss times are voicing choices for a hollow ceramic tap.
+        const float head[]={1,1.593f,2.135f,2.295f,2.653f,2.918f};
+        const float pot[]={.59f*std::sqrt(1+2.9f*aperture),3.77f,5.13f,7.84f,9.42f,12.31f};
+        const float headDrive[]={1-.79f*position,.65f*position,.47f*position*position,
+            .32f*std::abs(1-2.2f*position),.32f*position,.25f*position*position};
+        const float potDrive[]={1.18f-.98f*position,.14f+.47f*position,.32f*position,
+            .25f*position,.15f*position,.11f*position};
+        const float headTail[]={1.24f,1.55f,1.1f,.80f,.62f,.40f};
+        const float potTail[]={.85f,.29f,.20f,.16f,.11f,.075f};
+        std::array<float,6> cosine,sine;
+        for(size_t k=0;k<modes.size();++k){
+            const float frequency=base*(head[k]+body*(pot[k]-head[k]));
+            const float decay=(headTail[k]+body*(potTail[k]-headTail[k]))/(1+(2.3f+body)*damp);
+            const float radius=std::exp(-6.907755f/(48000*decay));
+            const float angle=6.2831853f*std::min(frequency,.45f);
+            cosine[k]=radius*std::cos(angle);
+            sine[k]=radius*std::sin(angle);
+            if(b.note.trigger && frequency<.45f){
+                const float brightness=k==0?1.f:(.22f+.78f*hard)*(.4f+.6f*velocity);
+                modes[k].y+=velocity*brightness*(headDrive[k]+body*(potDrive[k]-headDrive[k]));
+            }
+        }
+        if(b.note.trigger)contact=velocity*(.04f+.22f*hard)*(.35f+.65f*position);
+        for(int i=0;i<b.frames;++i){
+            float out=0;
+            for(size_t k=0;k<modes.size();++k){
+                auto& m=modes[k];const float x=cosine[k]*m.x+sine[k]*m.y;
+                m.y=cosine[k]*m.y-sine[k]*m.x;m.x=x;out+=x;
+            }
+            if(contact>1e-6f){
+                seed=seed*1664525u+1013904223u;
+                noise+=(.16f+.49f*hard)*(float(seed>>8)/8388608.f-1-noise);
+                out+=noise*contact;contact*=.994f;
+            }
+            b.outputs[0][i]=.58f*out;
+        }
+        for(auto& m:modes)if(std::abs(m.x)+std::abs(m.y)<1e-15f)m={};
+    }
+};
 class Drum final : public Module {
 public:
     explicit Drum(const NodeSpec& n) : Module(n) { drum.Init(); }
@@ -390,6 +452,7 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
             if(id=="osc.sine")return std::make_unique<Sine>(n);
             const char* miIds[]={"mutable.lowpass","mutable.bandpass","mutable.highpass"};
             for(int i=0;i<3;++i)if(id==miIds[i])return std::make_unique<MutableFilter>(n,i);
+            if(id=="drum.skin_vessel")return std::make_unique<SkinVessel>(n);
             if(id=="drum.droplet")return std::make_unique<Droplet>(n);
             if(id=="drum.analog")return std::make_unique<Drum>(n);
             if(id=="spectral.ahdsfr" || id=="spectral.adsr")return std::make_unique<Env>(n);

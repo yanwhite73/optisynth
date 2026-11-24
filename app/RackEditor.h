@@ -515,10 +515,33 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==27&&starters.size()==27&&*starters.begin()==0&&*starters.rbegin()==26,"Factory catalogue lists every starter once");}
+            require(factoryPresets().size()==28&&starters.size()==28&&*starters.begin()==0&&*starters.rbegin()==27,"Factory catalogue lists every starter once");}
         {
-            require(browser.visibleEntry(0).starter==26,"Newest factory revision comes first");
+            require(browser.visibleEntry(0).starter==27,"Newest factory revision comes first");
             require(browser.step("factory:26",1)->updated<=browser.entry("factory:26")->updated,"Audition arrows follow date order");
+            require(loadFactory(27),"Load hand percussion morph");drain();
+            auto* body=synthPanel.control("hand","body");
+            require(body && synthPanel.layoutSound(),"Morph control is on the playable panel");
+            body->slider.setValue(.66,sendNotificationSync);
+            require(std::abs(handles.at("hand")->values[0].load()-.66f)<.001f,"Panel morph reaches the active voice");
+            capture("skin-and-vessel.png");
+            const auto saved=readRack(JSON::parse(JSON::toString(rackJSON(document))));
+            const int phraseFrames=int(std::lround(48000.*60*8/saved.tempo));
+            AudioBuffer<float> comparison(2,3*phraseFrames);
+            for(int pass=0;pass<3;++pass){
+                Runtime voice(saved.graph);
+                require(std::abs(voice.controls("hand")->values[0].load()-.66f)<.001f,"Saved morph recalls");
+                voice.controls("hand")->values[0]=.5f*pass;
+                voice.clock.tempo(saved.tempo);voice.clock.play(true);
+                voice.render(comparison.getWritePointer(0,pass*phraseFrames),comparison.getWritePointer(1,pass*phraseFrames),phraseFrames,{});
+                const auto peak=comparison.getMagnitude(pass*phraseFrames,phraseFrames)*saved.gain;
+                require(peak>.01f && peak<.95f,"Each body shape plays the saved phrase with headroom");
+            }
+            comparison.applyGain(saved.gain);
+            auto file=directory.getChildFile("Frame - hybrid - udu.wav");file.deleteFile();auto stream=file.createOutputStream();WavAudioFormat format;
+            std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+            if(writer)stream.release();
+            require(writer && writer->writeFromAudioSampleBuffer(comparison,0,comparison.getNumSamples()),"Write same-gesture morph audition");
             require(loadFactory(26),"Open Clay and water");drain();
             require(synthPanel.layoutSound() && synthPanel.control("water","size") && handles.at("sequence")->performance,
                     "Drum kit exposes its model and editable sequencer");
@@ -876,7 +899,7 @@ public:
          keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
         require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
         browser.setKeepSequence(false);
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 27-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 28-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:

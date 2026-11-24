@@ -1288,3 +1288,21 @@ control. Verified 30 seconds of 48 kHz, 24-bit stereo and peak −20.5 dBFS.
 Near 17.3 seconds the upper bands include simultaneous energy near 0.70 and
 1.40 kHz, consistent with pitched harmonics. A stereo capture cannot identify
 the originating patch module or prove when the listener first heard it.
+
+Yan subsequently identified the sound he heard as his phone alarm (request 109).
+This resolves the report. The WAV remains an app-only recording of the patch.
+
+## Request 111 — Frame drum and udu response
+
+Kept Clay and water available as its own kit. Skin and vessel uses one set of
+ringing modes with continuously variable frequency and damping. The same
+performance exercises centre/edge strikes and held/released aperture gestures
+at each setting. The first prototype’s palm stroke had a middle 90% energy
+span of only 40 ms. Compared open and muted
+VCSL frame recordings before setting the final losses. Keep this comparison
+and a dry, fixed-phrase audition available when revising the voice.
+
+Delivered standalone 0.0.28 at the established Release location. The installed
+executable matched the qualified candidate. Native preset recall, live morph
+and the dry comparison passed, along with all 397 modular checks in both
+regular and address/undefined-behaviour sanitizer builds.

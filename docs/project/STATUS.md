@@ -1,5 +1,14 @@
 # Optisynth status — 24 November 2026
 
+## 0.0.28 — Skin and vessel
+
+**Factory → Percussion → Skin and vessel** is a dry, playable hand-drum
+morph. Turn **Frame to udu** while the saved phrase plays. On the vessel
+side, short notes uncover the opening while the bass still rings; a held
+key keeps it mostly sealed. Hand damping shortens the ring and strike position
+changes palm strokes into rim or shell taps. The comparison recording runs
+one two-bar pass at each of three body settings. [Design and acoustic sources](../research/modules/ORGANIC_PERCUSSION.md)
+
 ## 0.0.27 — Preset chronology and the first organic drum kit
 
 The browser opens newest first and remembers the chosen column and direction.
