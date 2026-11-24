@@ -1236,3 +1236,16 @@ Built Prism tank from the open Clouds Parasites Miverb processing network and ad
 The 0.0.24 delivery used the same short test motif as listening evidence for both sounds. Both were existing voices with prominent pitched reverb. Yan found the timbre basic, the effects muddy and the movement unconvincing. A technically successful render cost him another audition and did not demonstrate an arrangement role.
 
 The replacement ostinato has a sustained pitch reference within each strike, transient FM and cycling mallet colour. A separate Tank return makes an echo-only mix possible. The pad has eight voices and two optical layers with independent attack times. A different twelve-second performance exercises each sound; the original common phrase is retained for comparing builds. Future preset deliveries should choose the role first and demonstrate that role using the criteria in [Sound goals](SOUND_GOALS.md). Player acceptance remains open.
+
+## Request 103 — The preset must play the audition
+
+The 0.0.25 audition renderer supplied the mallet and reed notes externally.
+The factory sounds contained the voices and effects, so loading either sound
+could retain an unrelated sequence. Yan had to ask again to play the example
+in the app. Both factory patches now store Performance bank A and its note
+connection to the voice mixer. Each reed line occupies its own track so common
+tones can cross a chord change. The mallet leaves the gaps for its dotted echo.
+
+The musical WAV render now starts the recalled graph’s clock and releases it
+after four bars. Both complete stereo files match the 0.0.25 previews by SHA-256.
+Future sequenced sound deliveries follow the playback check in [Sound goals](SOUND_GOALS.md).

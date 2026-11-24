@@ -985,3 +985,10 @@ know the different roles of pads, leads and ostinato berlin school delayed lines
 ```text
 each has a different musical role and they should not be merged
 ```
+
+## 103 — Store the audition performance in the preset sequencer
+
+```text
+why arent you updating the sequencer in the preset?
+wavs are ok and those sound a bot better, but I want the preset to reflect that sound
+```

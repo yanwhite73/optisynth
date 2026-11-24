@@ -14,14 +14,26 @@ PerformanceData plainPerformance(){
 PerformanceTrace performanceTrace(const PerformanceData& data,int frames,int chunk,const std::function<void(int,SampleClock&,AudioModule&)>& action={}){
     auto module=makePerformance({"performance","seq.performance",{},std::make_shared<const PerformanceData>(data)});
     SampleClock clock;clock.play(true);PerformanceTrace result;
-    std::array<ClockFrame,24> time;std::array<NoteEventBlock,4> buses;std::array<NoteEventBlock*,16> events{};
+    std::array<ClockFrame,24> time;std::array<NoteEventBlock,5> buses;std::array<NoteEventBlock*,performanceAllNotes+1> events{};
     std::array<std::array<float,24>,16> output{};std::array<float*,16> pointers{};
     for(int i=0;i<16;++i)pointers[i]=output[i].data();for(int t=0;t<4;++t)events[t*4]=&buses[t];
+    events[performanceAllNotes]=&buses.back();
     result.bend.reserve(frames);result.gate.reserve(frames);
     for(int offset=0;offset<frames;){const int n=std::min({chunk,24,frames-offset});if(action)action(offset,clock,*module);
         module->controls->performance->collect();for(int i=0;i<n;++i)time[i]=clock.next();for(auto& bus:buses)bus.begin(n);
         module->process({n,{},nullptr,pointers.data(),nullptr,nullptr,nullptr,time.data(),&buses[0],events.data()});
         for(int t=0;t<4;++t){if(buses[t].failed())throw std::runtime_error("Performance bus overflow");for(const auto& e:buses[t])result.notes[t].push_back({uint64_t(offset)+e.offset,e.kind,e.pitch});}
+        size_t expected=0;
+        for(int t=0;t<performanceTracks;++t)expected+=buses[t].size();
+        const auto& all=buses.back();
+        if(all.failed() || all.size()!=expected)throw std::runtime_error("Combined track output lost notes");
+        for(const auto& e:all){
+            if(e.source<1 || e.source>performanceTracks)throw std::runtime_error("Unknown track source");
+            const auto& lane=buses[e.source-1];
+            if(std::none_of(lane.begin(),lane.end(),[&](const NoteEvent& n){
+                return e.offset==n.offset && e.noteId==n.noteId && e.kind==n.kind && e.pitch==n.pitch && e.velocity==n.velocity;
+            }))throw std::runtime_error("Combined output changed a track event");
+        }
         result.bend.insert(result.bend.end(),output[2].begin(),output[2].begin()+n);result.gate.insert(result.gate.end(),output[1].begin(),output[1].begin()+n);offset+=n;
     }return result;
 }

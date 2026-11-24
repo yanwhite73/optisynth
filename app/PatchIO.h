@@ -89,8 +89,8 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {7,{"Spectral audio + LFO into resonator","Texture","The spectral engine through a modal resonator; the engine's LFO moves resonator brightness.",{"spectral","resonator","evolving"}},"modular"},
         {21,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
         {22,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
-        {25,{"Optical vapour","Pad","An eight-voice reed chord. Hold a note for the upper octave to swell through the second optical gate.",{"low-pass-gate","polyphonic","swell"}},"panel"},
-        {24,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Leave a gap for the dotted echo.",{"mallet","modal","echo"}},"panel"},
+        {25,{"Optical vapour","Pad","An eight-voice reed chord. Play seq for overlapping reed lines, or hold keys for the octave swell.",{"low-pass-gate","polyphonic","swell"}},"panel"},
+        {24,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Play seq for the four-bar mallet phrase and dotted echo.",{"mallet","modal","echo"}},"panel"},
         {23,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
         {15,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
         {16,{"Prophet poly-mod","Pad","Prophet-style 4-pole pad; oscillator B and the filter envelope poly-modulate oscillator A and the filter. Stereo delay. 8 voices.",{"analog","prophet","poly-mod","evolving"}},"panel"},
@@ -109,6 +109,47 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
 }
 inline const FactoryPreset* factoryPreset(int starter) {
     for(const auto& f:factoryPresets())if(f.starter==starter)return &f;return nullptr;
+}
+// Four bars in bank A. Tied steps sustain one note identity across the grid.
+inline PerformancePtr prismPerformance(bool mallet) {
+    auto data=std::make_shared<PerformanceData>();
+    const std::array<std::string,4> names = mallet
+        ? std::array<std::string,4>{"Mallet","Track 2","Track 3","Track 4"}
+        : std::array<std::string,4>{"Bass reed","Inner reed","Middle reed","Upper reed"};
+    for(int lane=0;lane<performanceTracks;++lane) {
+        auto& track=data->tracks[lane];
+        track.name=names[lane];
+        for(auto& pattern:track.patterns) {
+            pattern.last=63;
+            pattern.scale=0;
+            for(auto& step:pattern.steps)step.on=false;
+        }
+    }
+    struct NoteSpan { int lane,start,length,pitch; float velocity; };
+    auto write=[&](std::initializer_list<NoteSpan> notes) {
+        for(const auto& n:notes) {
+            auto& steps=data->tracks[n.lane].patterns[0].steps;
+            for(int i=0;i<n.length;++i) {
+                auto& step=steps[n.start+i];
+                step.on=true;
+                step.pitch=n.pitch;
+                step.velocity=n.velocity;
+                step.gate=1;
+                step.tie=i+1<n.length;
+            }
+        }
+    };
+    if(mallet)write({
+        {0,0,2,62,.90f},{0,4,1,69,.56f},{0,6,2,74,.77f},{0,11,1,64,.48f},{0,14,2,69,.66f},
+        {0,16,2,62,.78f},{0,20,1,69,.53f},{0,22,3,77,.82f},{0,29,2,72,.60f},
+        {0,32,2,65,.89f},{0,36,1,69,.55f},{0,38,2,76,.76f},{0,43,1,67,.49f},{0,46,2,72,.62f},
+        {0,48,3,62,.83f},{0,54,2,69,.60f},{0,58,3,74,.74f}});
+    else write({
+        {0,0,16,50,.74f},{0,16,16,53,.68f},{0,32,14,48,.70f},{0,48,7,50,.68f},
+        {1,1,28,57,.62f},{1,33,15,55,.56f},{1,49,7,57,.56f},
+        {2,4,11,64,.63f},{2,18,12,65,.59f},{2,36,18,62,.64f},
+        {3,8,16,69,.48f},{3,25,6,67,.53f},{3,40,8,64,.50f},{3,51,6,65,.48f}});
+    return data;
 }
 inline RackDocument starterDocument(int which,float gain) {
     if(which==24 || which==25) {
@@ -157,6 +198,8 @@ inline RackDocument starterDocument(int which,float gain) {
                 {"breath","rate","Pulse rate"},{"swell","rate","Gate rate"}}},
                 {"OCTAVE BLOOM",{{"overtone","level","Level"},{"rise","attack","Rise"},{"rise","release","Fade"},{"overtone","fine","Detune"}}}}};
         }
+        d.graph.nodes.push_back({"sequence","seq.performance",{},prismPerformance(which==24)});
+        d.graph.connections.push_back({{"sequence","all_notes"},{"voices","notes"}});
         d.graph.connections.push_back({{"amp_env","out"},{"vca","gain"}});
         d.graph.connections.push_back({{"vca","out"},{"voices","in"}});
         d.graph.connections.push_back({{"voices","out"},{"prism","in"}});
@@ -309,7 +352,9 @@ inline RackDocument chooseStarter(const RackDocument& current, int index, bool k
     const bool polyphonic = std::any_of(next.graph.nodes.begin(), next.graph.nodes.end(),
         [](const NodeSpec& n){ return n.type == "voice.mix"; });
     const auto registry = moduleRegistry();
-    const auto port = seq->type == "seq.orbit" ? "all_notes" :
+    const bool usedAllNotes=std::any_of(current.graph.connections.begin(),current.graph.connections.end(),
+        [&](const Connection& c){return c.source.node==seq->id && c.source.port=="all_notes";});
+    const auto port = usedAllNotes || seq->type == "seq.orbit" ? "all_notes" :
                       seq->type == "seq.performance" ? "t1_notes" : "notes";
     for (const auto& node : next.graph.nodes) {
         if (polyphonic && node.type != "voice.mix") continue;

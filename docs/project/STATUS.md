@@ -1,5 +1,20 @@
 # Optisynth status — 24 November 2026
 
+## 0.0.26 — Factory playback matches the two listening examples
+
+Select **Factory** in the browser. **Prism afterimage** plays a 17-note mallet
+ostinato at 100 BPM. **Optical vapour** plays four overlapping reed lines at
+80 BPM. Both loop after four bars. Use **Open Performance sequencer** on either
+front panel to edit bank A. Each preset supplies its own sequence and tempo
+with Keep current sequence enabled.
+
+The native check started and stopped the panel transport, ran two loops for
+each sound, edited the first pitch and recalled the edit through patch JSON.
+A single pass from each recalled graph produced the exact earlier 12-second
+WAV (full-file comparison against `build/ui-review-102`). The older User
+library copy of Prism afterimage contains a Probability sequencer and a
+different voice graph. The updated version is the Factory entry.
+
 ## 0.0.25 — Distinct factory ostinato and pad
 
 Installed in the pinned Release bundle. Prism afterimage is under Ostinato and Optical vapour under Pad. Each has its own twelve-second stereo preview in `build/ui-review-102`. Native factory load, preset recall, panel geometry, single-repeat isolation and core regression checks passed. All 384 modular checks also passed under ASan/UBSan. Device qualification is complete; the voicing changes await Yan’s listening judgment.

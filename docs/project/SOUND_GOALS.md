@@ -3,6 +3,14 @@
 Recorded 19 November 2026 from request 44 (verbatim in `USER_REQUESTS.md`). These
 are design targets that steer priorities. They are not implemented features.
 
+## Factory performances
+
+When a factory sound is demonstrated with a composed sequence, put its notes,
+rests, velocities and durations in the preset’s editable sequencer. Save the
+tempo and route the sequencer to the instrument. Render the listening example
+from a recalled preset using its transport. Compare one pass with the reference
+and check the loop boundary with Play seq.
+
 ## Next playable patches for 0.0.18
 
 Request 80, 22 November 2026. The November 19 inventory below predates the

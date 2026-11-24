@@ -612,17 +612,14 @@ public:
             capture(String("device-")+String(starter)+"-normal.png");
             setSize(1120,800);resized();require(synthPanel.layoutSound(),"Device panel fits minimum size");
             capture(String("device-")+String(starter)+"-minimum.png");setSize(1440,940);resized();
-            struct StudyNote {int start,length,pitch;float velocity;};
-            const std::vector<StudyNote> malletStudy{
-                {0,2,62,.90f},{4,1,69,.56f},{6,2,74,.77f},{11,1,64,.48f},{14,2,69,.66f},
-                {16,2,62,.78f},{20,1,69,.53f},{22,3,77,.82f},{29,2,72,.60f},
-                {32,2,65,.89f},{36,1,69,.55f},{38,2,76,.76f},{43,1,67,.49f},{46,2,72,.62f},
-                {48,3,62,.83f},{54,2,69,.60f},{58,3,74,.74f}};
-            const std::vector<StudyNote> reedStudy{
-                {0,16,50,.74f},{1,28,57,.62f},{4,11,64,.63f},{8,16,69,.48f},
-                {16,16,53,.68f},{18,12,65,.59f},{25,6,67,.53f},
-                {32,14,48,.70f},{33,15,55,.56f},{36,18,62,.64f},{40,8,64,.50f},
-                {48,7,50,.68f},{49,7,57,.56f},{51,6,65,.48f}};
+            if(starter>=24) {
+                require(handles.at("sequence")->performance && hardware.find("sequence")->performance,
+                        "Factory phrase is connected to its editable Performance sequencer");
+                const auto recalled=std::find_if(restored.graph.nodes.begin(),restored.graph.nodes.end(),
+                    [](const NodeSpec& n){return n.type=="seq.performance";});
+                require(recalled!=restored.graph.nodes.end() && recalled->performance &&
+                        *recalled->performance==*prismPerformance(starter==24),"Recall preserves all four phrase tracks");
+            }
             for (int pass=0; pass<(starter>=24?2:1); ++pass) {
                 const bool musical=pass==1;
                 Runtime instrument(restored.graph);
@@ -638,15 +635,9 @@ public:
                         keysDown.push({0,1,uint64_t(pitch)+1,on?NoteEventKind::On:NoteEventKind::Off,pitch,velocity});
                     };
                     if(musical) {
-                        // Score units are sixteenths. Independent note lengths allow a held
-                        // inner voice to carry through the chord change.
-                        const auto& score=starter==24?malletStudy:reedStudy;
-                        const int tickFrames=starter==24?7200:9000;
-                        if(i%tickFrames==0) {
-                            const int tick=i/tickFrames;
-                            for(const auto& n:score)if(tick==n.start+n.length)key(n.pitch,false,0);
-                            for(const auto& n:score)if(tick==n.start)key(n.pitch,true,n.velocity);
-                        }
+                        // Play one four-bar pass from the recalled patch, then render its tail.
+                        if(i==0)instrument.clock.play(true);
+                        if(i==int(std::lround(16*60*48000/restored.tempo)))instrument.clock.play(false);
                     }else if(starter==23){
                         for(int pitch : {48,55,62,65}){
                             if(i==0)key(pitch,true,.8f);
@@ -667,6 +658,33 @@ public:
                 std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
                 if(writer)stream.release();
                 require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write device audition");
+            }
+            if(starter>=24) {
+                auto live=handles.at("sequence")->performance;
+                require(!player.playing.load() && player.tempo.load()==restored.tempo,"Preset recalls its transport tempo");
+                restart.onClick();
+                play.onClick();
+                std::array<float,480> block{};
+                const int barFrames=int(std::lround(4*60*48000/restored.tempo));
+                float peak=0;
+                for(int offset=0;offset<=8*barFrames;offset+=int(block.size())) {
+                    player.collect();
+                    player.render(block.data(),int(block.size()));
+                    for(float sample:block)peak=std::max(peak,std::abs(sample));
+                }
+                require(peak>.001f && live->passes[0]==2 && live->steps[0]==0,
+                        "Play seq loops the saved phrase twice without keyboard input");
+                play.onClick();
+                player.render(block.data(),int(block.size()));
+                auto* sequenceEditor=hardware.find("sequence")->performance->openEditor(false);
+                sequenceEditor->selectPattern(0,0);
+                sequenceEditor->selectStep(0);
+                sequenceEditor->pitchControl().setValue(73,sendNotificationSync);
+                auto edited=readRack(JSON::parse(JSON::toString(rackJSON(document))));
+                auto seq=std::find_if(edited.graph.nodes.begin(),edited.graph.nodes.end(),
+                    [](const NodeSpec& n){return n.type=="seq.performance";});
+                require(presetDirty && seq!=edited.graph.nodes.end() && seq->performance->tracks[0].patterns[0].steps[0].pitch==73,
+                        "Edited factory phrase is marked modified and survives preset serialization");
             }
         }
         for(int pad:{15,16,19,20}){const auto d=factoryDocument(pad,.25f);require(!d.panel.sections.empty()&&d.view=="panel","Pad has a curated panel and opens in it");
@@ -1070,6 +1088,7 @@ private:
             view->getTempo=[this]{return double(document.tempo);};view->changeTempo=[this](double value){tempo.setValue(value,sendNotificationSync);};view->onPlay=playAction;view->onRestart=[this]{player.restart();};
             view->dataChanged=[this,id](const PerformanceData& data){cancelLoading();validatePerformance(data);auto saved=std::make_shared<const PerformanceData>(data);
                 for(auto& n:document.graph.nodes)if(n.id==id)n.performance=saved;
+                if(!presetDirty){presetDirty=true;updatePresetDisplay();}
                 if(auto handle=handles[id])if(handle->performance)handle->performance->publish(data);
                 if(auto* p=hardware.find(id))if(p->performance)p->performance->setData(data);
                 if(editor.instance==id&&editor.performance)editor.performance->setData(data);

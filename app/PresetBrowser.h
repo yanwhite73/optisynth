@@ -74,7 +74,7 @@ public:
         importButton.onClick=[this]{if(importFile)importFile();};exportButton.onClick=[this]{if(exportFile)exportFile();};
         keepSequence.setButtonText("Keep current sequence");keepSequence.setColour(ToggleButton::textColourId,paper);keepSequence.setColour(ToggleButton::tickColourId,paper);
         keepSequence.setToggleState(prefs.flag("keepSequence",true),dontSendNotification);
-        keepSequence.setTooltip("When loading an instrument sound, keep the current pattern and tempo. Sequencer presets load their own patterns.");
+        keepSequence.setTooltip("Presets with a sequencer load their own pattern and tempo. Other instruments can keep the current sequence.");
         keepSequence.onClick=[this]{prefs.set("keepSequence",keepSequence.getToggleState());};
         closeButton.onClick=[this]{if(close)close();};
         for(const auto& f:prefs.list("favourites"))favourites.insert(f.toStdString());

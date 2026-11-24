@@ -4,6 +4,7 @@
 
 namespace optisynth {
 constexpr int performanceTracks=4, performancePatterns=8, performanceSteps=64, performanceRows=16;
+constexpr int performanceAllNotes=performanceTracks*4;
 struct PerformanceStep {
     int pitch=48, ratchets=1, condition=0;
     float velocity=.8f, gate=.7f, chance=1, cv=0, slide=0;

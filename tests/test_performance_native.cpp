@@ -61,7 +61,7 @@ void editorChecks(){
     editor.showChain(true);editor.chainBarsControl(7).setValue(5,juce::sendNotificationSync);require(data.chain[7].bars==5,"Chain inspector failed to edit saved duration");editor.undo();require(data.chain[7].bars==2,"Chain undo failed");
     editor.setActive(true);editor.launchPattern(2,6);require((module->controls->performance->requests[2].load()&127)==7&&editor.editingTrack()==0&&editor.editingBank()==1,"Launch changed edit selection or targeted wrong track");
     // Paint real current/queued state after DSP consumes the UI's commands.
-    SampleClock clock;clock.play(true);std::array<ClockFrame,24> time;std::array<NoteEventBlock,4> buses;std::array<NoteEventBlock*,16> events{};std::array<std::array<float,24>,16> output{};std::array<float*,16> outputs{};
+    SampleClock clock;clock.play(true);std::array<ClockFrame,24> time;std::array<NoteEventBlock,4> buses;std::array<NoteEventBlock*,performanceAllNotes+1> events{};std::array<std::array<float,24>,16> output{};std::array<float*,16> outputs{};
     for(int i=0;i<16;++i)outputs[i]=output[i].data();for(int t=0;t<4;++t)events[t*4]=&buses[t];
     for(int block=0;block<500;++block){module->controls->performance->collect();for(auto& t:time)t=clock.next();for(auto& bus:buses)bus.begin(24);module->process({24,{},nullptr,outputs.data(),nullptr,nullptr,nullptr,time.data(),&buses[0],events.data()});}
     require(module->controls->performance->steps[0]>=0&&module->controls->performance->queued[2]==6,"UI launch not reflected in actual engine state");editor.setTempoDisplay(120);

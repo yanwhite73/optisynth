@@ -175,6 +175,14 @@ public:
                 if(bus->failed()){track.held=0;track.pending=0;track.tie=false;display.fired[t]=false;}
             }
         }
+        if(auto* all=b.eventOutputs[performanceAllNotes]) {
+            for(int t=0;t<performanceTracks;++t) {
+                const auto* bus=b.eventOutputs[t*4];
+                if(!bus)continue;
+                if(bus->failed()){all->fail();break;}
+                for(const auto& event:*bus)all->push(event);
+            }
+        }
     }
 private:
     const Panel& definition;std::array<Track,4> tracks;
