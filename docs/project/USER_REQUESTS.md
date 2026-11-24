@@ -1071,3 +1071,15 @@ actually the udu sounds woody
 ```text
 the top of an udu has a ring generally, and the bass should have more of a thud
 ```
+
+## 115 — Deep delay/reverb modules, original-style panels, and a fidelity review
+
+```text
+we still dont have any modules that look or feel like deep ones such as mimeophon, vhykk x or other delay/reverbs that have been logged. Also the mutable ones should have similar layout. IT really helps to differentiate modules and see what in/out options are available
+
+do a review of how much open source modules have been faithfully recreated, and which other modules can be approached with whats known about their design
+```
+
+Claude session, 24 November 2026. "vhykk x" is taken to be the Forge TME Vhikk X.
+Review: [MODULE_FIDELITY_REVIEW.md](../research/modules/MODULE_FIDELITY_REVIEW.md).
+No implementation started; the recommended order awaits Yan's choice.
