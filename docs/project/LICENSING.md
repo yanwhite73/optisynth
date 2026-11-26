@@ -23,6 +23,7 @@ code may be adopted.
 | JUCE 8.0.8 (`~/JUCE`) | AGPLv3 or the commercial JUCE 8 licence | **Buy a JUCE licence before selling.** AGPL would force open source |
 | VST3 SDK | MIT since 3.8 (October 2025) | OK. The VST name and logo follow Steinberg's trademark rules |
 | Mutable `plaits`/`stmlib` (vendored) | MIT | Code OK. **Names are not:** upstream says "Mutable Instruments" must not appear on derivative works and advises against original module names. Before release, rename user-facing text: "Original Plaits DSP", "Original Mutable stmlib DSP" and the saved IDs `mutable.*` |
+| Mutable `beads` (vendored, as Mala) | MIT | Code OK, compiled unchanged. Displayed as "Mala"; no Mutable name, logo or panel artwork. Saved id `fx.granular_tape` |
 | MAME CEM chip models (candidate) | BSD-3-Clause per file | OK with notices; check each dependency's header |
 | Inherited Spectral engine | First-party code | Modelled on LinPlug's product, with `.ptch` import. **Review the "Spectral" name and preset import before release** |
 

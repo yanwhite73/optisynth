@@ -284,6 +284,22 @@ public:
                     require(stream.openedOk()&&PNGImageFormat().writeImageToStream(image,stream),"Faceplate preview");
                 }
             }
+            if(test.isTape()){
+                // Request 137: every Mala parameter has a knob, switch or lit button, inside the face, none overlapping.
+                std::vector<juce::Component*> parts{&test.freezeButton,&test.seedButton,&test.qualityButton,&test.assignButton};
+                for(auto& k:test.knobs)if(k->isVisible())parts.push_back(k.get());
+                require(parts.size()==test.knobs.size(),"Every Mala parameter has a control or button");
+                for(size_t i=0;i<parts.size();++i){
+                    const auto r=parts[i]->getBounds();
+                    require(r.getY()>=test.content.getY()&&r.getBottom()<=test.content.getBottom()&&r.getX()>=ModulePanel::pad-1&&r.getRight()<=test.getWidth()-ModulePanel::pad+1,"Mala control inside the face");
+                    for(size_t j=i+1;j<parts.size();++j)require(!r.intersects(parts[j]->getBounds()),"Mala controls do not overlap");
+                }
+                if(density==44){
+                    auto image=test.createComponentSnapshot(test.getLocalBounds());
+                    FileOutputStream stream(directory.getChildFile("fx.granular_tape-faceplate.png"));
+                    require(stream.openedOk()&&PNGImageFormat().writeImageToStream(image,stream),"Mala faceplate preview");
+                }
+            }
         }
         // Exercise explicit old-format import using the actual 0.0.2 keys.
         const auto legacy=JSON::parse(R"({"format":"optisynth.instrument","version":1,"source":"modal.voice","envelope":"spectral.ahdsfr","filter":"spectral.lowpass","amplitudeEnvelope":true,"filterEnvelope":true,"gain":0.25,"parameters":{"modal.voice":{"decay":0.7},"spectral.lowpass":{"cutoff_hz":1800}}})");
@@ -548,9 +564,10 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==28&&starters.size()==28&&*starters.begin()==0&&*starters.rbegin()==27,"Factory catalogue lists every starter once");}
+            require(starters.size()==factoryPresets().size()&&*starters.begin()==0&&starters.count(27)&&starters.count(40),"Factory catalogue lists every starter once");}
         {
-            require(browser.visibleEntry(0).starter==27,"Newest factory revision comes first");
+            const auto newest=std::max_element(factoryPresets().begin(),factoryPresets().end(),[](const FactoryPreset& a,const FactoryPreset& b){return a.updatedSeconds<b.updatedSeconds;});
+            require(browser.visibleEntry(0).starter==newest->starter,"Newest factory revision comes first");
             require(browser.step("factory:26",1)->updated<=browser.entry("factory:26")->updated,"Audition arrows follow date order");
             require(loadFactory(27),"Load hand percussion morph");drain();
             auto* body=synthPanel.control("hand","body");
@@ -797,6 +814,59 @@ public:
                 capture("movement-independent.png");
             }
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
+        }
+        {
+            // Programme item 1, requests 136-140: Seed rain plays the reeds through Mala.
+            require(loadFactory(40),"Seed rain loads");drain();
+            require(document.graph.outputs.front().node=="mala" && synthPanel.control("mala","density") && synthPanel.layoutSound(),"Seed rain shows Mala on the synth panel");
+            capture("mala-panel.png");
+            {
+                // One pass of the saved phrase and its tail, from the recalled patch, for listening.
+                const auto saved=readRack(rackJSON(document));
+                Runtime instrument(saved.graph);instrument.clock.tempo(saved.tempo);
+                const int playFrames=int(std::lround(16*60*48000/saved.tempo))/quantum*quantum,frames=playFrames+48000*6;
+                AudioBuffer<float> sound(2,frames);
+                for(int i=0;i+quantum<=frames;i+=quantum){
+                    if(i==0)instrument.clock.play(true);
+                    if(i==playFrames)instrument.clock.play(false);
+                    instrument.render(sound.getWritePointer(0,i),sound.getWritePointer(1,i),quantum,{},nullptr,nullptr);
+                }
+                sound.applyGain(saved.gain);
+                const float peak=sound.getMagnitude(0,frames);
+                require(std::isfinite(peak)&&peak>.001f&&peak<1.f,"Seed rain renders at the intended gain");
+                auto wav=directory.getChildFile("Seed rain.wav");wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
+                std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+                if(writer)stream.release();
+                require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write Seed rain audition");
+            }
+            setView("modular",false);resized();
+            auto* card=hardware.find("mala");
+            require(card && card->isTape() && card->freezeButton.isShowing() && card->seedButton.isShowing() && !card->control("freeze")->isVisible(),
+                    "The Mala card shows its own lit buttons");
+            auto saved=[&](const char* key){return nodeParameter(document.graph,"mala",key,-1);};
+            auto live=[&](int index){return handles.at("mala")->values[size_t(index)].load();};
+            card->freezeButton.onClick();
+            require(saved("freeze")==1 && live(17)==1 && synthPanel.control("mala","freeze")->toggle.getToggleState(),"Freeze button freezes, as the panel switch shows");
+            card->freezeButton.onClick();require(saved("freeze")==0 && live(17)==0,"Freeze button releases");
+            card->qualityButton.onClick();require(saved("quality")==3 && card->qualityButton.legend=="SCORCHED CASSETTE","Quality button steps to the next recording medium");
+            card->qualityButton.onClick();require(saved("quality")==0 && card->qualityButton.legend=="BRIGHT DIGITAL","Quality wraps to Bright digital");
+            card->assignButton.onClick();require(saved("assign")==1,"Assign steps to Dry/wet");
+            card->control("assign_rv")->slider.setValue(.7,sendNotificationSync);
+            require(saved("assign")==3 && saved("assign_rv")>.69f,"Turning a custom amount selects the custom destination");
+            card->seedButton.setState(Button::buttonDown);
+            require(saved("seed")==1 && saved("seed_latch")==0 && live(19)==1,"Pressing Seed plays grains and unlatches");
+            card->freezeButton.onClick();
+            require(saved("seed_latch")==1 && saved("seed")==0 && saved("freeze")==0,"Freeze while holding Seed relatches seeds");
+            card->seedButton.setState(Button::buttonNormal);require(saved("seed")==0,"Releasing Seed stops the held grains");
+            require(synthPanel.control("mala","pitch")->slider.getTextFromValue(.5)=="+4 st" && card->control("input_gain")->slider.getTextFromValue(0)=="Auto",
+                    "Pitch reads in notched semitones and input gain reads Auto at zero");
+            auto image=card->createComponentSnapshot(card->getLocalBounds());
+            FileOutputStream stream(directory.getChildFile("mala-card.png"));
+            require(stream.openedOk()&&PNGImageFormat().writeImageToStream(image,stream),"Mala card capture");
+            capture("mala-rack.png");
+            const auto recalled=readRack(rackJSON(document));
+            require(nodeParameter(recalled.graph,"mala","assign_rv",-1)>.69f && recalled.graph.outputs.front().node=="mala","Mala settings survive save and recall");
+            setView("panel",false);resized();
         }
         {
             require(loadFactory(25),"Optical vapour loads");drain();

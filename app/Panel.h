@@ -1,6 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "../src/modular/player.h"
+#include "../src/modular/granular_tape.h"
 #include "../plugin/Source/TypingKeyboard.h"
 #include <ApplicationServices/ApplicationServices.h>
 #include <map>
@@ -21,6 +22,7 @@ Colour panelColour(const std::string& id) {
     if(id=="spectral.engine")return Colour(0xff8ebecb);
     if(id=="analog.dual_lpg")return Colour(0xff30383b);
     if(id=="fx.prism_tank")return Colour(0xffabb8d7);
+    if(id=="fx.granular_tape")return Colour(0xffdcdbd5);
     if(id=="fx.dual_loop")return Colour(0xffb5c1be);
     if(id=="mod.lfo")return Colour(0xffd7b282);
     if(id=="modal.voice")return Colour(0xffdac9bd);
@@ -203,7 +205,7 @@ struct Control : juce::Component {
         slider.setValue(value,dontSendNotification);slider.updateText();slider.setDoubleClickReturnValue(true,p.initial);
         slider.setTooltip(p.label+" / double-click to reset");
         slider.onValueChange=[this,changed]{toggle.setToggleState(slider.getValue()>=.5,dontSendNotification);changed(float(slider.getValue()));};addAndMakeVisible(label);addAndMakeVisible(slider);
-        const bool loopSwitch=p.id=="freeze"||p.id=="a_hold"||p.id=="b_hold"||p.id=="a_reverse"||p.id=="b_reverse";
+        const bool loopSwitch=p.id=="freeze"||p.id=="seed"||p.id=="seed_latch"||p.id=="r_gate"||p.id=="a_hold"||p.id=="b_hold"||p.id=="a_reverse"||p.id=="b_reverse";
         if(loopSwitch||p.id=="loop"||p.id=="retrigger"){
             isSwitch=true;label.setVisible(false);slider.setVisible(false);addAndMakeVisible(toggle);toggle.setButtonText(loopSwitch?String(p.label):p.id=="loop"?"Loop while held":"Reset on note");
             toggle.setColour(ToggleButton::textColourId,text);toggle.setColour(ToggleButton::tickColourId,text);toggle.setColour(ToggleButton::tickDisabledColourId,text.withAlpha(.5f));
@@ -397,11 +399,49 @@ struct Jack : Button {
         g.setColour(Colour(0xff16181a));g.fillEllipse(cx-10,cy-10,20,20);
         g.setColour(over||down?Colour(0xfff0c76c):Colour(0xffc2c3bd));g.drawEllipse(cx-8.5f,cy-8.5f,17,17,2.4f);
         g.setColour(connected?(port.type==SignalType::Control?Colour(0xfff0c76c):teal):Colour(0xff080a0c));g.fillEllipse(cx-4,cy-4,8,8);
-        g.setColour(output?(text==ink?paper:ink):text);g.setFont(font(text::jack));g.drawFittedText(String(port.id).toUpperCase(),0,23,getWidth(),13,Justification::centred,1,.8f);
+        g.setColour(output?(text==ink?paper:ink):text);g.setFont(font(text::jack));g.drawFittedText(String(port.id).replaceCharacter('_',' ').toUpperCase(),0,23,getWidth(),13,Justification::centred,1,.8f);
         if(output){Path arrow;arrow.addTriangle(cx+10,9,cx+10,15,cx+14,12);g.fillPath(arrow);}
     }
 };
 // Rows follow the playing gesture. Diameter is expressed as a percentage of rack density.
+// Request 137: Mala's readouts follow the hardware laws (pitch notches, attenurandomizer dead band).
+// face: the module card, where the attenurandomizers sit in their own row with short labels.
+inline void customiseControl(const std::string& type,Control& c,bool face){
+    if(type!="fx.granular_tape")return;
+    const auto& id=c.param.id;
+    if(id=="pitch")c.slider.textFromValueFunction=[](double v){const float st=granularTapePitch(float(v));
+        return (st>0?"+":"")+String(st,std::abs(st-std::round(st))<.05f?0:1)+" st";};
+    if(id=="input_gain")c.slider.textFromValueFunction=[](double v){return v<=0?String("Auto"):String::fromUTF8("\xc3\x97")+String(1+39*std::pow(v,4.0),1);};
+    if(id.size()>4&&id.compare(id.size()-4,4,"_amt")==0){
+        c.slider.textFromValueFunction=[](double v){const float a=granularTapeAmount(float(v));return a==0?String("0"):(a>0?"+":"")+String(int(std::lround(a*100)))+"%";};
+        if(face)c.label.setText(String(id.substr(0,id.size()-4)).toUpperCase()+" AMT",dontSendNotification);
+    }
+    if(face&&id=="assign_fb")c.label.setText("TO FEEDBACK",dontSendNotification);
+    if(face&&id=="assign_dw")c.label.setText("TO DRY/WET",dontSendNotification);
+    if(face&&id=="assign_rv")c.label.setText("TO REVERB",dontSendNotification);
+    c.slider.updateText();
+}
+// A panel push button with its own light, as on the original hardware.
+struct LitButton final : Button {
+    String legend;Colour legendColour=ink,lit=Colour(0xffd8f27a),led;int diameter=30;float glow=0,ledLevel=0;
+    LitButton():Button("button"){setWantsKeyboardFocus(true);}
+    void paintButton(Graphics& g,bool over,bool down) override {
+        auto r=getLocalBounds().toFloat();
+        auto cap=r.removeFromTop(float(diameter+4)).withSizeKeepingCentre(float(diameter),float(diameter));
+        g.setColour(Colours::black.withAlpha(.25f));g.fillEllipse(cap.translated(1,2));
+        g.setColour(Colour(0xff2a2c2e));g.fillEllipse(cap.expanded(2));
+        g.setColour(Colour(0xff3a3c3d).interpolatedWith(lit,std::clamp(glow,0.f,1.f)));g.fillEllipse(cap);
+        if(glow>0){g.setColour(lit.withAlpha(.35f*glow));g.drawEllipse(cap.expanded(3.5f),2.f);}
+        if(over||down){g.setColour(Colours::white.withAlpha(down?.25f:.12f));g.fillEllipse(cap);}
+        if(hasKeyboardFocus(false)){g.setColour(orange);g.drawEllipse(cap.expanded(1.5f),1.2f);}
+        if(!led.isTransparent()){   // indicator light beside a small button
+            const auto light=Rectangle<float>(cap.getRight()+6,cap.getCentreY()-4,8,8);
+            g.setColour(Colour(0xff26282a));g.fillEllipse(light.expanded(1.5f));
+            g.setColour(led.withMultipliedBrightness(.25f+.75f*std::clamp(ledLevel,0.f,1.f)));g.fillEllipse(light);
+        }
+        g.setColour(legendColour);g.setFont(font(text::label));g.drawText(legend,r.toNearestInt(),Justification::centredTop,true);
+    }
+};
 struct FaceRow { const char* legend; int diameterPercent; std::vector<std::string> parameters; };
 using Faceplate=std::vector<FaceRow>;
 inline const Faceplate* faceplate(const std::string& type) {
@@ -458,6 +498,9 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     TextButton sampleButton{"Load WAV..."},menuButton{String::fromUTF8("\xe2\x8b\xaf")};Label sampleName,strokeRole;SamplePtr sample;std::string samplePath;
     std::function<void()> chooseSample;std::function<void(const File&)> sampleDropped;
     int knob=44;   // density: knob diameter in pixels
+    // Request 137: Mala's face, laid out after the original panel and drawn by us.
+    LitButton freezeButton,seedButton,qualityButton,assignButton;std::shared_ptr<Controls> tapeControls;bool seedHeld=false;
+    float inputLight=0,lampState=-1;bool synthLight=false;
     Rectangle<int> content,waveArea;int dividerY=0,jackTop=headerHeight;
     const Faceplate* plate=nullptr;
     static constexpr int legendHeight=16;
@@ -478,8 +521,121 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         more.onClick=[this]{++subpage;resized();repaint();};
         presetButton.onClick=[this]{if(choosePreset)choosePreset();};section.onChange=[this]{subpage=0;resized();repaint();};
         presetName.setFont(font(12));presetName.setColour(Label::textColourId,ink);
+        setupTape();
     }
     ~ModulePanel() override {removeMouseListener(this);}
+    bool isTape() const {return current=="fx.granular_tape";}
+    float tapeValue(const char* id) const {auto* c=control(id);return c?float(c->slider.getValue()):0.f;}
+    void setTapeValue(const char* id,float v){if(auto* c=control(id))c->slider.setValue(v,sendNotificationSync);tickTape();}
+    void setupTape(){
+        freezeButton.legend="FREEZE";seedButton.legend="SEED";qualityButton.legend="QUALITY";assignButton.legend="ASSIGN";
+        qualityButton.diameter=assignButton.diameter=16;qualityButton.led=movementColour(1);
+        freezeButton.setTooltip("Freeze: stop recording into the buffer. Press while holding Seed to latch seeds.");
+        seedButton.setTooltip("Seed: hold to play grains (unlatches). Freeze while holding Seed, or Latched seeds, relatches.");
+        qualityButton.setTooltip("Recording quality: Bright digital, Cold digital, Sunny tape, Scorched cassette");
+        assignButton.setTooltip("Assign CV to Feedback, Dry/wet or Reverb. Custom amounts are below.");
+        for(auto* b:{&freezeButton,&seedButton,&qualityButton,&assignButton})addChildComponent(*b);
+        freezeButton.onClick=[this]{
+            if(seedHeld){setTapeValue("seed_latch",1);setTapeValue("seed",0);return;}   // Seed + Freeze latches seeds
+            setTapeValue("freeze",tapeValue("freeze")>=.5f?0.f:1.f);
+        };
+        seedButton.onStateChange=[this]{
+            const bool down=seedButton.isDown();if(down==seedHeld)return;seedHeld=down;
+            if(down&&tapeValue("seed_latch")>=.5f)setTapeValue("seed_latch",0);   // a press unlatches
+            setTapeValue("seed",down?1.f:0.f);
+        };
+        qualityButton.onClick=[this]{setTapeValue("quality",float((int(std::lround(tapeValue("quality")))+1)%4));tickTape();};
+        assignButton.onClick=[this]{const int a=int(std::lround(tapeValue("assign")));setTapeValue("assign",float(a>=2?0:a+1));tickTape();};
+    }
+    struct TapeItem{juce::Component* c;int w,h;};
+    std::vector<std::pair<String,std::vector<TapeItem>>> tapeRows() const {
+        const int L=knob*3/2,M=knob*23/20,S=std::max(28,knob*7/10);
+        auto cell=[&](const char* id,int d)->TapeItem{auto* c=control(id);return {c,std::max(c->textWidth()+8,d+12),d+Control::labelHeight+Control::valueHeight};};
+        auto lit=[&](const LitButton& b,int w)->TapeItem{return {const_cast<LitButton*>(&b),w,b.diameter+6+Control::labelHeight};};
+        auto toggle=[&](const char* id)->TapeItem{auto* c=control(id);return {c,c->textWidth()+8,Control::labelHeight+8};};
+        return {
+            {"",{lit(freezeButton,64),cell("density",L),lit(seedButton,64)}},
+            {"",{cell("time",L),lit(qualityButton,112),cell("pitch",L)}},
+            {"",{cell("feedback",S),cell("size",M),cell("shape",M),cell("dry_wet",S)}},
+            {"",{lit(assignButton,60),cell("time_amt",S),cell("size_amt",S),cell("shape_amt",S),cell("pitch_amt",S),cell("reverb",S)}},
+            {"Hidden functions",{toggle("seed_latch"),toggle("r_gate"),cell("input_gain",S)}},
+            {"Custom assign amounts",{cell("assign_fb",S),cell("assign_dw",S),cell("assign_rv",S)}}};
+    }
+    Rectangle<int> tapeContentSize() const {
+        int width=0,height=0;
+        for(const auto& [legend,items]:tapeRows()){
+            int w=0,h=0;for(const auto& item:items){w+=item.w+gap;h=std::max(h,item.h);}
+            width=std::max(width,w-gap);height+=(legend.isEmpty()?0:legendHeight)+h+gap;
+        }
+        return {0,0,width,height-gap};
+    }
+    void layoutTape(int inner){
+        int y=content.getY();
+        for(const auto& [legend,items]:tapeRows()){
+            if(legend.isNotEmpty())y+=legendHeight;
+            int h=0;for(const auto& item:items)h=std::max(h,item.h);
+            FlexBox row;row.justifyContent=FlexBox::JustifyContent::spaceAround;row.alignItems=FlexBox::AlignItems::center;
+            for(const auto& item:items){item.c->setVisible(true);row.items.add(FlexItem(*item.c).withWidth(float(item.w)).withHeight(float(item.h)));}
+            row.performLayout(Rectangle<int>(pad,y,inner,h).toFloat());
+            y+=h+gap;
+        }
+    }
+    void paintTapeLegends(Graphics& g,Colour ink2){
+        int y=content.getY();
+        for(const auto& [legend,items]:tapeRows()){
+            int h=0;for(const auto& item:items)h=std::max(h,item.h);
+            if(legend.isNotEmpty()){
+                const String title=legend.toUpperCase();
+                g.setFont(font(text::header));g.setColour(ink2);g.drawText(title,pad+2,y,getWidth()-2*pad,legendHeight,Justification::centredLeft);
+                const int x=pad+10+int(std::ceil(GlyphArrangement::getStringWidth(font(text::header),title)));
+                g.setColour(ink2.withAlpha(.36f));g.drawHorizontalLine(y+legendHeight/2,float(x),float(getWidth()-pad));
+                y+=legendHeight;
+            }
+            y+=h+gap;
+        }
+    }
+    // Lights: the original's quality colours (ui.cc media_palette_), assignment lamps, input level.
+    static Colour qualityColour(int q){const Colour c[4]={Colour(0xffc0c0d0),Colour(0xff00d8a8),Colour(0xffff9000),Colour(0xffe0407a)};return c[std::clamp(q,0,3)];}
+    void tickTape(){
+        if(!isTape())return;
+        const auto meter=[&](int i){return tapeControls?tapeControls->meters[size_t(i)].load(std::memory_order_relaxed):0.f;};
+        const float freezeGlow=tapeValue("freeze")>=.5f?1.f:0.f;
+        const bool latched=tapeValue("seed_latch")>=.5f;
+        const float seedGlow=seedHeld||meter(kTapeSeedActivity)>0?1.f:latched?.45f+.3f*std::sin(float(Time::getMillisecondCounter())*.004f):0.f;
+        const int q=int(std::lround(tapeValue("quality")));
+        const float reserve=tapeControls?std::max(.25f,meter(kTapeReserve)):1.f;
+        static const char* modes[4]={"BRIGHT DIGITAL","COLD DIGITAL","SUNNY TAPE","SCORCHED CASSETTE"};
+        const String mode=modes[std::clamp(q,0,3)];
+        bool changed=std::abs(freezeButton.glow-freezeGlow)>.01f||std::abs(seedButton.glow-seedGlow)>.01f||qualityButton.led!=qualityColour(q)
+            ||std::abs(qualityButton.ledLevel-reserve)>.01f||qualityButton.legend!=mode;
+        freezeButton.glow=freezeGlow;seedButton.glow=seedGlow;qualityButton.led=qualityColour(q);qualityButton.ledLevel=reserve;qualityButton.legend=mode;
+        const int a=int(std::lround(tapeValue("assign")));
+        const String assignLegend=String("ASSIGN: ")+(a==0?"FB":a==1?"MIX":a==2?"REV":"CUSTOM");
+        changed|=assignButton.legend!=assignLegend;assignButton.legend=assignLegend;
+        if(changed){freezeButton.repaint();seedButton.repaint();qualityButton.repaint();assignButton.repaint();}
+        const float input=meter(kTapeInputLevel);const bool synth=meter(kTapeSynthMode)>.5f;
+        const float lamps=float(a)*10+tapeValue("assign_fb")+2*tapeValue("assign_dw")+4*tapeValue("assign_rv");
+        if(std::abs(input-inputLight)>.02f||synth!=synthLight||lamps!=lampState){inputLight=input;synthLight=synth;lampState=lamps;repaint();}
+    }
+    void paintTapeLights(Graphics& g){
+        const int a=int(std::lround(tapeValue("assign")));
+        const char* mix[3]={"feedback","dry_wet","reverb"};const char* amount[3]={"assign_fb","assign_dw","assign_rv"};
+        const Colour colour[3]={Colour(0xff2fb6e8),Colour(0xfff2c230),Colour(0xffe8455c)};
+        for(int i=0;i<3;++i)if(auto* c=control(mix[i])){
+            const float level=a==3?tapeValue(amount[i]):a==i?1.f:0.f;
+            const auto light=Rectangle<float>(float(c->getX()+2),float(c->getY()+Control::labelHeight+2),8,8);
+            g.setColour(Colour(0xff26282a));g.fillEllipse(light.expanded(1.5f));
+            g.setColour(colour[i].withMultipliedBrightness(.2f+.8f*level));g.fillEllipse(light);
+        }
+        Jack* left=nullptr;Jack* right=nullptr;
+        for(auto& j:jacks){if(j->port.id=="in_l")left=j.get();if(j->port.id=="in_r")right=j.get();}
+        if(left&&right){
+            const float x=.5f*(left->getBounds().getRight()+right->getX()),y=float(left->getY()+left->socket().y);
+            const auto light=Rectangle<float>(x-4,y-4,8,8);
+            g.setColour(Colour(0xff26282a));g.fillEllipse(light.expanded(1.5f));
+            g.setColour(Colour(0xff7be08a).withMultipliedBrightness(.2f+.8f*inputLight));g.fillEllipse(light);
+        }
+    }
     void mouseDown(const MouseEvent& e) override {
         if(activated && !dynamic_cast<Jack*>(e.eventComponent))activated();
         if(e.mods.isPopupMenu()&&e.eventComponent==this&&rowMenu)rowMenu();   // right-click on the card body or header
@@ -507,12 +663,24 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
         current=type;plate=faceplate(type);family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();referenceSequence.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
         sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");strokeRole.setVisible(type=="sample.player");
+        for(auto* b:{&freezeButton,&seedButton,&qualityButton,&assignButton}){b->setVisible(type=="fx.granular_tape");b->legendColour=panelInk(type);}
+        tapeControls=type=="fx.granular_tape"?controls:nullptr;seedHeld=false;
         const bool spectral=type=="spectral.engine";section.setVisible(spectral);presetButton.setVisible(spectral);presetName.setVisible(spectral);more.setVisible(spectral);subpage=0;
         const auto& d=panel(type);
         for(size_t i=0;i<d.parameters.size();++i){auto p=d.parameters[i];auto& saved=state[type];if(!saved.count(p.id))saved[p.id]=p.initial;
             if(isSequencer(type)||type=="seq.performance"||isReferenceSequencer(type))continue;
             auto knobControl=std::make_unique<Control>(p,saved[p.id],[&,controls,i,type,id=p.id,changed](float v){state[type][id]=v;if(controls)controls->values[i].store(v,std::memory_order_relaxed);if(changed)changed(id,v);},look,panelInk(type),false,family=="filter"&&type.rfind("spectral.",0)==0&&p.id=="env_octaves");
+            customiseControl(type,*knobControl,true);
             addAndMakeVisible(*knobControl);knobs.push_back(std::move(knobControl));}
+        if(isTape()){
+            for(const char* hidden:{"freeze","seed","quality","assign"})if(auto* c=control(hidden))c->setVisible(false);
+            // Turning a custom amount selects the custom destination, as holding Assign does on the hardware.
+            for(const char* custom:{"assign_fb","assign_dw","assign_rv"})if(auto* c=control(custom)){
+                auto previous=c->slider.onValueChange;
+                c->slider.onValueChange=[this,previous]{if(previous)previous();if(int(std::lround(tapeValue("assign")))!=3)setTapeValue("assign",3);};
+            }
+            tickTape();
+        }
         if(isReferenceSequencer(type)){referenceSequence=std::make_unique<optiui::ReferenceSequenceLauncher>(type,state[type],controls);referenceSequence->parameterChanged=changed;addAndMakeVisible(*referenceSequence);}
         if(type=="seq.performance"){performance=std::make_unique<optiui::PerformanceLauncher>(controls,state[type]);performance->parameterChanged=changed;addAndMakeVisible(*performance);}
         if(isSequencer(type)){
@@ -568,7 +736,8 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             k->liveOffset=movementOffset;k->bindMovement(current,instance,graph);
         }
     }
-    void tickMovement(){for(auto& k:knobs)k->tickMovement();}
+    void tickMovement(){for(auto& k:knobs)k->tickMovement();tickTape();}
+    void paintOverChildren(Graphics& g) override {if(isTape())paintTapeLights(g);}
     void setConnections(const GraphSpec& graph) {
         bindMovement(graph);
         if(current=="analog.filter")if(auto* fm=control("fm_depth"))fm->showFilterFmSource(graph,instance);
@@ -609,6 +778,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     bool editorContent() const {return sequence||performance||referenceSequence;}
     Control* control(const std::string& id) const {const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size()&&i<knobs.size();++i)if(ps[i].id==id)return knobs[i].get();return nullptr;}
     Rectangle<int> contentSize() const {
+        if(isTape())return tapeContentSize();
         const int cw=cellWidth(),ch=cellHeight();
         if(plate){
             int width=0,height=0;
@@ -658,6 +828,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
                 y+=faceRowHeight(row)+gap;
             }
         }
+        if(isTape())paintTapeLegends(g,ink2);
         if(current=="sample.player"){
             const auto wave=waveArea.toFloat();g.setColour(ink);g.fillRoundedRectangle(wave,2);
             if(sample&&knobs.size()>3){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());const float mid=wave.getCentreY(),half=wave.getHeight()*.45f;
@@ -676,6 +847,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             g.drawText(routed?"Waiting":"Waiting / oscillator unrouted",pad+67,int(y),getWidth()-pad-70,footerHeight,Justification::centredLeft);
             return;
         }
+        if(isTape()&&routed&&synthLight){g.drawText("No audio input: wavetable synth mode",pad,getHeight()-footerHeight-3,getWidth()-2*pad,footerHeight,Justification::centred,true);return;}
         g.drawText(routed?panel(current).description:"UNROUTED / connect to activate",pad,getHeight()-footerHeight-3,getWidth()-2*pad,footerHeight,Justification::centred,true);
     }
     void resized() override {
@@ -696,6 +868,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         const auto size=contentSize();
         content={pad+std::max(0,(inner-size.getWidth())/2),headerHeight+cableLane+4,std::min(inner,size.getWidth()),size.getHeight()};
         if(current.empty())return;
+        if(isTape()){layoutTape(inner);return;}
         if(plate){
             int y=content.getY();
             for(const auto& row:*plate){

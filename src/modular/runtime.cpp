@@ -134,6 +134,13 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
             mixRight_[size_t(v)]=source.outRight[size_t(c.source.port)];
         }
     }
+    // Tell each module which inputs are patched, as hardware normalisation probes do.
+    for(int i=0;i<count;++i){
+        std::vector<int> patched(nodes_[size_t(i)].in.size(),0);
+        for(const auto& c:connections)if(c.type!=SignalType::Event&&c.destination.node==i)
+            patched[size_t(c.destination.port)]=nodes_[size_t(c.source.node)].channels[size_t(c.source.port)];
+        for(int v=0;v<voicesOf(i);++v)if(auto* m=instance(i,v).module)m->patched(patched);
+    }
     if(mixer_>=0)for(int v=0;v<maximumVoices;++v)if(!mixLeft_[size_t(v)]){mixLeft_[size_t(v)]=zero_.data();mixRight_[size_t(v)]=zero_.data();}
     for(size_t i=0;i<spec.modulations.size();++i)routes_->amounts[i]=spec.modulations[i].amount;
     for(const auto& m:graph_.plan.modulations)for(int v=0;v<voicesOf(m.destination.node);++v)

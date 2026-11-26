@@ -16,6 +16,7 @@ with [native visual evidence](ui/REFERENCE_SEQUENCERS_REVIEW.md), [four-track Pe
 [Pattern / Motion](architecture/PATTERN_MOTION.md), and the
 [Pattern, Euclidean and Stage foundation](architecture/FIRST_SEQUENCERS.md).
 Standing module programme (requests 8–136): [faithful reproductions, order and status](project/MODULE_PROGRAMME.md).
+Mala (programme item 1, requests 136–140): [the open Beads design in the rack](research/modules/MALA.md).
 Module fidelity (request 115): [how much open-source DSP is faithfully recreated, and what else can be approached](research/modules/MODULE_FIDELITY_REVIEW.md).
 Handoff to Codex, 26 November (requests 115–117): [module panels and deep delay/reverb modules](project/HANDOFF_CLAUDE_TO_CODEX_20261126.md).
 Interface (requests 71–72): [rack density, synth-panel view and preset browser](ui/SYNTH_PANEL_AND_PRESETS.md); [existing JUCE UI frameworks and code](research/platforms/JUCE_UI_OPTIONS.md).

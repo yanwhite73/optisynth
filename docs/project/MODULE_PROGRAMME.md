@@ -42,7 +42,7 @@ Background:
 
 | # | Module | Basis | Status |
 | --- | --- | --- | --- |
-| 1 | Beads-derived granular / delay / reverb | Mutable Beads source, MIT | **In progress**: Claude, from 26 November |
+| 1 | **Mala**: Beads granular / delay / reverb, with its panel | Mutable Beads source, MIT, unchanged | **Built and checked** on branch `mala` (26 November): offline, sanitizer and native checks pass. Merges into the next release after Codex's 0.0.35. [Design and checks](../research/modules/MALA.md) |
 | 2 | Complete Plaits-derived macro oscillator, all models | Mutable Plaits source, MIT | Not started. Three model cores already wrapped |
 | 3 | Rings-derived resonator, then Elements | Mutable source, MIT | Not started |
 | 4 | Clouds, all modes, including the Parasites modes | Mutable source / Parasites, MIT | One mode (the reverb tank) inside Prism tank |

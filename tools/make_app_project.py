@@ -9,12 +9,13 @@ app = ET.Element('JUCERPROJECT', id='OptiApp2', name='Optisynth', projectType='g
     jucerFormatVersion='1', defines='TEST=1', headerPath=str(root/'third_party/mutable'))
 group = ET.SubElement(app, 'MAINGROUP', id='optiappsrc', name='Optisynth')
 files = ['app/Main.cpp', 'src/modular/graph.cpp', 'src/modular/runtime.cpp',
-         'src/modular/timing.cpp', 'src/modular/sequencer.cpp', 'src/modular/pattern.cpp', 'src/modular/performance.cpp', 'src/modular/reference_sequencers.cpp', 'src/modular/analog.cpp',
+         'src/modular/timing.cpp', 'src/modular/sequencer.cpp', 'src/modular/pattern.cpp', 'src/modular/performance.cpp', 'src/modular/reference_sequencers.cpp', 'src/modular/analog.cpp', 'src/modular/granular_tape.cpp',
          'src/core/spectrum.cpp', 'src/core/table_bank.cpp', 'src/core/patch.cpp', 'src/core/engine.cpp', 'src/core/arp.cpp', 'src/modular/spectral.cpp', 'src/modular/modules.cpp', 'src/modular/sample.cpp', 'src/core/envelope.cpp', 'src/core/effects.cpp',
          'third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc',
          'third_party/mutable/plaits/dsp/physical_modelling/resonator.cc',
          'third_party/mutable/plaits/resources_selected.cc',
-         'third_party/mutable/stmlib/dsp/units.cc', 'third_party/mutable/stmlib/utils/random.cc']
+         'third_party/mutable/stmlib/dsp/units.cc', 'third_party/mutable/stmlib/utils/random.cc',
+         'third_party/mutable/beads/dsp/processor.cc', 'third_party/mutable/beads/dsp/delay_controller.cc', 'third_party/mutable/beads/dsp/delay_clock.cc', 'third_party/mutable/beads/dsp/mu_law.cc', 'third_party/mutable/beads/dsp/synth.cc', 'third_party/mutable/beads/dsp/trigger_generator.cc', 'third_party/mutable/beads/resources.cc']
 for i, file in enumerate(files):
     ET.SubElement(group, 'FILE', id=f'optifile{i}', name=pathlib.Path(file).name,
                   compile='1', resource='0', file='../'+file)

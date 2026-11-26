@@ -2,6 +2,7 @@
 // docs/research/instruments/CLASSIC_PAD_ARCHITECTURE.md. The Prism tank adapts Clouds Parasites.
 #include "analog.h"
 #include "gate_delay.h"
+#include "granular_tape.h"
 #include "clouds/dsp/fx/oliverb.h"
 #include "../core/effects.h"
 #include <cmath>
@@ -596,6 +597,7 @@ std::vector<Panel> analogPanels() {
     p.push_back(effectPanel("fx.chorus", "Chorus", "chorus", "Stereo chorus (inherited library)", .4f));
     p.push_back(effectPanel("fx.delay", "Stereo delay", "delay_stereo", "Stereo delay with filtered feedback (inherited library)", .25f));
     p.push_back(effectPanel("fx.phaser", "Phaser", "phaser", "Stereo phaser (inherited library)", .4f));
+    p.push_back(granularTapePanel());
     return p;
 }
 
@@ -622,6 +624,8 @@ void analogPorts(const std::string& id, ModuleType& type) {
         type.inputs.push_back({"aux", SignalType::Audio});
         type.inputs.push_back({"notes", SignalType::Event});
         type.outputs = {{"sum",SignalType::Audio},{"a",SignalType::Audio},{"b",SignalType::Audio}};
+    } else if (id == "fx.granular_tape") {
+        granularTapePorts(type);
     } else if (id == "fx.dual_loop") {
         type.inputs = {{"in",SignalType::Audio,false,2},{"a",SignalType::Audio},{"b",SignalType::Audio},{"ping",SignalType::Control}};
         type.outputs = {{"out",SignalType::Audio,false,2},{"wet_a",SignalType::Audio},{"wet_b",SignalType::Audio}};
@@ -685,6 +689,7 @@ GraphSpec padPatch(int model) {
 
 std::unique_ptr<AudioModule> makeAnalog(const NodeSpec& n, const PrepareContext& c) {
     const auto& id = n.type;
+    if (id == "fx.granular_tape") return makeGranularTape(n);
     if (id == "analog.vco") return std::make_unique<Vco>(n, c);
     if (id == "analog.filter") return std::make_unique<ObFilter>(n);
     if (id == "analog.env") return std::make_unique<AnalogEnv>(n);

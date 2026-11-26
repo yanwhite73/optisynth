@@ -2,10 +2,10 @@
 CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
 CORE := src/core/spectrum.cpp src/core/table_bank.cpp src/core/envelope.cpp src/core/patch.cpp src/core/engine.cpp src/core/effects.cpp src/core/arp.cpp
-MUTABLE := third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc third_party/mutable/plaits/dsp/physical_modelling/resonator.cc third_party/mutable/plaits/resources_selected.cc third_party/mutable/stmlib/dsp/units.cc third_party/mutable/stmlib/utils/random.cc
-MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/modular/sample.cpp src/modular/spectral.cpp src/modular/timing.cpp src/modular/sequencer.cpp src/modular/pattern.cpp src/modular/performance.cpp src/modular/reference_sequencers.cpp src/modular/analog.cpp $(CORE) $(MUTABLE)
+MUTABLE := third_party/mutable/plaits/dsp/physical_modelling/modal_voice.cc third_party/mutable/plaits/dsp/physical_modelling/resonator.cc third_party/mutable/plaits/resources_selected.cc third_party/mutable/stmlib/dsp/units.cc third_party/mutable/stmlib/utils/random.cc third_party/mutable/beads/dsp/processor.cc third_party/mutable/beads/dsp/delay_controller.cc third_party/mutable/beads/dsp/delay_clock.cc third_party/mutable/beads/dsp/mu_law.cc third_party/mutable/beads/dsp/synth.cc third_party/mutable/beads/dsp/trigger_generator.cc third_party/mutable/beads/resources.cc
+MODULAR := src/modular/graph.cpp src/modular/runtime.cpp src/modular/modules.cpp src/modular/sample.cpp src/modular/spectral.cpp src/modular/timing.cpp src/modular/sequencer.cpp src/modular/pattern.cpp src/modular/performance.cpp src/modular/reference_sequencers.cpp src/modular/analog.cpp src/modular/granular_tape.cpp $(CORE) $(MUTABLE)
 MODFLAGS := -DTEST -Ithird_party/mutable
-MODHEADERS := $(wildcard third_party/mutable/clouds/dsp/*.h) $(wildcard third_party/mutable/clouds/dsp/fx/*.h) $(wildcard src/modular/*.h) $(wildcard src/core/*.h) $(wildcard tests/*.h) $(wildcard third_party/mutable/plaits/dsp/oscillator/*.h) $(wildcard third_party/mutable/stmlib/dsp/*.h)
+MODHEADERS := $(wildcard third_party/mutable/clouds/dsp/*.h) $(wildcard third_party/mutable/clouds/dsp/fx/*.h) $(wildcard src/modular/*.h) $(wildcard src/core/*.h) $(wildcard tests/*.h) $(wildcard third_party/mutable/plaits/dsp/oscillator/*.h) $(wildcard third_party/mutable/stmlib/dsp/*.h) $(wildcard third_party/mutable/beads/dsp/*.h) $(wildcard third_party/mutable/beads/dsp/fx/*.h)
 HEADERS := $(wildcard src/core/*.h) plugin/Source/TypingKeyboard.h $(wildcard tests/*.h)
 
 all: build/partials-render build/test_core build/test_graph build/test_modular build/test_timing

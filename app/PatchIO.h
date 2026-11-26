@@ -91,6 +91,7 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {21,1795378702,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
         {22,1795378702,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
         {25,1795523516,{"Optical vapour","Pad","An eight-voice reed chord. Play seq for overlapping reed lines, or hold keys for the octave swell.",{"low-pass-gate","polyphonic","swell"}},"panel"},
+        {40,1795734175,{"Seed rain","Texture","The reed chord falling through Mala's grains. Density sets how often seeds fall and Time how far back they reach. Press Freeze to hold the cloud.",{"granular","texture","reverb"}},"panel"},
         {24,1795523516,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Play seq for the four-bar mallet phrase and dotted echo.",{"mallet","modal","echo"}},"panel"},
         {23,1795378702,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
         {15,1795102287,{"OB swell","Pad","Oberheim-style 2-pole pad: two drifting saws, slow filter swell, chorus and long reverb. 8 voices.",{"analog","oberheim","swell","warm","ambient"}},"panel"},
@@ -210,6 +211,19 @@ inline RackDocument clayAndWater(float gain) {
     return d;
 }
 inline RackDocument starterDocument(int which,float gain) {
+    // Programme item 1 (request 136): the open Beads design as Mala, fed by the Optical vapour reeds.
+    if(which==40){
+        auto d=starterDocument(25,gain);
+        for(auto& n:d.graph.nodes)if(n.id=="prism")
+            n=NodeSpec{"mala","fx.granular_tape",{{"density",.72f},{"time",.32f},{"time_amt",.3f},{"size",.64f},{"size_amt",.2f},
+                {"shape",.55f},{"feedback",.28f},{"dry_wet",.58f},{"reverb",.42f},{"quality",2}}};
+        for(auto& c:d.graph.connections)for(auto* e:{&c.source,&c.destination})if(e->node=="prism")e->node="mala";
+        d.graph.outputs={{"mala","out"}};
+        d.panel.sections.erase(std::remove_if(d.panel.sections.begin(),d.panel.sections.end(),[](const PanelSection& s){return s.title=="SPACE";}),d.panel.sections.end());
+        d.panel.sections.push_back({"MALA",{{"mala","density","Density"},{"mala","time","Time"},{"mala","size","Size"},{"mala","shape","Shape"},
+            {"mala","pitch","Pitch"},{"mala","feedback","Feedback"},{"mala","dry_wet","Dry/wet"},{"mala","reverb","Reverb"},{"mala","freeze","Freeze"}}});
+        return d;
+    }
     if(which==27){
         RackDocument d;d.gain=gain;d.tempo=92;
         auto data=std::make_shared<PerformanceData>();

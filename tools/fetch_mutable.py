@@ -12,6 +12,12 @@ queue = [('eurorack', p) for p in ['README.md',
     'plaits/dsp/physical_modelling/modal_voice.cc',
     'plaits/dsp/physical_modelling/resonator.cc',
     'plaits/resources.cc', 'plaits/dsp/engine/bass_drum_engine.cc']]
+# Request 136: Beads, read in full before any port (DSP, control mapping, main loop, desktop test).
+queue += [('eurorack', 'beads/' + p) for p in [
+    'dsp/processor.cc', 'dsp/processor.h', 'dsp/delay_controller.cc', 'dsp/delay_clock.cc',
+    'dsp/mu_law.cc', 'dsp/synth.cc', 'dsp/trigger_generator.cc', 'resources.cc', 'resources.h',
+    'beads.cc', 'cv_reader.cc', 'pot_controller.h', 'gain_control.cc', 'normalization_detector.cc',
+    'settings.cc', 'ui.cc', 'calibrator.h', 'test/beads_test.cc', 'test/makefile', 'makefile']]
 queue += [('stmlib', 'README.md'), ('stmlib', 'LICENSE'), ('stmlib', 'utils/random.cc'),
           ('stmlib', 'dsp/units.cc')]
 seen, receipts = set(), []

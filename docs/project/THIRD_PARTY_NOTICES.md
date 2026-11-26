@@ -13,3 +13,9 @@ Prism tank adapts the MIT-licensed Clouds Parasites Oliverb and FX engine by
 Emilie Gillet and the random oscillator by Matthias Puech. Source notices
 are retained in third_party/mutable/clouds/dsp. The pinned revision, original
 manual and desktop adaptations are recorded in [Space devices](../research/modules/SPACE_DEVICES.md).
+
+Mala runs the MIT-licensed Beads DSP by Emilie Gillet, unchanged, with the stmlib
+converters, filters and utilities it needs. Source notices are retained in
+third_party/mutable/beads and third_party/mutable/stmlib. The input gain control
+is a float port of Beads' gain_control.cc, credited in src/modular/granular_tape.cpp.
+The pinned revision and host adaptations are recorded in [Mala](../research/modules/MALA.md).

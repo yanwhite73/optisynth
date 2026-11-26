@@ -38,6 +38,8 @@ struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
     std::atomic<int> playhead{-1};
     std::atomic<float> lfoPhase{-1}, lfoRate{0}, lfoOutput{0};
+    // Module-specific displays read by the panel, such as input level and grain lights (request 137).
+    std::array<std::atomic<float>,4> meters{};
     std::array<std::atomic<int>,4> laneHeads{};
     std::atomic<int> cycle{0};
     std::atomic<bool> stepFired{false};
@@ -70,6 +72,9 @@ public:
     // Audio-thread phase shared with a newly woken copy of this LFO.
     virtual double* freeLfoPhase() noexcept {return nullptr;}
     virtual SpectralPtr spectralState() const { return {}; }
+    // Called off the audio thread once wiring is known: one entry per input port,
+    // 0 when unpatched, otherwise the source output's channel count (1 or 2).
+    virtual void patched(const std::vector<int>&) {}
 };
 Registry moduleRegistry(const SampleBank& samples={},const SpectralBank& spectral={});
 

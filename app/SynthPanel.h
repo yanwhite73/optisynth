@@ -87,6 +87,7 @@ public:
                 Parameter p=*spec;if(!c.label.empty())p.label=c.label;
                 float value=p.initial;for(const auto& v:node->parameters)if(v.first==c.parameter)value=v.second;
                 auto control=std::make_unique<Control>(p,value,[this,id=c.node,key=c.parameter](float v){if(changed)changed(id,key,v);},look,theme.legend);
+                customiseControl(node->type,*control,false);
                 control->slider.setTooltip(String(c.node)+"."+String(c.parameter)+" / double-click to reset");
                 if(node->type=="analog.filter"&&c.parameter=="fm_depth")control->showFilterFmSource(d.graph,c.node);
                 control->movementClicked=[this,id=c.node](Control& k){if(openMovement)openMovement(id,k.param.id);};

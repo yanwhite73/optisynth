@@ -1498,3 +1498,40 @@ module.
 - STATUS and AGENTS.md point to it, so every agent sees it before choosing work.
 - When a review produces a recommended order, start the first step and report it.
   Ask only about genuine blockers, such as recordings for closed designs.
+
+## Requests 136–140 — Mala, the first faithful port
+
+**What was built.** The Beads DSP, unchanged, in a host that reproduces the
+firmware main loop and hardware, with its panel arrangement (request 137) and the
+name Mala (requests 138–140). Details are in
+[MALA.md](../research/modules/MALA.md).
+- The modular suite grows from 433 to 445 checks.
+- Native checks cover every parameter, the buttons and gestures, and save/recall.
+- Seed rain (factory 40) demonstrates it.
+
+**Working alongside Codex.**
+- **The collision.** Codex was preparing 0.0.35 in the same working tree. The
+  first Mala edits went straight into the shared Makefile and app file lists, so
+  Codex's next build would have compiled unfinished code.
+- **What happened next.**
+  1. The work moved to a git worktree (`../optisynth-mala`, branch `mala`).
+  2. Claude's hunks were removed from the shared tree after checking that they
+     were the only changes in those files.
+  3. Mala merges after Codex commits.
+- **Prevention.** Start multi-file work in a worktree whenever another agent has
+  uncommitted changes in the repository.
+
+**Mistake: staging the request log.**
+- **What happened.** Committing requests 137–140 by slicing the end of
+  USER_REQUESTS swept in Codex's uncommitted request 143, which Codex had written
+  between Claude's entries.
+- **Fix.** It was removed from the commit at once (`6bce871`); the working file was
+  untouched.
+- **Prevention.** When two agents append to the same file, stage your own entries
+  by their headings, never by position.
+
+**Two test-design errors caught by the checks.**
+- **Buffer position.** A Time setting read a buffer region that had not been
+  recorded yet. Beads holds up to 8 s, and Time 0.25 reads about 2 s back.
+- **Channel matching.** A mono source cannot feed a stereo socket in this rack.
+  That led to the added stereo In.

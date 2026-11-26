@@ -37,6 +37,7 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "analog_checks.h"
 #include "gate_delay_checks.h"
 #include "prism_checks.h"
+#include "granular_tape_checks.h"
 #include "pattern_checks.h"
 #include "performance_checks.h"
 #include "reference_sequencer_checks.h"
@@ -109,6 +110,7 @@ int main(int argc,char** argv){try {
     check(openSpan>=193 && openSpan<=287 && mutedSpan>=100 && mutedSpan<=141,
           "Open and damped frame strokes reach measured VCSL energy-duration ranges");
     prismChecks();
+    granularTapeChecks();
     gateDelayChecks();
     if(argc==2 && std::string(argv[1])=="--gate-delay"){std::printf("%d device checks passed\n",checks);return 0;}
     analogChecks();
