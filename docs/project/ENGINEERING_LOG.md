@@ -1437,3 +1437,14 @@ address/undefined-behaviour sanitizer builds. Four importer tests and one
 renderer test also passed. Delivered 0.0.32 in place. Installed and candidate
 executable SHA-256 matched at
 `6354a7c77d1b05cf40605b6b77fdba8eb756d523994aab3a9b27dc46bb955506`.
+
+
+## Requests 122–132 — Movement timing, limits and independent sources
+
+The earlier native check injected a constant 0.12 into the marker and inspected one frame. It exercised route addition and drawing but could not catch a frozen marker, confirm the rate, or distinguish clipping from a stopped source. Yan had to report Hardness, Strike and Colour Rate individually. The eight-entry colour palette also gave LFOs 3 and 11 identical badges.
+
+The native check now creates independent movements from the Mallet panel, sets their rates through the anchored editors, and samples the real player at 30 frames per second over eight seconds. It compares each assignment with an otherwise identical audio render with just that route at zero. The editor and panel use the same parameter mapping as the engine. Qualify movement changes with an edited multi-source patch, a shallow logarithmic sweep, a clipped deep sweep and running audio. A factory assignment list cannot establish the routing of the user's open patch.
+
+In the eight-second test the measured knob spans (fraction of rotary travel) were Hardness 0.0000–0.6050, Strike 0.0300–0.2700, Material 0.0604–0.2996, Brightness 0.3400–0.5800 and Colour Rate 0.4784–0.5061. Hardness was at zero on 102/240 frames. For a two-second phrase the per-route bypass RMS differences were respectively 0.04495616, 0.00181198, 0.00352389, 0.00271739 and 0.00009896. The test checks every measured span lies within the displayed arc. The offline reproduction and image captures are in `build/ui-review-132-final/`.
+
+0.0.33 installed in the canonical Release app. Native UI suite passed. Regular and address/undefined-behaviour sanitizer runs passed 1,194 core, 28 graph, 427 modular and 47 timing checks. The importer and renderer suites passed. Delivered executable SHA-256: `86957438d2f42facc94c76056949e601e884d492fe165438d189e97e4fa41320`.

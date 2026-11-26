@@ -1,5 +1,13 @@
 # Optisynth status — 26 November 2026
 
+## 0.0.33 — Independent movement on the Mallet panel
+
+Assigned controls show the LFO number and its phase on the wave button. The large knob tracks the bounded destination. Open movement to see the running rate, current target, range, and signed depth in percent. LFOs 3 and 11 have distinct colours. New assignments start within the available travel when the knob has room on both sides.
+
+The native test edited all five **Prism afterimage → Mallet** assignments and measured eight seconds of rendered audio. Hardness, Strike, Material and Colour Rate completed 2, 6, 8 and 10 cycles respectively. Colour Rate also modulated the Brightness source, which completed 4.026 cycles. Bypassing each route separately changed the waveform. At 50% depth Hardness reached zero for 102 of 240 display frames while its LFO continued. These measurements describe the test patch. The user's unsaved live settings were unavailable.
+
+[Movement controls](../ui/PARAMETER_MOVEMENT.md) · [Engineering record](ENGINEERING_LOG.md)
+
 ## 0.0.32 — Edit movement beside a knob
 
 Installed at the usual standalone Release location. In **Prism afterimage →

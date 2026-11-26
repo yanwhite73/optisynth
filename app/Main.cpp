@@ -4,7 +4,7 @@ namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.32";}
+    const String getApplicationVersion() override {return "0.0.33";}
     void initialise(const String& args) override {
         // Native checks keep their settings and preset library inside the snapshot folder,
         // starting empty each run; the user's own files are never touched.

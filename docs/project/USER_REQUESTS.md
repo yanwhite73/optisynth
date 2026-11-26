@@ -1228,3 +1228,61 @@ Until then, the screenshots are in `build/ui-review-120/`: `movement-editor.png`
 
 ⏺ Usage limit reached · continuing automatically at 4:30pm · esc to cancel
 ```
+
+## 122 — Movement marker appears to pause
+
+```text
+the lfo marker appears to stop at the bottom for a few seconds
+```
+
+## 123 — Hardness movement
+
+```text
+and the hardness lfo isnt moving at all
+```
+
+## 124–126 — Independent movement and Strike rate in the edited patch
+
+```text
+this is still a mess
+```
+
+```text
+in th current patch all params have independent lfo
+```
+
+```text
+strike rate is wrong as well
+```
+
+## 127 — Movement implementation quality
+
+```text
+why is this so badly implemented?
+```
+
+## 128–129 — Colour Rate and test request
+
+```text
+colour rate has stopped moving
+```
+
+```text
+run TESTS
+```
+
+## 130–131 — Depth units and duplicate source colours
+
+```text
+the depth scale is very weird as well
+```
+
+```text
+3 and 11 have the same colour
+```
+
+## 132 — Accuracy of the drawn range
+
+```text
+range might not be correct for the way lfo is drawn
+```

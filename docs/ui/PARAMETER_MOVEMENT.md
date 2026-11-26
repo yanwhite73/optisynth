@@ -2,6 +2,14 @@
 
 Requests 94–95. Interaction proposal for the desktop synth. The first review should use Modal Percussion Decay and Analog VCO pulse width at the smallest supported rack zoom.
 
+## Reading movement in 0.0.33
+
+The number beside the wave identifies the LFO. The dot travelling across that wave follows its audio-engine phase. The dot on the large knob shows the destination after modulation and range limits. A square wave can hold a destination for half a cycle. A deep sine wave can hold it against a limit. In both cases the wave button shows the source completing the cycle. With several sources on one knob the badge follows the first listed LFO and the white outer arc covers their combined possible range.
+
+Open the wave button to see the current destination value, the sweep endpoints in its own units, and the running frequency of each LFO. Colour Rate in the Prism Mallet panel is itself an LFO frequency. Assigning movement there can vary another control's cycle length. A source with no path to an audio output is identified in the editor. For an edited patch, use the source numbers on its own panel to identify assignments.
+
+Depth is signed. On Hardness, whose full range is four octaves, 10% means a swing of 0.4 octaves either side of the base. On a logarithmic control such as Colour Rate, the percentage is a fraction of its logarithmic span. Negative values reverse polarity. Type a rate as Hz or a duration such as `4 s` or `500 ms`. New assignments on controls inside their range use at most the headroom available on the nearer side.
+
 ## Using movement in 0.0.32
 
 Click the wave button beside a continuous knob in Panel, Modular or Focus.

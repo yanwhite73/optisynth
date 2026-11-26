@@ -646,10 +646,89 @@ public:
                 require(synthPanel.control("strike","brightness")->links.front().amount==.4f && routeHandles->amounts[size_t(first.route)].load()==.4f,
                         "Depth reaches the engine and the knob's arc");
                 auto* bright=synthPanel.control("strike","brightness");
-                bright->liveOffset=[](const MovementLink&){return std::optional<float>(.12f);};bright->tickMovement();
+                bright->liveOffset=[](const MovementLink&){return std::optional<MovementSample>({.12f,.5f,1.f});};bright->tickMovement();
                 require(bright->live && std::abs(*bright->live-.36f)<.001f,"The effective-value tick sums every route");
                 capture("movement-panel.png");setSize(1120,800);resized();capture("movement-minimum.png");setSize(1440,940);resized();
                 bright->liveOffset=synthPanel.movementOffset;bright->tickMovement();
+            }
+            // Recreate five independent movement assignments through the editor and drive the real player.
+            require(loadFactory(24),"Independent movement fixture");drain();
+            {
+                const std::array<Endpoint,5> targets{{{"body","fm_depth"},{"blend","gain_b"},{"strike","structure"},
+                                                      {"strike","brightness"},{"timbre","rate"}}};
+                const std::array<float,5> rates{{.25f,.75f,1.f,.50f,1.25f}};
+                makeIndependent(MovementView::panel,targets[1],synthPanel.control("blend","gain_b")->links.front());closeMovement();
+                for(int index:{0,2,4}){
+                    auto* c=synthPanel.control(targets[index].node,targets[index].port);
+                    c->movement.onClick();closeMovement();
+                }
+                std::array<Control*,5> knobs{};
+                std::set<std::string> ids;
+                for(size_t i=0;i<knobs.size();++i){
+                    knobs[i]=synthPanel.control(targets[i].node,targets[i].port);
+                    require(knobs[i]->links.size()==1 && ids.insert(knobs[i]->links[0].source).second,"Unique LFO for each Mallet control");
+                    auto* box=showMovement(MovementView::panel,targets[i]);
+                    require(box&&box->rateControl(0)&&box->depthControl(0),"Independent movement editor controls exist");
+                    auto& rate=box->rateControl(0)->slider;
+                    rate.setValue(rates[i],sendNotificationSync);
+                    require(std::abs(rate.getValueFromText("4 s")-.25)<.001 && std::abs(rate.getValueFromText("500 ms")-2)<.001,"Cycle duration input");
+                    auto& depth=box->depthControl(0)->slider;
+                    require(std::abs(depth.getValueFromText("-15 %")+.15)<.0001,"Signed percentage entry");
+                    depth.setValue(i==0?.5:i==4?.02:.12,sendNotificationSync);
+                    closeMovement();
+                }
+                require(movementColour(3)!=movementColour(11),"LFO 3 and 11 have different colours");
+                require(!running,"Offline check must own the player");
+                ScopedValueSetter<bool> offlineAudio(running,true);
+                std::array<float,1600> audioBlock{};
+                std::array<double,5> cycles{};
+                std::array<float,5> prev{},lowest{},highest{};
+                lowest.fill(1);int clippedHardness=0;
+                for(int frame=0;frame<=240;++frame){
+                    player.collect();player.render(audioBlock.data(),int(audioBlock.size()));
+                    tickMovement();
+                    for(size_t i=0;i<knobs.size();++i){
+                        auto* c=knobs[i];const float phase=c->movement.phase;
+                        require(c->live.has_value() && phase>=0,"Engine must reach each Mallet marker");
+                        if(frame){
+                            const float delta=phase-prev[i];cycles[i]+=delta<0?delta+1:delta;
+                            if(i==0 && c->modulatedValue(float(c->slider.getValue()),*c->live)==0 && delta!=0)++clippedHardness;
+                        }
+                        prev[i]=phase;
+                        const float prop=c->knobProportion(c->modulatedValue(float(c->slider.getValue()),*c->live));
+                        lowest[i]=std::min(lowest[i],prop);highest[i]=std::max(highest[i],prop);
+                    }
+                }
+                auto phrase=[](const GraphSpec& graph){
+                    Player p;p.publish(std::make_unique<Runtime>(graph));p.playing=true;
+                    std::vector<float> out(96000);
+                    for(int beat=0;beat<4;++beat){
+                        p.noteEvent(55,.8f,true);p.render(out.data()+beat*24000,12000);
+                        p.noteEvent(55,0,false);p.render(out.data()+beat*24000+12000,12000);
+                    }
+                    return out;
+                };
+                const auto reference=phrase(document.graph);
+                String report;
+                for(size_t i=0;i<knobs.size();++i){
+                    auto bypassed=document.graph;
+                    bypassed.modulations[size_t(knobs[i]->links.front().route)].amount=0;
+                    const auto dry=phrase(bypassed);
+                    double energy=0;for(size_t n=0;n<dry.size();++n){const double diff=reference[n]-dry[n];energy+=diff*diff;}
+                    require(energy>1e-12,"Each independent Mallet movement must reach rendered audio");
+                    const auto bounds=movementRange(knobs[i]->param,float(knobs[i]->slider.getValue()),knobs[i]->links);
+                    require(lowest[i]>=knobs[i]->knobProportion(bounds.first)-.001 && highest[i]<=knobs[i]->knobProportion(bounds.second)+.001,
+                            "Measured target stays on its drawn arc");
+                    report+=movementLabel(targets[i])+" cycles in 8 seconds: "+String(cycles[i],3)+"; knob range "
+                            +String(lowest[i],4)+".."+String(highest[i],4)+"; audio A/B RMS "+String(std::sqrt(energy/dry.size()),8)+"\n";
+                    require(highest[i]-lowest[i]>.01f,"Every destination visibly moves");
+                    // Colour Rate modulates Brightness's source rate, so its period varies.
+                    if(i!=3)require(std::abs(cycles[i]-8*rates[i])<.03,"Running LFO cycle count matches its own rate");
+                }
+                require(clippedHardness>10,"Hardness hits its lower bound while its independent LFO continues");
+                report+="Hardness at its lower bound with source advancing: "+String(clippedHardness)+" / 240 frames\n";
+                require(directory.getChildFile("movement-cycles.txt").replaceWithText(report),"Write real movement measurements");
+                capture("movement-independent.png");
             }
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
         }
@@ -1213,15 +1292,20 @@ private:
             if(key.find(fine)!=std::string::npos)return .04f;
         return .15f;
     }
-    std::optional<float> movementOffset(const MovementLink& link){
-        if(!running||!link.lfo||link.route<0||!routeHandles||size_t(link.route)>=document.graph.modulations.size())return {};
+    std::optional<MovementSample> movementOffset(const MovementLink& link){
+        if(!running||!link.lfo)return {};
         const auto it=handles.find(link.source);if(it==handles.end()||!it->second)return {};
-        return std::clamp(it->second->lfoOutput.load(std::memory_order_relaxed),-1.f,1.f)
-              *routeHandles->amounts[size_t(link.route)].load(std::memory_order_relaxed);
+        const auto& source=*it->second;
+        const float phase=source.lfoPhase.load(std::memory_order_relaxed);
+        if(phase<0)return {};
+        if(link.route>=0&&(!routeHandles||size_t(link.route)>=document.graph.modulations.size()))return {};
+        const float depth=link.route<0?1.f:routeHandles->amounts[size_t(link.route)].load(std::memory_order_relaxed);
+        return MovementSample{source.lfoOutput.load(std::memory_order_relaxed)*depth,phase,source.lfoRate.load(std::memory_order_relaxed)};
     }
     void rebindMovement(){
         synthPanel.bindMovement(document.graph);for(auto& card:hardware.modules)card->bindMovement(document.graph);
         if(!editor.current.empty())editor.bindMovement(document.graph);
+        for(const int route:bypassedRoutes)showMovementBypass(route,true);
     }
     void tickMovement(){
         synthPanel.tickMovement();
@@ -1258,6 +1342,13 @@ private:
         a.remove=[this,view,dest](const MovementLink& link){removeMovement(view,dest,link);};
         a.makeIndependent=[this,view,dest](const MovementLink& link){makeIndependent(view,dest,link);};
         a.setParameter=[this](const std::string& node,const std::string& key,float v){setParameter(node,key,v);rebindMovement();};
+        a.sample=[this](const MovementLink& link){return movementOffset(link);};
+        a.liveValue=[safe=SafePointer<Control>(control)]()->std::optional<float>{
+            if(!safe||!safe->live)return {};
+            return std::clamp(safe->modulatedValue(float(safe->slider.getValue()),*safe->live)+safe->cableOffset,
+                              safe->param.minimum,safe->param.maximum);
+        };
+        a.routed=handles.count(dest.node)&&bool(handles.at(dest.node));
         a.labelOf=[this](const Endpoint& e){return movementLabel(e);};
         a.format=[safe=SafePointer<Control>(control)](float v){return safe?safe->slider.getTextFromValue(v):String(v,3);};
         auto content=std::make_unique<MovementEditor>(dest,control->param,float(control->slider.getValue()),document.graph,links,others,std::move(a));
@@ -1274,7 +1365,15 @@ private:
             // A free-running sine at unit amplitude: the route's Depth is the only depth (design study).
             next.graph.nodes.push_back({source,"mod.lfo",{{"rate",.25f},{"depth",1.f},{"wave",0.f},{"retrigger",0.f}}});
         }
-        next.graph.modulations.push_back({{source,"out"},dest,defaultMovementAmount(dest.port)});
+        float amount=defaultMovementAmount(dest.port);
+        if(const auto* p=findParameter(modelOf(dest.node),dest.port)){
+            const float base=nodeParameter(next.graph,dest.node,dest.port,p->initial);
+            const float position=p->logarithmic && p->minimum>0?std::log(base/p->minimum)/std::log(p->maximum/p->minimum)
+                                                                :(base-p->minimum)/(p->maximum-p->minimum);
+            // Keep a new sweep within the available travel. At an endpoint a one-sided sweep is intentional.
+            if(position>0&&position<1)amount=std::min(amount,std::min(position,1-position));
+        }
+        next.graph.modulations.push_back({{source,"out"},dest,amount});
         if(!commit(std::move(next),selected))return;   // commit names the reason, e.g. a feedback loop
         message(movementLabel(dest)+" moves with LFO "+String(movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).back().number));
         reopenMovement(view,dest);
@@ -1293,6 +1392,15 @@ private:
         if(link.route<0||!routeHandles||size_t(link.route)>=document.graph.modulations.size())return;
         if(on)bypassedRoutes.insert(link.route);else bypassedRoutes.erase(link.route);
         routeHandles->amounts[size_t(link.route)]=on?0.f:document.graph.modulations[size_t(link.route)].amount;
+        showMovementBypass(link.route,on);
+    }
+    void showMovementBypass(int index,bool on){
+        const auto dest=document.graph.modulations[size_t(index)].destination;
+        for(auto view:{MovementView::panel,MovementView::rack,MovementView::focus})
+            if(auto* control=movementControl(view,dest)){
+                for(auto& route:control->links)if(route.route==index)route.bypassed=on;
+                control->repaint();
+            }
     }
     void removeMovement(MovementView view,const Endpoint& dest,const MovementLink& link){
         auto next=document;auto& g=next.graph;

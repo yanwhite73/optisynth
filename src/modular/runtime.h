@@ -3,6 +3,8 @@
 #include "sample.h"
 #include "spectral.h"
 #include "timing.h"
+#include <algorithm>
+#include <cmath>
 #include <array>
 #include <atomic>
 
@@ -18,6 +20,13 @@ struct Parameter {
     double step = .0001;
     std::vector<std::string> choices{}; // optional names for stepped values
 };
+inline float movementValue(const Parameter& p,float base,float offset) noexcept {
+    offset=std::clamp(offset,-1.f,1.f);
+    if(offset==0)return base;
+    const float value=p.logarithmic&&p.minimum>0?base*std::exp(offset*std::log(p.maximum/p.minimum))
+                                                :base+offset*(p.maximum-p.minimum);
+    return std::clamp(value,p.minimum,p.maximum);
+}
 struct Panel {
     std::string type, name, description, family;
     std::vector<Parameter> parameters;
@@ -27,7 +36,7 @@ const Panel& panel(const std::string& type);
 struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
     std::atomic<int> playhead{-1};
-    std::atomic<float> lfoOutput{0};
+    std::atomic<float> lfoPhase{-1}, lfoRate{0}, lfoOutput{0};
     std::array<std::atomic<int>,4> laneHeads{};
     std::atomic<int> cycle{0};
     std::atomic<bool> stepFired{false};

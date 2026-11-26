@@ -87,21 +87,34 @@ struct KnobLook : LookAndFeel_V4 {
 // A source keeps one colour wherever it moves a control, so shared motion is visible.
 inline Colour movementColour(int number){
     static const uint32 colours[]={0xff5fd0b5,0xfff2a65a,0xffb28cf2,0xfff27d9b,0xffa3d65c,0xff6cb4f5,0xffe9d25e,0xffef8a5b};
-    return Colour(colours[size_t(std::max(0,number-1))%8]);
+    if(number<=8)return Colour(colours[std::max(0,number-1)]);
+    return Colour::fromHSV(float(std::fmod((number-9)*0.61803398875+.58,1.0)),.74f,.94f,1.f);
 }
 // Movement created from a parameter owns its LFO; the id prefix marks that ownership in saved patches.
 inline bool privateMovementSource(const std::string& id){return id.rfind("move_",0)==0;}
+struct MovementSample {float offset, phase, rate;};
 struct MovementLink {
     std::string source;          // node id of the moving source
+    int shape=0;
     int number=0;                // LFO n, counted in patch order
     int route=-1;                // matrix route index; -1 when a CV cable carries it
     float amount=0;              // the route's signed amount (a fraction of the normalised range)
     float sourceDepth=1;         // the LFO's own Depth
-    bool lfo=false;
+    bool lfo=false,bypassed=false;
     std::vector<Endpoint> destinations;   // every parameter or input this source moves
     Colour colour() const {return lfo?movementColour(number):Colour(0xffc2c3bd);}
     String name() const {return lfo?"LFO "+String(number):String(source);}
 };
+// The matrix acts on the base value; modal cable CV is added after that clamp.
+inline std::pair<float,float> movementRange(const Parameter& p,float base,const std::vector<MovementLink>& links){
+    float matrix=0,cable=0;
+    for(const auto& link:links)if(!link.bypassed){
+        const float extent=std::abs(link.amount*link.sourceDepth);
+        if(link.route<0)cable+=extent;else matrix+=extent;
+    }
+    return {std::clamp(movementValue(p,base,-matrix)-cable,p.minimum,p.maximum),
+            std::clamp(movementValue(p,base,matrix)+cable,p.minimum,p.maximum)};
+}
 // Modal modules also take movement through their CV inputs (the 0.0.22 cables).
 inline std::string modalCvPort(const std::string& model,const std::string& param){
     if(model!="modal.voice"&&model!="modal.resonator")return {};
@@ -119,7 +132,7 @@ inline std::vector<MovementLink> movementLinks(const GraphSpec& graph,const std:
             if(n.type=="mod.lfo")++ordinal;
             if(n.id==source){link.lfo=n.type=="mod.lfo";link.number=ordinal;break;}
         }
-        if(link.lfo)link.sourceDepth=nodeParameter(graph,source,"depth",1);
+        if(link.lfo){link.sourceDepth=nodeParameter(graph,source,"depth",1);link.shape=int(nodeParameter(graph,source,"wave",0));}
         for(const auto& m:graph.modulations)if(m.source.node==source)link.destinations.push_back(m.destination);
         for(const auto& c:graph.connections)if(c.source.node==source)link.destinations.push_back(c.destination);
         links.push_back(std::move(link));
@@ -139,18 +152,31 @@ inline bool movableParameter(const std::string& model,const Parameter& p){
 }
 // Quiet outlined wave when free; filled in the source colour once something moves the control.
 struct MovementButton final : Button {
-    Colour legend=paper,fill=teal;bool assigned=false;int sources=0;
+    Colour legend=paper,fill=teal;bool assigned=false;int sources=0,number=0,shape=0;float phase=-1;
     MovementButton():Button("Movement"){setWantsKeyboardFocus(true);}
     void paintButton(Graphics& g,bool over,bool down) override {
         auto r=getLocalBounds().toFloat().reduced(1.5f,1.f);
         const float radius=r.getHeight()*.5f;
         if(assigned){g.setColour(fill.withMultipliedBrightness(down?.85f:1.f));g.fillRoundedRectangle(r,radius);}
         else{g.setColour(legend.withAlpha(over||down?.95f:.5f));g.drawRoundedRectangle(r,radius,1.f);}
-        Path wave;const auto x0=r.getX()+4,w=r.getWidth()-8-(sources>1?5.f:0.f),y=r.getCentreY(),h=r.getHeight()*.26f;
-        wave.startNewSubPath(x0,y);for(int i=1;i<=20;++i){const float t=float(i)/20;wave.lineTo(x0+t*w,y-std::sin(t*MathConstants<float>::twoPi)*h);}
+        Path wave;const auto x0=r.getX()+4,w=r.getWidth()-8-(assigned&&number>0?15.f:sources>1?5.f:0.f),y=r.getCentreY(),h=r.getHeight()*.26f;
+        auto waveY=[&](float t){
+            const float v=shape==1?1.f-4.f*std::abs(t-.5f):shape==2?2*t-1:shape==3?(t<.5f?1.f:-1.f):std::sin(t*MathConstants<float>::twoPi);
+            return y-v*h;
+        };
+        wave.startNewSubPath(x0,waveY(0));for(int i=1;i<=20;++i){const float t=float(i)/20;wave.lineTo(x0+t*w,waveY(t));}
         const auto mark=assigned?(fill.getPerceivedBrightness()>.55f?ink:paper):legend.withAlpha(over||down?1.f:.7f);
         g.setColour(mark);g.strokePath(wave,PathStrokeType(1.4f));
-        if(sources>1){g.fillEllipse(r.getRight()-6.5f,y-3.5f,2.5f,2.5f);g.fillEllipse(r.getRight()-6.5f,y+1,2.5f,2.5f);}
+        if(assigned&&number>0){
+            g.setFont(font(10.f).boldened());
+            g.drawText(String(number),r.toNearestInt().reduced(3,0),Justification::centredRight);
+            if(phase>=0){
+                const float px=x0+phase*w, py=waveY(phase);
+                g.setColour(ink);g.fillEllipse(px-2.8f,py-2.8f,5.6f,5.6f);
+                g.setColour(Colours::white);g.fillEllipse(px-1.8f,py-1.8f,3.6f,3.6f);
+            }
+        }
+        if(sources>1&&number==0){g.fillEllipse(r.getRight()-6.5f,y-3.5f,2.5f,2.5f);g.fillEllipse(r.getRight()-6.5f,y+1,2.5f,2.5f);}
         if(hasKeyboardFocus(false)){g.setColour(orange);g.drawRoundedRectangle(r.expanded(1),radius+1,1.2f);}
     }
 };
@@ -198,13 +224,16 @@ struct Control : juce::Component {
     MovementButton movement;bool movementAvailable=false;int badgeWidth=0;
     std::vector<MovementLink> links;
     std::function<void(Control&)> movementClicked;
-    std::function<std::optional<float>(const MovementLink&)> liveOffset;   // a route's current normalised contribution
-    std::optional<float> live;
+    std::function<std::optional<MovementSample>(const MovementLink&)> liveOffset;   // a route's current normalised contribution
+    std::optional<float> live;float cableOffset=0;
     void bindMovement(const std::string& model,const std::string& node,const GraphSpec& graph){
         const bool available=!isSwitch && slider.getSliderStyle()==Slider::RotaryHorizontalVerticalDrag && movableParameter(model,param);
         links=available?movementLinks(graph,model,node,param.id):std::vector<MovementLink>{};
         const String name=String(param.label);
         movement.legend=label.findColour(Label::textColourId);movement.assigned=!links.empty();movement.sources=int(links.size());
+        movement.shape=links.empty()?0:links.front().shape;
+        movement.number=links.empty()||!links.front().lfo?0:links.front().number;
+        movement.phase=-1;
         if(!links.empty())movement.fill=links.front().colour();
         String tip;
         if(links.empty())tip="Add movement to "+name+": a free-running LFO, edited here";
@@ -219,7 +248,7 @@ struct Control : juce::Component {
         movement.setTooltip(tip);movement.setTitle(links.empty()?"Add movement to "+name:"Edit "+name+" movement");
         movement.onClick=[this]{if(movementClicked)movementClicked(*this);};
         if(available!=movementAvailable){
-            movementAvailable=available;badgeWidth=available?24:0;
+            movementAvailable=available;badgeWidth=available?38:0;
             if(available)addAndMakeVisible(movement);else movement.setVisible(false);
             resized();
         }
@@ -229,17 +258,22 @@ struct Control : juce::Component {
     void tickMovement(){
         std::optional<float> next;
         if(!links.empty()&&liveOffset){
-            float sum=0;bool any=false;
-            for(const auto& link:links)if(auto v=liveOffset(link)){sum+=*v;any=true;}
+            float sum=0,cable=0;bool any=false;
+            float phase=-1;
+            for(const auto& link:links)if(auto v=liveOffset(link)){
+                if(link.route<0)cable+=v->offset;else sum+=v->offset;
+                any=true;
+                if(&link==&links.front())phase=v->phase;
+            }
+            if(movement.phase!=phase){movement.phase=phase;movement.repaint();}
             if(any)next=sum;
+            if(cableOffset!=cable){cableOffset=cable;repaint();}
         }
-        if(next.has_value()!=live.has_value()||(next&&std::abs(*next-*live)>.0005f)){live=next;repaint();}
+        if(next!=live){live=next;repaint();}
     }
     // The value the engine reaches for a normalised offset (Runtime::computeParameters).
     float modulatedValue(float base,float offset) const {
-        offset=std::clamp(offset,-1.f,1.f);
-        const float v=param.logarithmic&&param.minimum>0?base*std::exp(offset*std::log(param.maximum/param.minimum)):base+offset*(param.maximum-param.minimum);
-        return std::clamp(v,param.minimum,param.maximum);
+        return movementValue(param,base,offset);
     }
     float knobProportion(float v) const {return float(const_cast<Slider&>(slider).valueToProportionOfLength(v));}
     struct KnobGeometry{juce::Point<float> centre;float radius,start,end;};
@@ -255,18 +289,26 @@ struct Control : juce::Component {
         const auto k=knobGeometry();if(!k||links.empty())return;
         const float base=float(slider.getValue());int ring=0;
         auto angle=[&](float proportion){return k->start+std::clamp(proportion,0.f,1.f)*(k->end-k->start);};
-        for(const auto& link:links){
-            if(link.route<0||ring>=3)continue;
-            const float extent=std::abs(link.amount*link.sourceDepth);
-            const float lo=knobProportion(modulatedValue(base,-extent)),hi=knobProportion(modulatedValue(base,extent));
+        auto arcFor=[&](float low,float high,Colour colour){
+            const float lo=knobProportion(low),hi=knobProportion(high);
+            if(hi<=lo)return;
             const float radius=k->radius-1.5f-ring*3.2f;
-            Path arc;arc.addCentredArc(k->centre.x,k->centre.y,radius,radius,0,angle(lo),angle(std::max(hi,lo+.004f)),true);
+            Path arc;arc.addCentredArc(k->centre.x,k->centre.y,radius,radius,0,angle(lo),angle(hi),true);
             g.setColour(Colours::black.withAlpha(.35f));g.strokePath(arc,PathStrokeType(4.f,PathStrokeType::curved,PathStrokeType::rounded));
-            g.setColour(link.colour());g.strokePath(arc,PathStrokeType(2.6f,PathStrokeType::curved,PathStrokeType::rounded));
+            g.setColour(colour);g.strokePath(arc,PathStrokeType(2.6f,PathStrokeType::curved,PathStrokeType::rounded));
             ++ring;
+        };
+        if(links.size()>1){
+            const auto range=movementRange(param,base,links);
+            arcFor(range.first,range.second,Colours::white);
+        }
+        for(const auto& link:links){
+            if(link.bypassed||ring>=4)continue;
+            const float extent=std::abs(link.amount*link.sourceDepth);
+            arcFor(modulatedValue(base,-extent),modulatedValue(base,extent),link.colour());
         }
         if(live){
-            const float a=angle(knobProportion(modulatedValue(base,*live))),radius=k->radius-1.5f;
+            const float a=angle(knobProportion(std::clamp(modulatedValue(base,*live)+cableOffset,param.minimum,param.maximum))),radius=k->radius-1.5f;
             const juce::Point<float> p{k->centre.x+std::sin(a)*radius,k->centre.y-std::cos(a)*radius};
             g.setColour(ink);g.fillEllipse(p.x-3.4f,p.y-3.4f,6.8f,6.8f);
             g.setColour(Colours::white);g.fillEllipse(p.x-2.3f,p.y-2.3f,4.6f,4.6f);
@@ -526,7 +568,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     }
     // Movement on a parameter opens its anchored editor; liveOffset feeds the knob's effective-value tick.
     std::function<void(const std::string&,const std::string&)> openMovement;
-    std::function<std::optional<float>(const MovementLink&)> movementOffset;
+    std::function<std::optional<MovementSample>(const MovementLink&)> movementOffset;
     void bindMovement(const GraphSpec& graph){
         for(auto& k:knobs){
             k->movementClicked=[this](Control& c){if(openMovement)openMovement(instance,c.param.id);};

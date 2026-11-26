@@ -413,6 +413,8 @@ public:
             b.outputs[0][i]=v*values[1];phase+=values[0]/48000.;phase-=std::floor(phase);
         }
         freePhase=phase+noteOrigin;freePhase-=std::floor(freePhase);
+        controls->lfoPhase.store(float(phase),std::memory_order_relaxed);
+        controls->lfoRate.store(values[0],std::memory_order_relaxed);
         controls->lfoOutput.store(b.outputs[0][b.frames-1],std::memory_order_relaxed);
     }
 private:double freePhase=0,noteOrigin=0;

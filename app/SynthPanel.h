@@ -59,7 +59,7 @@ public:
     std::function<void(const std::string&,const std::string&,float)> changed;
     std::function<void(const std::string&)> openEditor;
     std::function<void(const std::string&,const std::string&)> openMovement;
-    std::function<std::optional<float>(const MovementLink&)> movementOffset;
+    std::function<std::optional<MovementSample>(const MovementLink&)> movementOffset;
     SynthPanelView(){face.owner=this;addAndMakeVisible(viewport);viewport.setViewedComponent(&face,false);viewport.setScrollBarsShown(true,false);viewport.setScrollBarThickness(10);}
     ~SynthPanelView() override {controls.clear();launchers.clear();sections.clear();viewport.setViewedComponent(nullptr,false);}
     void build(const RackDocument& d) {

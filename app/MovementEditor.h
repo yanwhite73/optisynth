@@ -16,10 +16,13 @@ struct MovementActions {
     std::function<void(const MovementLink&)> remove;
     std::function<void(const MovementLink&)> makeIndependent;
     std::function<void(const std::string&,const std::string&,float)> setParameter;   // the source's own settings
+    std::function<std::optional<MovementSample>(const MovementLink&)> sample;
+    std::function<std::optional<float>()> liveValue;
+    bool routed=true;
     std::function<String(const Endpoint&)> labelOf;
     std::function<String(float)> format;                             // destination value text
 };
-class MovementEditor final : public juce::Component {
+class MovementEditor final : public juce::Component, private Timer {
 public:
     static constexpr int width=470,pad=10,gap=6,knob=40;
     MovementEditor(const Endpoint& target,const Parameter& destination,float baseValue,const GraphSpec& graph,
@@ -43,7 +46,7 @@ public:
             };
         }
         int height=pad+22+gap;for(auto& r:rows)height+=r->height()+gap;height+=28+pad;
-        setSize(width,height);updateRange();
+        setSize(width,height);updateRange();timerCallback();startTimerHz(8);
     }
     ~MovementEditor() override {rows.clear();}
     void paint(Graphics& g) override {
@@ -56,7 +59,7 @@ public:
     }
     void resized() override {
         auto area=getLocalBounds().reduced(pad);
-        auto top=area.removeFromTop(22);title.setBounds(top.removeFromLeft(220));range.setBounds(top);
+        auto top=area.removeFromTop(22);title.setBounds(top.removeFromLeft(159));range.setBounds(top);
         area.removeFromTop(gap);
         for(auto& r:rows){r->setBounds(area.removeFromTop(r->height()));area.removeFromTop(gap);}
         FlexBox footer;footer.justifyContent=FlexBox::JustifyContent::flexStart;
@@ -66,23 +69,24 @@ public:
     }
     // The range the engine reaches with every route at its extreme, in the destination's units.
     void updateRange(){
-        float extent=0;
-        for(const auto& r:rows)if(r->link.route>=0)extent+=std::abs(r->link.amount*r->link.sourceDepth);
-        auto value=[&](float offset){
-            offset=std::clamp(offset,-1.f,1.f);
-            const float v=param.logarithmic&&param.minimum>0?base*std::exp(offset*std::log(param.maximum/param.minimum)):base+offset*(param.maximum-param.minimum);
-            return std::clamp(v,param.minimum,param.maximum);
-        };
+        for(size_t i=0;i<rows.size();++i){
+            links[i]=rows[i]->link;
+            links[i].bypassed=rows[i]->bypass.getToggleState();
+        }
+        const auto bounds=movementRange(param,base,links);
         auto text=[&](float v){return actions.format?actions.format(v):String(v,3);};
-        range.setText(text(base)+" base  /  "+text(value(-extent))+String::fromUTF8(" \xe2\x80\x93 ")+text(value(extent)),dontSendNotification);
+        rangeText=text(bounds.first)+String::fromUTF8(" \xe2\x80\x93 ")+text(bounds.second);
+        range.setText(rangeText,dontSendNotification);
     }
     Control* depthControl(size_t row) const {return row<rows.size()?rows[row]->depth.get():nullptr;}
+    Control* rateControl(size_t row) const {return row<rows.size()?rows[row]->rate.get():nullptr;}
     size_t rowCount() const {return rows.size();}
     void focusFirstDepth(){if(!rows.empty()&&rows.front()->depth)rows.front()->depth->slider.grabKeyboardFocus();}
 private:
     struct Row final : juce::Component {
         MovementEditor& owner;MovementLink link;Label name,role;
         std::unique_ptr<Control> depth,level,rate,shape,reset;
+        Label clock;
         TextButton bypass{"Bypass"},independent{"Make independent"},remove{"Remove"};
         Row(MovementEditor& editor,const MovementLink& l,const GraphSpec& graph):owner(editor),link(l){
             name.setText(link.name(),dontSendNotification);name.setFont(font(text::header).boldened());name.setColour(Label::textColourId,link.colour());
@@ -112,13 +116,16 @@ private:
                 const Parameter amount{"amount","Depth","",-1,1,0,false,.001};
                 depth=std::make_unique<Control>(amount,link.amount,[this](float v){
                     link.amount=v;owner.updateRange();if(owner.actions.setDepth)owner.actions.setDepth(link,v);},owner.look,paper);
-                depth->slider.setTooltip("This control's depth only. Negative moves it the opposite way");
+                depth->slider.textFromValueFunction=[](double v){return String(v*100.,1)+" %";};
+                depth->slider.valueFromTextFunction=[](const String& v){return v.getDoubleValue()*.01;};
+                depth->slider.updateText();
+                depth->slider.setTooltip("Percent of the full parameter range each side of its base. Negative reverses direction.");
                 addAndMakeVisible(*depth);
                 addAndMakeVisible(bypass);bypass.setClickingTogglesState(true);
                 bypass.setToggleState(owner.actions.bypassed&&owner.actions.bypassed(link),dontSendNotification);
                 bypass.setColour(TextButton::buttonOnColourId,orange);bypass.setColour(TextButton::textColourOnId,ink);
                 bypass.setTooltip("Hear the control without this movement; the depth is kept");
-                bypass.onClick=[this]{if(owner.actions.bypass)owner.actions.bypass(link,bypass.getToggleState());};
+                bypass.onClick=[this]{if(owner.actions.bypass)owner.actions.bypass(link,bypass.getToggleState());owner.updateRange();};
                 // A source saved before unit amplitude keeps its own level; show it rather than hide a second depth.
                 if(link.lfo&&std::abs(link.sourceDepth-1)>.0005f)level=sourceControl("depth","Source level");
             }else if(link.lfo)depth=sourceControl("depth","Level");
@@ -126,7 +133,16 @@ private:
                 rate=sourceControl("rate","Rate");
                 rate->slider.setTextValueSuffix({});
                 rate->slider.textFromValueFunction=[](double v){return String(v,v<1?3:v<10?2:1)+" Hz / "+(v<1?String(1/v,1)+" s":String(1000/v,0)+" ms");};
+                rate->slider.valueFromTextFunction=[](const String& text){
+                    const double v=text.getDoubleValue();
+                    if(v>0 && !text.containsIgnoreCase("Hz")){
+                        if(text.trimEnd().endsWithIgnoreCase("ms"))return 1000./v;
+                        if(text.trimEnd().endsWithIgnoreCase("s"))return 1./v;
+                    }
+                    return v;
+                };
                 rate->slider.updateText();
+                clock.setFont(font(text::label));clock.setColour(Label::textColourId,paper);addAndMakeVisible(clock);
                 shape=sourceControl("wave","Shape");reset=sourceControl("retrigger","Reset on note");
                 if(link.destinations.size()>1&&link.route>=0){
                     addAndMakeVisible(independent);independent.setTooltip("Copy this LFO so only this control follows the copy");
@@ -150,7 +166,7 @@ private:
             if(bypass.isVisible())buttons.items.add(FlexItem(bypass).withWidth(64).withHeight(20).withMargin({0,4,0,0}));
             buttons.performLayout(head.toFloat());
             name.setBounds(head.removeFromLeft(56));
-            area.removeFromTop(2);role.setBounds(area.removeFromTop(16));area.removeFromTop(4);
+            area.removeFromTop(2);auto description=area.removeFromTop(16);clock.setBounds(description.removeFromRight(116));role.setBounds(description);area.removeFromTop(4);
             Grid grid;grid.columnGap=Grid::Px(gap);
             const auto c=cells();
             for(auto* cell:c)grid.templateColumns.add(Grid::TrackInfo(Grid::Px(std::max(knob+14,cell->textWidth()+6))));
@@ -159,10 +175,23 @@ private:
             grid.performLayout(area.removeFromTop(cellHeight()));
         }
     };
+    void timerCallback() override {
+        const auto current=actions.liveValue?actions.liveValue():std::nullopt;
+        const auto display=current && actions.format?"Now "+actions.format(*current)+"   /   "+rangeText:rangeText;
+        range.setText(display,dontSendNotification);
+        for(auto& row:rows)if(row->link.lfo){
+            const auto sample=actions.sample?actions.sample(row->link):std::nullopt;
+            String state;
+            if(!actions.routed)state="No output route";
+            else if(sample)state="Running "+String(sample->rate,sample->rate<1?3:2)+" Hz";
+            else state="Audio idle";
+            row->clock.setText(state,dontSendNotification);
+        }
+    }
     friend struct Row;
     Endpoint dest;Parameter param;float base;std::vector<MovementLink> links;
     std::vector<std::pair<std::string,int>> available;MovementActions actions;
-    KnobLook look;Label title,range;std::vector<std::unique_ptr<Row>> rows;
+    KnobLook look;String rangeText;Label title,range;std::vector<std::unique_ptr<Row>> rows;
     TextButton addButton{"+ Add movement"},useButton{"Use existing LFO..."};
 };
 }

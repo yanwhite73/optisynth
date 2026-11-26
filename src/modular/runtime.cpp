@@ -165,11 +165,7 @@ void Runtime::computeParameters(NodeBuffers& node,int sampleOffset) noexcept {
     for(size_t i=0;i<node.parameters.size();++i){
         const auto& p=node.parameters[i];float base=node.base[i];
         base=std::isfinite(base)?std::clamp(base,p.minimum,p.maximum):p.initial;
-        const float offset=std::clamp(node.offset[i],-1.f,1.f);
-        float value=base;
-        if(offset!=0)value=p.logarithmic&&p.minimum>0?
-            base*std::exp(offset*std::log(p.maximum/p.minimum)):base+offset*(p.maximum-p.minimum);
-        node.effective[i]=std::clamp(value,p.minimum,p.maximum);
+        node.effective[i]=movementValue(p,base,node.offset[i]);
     }
 }
 
