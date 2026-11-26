@@ -428,6 +428,16 @@ public:
         auto oldRack=rackJSON({rackPreset(0),.25f,{}});oldRack.getDynamicObject()->setProperty("version",1);oldRack.getDynamicObject()->removeProperty("samples");require(render(readRack(oldRack).graph)==render(rackPreset(0)),"Version one rack import unchanged");
         auto v2=oldRack;v2.getDynamicObject()->setProperty("version",2);v2.getDynamicObject()->setProperty("samples",juce::var(new juce::DynamicObject));require(render(readRack(v2).graph)==render(rackPreset(0)),"Version two rack import unchanged");
         setSize(1440,940);require(commit(starterDocument(6,.25f),"spectral")&&loading,"Spectral prepares in worker");drain();
+        {
+            const Endpoint rate{"lfo","rate"};
+            auto oscillator=handles.at("lfo");
+            showMovement(MovementView::rack,rate);
+            require(loading && bool(pendingMovementEditor),"First click waits for the Spectral graph worker");
+            drain();closeMovement();
+            const auto links=movementLinks(document.graph,"mod.lfo",rate.node,rate.port);
+            require(links.size()==1 && handles.at("lfo")==oscillator,"Worker completes just one movement edit on the existing patch");
+            removeMovement(MovementView::rack,rate,links.front());drain();closeMovement();
+        }
         require(document.spectral.at("spectral")->tables[0]&&activeCount==2,"Whole Spectral and external LFO active");
         auto* spectralPanel=hardware.find("spectral");require(spectralPanel&&spectralPanel->jacks.size()==19&&spectralPanel->presetName.getText().contains("Spectral"),"Contextual full-engine panel");
         spectralPanel->section.setSelectedId(2,sendNotificationSync);capture("spectral-stereo.png");
@@ -651,6 +661,59 @@ public:
                 capture("movement-panel.png");setSize(1120,800);resized();capture("movement-minimum.png");setSize(1440,940);resized();
                 bright->liveOffset=synthPanel.movementOffset;bright->tickMovement();
             }
+            // Run the edited panel alongside an untouched copy. Muting the new
+            // route isolates playback continuity, including gates, voices and FX tails.
+            {
+                player.playing=false;player.releaseAll();player.note(48,false);
+                std::array<float,480> left{},right{},refLeft{},refRight{};
+                for(int i=0;i<4;++i){player.collect();player.render(left.data(),right.data(),480);}
+                require(loadFactory(24),"Load Prism for playing movement test");drain();
+                Player reference;
+                auto referenceRack=std::make_unique<Runtime>(document.graph);
+                auto baseline=referenceRack->controls("sequence")->performance;
+                reference.publish(std::move(referenceRack));reference.tempo=document.tempo;reference.gain=document.gain;
+                player.restart();reference.restart();
+                auto block=[&]{
+                    player.collect();reference.collect();
+                    player.render(left.data(),right.data(),480);reference.render(refLeft.data(),refRight.data(),480);
+                };
+                for(int i=0;i<60;++i)block();
+                player.playing=true;reference.playing=true;
+                auto initial=handles.at("sequence")->performance;
+                int compared=0;float peak=0;
+                auto compare=[&](int blocks){
+                    for(int i=0;i<blocks;++i){
+                        block();
+                        require(player.beat.load()==reference.beat.load(),"Movement altered the transport");
+                        auto seq=handles.at("sequence")->performance;
+                        for(int t=0;t<performanceTracks;++t)
+                            require(seq->steps[t].load()==baseline->steps[t].load() && seq->playing[t].load()==baseline->playing[t].load()
+                                    && seq->queued[t].load()==baseline->queued[t].load(),"Movement altered a playhead or queued pattern");
+                        for(size_t n=0;n<left.size();++n){
+                            peak=std::max(peak,std::abs(left[n]));
+                            require(std::abs(left[n]-refLeft[n])<.00001f && std::abs(right[n]-refRight[n])<.00001f,
+                                    "Movement interrupted the running phrase or tail");
+                        }
+                        compared+=480;
+                    }
+                };
+                compare(157);require(initial->steps[0].load()>0,"Exercise movement after step one");
+                initial->launch(0,1);baseline->launch(0,1);
+                synthPanel.control("blend","gain_b")->movement.onClick();closeMovement();compare(7);
+                synthPanel.control("body","fm_depth")->movement.onClick();closeMovement();drain();
+                auto added=synthPanel.control("body","fm_depth")->links.front();setMovementDepth(added,0);compare(29);
+                removeMovement(MovementView::panel,{"body","fm_depth"},added);closeMovement();compare(37);
+                // Rapid consecutive edits may coalesce before the audio thread sees either plan.
+                for(auto dest:{Endpoint{"body","fm_depth"},Endpoint{"strike","structure"}}){
+                    synthPanel.control(dest.node,dest.port)->movement.onClick();closeMovement();
+                    setMovementDepth(synthPanel.control(dest.node,dest.port)->links.front(),0);
+                }
+                compare(275);
+                require(handles.at("sequence")->performance==initial && peak>.001f,"Sequencer retained its playing instance");
+                require(directory.getChildFile("movement-playback.txt").replaceWithText("PASS: "+String(compared)
+                    +" stereo frames against uninterrupted Prism afterimage; assigned click, first assignment, removal, queued pattern and rapid edits.\n"),"Write movement playback receipt");
+                player.playing=false;
+            }
             // Recreate five independent movement assignments through the editor and drive the real player.
             require(loadFactory(24),"Independent movement fixture");drain();
             {
@@ -667,6 +730,8 @@ public:
                 for(size_t i=0;i<knobs.size();++i){
                     knobs[i]=synthPanel.control(targets[i].node,targets[i].port);
                     require(knobs[i]->links.size()==1 && ids.insert(knobs[i]->links[0].source).second,"Unique LFO for each Mallet control");
+                    require(knobs[i]->movement.caption()==String(knobs[i]->links[0].number) &&
+                            knobs[i]->movement.getY()>=Control::labelHeight,"Clickable source number sits beside the curve");
                     auto* box=showMovement(MovementView::panel,targets[i]);
                     require(box&&box->rateControl(0)&&box->depthControl(0),"Independent movement editor controls exist");
                     auto& rate=box->rateControl(0)->slider;
@@ -688,7 +753,8 @@ public:
                     player.collect();player.render(audioBlock.data(),int(audioBlock.size()));
                     tickMovement();
                     for(size_t i=0;i<knobs.size();++i){
-                        auto* c=knobs[i];const float phase=c->movement.phase;
+                        auto* c=knobs[i];const auto source=movementOffset(c->links.front());
+                        const float phase=source?source->phase:-1;
                         require(c->live.has_value() && phase>=0,"Engine must reach each Mallet marker");
                         if(frame){
                             const float delta=phase-prev[i];cycles[i]+=delta<0?delta+1:delta;
@@ -1074,7 +1140,7 @@ private:
     TextButton prevPreset{String::fromUTF8("\xe2\x80\xb9")},nextPreset{String::fromUTF8("\xe2\x80\xba")},favouriteButton{starOff},savePreset{"Save"};
     TextButton panelViewButton{"Panel"},modularViewButton{"Modular"},viewMenu{String::fromUTF8("\xe2\x96\xbe")};
     TextButton zoomOut{String::fromUTF8("\xe2\x88\x92")},zoomLabel{"Normal"},zoomIn{"+"},zoomFit{"Fit"};
-    std::string currentView="modular",presetKey,pendingPreset;bool presetDirty=false;
+    std::string currentView="modular",presetKey,pendingPreset;bool pendingMovement=false;bool presetDirty=false;
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
     std::unique_ptr<FileChooser> chooser;
@@ -1312,14 +1378,17 @@ private:
         if(rackView.isShowing())for(auto& card:hardware.modules)card->tickMovement();
         if(editor.isShowing())editor.tickMovement();
     }
+    std::optional<std::pair<MovementView,Endpoint>> pendingMovementEditor;
     int movementGeneration=0;
     // Hide at once so no later capture or click meets a box that is only queued for deletion.
-    void closeMovement(){++movementGeneration;if(movementBox){movementBox->setVisible(false);movementBox->dismiss();}movementBox=nullptr;}
+    void closeMovement(){pendingMovementEditor.reset();++movementGeneration;if(movementBox){movementBox->setVisible(false);movementBox->dismiss();}movementBox=nullptr;}
     // Structural edits rebuild the panel; reopen the editor on the rebuilt control unless closed meanwhile.
     void reopenMovement(MovementView view,const Endpoint& dest){
         closeMovement();
+        if(loading&&pendingMovement){pendingMovementEditor.emplace(view,dest);return;}
         MessageManager::callAsync([safe=SafePointer<RackSynth>(this),view,dest,generation=movementGeneration]{
-            if(safe&&safe->movementGeneration==generation)safe->showMovement(view,dest);});
+            if(safe&&safe->movementGeneration==generation &&
+               !movementLinks(safe->document.graph,safe->modelOf(dest.node),dest.node,dest.port).empty())safe->showMovement(view,dest);});
     }
     MovementEditor* showMovement(MovementView view,const Endpoint& dest){
         closeMovement();
@@ -1374,8 +1443,8 @@ private:
             if(position>0&&position<1)amount=std::min(amount,std::min(position,1-position));
         }
         next.graph.modulations.push_back({{source,"out"},dest,amount});
-        if(!commit(std::move(next),selected))return;   // commit names the reason, e.g. a feedback loop
-        message(movementLabel(dest)+" moves with LFO "+String(movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).back().number));
+        if(!commit(std::move(next),selected,{},true))return;   // commit names the reason, e.g. a feedback loop
+        if(!loading)message(movementLabel(dest)+" moves with LFO "+String(movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).back().number));
         reopenMovement(view,dest);
     }
     void setMovementDepth(const MovementLink& link,float v){
@@ -1422,7 +1491,7 @@ private:
             g.modulations.erase(std::remove_if(g.modulations.begin(),g.modulations.end(),[&](const Modulation& m){return m.destination.node==link.source;}),g.modulations.end());
             g.connections.erase(std::remove_if(g.connections.begin(),g.connections.end(),[&](const Connection& c){return c.destination.node==link.source;}),g.connections.end());
         }
-        if(!commit(std::move(next),selected))return;
+        if(!commit(std::move(next),selected,{},true))return;
         message(link.name()+" no longer moves "+movementLabel(dest));
         if(!movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).empty())reopenMovement(view,dest);else closeMovement();
     }
@@ -1447,7 +1516,7 @@ private:
         }
         for(auto c:graph.connections)if(c.destination.node==link.source){c.destination.node=id;next.graph.connections.push_back(c);}
         for(auto m:graph.modulations)if(m.destination.node==link.source){m.destination.node=id;next.graph.modulations.push_back(m);}
-        if(!commit(std::move(next),selected))return;
+        if(!commit(std::move(next),selected,{},true))return;
         message(movementLabel(dest)+" now has its own LFO");
         reopenMovement(view,dest);
     }
@@ -1527,18 +1596,19 @@ private:
         });
     }
     // presetLoad: the preset key when this commit loads a preset (applies its view; clears the modified mark).
-    bool commit(RackDocument next,const std::string& preferred,const std::string& presetLoad={}) {
+    bool commit(RackDocument next,const std::string& preferred,const std::string& presetLoad={},bool movementEdit=false) {
         cancelLoading();const auto target=preferred;
         try {
             validateRack(next.graph);pruneSampleReferences(next);prunePanel(next);pruneRows(next);
-            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;pendingPreset=presetLoad;message("Preparing patch... current sound stays ready");return true;}
-            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target,presetLoad);return true;
+            if(needsSamples(next)){sampleLoader.submit(std::move(next),target);loading=true;pendingPreset=presetLoad;pendingMovement=movementEdit;message("Preparing patch... current sound stays ready");return true;}
+            prepareSamples(next);auto runtime=std::make_unique<Runtime>(next.graph,sampleBank(next),next.spectral);install(std::move(next),std::move(runtime),target,presetLoad,movementEdit);return true;
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
     }
-    void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target,const std::string& presetLoad={}) {
+    void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target,const std::string& presetLoad={},bool movementEdit=false) {
+        if(movementEdit)runtime->prepareMovementEdit(handles);
         std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
         routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());bypassedRoutes.clear();
-        player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
+        player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime),movementEdit);
         player.tempo.store(document.tempo);tempo.setValue(document.tempo,dontSendNotification);
         if(!presetLoad.empty()){presetKey=presetLoad;presetDirty=false;}else presetDirty=true;
         refresh(target);if(!presetLoad.empty())applyViewPolicy();
@@ -1546,11 +1616,15 @@ private:
         if(matrixWindow)matrixWindow->editor->refresh(document);
         message(currentView=="panel"?"Ready - play the keyboard and shape the sound on the panel":"Ready - select a module to edit");updatePresetDisplay();
     }
-    void cancelLoading(){if(loading){sampleLoader.cancel();loading=false;pendingPreset.clear();message("Pending patch load cancelled by edit");}}
+    void cancelLoading(){if(loading){pendingMovementEditor.reset();pendingMovement=false;sampleLoader.cancel();loading=false;pendingPreset.clear();message("Pending patch load cancelled by edit");}}
     void collectSamples(){if(auto r=sampleLoader.take()){
         loading=false;if(!r->error.empty())message(String("Patch unchanged: ")+r->error,true);
-        else install(std::move(r->document),std::move(r->runtime),r->preferred,pendingPreset);
-        pendingPreset.clear();
+        else{
+            auto reopen=std::exchange(pendingMovementEditor,{});
+            install(std::move(r->document),std::move(r->runtime),r->preferred,pendingPreset,pendingMovement);
+            if(reopen)reopenMovement(reopen->first,reopen->second);
+        }
+        pendingMovementEditor.reset();pendingMovement=false;pendingPreset.clear();
     }}
     void loadSample(const std::string& id,const File& file){
         auto next=document;

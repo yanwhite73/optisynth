@@ -7,6 +7,7 @@
 #include <cmath>
 #include <array>
 #include <atomic>
+#include <map>
 
 namespace optisynth {
 class PerformanceExchange;
@@ -83,6 +84,10 @@ public:
     void render(float* out, int frames, Note note) noexcept;
     // keys: optional keyboard note events for a voice group, applied in the first quantum.
     void render(float* left,float* right,int frames,Note note,const ClockFrame* clockFrames=nullptr,const NoteEventBlock* keys=nullptr) noexcept;
+    // Called on the UI thread for a movement edit within the same patch.
+    void prepareMovementEdit(const std::map<std::string,std::shared_ptr<Controls>>& existing);
+    // Called once at the audio block boundary. All lookup/storage was prepared off-thread.
+    void continueMovementFrom(Runtime& previous) noexcept;
     SampleClock clock; // offline default; Player supplies the shared transport
     std::shared_ptr<Controls> controls(const std::string& node) const;
     SpectralBank spectralBank() const;
@@ -94,6 +99,7 @@ public:
     int awakeVoices() const noexcept { int n=0;for(const auto& s:slots_)n+=s.awake;return n; }
 private:
     struct NodeBuffers {
+        std::unique_ptr<PreparedModule> owner;
         AudioModule* module = nullptr;
         double* lfoPhase = nullptr;
         std::vector<std::array<float, quantum>> outputs;
@@ -136,7 +142,9 @@ private:
     VoiceMixer* voiceMixer_=nullptr;
     std::vector<char> voiceNode_;
     std::vector<std::vector<NodeBuffers>> voiceCopies_;
-    std::vector<std::unique_ptr<PreparedModule>> voiceModules_;
+    std::map<const Controls*,int> continuingNodes_;
+    friend class Player;
+    uint64_t patchGeneration_=0;
     std::array<VoiceSlot,maximumVoices> slots_{};
     std::array<Note,maximumVoices> voiceStart_{};
     std::array<std::array<VoiceChange,32>,maximumVoices> changes_{};

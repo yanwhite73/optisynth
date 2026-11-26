@@ -88,6 +88,29 @@ void sequencerChecks(){
     auto removed=instrumentPatch("osc.variable","spectral.adsr","filter.bypass",true,false);
     player.publish(std::make_unique<Runtime>(removed));allocations=0;watchAllocations=true;player.render(left.data(),48000);watchAllocations=false;
     check(allocations==0&&std::abs(left.back())<1e-8,"Removing sequencer retires note owners without allocation or stuck note");player.collect();
+    {
+        auto graph=sequencerPatch(0);
+        Player edited,baseline;
+        auto original=std::make_unique<Runtime>(graph);
+        std::map<std::string,std::shared_ptr<Controls>> handles;
+        for(const auto& node:graph.nodes)handles[node.id]=original->controls(node.id);
+        edited.publish(std::move(original));baseline.publish(std::make_unique<Runtime>(graph));
+        edited.playing=true;baseline.playing=true;
+        std::array<float,480> actual{},expected{};
+        for(int i=0;i<79;++i){edited.render(actual.data(),480);baseline.render(expected.data(),480);}
+        graph.nodes.push_back({"movement","mod.lfo",{}});
+        graph.modulations.push_back({{"movement","out"},{"source","shape"},0});
+        auto updated=std::make_unique<Runtime>(graph);updated->prepareMovementEdit(handles);
+        edited.publish(std::move(updated),true);
+        bool identical=true;allocations=0;watchAllocations=true;
+        for(int i=0;i<127;++i){
+            edited.render(actual.data(),480);baseline.render(expected.data(),480);
+            identical=identical&&actual==expected;
+        }
+        watchAllocations=false;
+        check(allocations==0,"Movement handover and following render allocate nothing on the audio thread");
+        check(identical,"Held sequencer notes and oscillator state are sample-identical across a zero-depth movement edit");
+    }
     auto dormant=removed;dormant.nodes.push_back({"unpatched","seq.stage",{}});Runtime unused(dormant);
     check(!unused.controls("unpatched"),"Unrouted sequencer is not constructed");
 }

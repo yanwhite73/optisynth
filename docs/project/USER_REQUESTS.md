@@ -1286,3 +1286,15 @@ the depth scale is very weird as well
 ```text
 range might not be correct for the way lfo is drawn
 ```
+
+## 133 — Preserve sequencer playback when clicking movement
+
+```text
+clicking on an lfo should not restart the sequencer
+```
+
+## 134 — Put the LFO number beside the parameter curve
+
+```text
+its not good ui to have lfo visual feedback in 2 places, just the param curve is fine, but put the number next to that
+```

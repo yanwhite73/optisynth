@@ -1448,3 +1448,14 @@ The native check now creates independent movements from the Mallet panel, sets t
 In the eight-second test the measured knob spans (fraction of rotary travel) were Hardness 0.0000–0.6050, Strike 0.0300–0.2700, Material 0.0604–0.2996, Brightness 0.3400–0.5800 and Colour Rate 0.4784–0.5061. Hardness was at zero on 102/240 frames. For a two-second phrase the per-route bypass RMS differences were respectively 0.04495616, 0.00181198, 0.00352389, 0.00271739 and 0.00009896. The test checks every measured span lies within the displayed arc. The offline reproduction and image captures are in `build/ui-review-132-final/`.
 
 0.0.33 installed in the canonical Release app. Native UI suite passed. Regular and address/undefined-behaviour sanitizer runs passed 1,194 core, 28 graph, 427 modular and 47 timing checks. The importer and renderer suites passed. Delivered executable SHA-256: `86957438d2f42facc94c76056949e601e884d492fe165438d189e97e4fa41320`.
+
+
+## Requests 133–134 — Movement edits during sequencing
+
+Opening an assigned LFO uses the existing editor state. A first click on an empty wave also adds a module and route. The old graph publication discarded the running sequencer instance, voices and tails, even as the transport continued counting beats. Testing only the beat counter would miss the audible interruption.
+
+For movement edits the UI prepares the new routing and retains matching control handles. At the next block boundary the engine transfers the existing processors, allocator and held-note state into those routes. Old graph storage is retired off the audio thread. A patch generation distinguishes a movement edit from an actual patch change, including when several pending edits coalesce. A background-prepared rack reopens the requested editor after installation.
+
+The knob arc carries the moving target. Its adjacent static number opens the editor. The former second animated waveform is removed. Qualification compares simultaneous stereo renders and per-track playback state during edits, tests a held-note handover with allocation monitoring under sanitizers, and inspects the rendered Mallet panel.
+
+Installed 0.0.34 in the canonical Release app. The native editor suite and the background Spectral movement edit passed. Regular and ASan/UBSan runs passed 1,194 core, 28 graph, 429 modular and 47 timing checks. Both Python suites passed. The installed binary matches the candidate, SHA-256 `784b005d6b58074271689506d8764d6f7c6836883648e4e7db469b0268bf6bb6`.

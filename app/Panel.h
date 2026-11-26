@@ -95,7 +95,6 @@ inline bool privateMovementSource(const std::string& id){return id.rfind("move_"
 struct MovementSample {float offset, phase, rate;};
 struct MovementLink {
     std::string source;          // node id of the moving source
-    int shape=0;
     int number=0;                // LFO n, counted in patch order
     int route=-1;                // matrix route index; -1 when a CV cable carries it
     float amount=0;              // the route's signed amount (a fraction of the normalised range)
@@ -132,7 +131,7 @@ inline std::vector<MovementLink> movementLinks(const GraphSpec& graph,const std:
             if(n.type=="mod.lfo")++ordinal;
             if(n.id==source){link.lfo=n.type=="mod.lfo";link.number=ordinal;break;}
         }
-        if(link.lfo){link.sourceDepth=nodeParameter(graph,source,"depth",1);link.shape=int(nodeParameter(graph,source,"wave",0));}
+        if(link.lfo)link.sourceDepth=nodeParameter(graph,source,"depth",1);
         for(const auto& m:graph.modulations)if(m.source.node==source)link.destinations.push_back(m.destination);
         for(const auto& c:graph.connections)if(c.source.node==source)link.destinations.push_back(c.destination);
         links.push_back(std::move(link));
@@ -150,34 +149,25 @@ inline bool movableParameter(const std::string& model,const Parameter& p){
     return p.choices.empty() && p.step<1 && model!="spectral.engine" && !isSequencer(model)
         && model!="seq.performance" && p.maximum>p.minimum;
 }
-// Quiet outlined wave when free; filled in the source colour once something moves the control.
+// An empty wave adds movement. An assigned control has a static source number beside its arc.
 struct MovementButton final : Button {
-    Colour legend=paper,fill=teal;bool assigned=false;int sources=0,number=0,shape=0;float phase=-1;
+    Colour legend=paper,fill=teal;bool assigned=false;int sources=0,number=0;
     MovementButton():Button("Movement"){setWantsKeyboardFocus(true);}
+    String caption() const {return (number>0?String(number):String("CV"))+(sources>1?"+":"");}
     void paintButton(Graphics& g,bool over,bool down) override {
-        auto r=getLocalBounds().toFloat().reduced(1.5f,1.f);
-        const float radius=r.getHeight()*.5f;
-        if(assigned){g.setColour(fill.withMultipliedBrightness(down?.85f:1.f));g.fillRoundedRectangle(r,radius);}
-        else{g.setColour(legend.withAlpha(over||down?.95f:.5f));g.drawRoundedRectangle(r,radius,1.f);}
-        Path wave;const auto x0=r.getX()+4,w=r.getWidth()-8-(assigned&&number>0?15.f:sources>1?5.f:0.f),y=r.getCentreY(),h=r.getHeight()*.26f;
-        auto waveY=[&](float t){
-            const float v=shape==1?1.f-4.f*std::abs(t-.5f):shape==2?2*t-1:shape==3?(t<.5f?1.f:-1.f):std::sin(t*MathConstants<float>::twoPi);
-            return y-v*h;
-        };
-        wave.startNewSubPath(x0,waveY(0));for(int i=1;i<=20;++i){const float t=float(i)/20;wave.lineTo(x0+t*w,waveY(t));}
-        const auto mark=assigned?(fill.getPerceivedBrightness()>.55f?ink:paper):legend.withAlpha(over||down?1.f:.7f);
-        g.setColour(mark);g.strokePath(wave,PathStrokeType(1.4f));
-        if(assigned&&number>0){
-            g.setFont(font(10.f).boldened());
-            g.drawText(String(number),r.toNearestInt().reduced(3,0),Justification::centredRight);
-            if(phase>=0){
-                const float px=x0+phase*w, py=waveY(phase);
-                g.setColour(ink);g.fillEllipse(px-2.8f,py-2.8f,5.6f,5.6f);
-                g.setColour(Colours::white);g.fillEllipse(px-1.8f,py-1.8f,3.6f,3.6f);
-            }
+        auto r=getLocalBounds().toFloat().reduced(1,1);
+        if(assigned){
+            g.setColour(fill.withMultipliedBrightness(down?.85f:1.f));g.fillRoundedRectangle(r,4);
+            g.setColour(fill.getPerceivedBrightness()>.55f?ink:paper);g.setFont(font(text::label).boldened());
+            g.drawText(caption(),r.toNearestInt(),Justification::centred);
+        }else{
+            g.setColour(legend.withAlpha(over||down?.95f:.55f));g.drawRoundedRectangle(r,r.getHeight()*.5f,1);
+            Path wave;wave.startNewSubPath(r.getX()+3,r.getCentreY());
+            for(int i=1;i<=20;++i){const float t=i/20.f;
+                wave.lineTo(r.getX()+3+t*(r.getWidth()-6),r.getCentreY()-std::sin(t*MathConstants<float>::twoPi)*r.getHeight()*.22f);}
+            g.strokePath(wave,PathStrokeType(1.3f));
         }
-        if(sources>1&&number==0){g.fillEllipse(r.getRight()-6.5f,y-3.5f,2.5f,2.5f);g.fillEllipse(r.getRight()-6.5f,y+1,2.5f,2.5f);}
-        if(hasKeyboardFocus(false)){g.setColour(orange);g.drawRoundedRectangle(r.expanded(1),radius+1,1.2f);}
+        if(hasKeyboardFocus(false)){g.setColour(orange);g.drawRoundedRectangle(r,4,1);}
     }
 };
 // One parameter: label, knob (or trim slider / switch) and value, stacked tightly.
@@ -231,9 +221,7 @@ struct Control : juce::Component {
         links=available?movementLinks(graph,model,node,param.id):std::vector<MovementLink>{};
         const String name=String(param.label);
         movement.legend=label.findColour(Label::textColourId);movement.assigned=!links.empty();movement.sources=int(links.size());
-        movement.shape=links.empty()?0:links.front().shape;
         movement.number=links.empty()||!links.front().lfo?0:links.front().number;
-        movement.phase=-1;
         if(!links.empty())movement.fill=links.front().colour();
         String tip;
         if(links.empty())tip="Add movement to "+name+": a free-running LFO, edited here";
@@ -248,10 +236,10 @@ struct Control : juce::Component {
         movement.setTooltip(tip);movement.setTitle(links.empty()?"Add movement to "+name:"Edit "+name+" movement");
         movement.onClick=[this]{if(movementClicked)movementClicked(*this);};
         if(available!=movementAvailable){
-            movementAvailable=available;badgeWidth=available?38:0;
+            movementAvailable=available;badgeWidth=available?24:0;
             if(available)addAndMakeVisible(movement);else movement.setVisible(false);
-            resized();
         }
+        resized();
         if(links.empty())live.reset();
         movement.repaint();repaint();
     }
@@ -259,13 +247,10 @@ struct Control : juce::Component {
         std::optional<float> next;
         if(!links.empty()&&liveOffset){
             float sum=0,cable=0;bool any=false;
-            float phase=-1;
             for(const auto& link:links)if(auto v=liveOffset(link)){
                 if(link.route<0)cable+=v->offset;else sum+=v->offset;
                 any=true;
-                if(&link==&links.front())phase=v->phase;
             }
-            if(movement.phase!=phase){movement.phase=phase;movement.repaint();}
             if(any)next=sum;
             if(cableOffset!=cable){cableOffset=cable;repaint();}
         }
@@ -367,9 +352,17 @@ struct Control : juce::Component {
             return;
         }
         if(slider.getTextBoxWidth()!=getWidth())slider.setTextBoxStyle(Slider::TextBoxBelow,false,getWidth(),valueHeight);
-        const int buttonWidth=badgeWidth;
-        if(movementAvailable)movement.setBounds(getWidth()-buttonWidth,0,buttonWidth,labelHeight);
-        label.setBounds(0,0,getWidth()-buttonWidth,labelHeight);slider.setBounds(0,labelHeight-1,getWidth(),getHeight()-labelHeight+1);
+        const int addWidth=movement.assigned?0:badgeWidth;
+        label.setBounds(0,0,getWidth()-addWidth,labelHeight);
+        slider.setBounds(0,labelHeight-1,getWidth(),getHeight()-labelHeight+1);
+        if(!movementAvailable)return;
+        if(!movement.assigned){movement.setBounds(getWidth()-addWidth,0,addWidth,labelHeight);return;}
+        if(const auto k=knobGeometry()){
+            const int width=8+int(std::ceil(GlyphArrangement::getStringWidth(font(text::label).boldened(),movement.caption())));
+            // The top-right corner is outside the circular track and inside this control.
+            const int x=std::clamp(int(k->centre.x+.75f*k->radius),0,std::max(0,getWidth()-width));
+            movement.setBounds(x,labelHeight,width,labelHeight);
+        }
     }
 };
 struct Jack : Button {

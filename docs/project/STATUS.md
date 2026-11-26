@@ -1,5 +1,11 @@
 # Optisynth status — 26 November 2026
 
+## 0.0.34 — Edit LFOs during a playing pattern
+
+Opening or assigning movement during playback preserves the running sequencers, held notes, pending pattern launches and effect tails. The assigned LFO number sits beside the knob's modulation arc. Click the number to edit it. The white marker on the arc is the single live display on the knob.
+
+The native playback test compares Prism afterimage with an untouched copy for 242,400 stereo frames. It opens an existing assignment and adds and removes zero-depth assignments mid-phrase, including two edits before the next audio callback. It compares all four track positions and queued patterns, and both audio channels to within 0.00001 per sample. A separate mono sequencer test requires sample-identical audio and zero audio-thread allocations during the handover.
+
 ## 0.0.33 — Independent movement on the Mallet panel
 
 Assigned controls show the LFO number and its phase on the wave button. The large knob tracks the bounded destination. Open movement to see the running rate, current target, range, and signed depth in percent. LFOs 3 and 11 have distinct colours. New assignments start within the available travel when the knob has room on both sides.

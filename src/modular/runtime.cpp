@@ -46,8 +46,11 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
     const int count=int(graph_.modules.size());
     nodes_.resize(size_t(count));
     auto typeOf=[&](int i)->const std::string&{return spec.nodes[size_t(graph_.plan.nodes[size_t(i)])].type;};
-    for(int i=0;i<count;++i)
-        prepareBuffers(nodes_[size_t(i)],dynamic_cast<AudioModule*>(graph_.modules[size_t(i)].get()),findType(registry,typeOf(i)),typeOf(i));
+    for(int i=0;i<count;++i){
+        auto& node=nodes_[size_t(i)];
+        node.owner=std::move(graph_.modules[size_t(i)]);
+        prepareBuffers(node,dynamic_cast<AudioModule*>(node.owner.get()),findType(registry,typeOf(i)),typeOf(i));
+    }
 
     // Voice group: everything feeding the voice mixer through audio/control cables
     // runs once per voice, except modules that are inherently global.
@@ -91,8 +94,9 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
             voiceCopies_[size_t(i)].resize(maximumVoices-1);
             for(int v=1;v<maximumVoices;++v){
                 PrepareContext context{48000,quantum,Scope::Voice,v};
-                voiceModules_.push_back(type.create(node,context));
-                auto* module=dynamic_cast<AudioModule*>(voiceModules_.back().get());
+                auto& copy=voiceCopies_[size_t(i)][size_t(v-1)];
+                copy.owner=type.create(node,context);
+                auto* module=dynamic_cast<AudioModule*>(copy.owner.get());
                 if(!module)throw std::invalid_argument("Module has no audio implementation");
                 module->controls=nodes_[size_t(i)].module->controls;
                 prepareBuffers(voiceCopies_[size_t(i)][size_t(v-1)],module,type,node.type);
@@ -147,6 +151,44 @@ Runtime::Runtime(const GraphSpec& spec,const SampleBank& samples,const SpectralB
 void Runtime::render(float* out, int frames, Note note) noexcept {
     std::array<float,quantum> right;
     while(frames>0){const int n=std::min(frames,quantum);render(out,right.data(),n,note);note.trigger=false;out+=n;frames-=n;}
+}
+
+void Runtime::prepareMovementEdit(const std::map<std::string,std::shared_ptr<Controls>>& existing){
+    for(size_t i=0;i<nodes_.size();++i){
+        const auto& id=spec_.nodes[size_t(graph_.plan.nodes[i])].id;
+        const auto found=existing.find(id);
+        if(found==existing.end()||!found->second)continue;
+        nodes_[i].module->controls=found->second;
+        if(voiceNode_[i])for(auto& copy:voiceCopies_[i])copy.module->controls=found->second;
+        continuingNodes_.emplace(found->second.get(),int(i));
+    }
+}
+
+void Runtime::continueMovementFrom(Runtime& previous) noexcept {
+    // Keep the new graph's wiring and buffers. Move the sounding processors into
+    // those buffers; their unused replacements retire with the old graph on the UI thread.
+    auto resume=[](NodeBuffers& dest,NodeBuffers& source){
+        dest.owner.swap(source.owner);
+        std::swap(dest.module,source.module);
+        std::swap(dest.lfoPhase,source.lfoPhase);
+        if(dest.noteInput){dest.held=source.held;dest.routedNote=source.routedNote;}
+        std::copy_n(source.base.data(),dest.parameters.size(),dest.base.data());
+    };
+    for(size_t i=0;i<previous.nodes_.size();++i){
+        auto& source=previous.nodes_[i];
+        const auto match=continuingNodes_.find(source.module->controls.get());
+        if(match==continuingNodes_.end())continue;
+        const auto dest=size_t(match->second);
+        resume(nodes_[dest],source);
+        if(voiceNode_[dest]&&previous.voiceNode_[i])
+            for(size_t v=0;v<voiceCopies_[dest].size();++v)resume(voiceCopies_[dest][v],previous.voiceCopies_[i][v]);
+        if(int(dest)==mixer_)std::swap(voiceMixer_,previous.voiceMixer_);
+    }
+    slots_=previous.slots_;
+    voiceClock_=previous.voiceClock_;
+    tuning_=previous.tuning_;
+    tuningScale_=previous.tuningScale_;
+    tuningRoot_=previous.tuningRoot_;
 }
 
 void Runtime::computeParameters(NodeBuffers& node,int sampleOffset) noexcept {

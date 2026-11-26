@@ -11,7 +11,11 @@ namespace optisynth {
 class Player {
 public:
     ~Player() { delete active_;delete fading_;delete pending_.load();delete retired_.load(); }
-    void publish(std::unique_ptr<Runtime> next) { delete pending_.exchange(next.release()); collect(); }
+    void publish(std::unique_ptr<Runtime> next,bool movementEdit=false) {
+        if(!movementEdit)++generation_;
+        next->patchGeneration_=generation_;
+        delete pending_.exchange(next.release());collect();
+    }
     void collect() { delete retired_.exchange(nullptr); }
     // UI thread only. A packed event prevents torn pitch/gate/sequence reads.
     void note(int midi,bool gate) {
@@ -54,10 +58,16 @@ public:
             drainKeys();
             if(!fading_ && !retired_.load(std::memory_order_acquire)) {
                 if(auto* next=pending_.exchange(nullptr,std::memory_order_acq_rel)) {
-                    fading_=active_;active_=next;fade_=0;note.trigger=note.gate;
-                    // The new plan starts with no voices: hand it every key still held.
-                    keys_.begin(uint32_t(count));
-                    for(int k=0;k<128;++k)if(held_[size_t(k)]>0)keys_.push({0,1,uint64_t(k)+1,NoteEventKind::On,k,held_[size_t(k)]});
+                    if(active_ && active_->patchGeneration_==next->patchGeneration_){
+                        next->continueMovementFrom(*active_);
+                        retired_.store(active_,std::memory_order_release);
+                        active_=next;
+                    }else{
+                        fading_=active_;active_=next;fade_=0;note.trigger=note.gate;
+                        // A new patch receives every key still held.
+                        keys_.begin(uint32_t(count));
+                        for(int k=0;k<128;++k)if(held_[size_t(k)]>0)keys_.push({0,1,uint64_t(k)+1,NoteEventKind::On,k,held_[size_t(k)]});
+                    }
                 }
             }
             std::fill_n(output,count,0.f);
@@ -119,6 +129,7 @@ private:
     NoteEventBlock keys_;
     std::atomic<Runtime*> pending_{nullptr},retired_{nullptr};
     Runtime *active_=nullptr,*fading_=nullptr;
+    uint64_t generation_=0; // UI producer only
     SampleClock clock_;
     std::atomic<uint64_t> restart_{0};
     uint64_t seenRestart_=0;float lastTempo_=120;
