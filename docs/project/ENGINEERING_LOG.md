@@ -1498,3 +1498,11 @@ module.
 - STATUS and AGENTS.md point to it, so every agent sees it before choosing work.
 - When a review produces a recommended order, start the first step and report it.
   Ask only about genuine blockers, such as recordings for closed designs.
+
+## 26 November 2026 — Frame drum and pakhawaj, requests 135 and 141–143
+
+Yan found the earlier hand-percussion sound too basic. It gave no way to choose independent recorded gestures by stroke, position and force. The two new modules and sequenced presets now expose those choices, membrane loss, finite contact, pressure and sympathetic coupling. The frame drum can mix recorded skin with a measured resonator. The factory pakhawaj uses synthesized contact. Thirty WAV assignments per instrument survive recall. Native QA dropped a WAV through the actual stroke map and checked that the sequencer handle survived. No recordings are distributed.
+
+Listening expectations now have a reproducible acoustic check. Testing duration alone missed the medium frame slap and stopped pakhawaj sounding on the wrong modes. Matching measured relative peak strengths brought their dominant peaks to 291.5 and 565.4 Hz. The [study and remaining discrepancies](../research/modules/HAND_DRUM_ACOUSTICS.md) include results for all strengths. Inspecting the native screenshot also caught a panel validation rule silently pruning the stroke-map button. The native test now opens it through the same button as the player.
+
+0.0.35 delivered at the canonical Release app. Regular and ASan/UBSan runs passed 1,194 core, 28 graph, 488 modular and 47 timing checks each. Native QA and both saved dry phrases passed. The first-party checks cover stroke differentiation, zero allocation, position, force, pressure, coupling, sample selection and the pure model. Perceptual fidelity and bol identification remain open.

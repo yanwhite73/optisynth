@@ -164,7 +164,10 @@ SamplePtr decodeWave(const std::vector<uint8_t>& bytes,const CancelSample& cance
         }
         s->mono[i]=float(sum/channels);
     }
-    s->strike=describeStrike(s->mono,s->rate,cancelled);preview(*s);return s;
+    preview(*s);
+    s->strikePeak=std::max(.001f,*std::max_element(s->peaks.begin(),s->peaks.end()));
+    while(s->strikeStart+1<s->mono.size() && std::abs(s->mono[s->strikeStart])<s->strikePeak*.012f)++s->strikeStart;
+    s->strike=describeStrike(s->mono,s->rate,cancelled);return s;
 }
 SamplePtr loadWave(const std::string& path,const CancelSample& cancelled){
     cancel(cancelled);std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)throw std::runtime_error("Cannot open sample: "+path);

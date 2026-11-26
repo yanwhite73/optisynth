@@ -5,6 +5,7 @@
 #include "ModulationEditor.h"
 #include "SynthPanel.h"
 #include "MovementEditor.h"
+#include "DrumStrokeMap.h"
 #include "SignalFlow.h"
 #include "PresetBrowser.h"
 #include <chrono>
@@ -84,7 +85,7 @@ public:
         editor.openMovement=[this](const std::string& node,const std::string& key){showMovement(MovementView::focus,{node,key});};
         editor.movementOffset=synthPanel.movementOffset;
         synthPanel.changed=[this](const std::string& node,const std::string& key,float value){setParameter(node,key,value);};
-        synthPanel.openEditor=[this](const std::string& node){if(auto* card=hardware.find(node))card->openSequencerWindow();};
+        synthPanel.openEditor=[this](const std::string& node){if(handdrum::isHandDrum(modelOf(node)))showDrumMap(node);else if(auto* card=hardware.find(node))card->openSequencerWindow();};
         browser.load=[this](const PresetEntry& e){loadPreset(e);};
         browser.close=[this]{showBrowser(false);};
         browser.importFile=[this]{chooseFile(false);};browser.exportFile=[this]{chooseFile(true);};
@@ -548,10 +549,68 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(factoryPresets().size()==28&&starters.size()==28&&*starters.begin()==0&&*starters.rbegin()==27,"Factory catalogue lists every starter once");}
+            require(factoryPresets().size()==30&&starters.size()==30&&*starters.begin()==0&&*starters.rbegin()==29,"Factory catalogue lists every starter once");}
         {
-            require(browser.visibleEntry(0).starter==27,"Newest factory revision comes first");
+            require(browser.visibleEntry(0).starter==29,"Newest factory revision comes first");
             require(browser.step("factory:26",1)->updated<=browser.entry("factory:26")->updated,"Audition arrows follow date order");
+            for(int preset:{28,29}){
+                require(loadFactory(preset),"Load measured drum preset");drain();
+                const bool barrel=preset==29;
+                auto doc=readRack(rackJSON(document));prepareSamples(doc);
+                const auto model=barrel?"drum.pakhawaj":"drum.frame";
+                const auto samples=sampleBank(doc);
+                const auto prefix=barrel?String("Pakhawaj"):String("Frame drum");
+                require(synthPanel.control("head","couple")&&synthPanel.control("head","area")&&synthPanel.layoutSound(),
+                        "Hand and coupled body controls on playable panel");
+                capture(barrel?"pakhawaj-panel.png":"frame-drum-panel.png");
+                auto writeAudio=[&](File file,const AudioBuffer<float>& buffer){
+                    file.deleteFile();auto stream=file.createOutputStream();WavAudioFormat fmt;
+                    std::unique_ptr<AudioFormatWriter> writer(fmt.createWriterFor(stream.get(),48000,buffer.getNumChannels(),24,{},0));
+                    if(writer)stream.release();
+                    require(writer&&writer->writeFromAudioSampleBuffer(buffer,0,buffer.getNumSamples()),"Write dry hand drum render");
+                };
+                auto phrase=[&](const SampleBank& bank){
+                    Runtime r(doc.graph,bank);r.clock.tempo(doc.tempo);r.clock.play(true);
+                    const int beats=barrel?24:16;
+                    const int frames=int(48000.*60*beats/doc.tempo);
+                    AudioBuffer<float> sound(2,frames);
+                    r.render(sound.getWritePointer(0),sound.getWritePointer(1),frames,{});
+                    sound.applyGain(doc.gain);
+                    require(sound.getMagnitude(0,frames)>.025f&&sound.getMagnitude(0,frames)<.95f,"Audible dry phrase with headroom");
+                    return sound;
+                };
+                writeAudio(directory.getChildFile(prefix+" - dry phrase.wav"),phrase(samples));
+                if(!barrel&&!samples.empty()){
+                    require(samples.size()==doc.samples.size(),"Mapped contact files resolved");
+                    writeAudio(directory.getChildFile(prefix+" - synthesis only.wav"),phrase({}));
+                }
+                auto* launcher=synthPanel.strokeMapLauncher();
+                require(launcher!=nullptr,"Playable panel exposes the stroke map");
+                launcher->onClick();
+                auto* map=drumMapBox?dynamic_cast<DrumStrokeMap*>(drumMapBox->getChildComponent(0)):nullptr;
+                require(map && map->getNumChildComponents()==30,"Thirty editable type / position / force cells");
+                if(!barrel)capture("frame-drum-stroke-map.png");
+                if(barrel){
+                    auto seq=handles.at("sequence");
+                    auto* cell=dynamic_cast<FileDragAndDropTarget*>(map->getChildComponent(0));
+                    require(cell&&cell->isInterestedInFileDrag({fixture.getFullPathName()}),"Pakhawaj stroke map accepts local hand recordings");
+                    cell->filesDropped({fixture.getFullPathName()},0,0);drain();
+                    require(document.samples.at("head__skin_0").data&&handles.at("sequence")==seq,"Assigning a pakhawaj layer preserves the sequencer");
+                    auto recalled=readRack(rackJSON(document));prepareSamples(recalled);
+                    require(recalled.samples.at("head__skin_0").data->fingerprint==document.samples.at("head__skin_0").fingerprint,"Mapped WAV survives save and recall");
+                }
+                drumMapBox->setVisible(false);drumMapBox->dismiss();
+                auto singles=directory.getChildFile("stroke-check");singles.createDirectory();
+                for(int key:{0,2,4,5,7})for(int dynamic=0;dynamic<3;++dynamic){
+                    GraphSpec g;g.nodes={{"head",model,{{"position",0}}}};g.outputs={{"head","out"}};
+                    Runtime r(g);AudioBuffer<float> sound(1,60000);
+                    const float velocity=.22f+dynamic*.345f;
+                    r.render(sound.getWritePointer(0),12000,{48+key,velocity,true,true});
+                    r.render(sound.getWritePointer(0)+12000,48000,{48+key,velocity,false,false});
+                    require(sound.getMagnitude(0,60000)>.005f && sound.getMagnitude(0,60000)<1,"Synthesized stroke finite and audible");
+                    writeAudio(singles.getChildFile(prefix+"-"+String(key)+"-"+String(dynamic)+".wav"),sound);
+                }
+            }
             require(loadFactory(27),"Load hand percussion morph");drain();
             auto* body=synthPanel.control("hand","body");
             require(body && synthPanel.layoutSound(),"Morph control is on the playable panel");
@@ -1115,7 +1174,7 @@ public:
          keys.noteOff(1,60,0);require(peak>.001f,"Keyboard plays the pad while a kept sequencer is stopped");}
         require(synthPanel.launcherCount()==1,"The kept sequencer appears on the curated panel");
         browser.setKeepSequence(false);
-        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 28-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
+        require(directory.getChildFile("panel-browser-check.txt").replaceWithText("PASS: 30-entry factory catalogue with categories/tags; curated pad panels resolve; category, tag (AND), word search and favourites filters; favourites persist; previous/next wrap through the filtered list; pad presets open in their saved panel view; panel <-> rack card <-> DSP handle synchronisation; automatic panel and sequencer launcher; view preference overrides; save to library, overwrite guard, in-place metadata edit with identical audio, version 5 listing/upgrade, unreadable files skipped; version 6 round trip, version 5 compatibility, strict panel references, pruning on module replacement; density (fixed text, equal row heights, compact/fit/large), hand-made rows saved and pruned, scroll-into-view, pinch steps, saved density; header arrows, arrow keys, browser down/Return, arrows outside the filter; Presets/User listed; keyboard plays a sequencer-driven pad; native captures. Settings and library inside the snapshot folder. No audio device opened.\n"),"Write panel/browser receipt");
         require(directory.getChildFile("ui-check.txt").replaceWithText("PASS: independent controls; rack/focus synchronization; JSON/audio recall; invalid-edit preservation; dormant add/remove; typed routing and cycle rejection; contextual replacement; 26 panel layouts; legacy rack import; background sample and Spectral loading/recall/cancellation; contextual sequencer editing and transport. No audio device opened.\n"),"Write UI receipt");
     }
 private:
@@ -1262,6 +1321,7 @@ private:
         size_t r=0,c=0;bool found=false;for(size_t i=0;i<rows.size()&&!found;++i)for(size_t j=0;j<rows[i].size();++j)if(rows[i][j]==id){r=i;c=j;found=true;break;}
         if(!found)return;
         PopupMenu menu;menu.addSectionHeader(String(id)+"  /  rack rows");
+        if(handdrum::isHandDrum(modelOf(id))){menu.addItem(6,"Stroke map…");menu.addSeparator();}
         menu.addItem(1,"Start a new row with this module",c>0);
         menu.addItem(2,"Join the row above",c==0&&r>0);
         menu.addItem(3,"Move left",c>0);menu.addItem(4,"Move right",c+1<rows[r].size());
@@ -1272,6 +1332,7 @@ private:
         auto rows=document.rows.empty()?hardware.shownRows():document.rows;
         for(size_t r=0;r<rows.size();++r)for(size_t c=0;c<rows[r].size();++c)if(rows[r][c]==id){
             auto& row=rows[r];
+            if(action==6){showDrumMap(id);return;}
             if(action==1&&c>0){std::vector<std::string> tail(row.begin()+long(c),row.end());row.erase(row.begin()+long(c),row.end());rows.insert(rows.begin()+long(r)+1,tail);}
             else if(action==2&&c==0&&r>0){rows[r-1].insert(rows[r-1].end(),row.begin(),row.end());rows.erase(rows.begin()+long(r));}
             else if(action==3&&c>0)std::swap(row[c],row[c-1]);
@@ -1605,7 +1666,20 @@ private:
         } catch(const std::exception& e){refresh(selected);message(String("Route unchanged: ")+e.what(),true);return false;}
     }
     void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target,const std::string& presetLoad={},bool movementEdit=false) {
-        if(movementEdit)runtime->prepareMovementEdit(handles);
+        if(movementEdit){
+            auto continuing=handles;
+            // A stroke-bank edit preserves the transport and other processors.
+            // The edited head must adopt its newly prepared immutable sample bank.
+            auto excludeChanges=[&](const RackDocument& from,const RackDocument& to){
+                for(const auto& [slot,ref]:from.samples){
+                    const auto other=to.samples.find(slot);
+                    if(other!=to.samples.end()&&other->second.path==ref.path&&other->second.fingerprint==ref.fingerprint)continue;
+                    if(const auto* owner=sampleOwner(from.graph,slot))continuing.erase(owner->id);
+                }
+            };
+            excludeChanges(document,next);excludeChanges(next,document);
+            runtime->prepareMovementEdit(continuing);
+        }
         std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
         routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());bypassedRoutes.clear();
         player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime),movementEdit);
@@ -1626,6 +1700,35 @@ private:
         }
         pendingMovementEditor.reset();pendingMovement=false;pendingPreset.clear();
     }}
+    Component::SafePointer<CallOutBox> drumMapBox;
+    DrumStrokeMap* showDrumMap(const std::string& id){
+        const auto model=modelOf(id);if(!handdrum::isHandDrum(model))return nullptr;
+        if(drumMapBox){drumMapBox->setVisible(false);drumMapBox->dismiss();}
+        const auto key=presetKey;
+        auto safe=Component::SafePointer<RackSynth>(this);
+        auto assign=[safe,id,key,model](int slot,const File& file){
+            if(!safe||safe->presetKey!=key||safe->modelOf(id)!=model||safe->loading)return;
+            auto next=safe->document;const auto asset=handdrum::sampleKey(id,slot);
+            if(file==File())next.samples.erase(asset);
+            else next.samples[asset]={file.getFullPathName().toStdString(),{},{}};
+            safe->commit(std::move(next),id,{},true);
+        };
+        auto choose=[safe,assign](int slot){
+            if(!safe)return;
+            safe->chooser=std::make_unique<FileChooser>("Choose a WAV for this stroke layer",File{},"*.wav");
+            safe->chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles,
+                [assign,slot](const FileChooser& c){if(c.getResult()!=File())assign(slot,c.getResult());});
+        };
+        auto path=[safe,id,key,model](int slot)->String{
+            if(!safe||safe->presetKey!=key||safe->modelOf(id)!=model)return {};
+            const auto found=safe->document.samples.find(handdrum::sampleKey(id,slot));
+            return found==safe->document.samples.end()?String{}:String(found->second.path);
+        };
+        auto map=std::make_unique<DrumStrokeMap>(String(panel(model).name),path,choose,assign);
+        auto* content=map.get();
+        drumMapBox=&CallOutBox::launchAsynchronously(std::move(map),getLocalBounds().withSizeKeepingCentre(8,8),this);
+        return content;
+    }
     void loadSample(const std::string& id,const File& file){
         auto next=document;
         if(std::none_of(next.graph.nodes.begin(),next.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id&&n.type=="sample.player";}))return;

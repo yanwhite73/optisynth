@@ -22,6 +22,7 @@ struct SampleData {
     std::string fingerprint;
     std::vector<float> mono;
     std::array<float,128> peaks{};
+    size_t strikeStart=0;float strikePeak=1;
     StrikeProfile strike;
 };
 using SamplePtr=std::shared_ptr<const SampleData>;

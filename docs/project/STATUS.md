@@ -4,6 +4,12 @@
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).
 
+## 0.0.35 — Frame drum and pakhawaj
+
+The standalone browser includes **Frame drum / Skin and rim** and **Pakhawaj / Two hands**. Both presets contain their own two-track sequence. Play C, D, E, F and G for bass, open, slap, stopped and finger strokes. Velocity changes the contact and resonance. The wheel adds pressure. On the preset panel, **Stroke map** assigns local WAVs by stroke, inner/outer skin and force. **Recorded skin** blends them into the model. The frame preset resolves 30 local files when the Organic Loops library is present. Pakhawaj starts fully synthesized.
+
+The [acoustic study](../research/modules/HAND_DRUM_ACOUSTICS.md) documents the recordings, mode fits, playing technique and remaining limitations. The current native captures and dry audition phrases are in `build/ui-review-135-qualified/`.
+
 ## 0.0.34 — Edit LFOs during a playing pattern
 
 Opening or assigning movement during playback preserves the running sequencers, held notes, pending pattern launches and effect tails. The assigned LFO number sits beside the knob's modulation arc. Click the number to edit it. The white marker on the arc is the single live display on the knob.

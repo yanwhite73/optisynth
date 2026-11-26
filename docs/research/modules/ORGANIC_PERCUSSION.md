@@ -125,3 +125,5 @@ bass. Steps 3, 12 and 20 (zero-based) gave +8 to +12 dB and upper peaks at
 1.03–1.37 kHz. For the first palm stroke, RMS from 100–150 ms relative to the
 first 30 ms fell from −15.0 dB to −28.3 dB. All comparisons used the same
 notes, sequence and output gain.
+
+The [frame drum and pakhawaj study](HAND_DRUM_ACOUSTICS.md) records the acoustic models, stroke recordings, measurements and implementation evidence.
