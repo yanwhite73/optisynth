@@ -42,7 +42,7 @@ Background:
 
 | # | Module | Basis | Status |
 | --- | --- | --- | --- |
-| 1 | Beads-derived granular / delay / reverb | Mutable Beads source, MIT | **In progress**: Claude, from 26 November |
+| 1 | **Mala**: Beads granular / delay / reverb, with its panel | Mutable Beads source, MIT, unchanged | **Built and checked** on branch `mala` (26 November): offline, sanitizer and native checks pass. Merges into the next release after Codex's 0.0.35. [Design and checks](../research/modules/MALA.md) |
 | 2 | Complete Plaits-derived macro oscillator, all models | Mutable Plaits source, MIT | Not started. Three model cores already wrapped |
 | 3 | Rings-derived resonator, then Elements | Mutable source, MIT | Not started |
 | 4 | Clouds, all modes, including the Parasites modes | Mutable source / Parasites, MIT | One mode (the reverb tank) inside Prism tank |
@@ -51,3 +51,11 @@ Background:
 | 7 | Mimeophon-style repeater | Make Noise manual (closed DSP) | Not started |
 | 8 | StarLab / Sealegs / Erbe-Verb-class depth targets | Manuals (closed DSP) | Not started |
 | 9 | Vhikk X-inspired voice | Needs the manual or recordings | Waiting |
+
+**For the next agent to release.** Branch `mala` contains Mala and factory starter
+40, "Seed rain". Keep starter 40. Merge `mala` after the 0.0.35 commit. Expect
+small conflicts in:
+- `app/PatchIO.h`: the factory list;
+- `app/RackEditor.h`: the catalogue check and the newest-first check;
+- the version lines.
+
