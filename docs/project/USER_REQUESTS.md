@@ -1163,3 +1163,24 @@ graph routes timbre.out to Strike and Brightness in the matrix.
 ```text
 lfo 3 seems to be behaving as if reset on note were active, dont limit to 2
 ```
+
+## 120 — The 0.0.31 LFO implementation is rejected
+
+```text
+"
+
+<pasted_content id="0f4b">
+Fixed in Optisynth 0.0.31. I reproduced the apparent reset on LFO 3. With Reset on note off, a cabled LFO now keeps its phase through rests and overlapping notes. Turning reset on restarts the waveform for each new note.
+
+To layer a third, fourth, or further LFO on a control, click its modulation badge and choose Add another LFO. Each source has its own rate and depth. I verified five LFOs in one preset through save and recall.
+
+Quit and reopen Optisynth 0.0.31 (optisynth/app/Builds/MacOSX/build/Release/Optisynth.app). All 427 modular checks passed, including under sanitizers. Pushed to main and backed up at 703819c.
+</pasted_content id="0f4b">
+
+"
+
+This implementation is absolute crap
+```
+
+Claude session, 26 November 2026. The pasted text is Codex's 0.0.31 report
+(requests 118–119). Diagnosis and plan in ENGINEERING_LOG, request 120.

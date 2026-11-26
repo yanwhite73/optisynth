@@ -4,6 +4,7 @@
 #include "SampleLoader.h"
 #include "ModulationEditor.h"
 #include "SynthPanel.h"
+#include "MovementEditor.h"
 #include "SignalFlow.h"
 #include "PresetBrowser.h"
 #include <chrono>
@@ -78,21 +79,10 @@ public:
         panelViewButton.onClick=[this]{setView("panel",true);};modularViewButton.onClick=[this]{setView("modular",true);};
         panelViewButton.setTooltip("Synth panel: the patch's playing controls on one front panel");modularViewButton.setTooltip("Modular rack: every module, socket and route");
         viewMenu.onClick=[this]{showViewMenu();};viewMenu.setTooltip("Which view opens when a patch loads");
-        synthPanel.modalModAction.add=[this](const Endpoint& input){editModalCV(input);};
-        synthPanel.modalModAction.addLayer=[this](const Endpoint& dest){addLfoLayer(dest);};
-        synthPanel.modalModAction.edit=[this](const std::string& source,const Endpoint& dest,int route,bool split){
-            if(split)splitLfo(source,dest,route);
-            else {setView("modular",true);selectNode(source);}
-        };
-        synthPanel.modalModAction.signal=[this](const std::string& source,int route)->std::optional<float>{
-            const auto it=handles.find(source);
-            if(!running || it==handles.end() || !it->second)return {};
-            const float depth=route>=0 && routeHandles?routeHandles->amounts[size_t(route)].load():1.f;
-            if(depth==0.f)return {};
-            // Show the source excursion even on a deliberately shallow route.
-            return it->second->lfoOutput.load(std::memory_order_relaxed)*(depth<0?-1.f:1.f);
-        };
-        editor.modalModAction=synthPanel.modalModAction;
+        synthPanel.openMovement=[this](const std::string& node,const std::string& key){showMovement(MovementView::panel,{node,key});};
+        synthPanel.movementOffset=[this](const MovementLink& link){return movementOffset(link);};
+        editor.openMovement=[this](const std::string& node,const std::string& key){showMovement(MovementView::focus,{node,key});};
+        editor.movementOffset=synthPanel.movementOffset;
         synthPanel.changed=[this](const std::string& node,const std::string& key,float value){setParameter(node,key,value);};
         synthPanel.openEditor=[this](const std::string& node){if(auto* card=hardware.find(node))card->openSequencerWindow();};
         browser.load=[this](const PresetEntry& e){loadPreset(e);};
@@ -380,17 +370,23 @@ public:
         focusMode.setToggleState(false,dontSendNotification);commit({rackPreset(2),.25f},"resonator");capture("hardware-resonator.png");
         setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("hardware-minimum.png");
         auto* decay=hardware.find("source")->control("decay");
-        require(decay->modulationButton && decay->modulationButton->getButtonText()=="+ LFO","Decay exposes LFO shortcut");
+        require(decay->movementAvailable && !decay->movement.assigned && decay->links.empty(),"Decay offers movement");
         const auto dryModal=render(document.graph);
-        editModalCV({"source","decay"});const auto lfoId=selected;
-        require(hardware.find(lfoId)->current=="mod.lfo" && hardware.find("source")->control("decay")->modulationButton->getButtonText().startsWith("LFO "),"Created and patched a decay LFO");
+        showMovement(MovementView::rack,{"source","decay"});closeMovement();   // the first click assigns
+        const auto lfoId=document.graph.modulations.back().source.node;
+        decay=hardware.find("source")->control("decay");
+        require(privateMovementSource(lfoId) && decay->movement.assigned && decay->links.size()==1 && decay->links[0].route>=0
+                && selected=="envelope","Decay movement adds a private LFO and route without leaving the module");
         const auto wetModal=render(readRack(rackJSON(document)).graph);
         double delta=0;for(size_t i=0;i<wetModal.size();++i)delta+=std::abs(wetModal[i]-dryModal[i]);
-        require(delta>1,"LFO cable changes rendered modal decay");
-        setParameter(lfoId,"depth",0);require(render(document.graph)==dryModal,"Zero LFO depth restores original modal audio");
-        setParameter(lfoId,"depth",.35f);const auto nodeCount=document.graph.nodes.size();editModalCV({"source","decay"});
-        require(document.graph.nodes.size()==nodeCount && selected==lfoId,"CV button reopens existing source");
-        checkCableLayout();capture("modal-decay-lfo.png");
+        require(delta>1,"Movement changes rendered modal decay");
+        setMovementDepth(decay->links[0],0);require(render(document.graph)==dryModal,"Zero movement depth restores original modal audio");
+        setMovementDepth(hardware.find("source")->control("decay")->links[0],.2f);
+        const auto nodeCount=document.graph.nodes.size();
+        auto* reopened=showMovement(MovementView::rack,{"source","decay"});
+        require(reopened && reopened->rowCount()==1 && document.graph.nodes.size()==nodeCount,"The wave button reopens the existing movement");
+        capture("modal-decay-movement-editor.png");closeMovement();
+        checkCableLayout();capture("modal-decay-movement.png");
         commit({rackPreset(0),.25f},"filter");replaceModule("filter","spectral.lowpass");capture("hardware-spectral-minimum.png");
         setSize(1440,940);commit({rackPreset(3),.25f},"second");capture("hardware-two-oscillators.png");
         auto drain=[&]{const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(10);while(loading&&std::chrono::steady_clock::now()<end){collectSamples();std::this_thread::sleep_for(std::chrono::milliseconds(1));}require(!loading,"Sample worker timed out");};
@@ -605,30 +601,56 @@ public:
             require(loadFactory(24),"Prism afterimage loads");drain();
             require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","mix"),"Ostinato echo controls");
             require(handles.at("prism")->values[14].load()==0 && !synthPanel.control("prism","freeze"),"Ostinato isolates the clocked echo");
-            auto* strikeBadge=synthPanel.control("blend","gain_b")->modulationButton.get();
-            auto* brightBadge=synthPanel.control("strike","brightness")->modulationButton.get();
-            require(strikeBadge && brightBadge && strikeBadge->getButtonText()==brightBadge->getButtonText()
-                    && strikeBadge->getTooltip().contains("strike.brightness") && strikeBadge->getTooltip().contains("blend.gain_b"),
-                    "Mallet panel identifies both destinations of the timbre LFO");
-            require(synthPanel.control("strike","structure")->modulationButton->getButtonText()=="+ LFO","Material has an available input");
-            require(synthPanel.control("timbre","rate")->modulationButton->getButtonText()=="LFO 1 source",
-                    "Colour rate identifies the source rather than another destination");
+            {
+                auto* strike=synthPanel.control("blend","gain_b");auto* bright=synthPanel.control("strike","brightness");
+                require(strike && bright && strike->links.size()==1 && bright->links.size()==1
+                        && strike->links[0].source=="timbre" && bright->links[0].source=="timbre"
+                        && strike->movement.fill==bright->movement.fill && strike->links[0].destinations.size()==2
+                        && strike->movement.getTooltip().contains("shared"),
+                        "Strike and Brightness show one shared LFO in one colour");
+                require(synthPanel.control("strike","structure")->movementAvailable && !synthPanel.control("strike","structure")->movement.assigned,
+                        "Material offers movement");
+            }
             auto* tankCard=hardware.find("prism");
             auto tankImage=tankCard->createComponentSnapshot(tankCard->getLocalBounds());
             FileOutputStream tankStream(directory.getChildFile("prism-connected.png"));
             require(tankStream.openedOk()&&PNGImageFormat().writeImageToStream(tankImage,tankStream),"Connected Prism module capture");
             capture("prism-afterimage.png");
             setSize(1120,800);resized();capture("prism-minimum.png");setSize(1440,940);resized();
-            splitLfo("timbre",{"blend","gain_b"},1);
-            require(document.graph.modulations[0].source.node=="timbre" && document.graph.modulations[1].source.node!="timbre"
-                    && synthPanel.control("blend","gain_b")->modulationButton->getButtonText()!=synthPanel.control("strike","brightness")->modulationButton->getButtonText(),
-                    "Separate Strike from Brightness and show both independent LFOs");
-            for(int layer=0;layer<3;++layer)synthPanel.modalModAction.addLayer({"strike","brightness"});
-            const auto layered=readRack(rackJSON(document));
-            require(layered.graph.modulations.size()==5 &&
-                    synthPanel.control("strike","brightness")->modulationButton->getButtonText()=="4 LFO routes" &&
-                    synthPanel.control("strike","brightness")->modulationButton->getTooltip().contains("LFO 5"),
-                    "Five independent LFOs survive recall and the panel lists every layer");
+            {
+                auto* editorView=showMovement(MovementView::panel,{"strike","brightness"});
+                require(editorView && editorView->rowCount()==1 && currentView=="panel","Brightness movement opens in place on the panel");
+                capture("movement-editor.png");closeMovement();
+                const auto strikeLink=synthPanel.control("blend","gain_b")->links.front();
+                makeIndependent(MovementView::panel,{"blend","gain_b"},strikeLink);closeMovement();
+                const auto strikeSource=synthPanel.control("blend","gain_b")->links.front().source;
+                require(privateMovementSource(strikeSource) && synthPanel.control("strike","brightness")->links.front().source=="timbre"
+                        && synthPanel.control("blend","gain_b")->movement.fill!=synthPanel.control("strike","brightness")->movement.fill,
+                        "Make independent gives Strike its own LFO and colour");
+                for(int layer=0;layer<3;++layer){addMovement(MovementView::panel,{"strike","brightness"});closeMovement();}
+                const auto layered=readRack(rackJSON(document));
+                require(layered.graph.modulations.size()==5 && synthPanel.control("strike","brightness")->links.size()==4,
+                        "Five sources survive recall and Brightness lists its four");
+                auto last=synthPanel.control("strike","brightness")->links.back();
+                bypassMovement(last,true);
+                require(routeHandles->amounts[size_t(last.route)].load()==0 && document.graph.modulations[size_t(last.route)].amount!=0,
+                        "Bypass silences only the live route and keeps its depth");
+                bypassMovement(last,false);
+                require(routeHandles->amounts[size_t(last.route)].load()==document.graph.modulations[size_t(last.route)].amount,"Bypass off restores the depth");
+                const auto nodes=document.graph.nodes.size();removeMovement(MovementView::panel,{"strike","brightness"},last);closeMovement();
+                require(document.graph.nodes.size()==nodes-1 && std::none_of(document.graph.nodes.begin(),document.graph.nodes.end(),
+                        [&](const NodeSpec& n){return n.id==last.source;}) && synthPanel.control("strike","brightness")->links.size()==3,
+                        "Removing a private LFO's last use disposes of it");
+                const auto first=synthPanel.control("strike","brightness")->links.front();
+                setMovementDepth(first,.4f);
+                require(synthPanel.control("strike","brightness")->links.front().amount==.4f && routeHandles->amounts[size_t(first.route)].load()==.4f,
+                        "Depth reaches the engine and the knob's arc");
+                auto* bright=synthPanel.control("strike","brightness");
+                bright->liveOffset=[](const MovementLink&){return std::optional<float>(.12f);};bright->tickMovement();
+                require(bright->live && std::abs(*bright->live-.36f)<.001f,"The effective-value tick sums every route");
+                capture("movement-panel.png");setSize(1120,800);resized();capture("movement-minimum.png");setSize(1440,940);resized();
+                bright->liveOffset=synthPanel.movementOffset;bright->tickMovement();
+            }
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
         }
         {
@@ -977,6 +999,7 @@ private:
     Slider gain;TextEditor routes;Label status,keyboardHelp;
     TextButton play{"Play seq"},restart{"Restart"};Slider tempo;Label position;
     std::unique_ptr<FileChooser> chooser;
+    int movementFrame=0;
     bool refreshing=false,running=false,openPatternWhenReady=false,openPerformanceWhenReady=false,openReferenceWhenReady=false;
     int bodyBottom() const {return getHeight()-185;}
     SignalFlow flow;TextButton flowButton{"Signal flow"},cablesButton{"Cables"};
@@ -1159,61 +1182,171 @@ private:
             if(node!=document.graph.nodes.end()){const auto& ps=panel(node->type).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==key)handle->second->values[i]=value;}
         }
     }
-    std::string newLfoId(const Endpoint& target) const {
-        const auto base=target.node+"_"+target.port+"_lfo";auto id=base;
+    // Request 120: movement on a parameter (docs/ui/PARAMETER_MOVEMENT.md).
+    enum class MovementView{panel,rack,focus};
+    Component::SafePointer<CallOutBox> movementBox;std::set<int> bypassedRoutes;
+    std::string modelOf(const std::string& node) const {
+        for(const auto& n:document.graph.nodes)if(n.id==node)return n.type;
+        return {};
+    }
+    Control* movementControl(MovementView view,const Endpoint& e){
+        if(view==MovementView::panel)return synthPanel.control(e.node,e.port);
+        if(view==MovementView::focus)return editor.instance==e.node?editor.control(e.port):nullptr;
+        auto* card=hardware.find(e.node);return card?card->control(e.port):nullptr;
+    }
+    String movementLabel(const Endpoint& e) const {
+        PanelLayout scratch;const auto& layout=effectivePanel(document,scratch);
+        for(const auto& sec:layout.sections)for(const auto& c:sec.controls)
+            if(c.node==e.node&&c.parameter==e.port&&!c.label.empty())return String(c.label);
+        if(const auto* spec=findParameter(modelOf(e.node),e.port))return String(spec->label);
+        return String(e.port);
+    }
+    std::string newMovementId(const Endpoint& target) const {
+        const auto base="move_"+target.node+"_"+target.port;auto id=base;
         for(int n=2;std::any_of(document.graph.nodes.begin(),document.graph.nodes.end(),
             [&](const NodeSpec& node){return node.id==id;});++n)id=base+"_"+std::to_string(n);
         return id;
     }
-    void addLfoLayer(const Endpoint& dest){
-        auto next=document;
-        const auto id=newLfoId(dest);
-        next.graph.nodes.push_back({id,"mod.lfo",{{"rate",1.f}}});
-        next.graph.modulations.push_back({{id,"out"},dest,.15f});
-        if(commit(std::move(next),id))message(String(id)+" added to "+String(dest.node)+"."+String(dest.port));
+    static float defaultMovementAmount(const std::string& key){
+        // Small for pitch and time, where a little deviation is already a lot (design study).
+        for(const char* fine:{"time","transpose","pitch","fine","tune","predelay","shift","division"})
+            if(key.find(fine)!=std::string::npos)return .04f;
+        return .15f;
     }
-    void splitLfo(const std::string& source,const Endpoint& dest,int route){
+    std::optional<float> movementOffset(const MovementLink& link){
+        if(!running||!link.lfo||link.route<0||!routeHandles||size_t(link.route)>=document.graph.modulations.size())return {};
+        const auto it=handles.find(link.source);if(it==handles.end()||!it->second)return {};
+        return std::clamp(it->second->lfoOutput.load(std::memory_order_relaxed),-1.f,1.f)
+              *routeHandles->amounts[size_t(link.route)].load(std::memory_order_relaxed);
+    }
+    void rebindMovement(){
+        synthPanel.bindMovement(document.graph);for(auto& card:hardware.modules)card->bindMovement(document.graph);
+        if(!editor.current.empty())editor.bindMovement(document.graph);
+    }
+    void tickMovement(){
+        synthPanel.tickMovement();
+        if(rackView.isShowing())for(auto& card:hardware.modules)card->tickMovement();
+        if(editor.isShowing())editor.tickMovement();
+    }
+    int movementGeneration=0;
+    // Hide at once so no later capture or click meets a box that is only queued for deletion.
+    void closeMovement(){++movementGeneration;if(movementBox){movementBox->setVisible(false);movementBox->dismiss();}movementBox=nullptr;}
+    // Structural edits rebuild the panel; reopen the editor on the rebuilt control unless closed meanwhile.
+    void reopenMovement(MovementView view,const Endpoint& dest){
+        closeMovement();
+        MessageManager::callAsync([safe=SafePointer<RackSynth>(this),view,dest,generation=movementGeneration]{
+            if(safe&&safe->movementGeneration==generation)safe->showMovement(view,dest);});
+    }
+    MovementEditor* showMovement(MovementView view,const Endpoint& dest){
+        closeMovement();
+        auto* control=movementControl(view,dest);
+        if(!control||!control->movementAvailable)return nullptr;
+        const auto model=modelOf(dest.node);
+        const auto links=movementLinks(document.graph,model,dest.node,dest.port);
+        if(links.empty()){addMovement(view,dest);return nullptr;}   // first click: assign, then open
+        std::vector<std::pair<std::string,int>> others;int ordinal=0;
+        for(const auto& n:document.graph.nodes)if(n.type=="mod.lfo"){
+            ++ordinal;
+            if(std::none_of(links.begin(),links.end(),[&](const MovementLink& l){return l.source==n.id;}))others.push_back({n.id,ordinal});
+        }
+        MovementActions a;
+        a.add=[this,view,dest]{addMovement(view,dest);};
+        a.useExisting=[this,view,dest](const std::string& source){addMovement(view,dest,source);};
+        a.setDepth=[this](const MovementLink& link,float v){setMovementDepth(link,v);};
+        a.bypass=[this](const MovementLink& link,bool on){bypassMovement(link,on);};
+        a.bypassed=[this](const MovementLink& link){return bypassedRoutes.count(link.route)>0;};
+        a.remove=[this,view,dest](const MovementLink& link){removeMovement(view,dest,link);};
+        a.makeIndependent=[this,view,dest](const MovementLink& link){makeIndependent(view,dest,link);};
+        a.setParameter=[this](const std::string& node,const std::string& key,float v){setParameter(node,key,v);rebindMovement();};
+        a.labelOf=[this](const Endpoint& e){return movementLabel(e);};
+        a.format=[safe=SafePointer<Control>(control)](float v){return safe?safe->slider.getTextFromValue(v):String(v,3);};
+        auto content=std::make_unique<MovementEditor>(dest,control->param,float(control->slider.getValue()),document.graph,links,others,std::move(a));
+        auto* raw=content.get();
+        // Point at the whole control so the box opens beside the knob and its arcs stay visible.
+        movementBox=&CallOutBox::launchAsynchronously(std::move(content),getLocalArea(control,control->getLocalBounds()),this);
+        raw->focusFirstDepth();
+        return raw;
+    }
+    void addMovement(MovementView view,const Endpoint& dest,const std::string& existing={}){
+        auto next=document;auto source=existing;
+        if(source.empty()){
+            source=newMovementId(dest);
+            // A free-running sine at unit amplitude: the route's Depth is the only depth (design study).
+            next.graph.nodes.push_back({source,"mod.lfo",{{"rate",.25f},{"depth",1.f},{"wave",0.f},{"retrigger",0.f}}});
+        }
+        next.graph.modulations.push_back({{source,"out"},dest,defaultMovementAmount(dest.port)});
+        if(!commit(std::move(next),selected))return;   // commit names the reason, e.g. a feedback loop
+        message(movementLabel(dest)+" moves with LFO "+String(movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).back().number));
+        reopenMovement(view,dest);
+    }
+    void setMovementDepth(const MovementLink& link,float v){
+        if(link.route<0){setParameter(link.source,"depth",v);rebindMovement();return;}   // a cable has no route attenuator
+        cancelLoading();const auto i=size_t(link.route);if(i>=document.graph.modulations.size())return;
+        document.graph.modulations[i].amount=v;
+        if(routeHandles&&!bypassedRoutes.count(link.route))routeHandles->amounts[i]=v;
+        if(flow.isVisible())flow.updateDepth(link.route,v);
+        if(matrixWindow&&matrixWindow->isVisible())matrixWindow->editor->refresh(document);
+        if(!presetDirty){presetDirty=true;updatePresetDisplay();}
+        rebindMovement();
+    }
+    void bypassMovement(const MovementLink& link,bool on){
+        if(link.route<0||!routeHandles||size_t(link.route)>=document.graph.modulations.size())return;
+        if(on)bypassedRoutes.insert(link.route);else bypassedRoutes.erase(link.route);
+        routeHandles->amounts[size_t(link.route)]=on?0.f:document.graph.modulations[size_t(link.route)].amount;
+    }
+    void removeMovement(MovementView view,const Endpoint& dest,const MovementLink& link){
+        auto next=document;auto& g=next.graph;
+        if(link.route>=0){
+            if(size_t(link.route)>=g.modulations.size())return;
+            const auto& m=g.modulations[size_t(link.route)];
+            if(m.source.node!=link.source||m.destination.node!=dest.node||m.destination.port!=dest.port)return;
+            g.modulations.erase(g.modulations.begin()+link.route);
+        }else{
+            const auto port=modalCvPort(modelOf(dest.node),dest.port);
+            g.connections.erase(std::remove_if(g.connections.begin(),g.connections.end(),[&](const Connection& c){
+                return c.source.node==link.source&&c.destination.node==dest.node&&c.destination.port==port;}),g.connections.end());
+        }
+        // A private source goes with its last use; a rack LFO the player added stays.
+        const bool used=std::any_of(g.modulations.begin(),g.modulations.end(),[&](const Modulation& m){return m.source.node==link.source;})
+                      ||std::any_of(g.connections.begin(),g.connections.end(),[&](const Connection& c){return c.source.node==link.source;});
+        if(privateMovementSource(link.source)&&!used){
+            g.nodes.erase(std::remove_if(g.nodes.begin(),g.nodes.end(),[&](const NodeSpec& n){return n.id==link.source;}),g.nodes.end());
+            g.modulations.erase(std::remove_if(g.modulations.begin(),g.modulations.end(),[&](const Modulation& m){return m.destination.node==link.source;}),g.modulations.end());
+            g.connections.erase(std::remove_if(g.connections.begin(),g.connections.end(),[&](const Connection& c){return c.destination.node==link.source;}),g.connections.end());
+        }
+        if(!commit(std::move(next),selected))return;
+        message(link.name()+" no longer moves "+movementLabel(dest));
+        if(!movementLinks(document.graph,modelOf(dest.node),dest.node,dest.port).empty())reopenMovement(view,dest);else closeMovement();
+    }
+    // Copy a shared source so only this destination follows the copy (its incoming routes come too).
+    void makeIndependent(MovementView view,const Endpoint& dest,const MovementLink& link){
         const auto& graph=document.graph;
-        const auto osc=std::find_if(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& n){return n.id==source && n.type=="mod.lfo";});
+        const auto osc=std::find_if(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& n){return n.id==link.source && n.type=="mod.lfo";});
         if(osc==graph.nodes.end())return;
-        auto next=document;
-        const auto id=newLfoId(dest);
+        auto next=document;const auto id=newMovementId(dest);
         auto copy=*osc;copy.id=id;next.graph.nodes.push_back(copy);
-        if(route>=0){
-            if(size_t(route)>=next.graph.modulations.size())return;
-            auto& m=next.graph.modulations[size_t(route)];
-            if(m.source.node!=source || m.destination.node!=dest.node || m.destination.port!=dest.port)return;
+        if(link.route>=0){
+            if(size_t(link.route)>=next.graph.modulations.size())return;
+            auto& m=next.graph.modulations[size_t(link.route)];
+            if(m.source.node!=link.source || m.destination.node!=dest.node || m.destination.port!=dest.port)return;
             m.source.node=id;
         }else{
-            const std::string port=dest.port=="structure"?"mat":dest.port=="brightness"?"bright":"decay";
+            const auto port=modalCvPort(modelOf(dest.node),dest.port);
             auto cable=std::find_if(next.graph.connections.begin(),next.graph.connections.end(),[&](const Connection& c){
-                return c.source.node==source && c.destination.node==dest.node && c.destination.port==port;
-            });
+                return c.source.node==link.source && c.destination.node==dest.node && c.destination.port==port;});
             if(cable==next.graph.connections.end())return;
             cable->source.node=id;
         }
-        for(auto c:graph.connections)if(c.destination.node==source){c.destination.node=id;next.graph.connections.push_back(c);}
-        for(auto m:graph.modulations)if(m.destination.node==source){m.destination.node=id;next.graph.modulations.push_back(m);}
-        if(commit(std::move(next),id))message(String(id)+" now drives "+String(dest.node)+"."+String(dest.port));
-    }
-    void editModalCV(const Endpoint& input){
-        std::string source;
-        for(const auto& c:document.graph.connections)
-            if(c.destination.node==input.node && c.destination.port==input.port)source=c.source.node;
-        if(source.empty()){
-            auto next=document;
-            source=newLfoId(input);
-            next.graph.nodes.push_back({source,"mod.lfo",{{"rate",1.f},{"depth",.35f}}});
-            setRackConnection(next.graph,input,{source,"out"});
-            if(!commit(std::move(next),source))return;
-        }
-        setView("modular",true);selectNode(source);
-        message(String(source)+" drives "+String(input.node)+"."+String(input.port));
+        for(auto c:graph.connections)if(c.destination.node==link.source){c.destination.node=id;next.graph.connections.push_back(c);}
+        for(auto m:graph.modulations)if(m.destination.node==link.source){m.destination.node=id;next.graph.modulations.push_back(m);}
+        if(!commit(std::move(next),selected))return;
+        message(movementLabel(dest)+" now has its own LFO");
+        reopenMovement(view,dest);
     }
     void showMatrix(){
         if(!matrixWindow){matrixWindow=std::make_unique<MatrixWindow>();auto* m=matrixWindow->editor;
             m->addRoute=[this](const Endpoint& source,const Endpoint& destination,float amount){auto next=document;next.graph.modulations.push_back({source,destination,amount});return commit(std::move(next),selected);};
-            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;if(flow.isVisible())flow.updateDepth(i,amount);if(auto* card=hardware.find(document.graph.modulations[size_t(i)].destination.node))updateVcoActivity(*card);}};
+            m->setDepth=[this](int i,float amount){cancelLoading();if(i>=0&&i<int(document.graph.modulations.size())){document.graph.modulations[size_t(i)].amount=amount;if(routeHandles)routeHandles->amounts[size_t(i)]=amount;if(flow.isVisible())flow.updateDepth(i,amount);if(auto* card=hardware.find(document.graph.modulations[size_t(i)].destination.node))updateVcoActivity(*card);rebindMovement();}};
             m->removeRoute=[this](int i){MessageManager::callAsync([safe=SafePointer<RackSynth>(this),i]{if(!safe)return;auto next=safe->document;if(i>=0&&i<int(next.graph.modulations.size())){next.graph.modulations.erase(next.graph.modulations.begin()+i);safe->commit(std::move(next),safe->selected);}});};
         }
         matrixWindow->editor->refresh(document);matrixWindow->setVisible(true);matrixWindow->toFront(true);
@@ -1248,7 +1381,7 @@ private:
     void rebuildHardware() {
         hardware.clear();
         for(const auto& node:document.graph.nodes){
-            auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;p->knob=hardware.knob;p->modalModAction=synthPanel.modalModAction;
+            auto card=std::make_unique<ModulePanel>("all");auto* p=card.get();p->instance=node.id;p->knob=hardware.knob;p->openMovement=[this](const std::string& node,const std::string& key){showMovement(MovementView::rack,{node,key});};p->movementOffset=synthPanel.movementOffset;
             p->rowMenu=[this,id=node.id]{MessageManager::callAsync([safe=SafePointer<RackSynth>(this),id]{if(safe)safe->showRowMenu(id);});};
             auto& values=hardware.values[node.id];for(const auto& v:node.parameters)values[node.type][v.first]=v.second;
             p->show(node.type,values,handles[node.id],[this,id=node.id](const std::string& key,float value){setParameter(id,key,value);});bindSamplePanel(*p,node.id);bindSpectralPanel(*p,node.id);
@@ -1296,7 +1429,7 @@ private:
     }
     void install(RackDocument next,std::unique_ptr<Runtime> runtime,const std::string& target,const std::string& presetLoad={}) {
         std::map<std::string,std::shared_ptr<Controls>> controls;for(const auto& n:next.graph.nodes)controls[n.id]=runtime->controls(n.id);
-        routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());
+        routeHandles=runtime->routeControls();document=std::move(next);handles=std::move(controls);activeCount=int(runtime->activeModules());bypassedRoutes.clear();
         player.gain.store(document.gain);gain.setValue(document.gain,dontSendNotification);player.publish(std::move(runtime));
         player.tempo.store(document.tempo);tempo.setValue(document.tempo,dontSendNotification);
         if(!presetLoad.empty()){presetKey=presetLoad;presetDirty=false;}else presetDirty=true;
@@ -1455,6 +1588,7 @@ private:
     }
     void timerCallback() override {
         player.collect();collectSamples();
+        if((++movementFrame&1)==0)tickMovement();
         if(openReferenceWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->referenceSequence){card->referenceSequence->openEditor();openReferenceWhenReady=false;}}
         if(openPatternWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->sequence){card->sequence->openPerformanceEditor();openPatternWhenReady=false;}}
         if(openPerformanceWhenReady&&!loading){if(auto* card=hardware.find("sequence"))if(card->performance){card->performance->openEditor();openPerformanceWhenReady=false;}}

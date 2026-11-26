@@ -1374,3 +1374,51 @@ Delivered standalone 0.0.31 at the established Release location. The installed
 executable matched the candidate. The previously failing four-LFO regression,
 the five-source native editor/recall check and all 427 modular checks passed,
 including the address and undefined-behaviour sanitizer run.
+
+## Request 120 — the 0.0.30–0.0.31 LFO interface rejected
+
+Yan, 26 November, after reading the 0.0.31 report: "This implementation is
+absolute crap".
+
+**What a player met in 0.0.31.**
+- **Badges.** Text badges ("LFO 1 shared", "LFO 1 source", "4 LFO routes") beside a
+  few knob labels.
+- **Limited reach.** The badge appeared only on the three modal parameters and on
+  knobs already in the matrix. No other panel knob could be given movement.
+- **Hidden LFOs.** "Add another LFO" created a hidden rack module with an
+  internal id (`strike_brightness_lfo_2`) at 1 Hz and a fixed 0.15 route amount.
+  Nothing on the panel showed or set its rate, shape, reset or depth.
+- **Editing meant leaving the panel.** Opening any LFO switched the whole window to
+  the Modular view. Route depth was only in the matrix window.
+- **Weak activity signal.** The only sign of activity was a 3 px dot under the
+  badge.
+
+**Cause.** The project already had the design:
+- request 31: Pigments / Vital conventions, with coloured sources, assignment onto
+  the parameter and visible depth;
+- requests 94–95 and [PARAMETER_MOVEMENT.md](../ui/PARAMETER_MOVEMENT.md): a
+  per-parameter movement button, an anchored editor with Depth / Rate / Shape /
+  Reset, an extent arc, bypass and remove, a shared-source label and Make
+  independent.
+
+Requests 118–119 were treated as isolated defects, so those documents were not
+used. The checks counted badge strings and serialised routes; nobody performed
+the musical task through the interface. The DSP change in 0.0.31 is sound: a
+cabled LFO now keeps its phase across voice allocation. It is kept.
+
+**Correction (Claude).** Implement the documented movement control, Placement A,
+on every continuous parameter in the synth panel, rack cards and focus view:
+- a wave button that creates a private, free-running LFO and a matrix route;
+- a JUCE `CallOutBox` editor anchored to the button, so the player stays where
+  they are;
+- coloured extent arcs, with a live effective-value tick on the knob;
+- the shared-source colour and label.
+
+The badges, the menu-driven layering and the jump to Modular view are removed.
+
+**Prevention.**
+- Before changing an interface area, search USER_REQUESTS and `docs/ui` for
+  earlier requests and design studies on it, and build from them.
+- Treat a defect report as a symptom of the larger design request when one exists.
+- Qualify interaction work by performing the player's task in native captures, step
+  by step, not by asserting strings.

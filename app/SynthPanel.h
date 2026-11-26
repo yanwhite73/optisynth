@@ -58,11 +58,12 @@ class SynthPanelView final : public juce::Component {
 public:
     std::function<void(const std::string&,const std::string&,float)> changed;
     std::function<void(const std::string&)> openEditor;
-    ModulationActions modalModAction;
+    std::function<void(const std::string&,const std::string&)> openMovement;
+    std::function<std::optional<float>(const MovementLink&)> movementOffset;
     SynthPanelView(){face.owner=this;addAndMakeVisible(viewport);viewport.setViewedComponent(&face,false);viewport.setScrollBarsShown(true,false);viewport.setScrollBarThickness(10);}
     ~SynthPanelView() override {controls.clear();launchers.clear();sections.clear();viewport.setViewedComponent(nullptr,false);}
     void build(const RackDocument& d) {
-        controls.clear();launchers.clear();sections.clear();keys.clear();
+        controls.clear();launchers.clear();sections.clear();keys.clear();models.clear();
         PanelLayout scratch;auto layout=effectivePanel(d,scratch);
         // A sequencer the curated layout does not mention still drives the sound: show it first.
         for(auto n=d.graph.nodes.rbegin();n!=d.graph.nodes.rend();++n)if(isSequencerModule(n->type)){
@@ -88,9 +89,10 @@ public:
                 auto control=std::make_unique<Control>(p,value,[this,id=c.node,key=c.parameter](float v){if(changed)changed(id,key,v);},look,theme.legend);
                 control->slider.setTooltip(String(c.node)+"."+String(c.parameter)+" / double-click to reset");
                 if(node->type=="analog.filter"&&c.parameter=="fm_depth")control->showFilterFmSource(d.graph,c.node);
-                control->bindModulation(node->type,c.parameter,c.node,d.graph,modalModAction);
+                control->movementClicked=[this,id=c.node](Control& k){if(openMovement)openMovement(id,k.param.id);};
+                control->liveOffset=movementOffset;control->bindMovement(node->type,c.node,d.graph);
                 face.addAndMakeVisible(*control);section->items.push_back(control.get());
-                keys.push_back({c.node,c.parameter});controls.push_back(std::move(control));
+                keys.push_back({c.node,c.parameter});models.push_back(node->type);controls.push_back(std::move(control));
             }
             if(section->items.empty())continue;
             const bool launcher=section->items.size()==1&&dynamic_cast<TextButton*>(section->items[0]);
@@ -108,6 +110,9 @@ public:
     Control* control(const std::string& node,const std::string& key) {
         for(size_t i=0;i<keys.size();++i)if(keys[i].first==node&&keys[i].second==key)return controls[i].get();return nullptr;
     }
+    // Route amounts change without a rebuild; refresh the arcs and tooltips from the graph.
+    void bindMovement(const GraphSpec& graph){for(size_t i=0;i<controls.size();++i)controls[i]->bindMovement(models[i],keys[i].first,graph);}
+    void tickMovement(){if(isShowing())for(auto& c:controls)c->tickMovement();}
     size_t controlCount() const {return controls.size();}
     size_t sectionCount() const {return sections.size();}
     size_t launcherCount() const {return launchers.size();}
@@ -174,7 +179,7 @@ private:
     }
     Viewport viewport;Face face;KnobLook look;PanelTheme theme=panelTheme("graphite");
     std::vector<std::unique_ptr<Section>> sections;std::vector<std::unique_ptr<Control>> controls;std::vector<std::unique_ptr<TextButton>> launchers;
-    std::vector<std::pair<std::string,std::string>> keys;
+    std::vector<std::pair<std::string,std::string>> keys;std::vector<std::string> models;
     std::string title,subtitle;bool curated=false;int knob=72,preferred=0,cheek=0;
 };
 }

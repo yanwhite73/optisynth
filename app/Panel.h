@@ -83,40 +83,83 @@ struct KnobLook : LookAndFeel_V4 {
         g.setColour(paper);g.drawLine(c.x+std::sin(a)*outer*.68f,c.y-std::cos(a)*outer*.68f,c.x+std::sin(a)*outer,c.y-std::cos(a)*outer,2.3f);
     }
 };
-// The meter shows the source waveform in the direction of the route.
-struct RouteBadge final : TextButton, private Timer {
-    std::function<std::optional<float>()> signal;
-    std::optional<float> level;
-    void timerCallback() override {
-        if(!isShowing() || !signal)return;
-        const auto value=signal();
-        if(value!=level){
-            level=value;
-            setColour(TextButton::buttonColourId,level?Colour(0xff196c51):Colour(0xff405957));
-            repaint();
-        }
-    }
-    void monitor(std::function<std::optional<float>()> read){
-        signal=std::move(read);if(signal)startTimerHz(20);
-    }
-    void paintButton(Graphics& g,bool over,bool down) override {
-        TextButton::paintButton(g,over,down);
-        if(!level)return;
-        const float span=getWidth()*.38f,mid=getWidth()*.5f,y=getHeight()-2.f;
-        g.setColour(Colour(0xff17372d));g.drawLine(mid-span,y,mid+span,y);
-        g.setColour(Colours::white);g.fillEllipse(mid+span*std::clamp(*level,-1.f,1.f)-1.5f,y-1.5f,3,3);
-    }
+// Request 120: movement on a parameter (docs/ui/PARAMETER_MOVEMENT.md, Placement A).
+// A source keeps one colour wherever it moves a control, so shared motion is visible.
+inline Colour movementColour(int number){
+    static const uint32 colours[]={0xff5fd0b5,0xfff2a65a,0xffb28cf2,0xfff27d9b,0xffa3d65c,0xff6cb4f5,0xffe9d25e,0xffef8a5b};
+    return Colour(colours[size_t(std::max(0,number-1))%8]);
+}
+// Movement created from a parameter owns its LFO; the id prefix marks that ownership in saved patches.
+inline bool privateMovementSource(const std::string& id){return id.rfind("move_",0)==0;}
+struct MovementLink {
+    std::string source;          // node id of the moving source
+    int number=0;                // LFO n, counted in patch order
+    int route=-1;                // matrix route index; -1 when a CV cable carries it
+    float amount=0;              // the route's signed amount (a fraction of the normalised range)
+    float sourceDepth=1;         // the LFO's own Depth
+    bool lfo=false;
+    std::vector<Endpoint> destinations;   // every parameter or input this source moves
+    Colour colour() const {return lfo?movementColour(number):Colour(0xffc2c3bd);}
+    String name() const {return lfo?"LFO "+String(number):String(source);}
 };
-struct ModulationActions {
-    std::function<void(const Endpoint&)> add,addLayer;
-    std::function<void(const std::string&,const Endpoint&,int,bool)> edit;
-    std::function<std::optional<float>(const std::string&,int)> signal;
+// Modal modules also take movement through their CV inputs (the 0.0.22 cables).
+inline std::string modalCvPort(const std::string& model,const std::string& param){
+    if(model!="modal.voice"&&model!="modal.resonator")return {};
+    return param=="structure"?"mat":param=="brightness"?"bright":param=="decay"?"decay":"";
+}
+inline float nodeParameter(const GraphSpec& graph,const std::string& node,const std::string& key,float fallback){
+    for(const auto& n:graph.nodes)if(n.id==node)for(const auto& [k,v]:n.parameters)if(k==key)return v;
+    return fallback;
+}
+inline std::vector<MovementLink> movementLinks(const GraphSpec& graph,const std::string& model,const std::string& node,const std::string& param){
+    std::vector<MovementLink> links;
+    auto describe=[&](const std::string& source,int route,float amount){
+        MovementLink link;link.source=source;link.route=route;link.amount=amount;int ordinal=0;
+        for(const auto& n:graph.nodes){
+            if(n.type=="mod.lfo")++ordinal;
+            if(n.id==source){link.lfo=n.type=="mod.lfo";link.number=ordinal;break;}
+        }
+        if(link.lfo)link.sourceDepth=nodeParameter(graph,source,"depth",1);
+        for(const auto& m:graph.modulations)if(m.source.node==source)link.destinations.push_back(m.destination);
+        for(const auto& c:graph.connections)if(c.source.node==source)link.destinations.push_back(c.destination);
+        links.push_back(std::move(link));
+    };
+    for(size_t i=0;i<graph.modulations.size();++i){
+        const auto& m=graph.modulations[i];
+        if(m.destination.node==node&&m.destination.port==param)describe(m.source.node,int(i),m.amount);
+    }
+    if(const auto port=modalCvPort(model,param);!port.empty())
+        for(const auto& c:graph.connections)if(c.destination.node==node&&c.destination.port==port)describe(c.source.node,-1,1);
+    return links;
+}
+// Continuous parameters can move. Stepped choices, switches and structural settings cannot.
+inline bool movableParameter(const std::string& model,const Parameter& p){
+    return p.choices.empty() && p.step<1 && model!="spectral.engine" && !isSequencer(model)
+        && model!="seq.performance" && p.maximum>p.minimum;
+}
+// Quiet outlined wave when free; filled in the source colour once something moves the control.
+struct MovementButton final : Button {
+    Colour legend=paper,fill=teal;bool assigned=false;int sources=0;
+    MovementButton():Button("Movement"){setWantsKeyboardFocus(true);}
+    void paintButton(Graphics& g,bool over,bool down) override {
+        auto r=getLocalBounds().toFloat().reduced(1.5f,1.f);
+        const float radius=r.getHeight()*.5f;
+        if(assigned){g.setColour(fill.withMultipliedBrightness(down?.85f:1.f));g.fillRoundedRectangle(r,radius);}
+        else{g.setColour(legend.withAlpha(over||down?.95f:.5f));g.drawRoundedRectangle(r,radius,1.f);}
+        Path wave;const auto x0=r.getX()+4,w=r.getWidth()-8-(sources>1?5.f:0.f),y=r.getCentreY(),h=r.getHeight()*.26f;
+        wave.startNewSubPath(x0,y);for(int i=1;i<=20;++i){const float t=float(i)/20;wave.lineTo(x0+t*w,y-std::sin(t*MathConstants<float>::twoPi)*h);}
+        const auto mark=assigned?(fill.getPerceivedBrightness()>.55f?ink:paper):legend.withAlpha(over||down?1.f:.7f);
+        g.setColour(mark);g.strokePath(wave,PathStrokeType(1.4f));
+        if(sources>1){g.fillEllipse(r.getRight()-6.5f,y-3.5f,2.5f,2.5f);g.fillEllipse(r.getRight()-6.5f,y+1,2.5f,2.5f);}
+        if(hasKeyboardFocus(false)){g.setColour(orange);g.drawRoundedRectangle(r.expanded(1),radius+1,1.2f);}
+    }
 };
 // One parameter: label, knob (or trim slider / switch) and value, stacked tightly.
 struct Control : juce::Component {
     static constexpr int labelHeight=15,valueHeight=18;
     Label label;Slider slider;ToggleButton toggle;bool isSwitch=false;
-    Control(const Parameter& p,float value,std::function<void(float)> changed,KnobLook& look,Colour text,bool fader=false,bool compactTrim=false) {
+    Parameter param;
+    Control(const Parameter& p,float value,std::function<void(float)> changed,KnobLook& look,Colour text,bool fader=false,bool compactTrim=false):param(p) {
         label.setText(String(p.label).toUpperCase(),dontSendNotification);label.setFont(font(text::label));label.setColour(Label::textColourId,text);label.setJustificationType(Justification::centred);
         label.setBorderSize({0,0,0,0});label.setMinimumHorizontalScale(.85f);
         const bool trim=compactTrim||p.id.find("_curve")!=std::string::npos||p.id=="fade"||p.id=="mod_rate_hz"||p.id=="mod_depth"||p.id=="start"||p.id=="end";
@@ -151,87 +194,83 @@ struct Control : juce::Component {
             toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
         }
     }
-    std::unique_ptr<RouteBadge> modulationButton;
-    struct Link { std::string source; String name; int route; bool lfo,shared; };
-    int badgeWidth=0;
-    void bindModulation(const std::string& model,const std::string& param,const std::string& node,
-                        const GraphSpec& graph,const ModulationActions& actions){
-        modulationButton.reset();badgeWidth=0;
-        if(!actions.add)return;
-        const bool modal=model=="modal.voice"||model=="modal.resonator";
-        const std::string port=modal?(param=="structure"?"mat":param=="brightness"?"bright":param=="decay"?"decay":""):"";
-        const bool sourceKnob=model=="mod.lfo"&&param=="rate";
-        const Endpoint destination{node,param};
-        std::vector<Link> links;String details;
-        auto append=[&](const std::string& source,int route){
-            int ordinal=0;bool lfo=false;
-            for(const auto& n:graph.nodes){
-                if(n.type=="mod.lfo")++ordinal;
-                if(n.id==source){lfo=n.type=="mod.lfo";break;}
+    // Movement: the button, the sources reaching this parameter, and their extent arcs.
+    MovementButton movement;bool movementAvailable=false;int badgeWidth=0;
+    std::vector<MovementLink> links;
+    std::function<void(Control&)> movementClicked;
+    std::function<std::optional<float>(const MovementLink&)> liveOffset;   // a route's current normalised contribution
+    std::optional<float> live;
+    void bindMovement(const std::string& model,const std::string& node,const GraphSpec& graph){
+        const bool available=!isSwitch && slider.getSliderStyle()==Slider::RotaryHorizontalVerticalDrag && movableParameter(model,param);
+        links=available?movementLinks(graph,model,node,param.id):std::vector<MovementLink>{};
+        const String name=String(param.label);
+        movement.legend=label.findColour(Label::textColourId);movement.assigned=!links.empty();movement.sources=int(links.size());
+        if(!links.empty())movement.fill=links.front().colour();
+        String tip;
+        if(links.empty())tip="Add movement to "+name+": a free-running LFO, edited here";
+        else{
+            tip=name+" movement";
+            for(const auto& link:links){
+                tip+="\n"+link.name()+(link.route<0?String(" (CV cable)"):" "+String(link.amount>=0?"+":"")+String(link.amount,2));
+                if(link.destinations.size()>1)tip+=" / shared by "+String(int(link.destinations.size()))+" controls";
             }
-            const String name=lfo?"LFO "+String(ordinal):String(source);
-            StringArray destinations;
-            for(const auto& m:graph.modulations)if(m.source.node==source)
-                destinations.add(String(m.destination.node)+"."+String(m.destination.port));
-            for(const auto& c:graph.connections)if(c.source.node==source)
-                destinations.add(String(c.destination.node)+"."+String(c.destination.port));
-            details+=name+" ("+String(source)+") → "+destinations.joinIntoString(", ")+"\n";
-            links.push_back({source,name,route,lfo,destinations.size()>1});
-        };
-        for(size_t i=0;i<graph.modulations.size();++i){
-            const auto& m=graph.modulations[i];
-            if(m.destination.node==node&&m.destination.port==param)append(m.source.node,int(i));
+            tip+="\nClick to edit";
         }
-        if(!port.empty())for(const auto& c:graph.connections)
-            if(c.destination.node==node&&c.destination.port==port)append(c.source.node,-1);
-        const bool sourceIndicator=sourceKnob && links.empty();
-        if(sourceIndicator)append(node,-1);
-        if(links.empty()&&port.empty())return;
-        modulationButton=std::make_unique<RouteBadge>();
-        auto& button=*modulationButton;
-        String title="+ LFO";
-        if(links.size()==1)
-            title=links.front().name+(sourceIndicator?" source":links.front().shared?" shared":"");
-        else if(links.size()>1){
-            const bool allLfos=std::all_of(links.begin(),links.end(),[](const Link& link){return link.lfo;});
-            title=String(int(links.size()))+(allLfos?" LFO routes":" routes");
+        movement.setTooltip(tip);movement.setTitle(links.empty()?"Add movement to "+name:"Edit "+name+" movement");
+        movement.onClick=[this]{if(movementClicked)movementClicked(*this);};
+        if(available!=movementAvailable){
+            movementAvailable=available;badgeWidth=available?24:0;
+            if(available)addAndMakeVisible(movement);else movement.setVisible(false);
+            resized();
         }
-        button.setButtonText(title);
-        badgeWidth=int(std::ceil(GlyphArrangement::getStringWidth(font(12),title)))+16;
-        if(links.empty()){
-            button.setTooltip("Add an independent LFO to "+label.getText().toLowerCase());
-            button.onClick=[safe=SafePointer<Control>(this),input=Endpoint{node,port},add=actions.add]{
-                MessageManager::callAsync([safe,input,add]{if(safe)add(input);});
-            };
-        }else{
-            button.setColour(TextButton::buttonColourId,Colour(0xff405957));
-            button.setColour(TextButton::textColourOffId,Colours::white);
-            button.setTooltip(details.trimEnd()+"\nClick to inspect the source or separate a shared LFO.");
-            const auto& first=links.front();
-            if(first.lfo && actions.signal)button.monitor([read=actions.signal,source=first.source,route=first.route]{return read(source,route);});
-            button.onClick=[safe=SafePointer<Control>(this),links,destination,sourceIndicator,edit=actions.edit,addLayer=actions.addLayer]{
-                if(!safe || !edit)return;
-                PopupMenu menu;
-                for(size_t i=0;i<links.size();++i){
-                    const auto& link=links[i];const String name=link.name+" ("+String(link.source)+")";
-                    menu.addItem(int(2*i+1),"Open "+name);
-                    if(link.lfo && link.shared && !sourceIndicator)
-                        menu.addItem(int(2*i+2),"Give "+safe->label.getText().toLowerCase()+" its own LFO");
-                }
-                const int addId=int(links.size()*2)+1;
-                if(!sourceIndicator && addLayer){
-                    menu.addSeparator();menu.addItem(addId,"Add another LFO to "+safe->label.getText().toLowerCase());
-                }
-                menu.showMenuAsync(PopupMenu::Options().withTargetComponent(safe->modulationButton.get()),
-                    [safe,links,destination,edit,addLayer,addId](int result){
-                        if(!safe || result<=0)return;
-                        if(result==addId){if(addLayer)addLayer(destination);return;}
-                        const auto& link=links[size_t(result-1)/2];
-                        edit(link.source,destination,link.route,result%2==0);
-                    });
-            };
+        if(links.empty())live.reset();
+        movement.repaint();repaint();
+    }
+    void tickMovement(){
+        std::optional<float> next;
+        if(!links.empty()&&liveOffset){
+            float sum=0;bool any=false;
+            for(const auto& link:links)if(auto v=liveOffset(link)){sum+=*v;any=true;}
+            if(any)next=sum;
         }
-        addAndMakeVisible(button);resized();
+        if(next.has_value()!=live.has_value()||(next&&std::abs(*next-*live)>.0005f)){live=next;repaint();}
+    }
+    // The value the engine reaches for a normalised offset (Runtime::computeParameters).
+    float modulatedValue(float base,float offset) const {
+        offset=std::clamp(offset,-1.f,1.f);
+        const float v=param.logarithmic&&param.minimum>0?base*std::exp(offset*std::log(param.maximum/param.minimum)):base+offset*(param.maximum-param.minimum);
+        return std::clamp(v,param.minimum,param.maximum);
+    }
+    float knobProportion(float v) const {return float(const_cast<Slider&>(slider).valueToProportionOfLength(v));}
+    struct KnobGeometry{juce::Point<float> centre;float radius,start,end;};
+    std::optional<KnobGeometry> knobGeometry() const {
+        if(!slider.isVisible()||slider.getSliderStyle()!=Slider::RotaryHorizontalVerticalDrag)return {};
+        auto& s=const_cast<Slider&>(slider);
+        auto r=s.getLookAndFeel().getSliderLayout(s).sliderBounds.toFloat().translated(float(s.getX()),float(s.getY())).reduced(2);
+        const float d=std::min(r.getWidth(),r.getHeight());r=r.withSizeKeepingCentre(d,d);
+        const auto rotary=s.getRotaryParameters();
+        return KnobGeometry{r.getCentre(),d*.5f,rotary.startAngleRadians,rotary.endAngleRadians};
+    }
+    void paintMovement(Graphics& g){
+        const auto k=knobGeometry();if(!k||links.empty())return;
+        const float base=float(slider.getValue());int ring=0;
+        auto angle=[&](float proportion){return k->start+std::clamp(proportion,0.f,1.f)*(k->end-k->start);};
+        for(const auto& link:links){
+            if(link.route<0||ring>=3)continue;
+            const float extent=std::abs(link.amount*link.sourceDepth);
+            const float lo=knobProportion(modulatedValue(base,-extent)),hi=knobProportion(modulatedValue(base,extent));
+            const float radius=k->radius-1.5f-ring*3.2f;
+            Path arc;arc.addCentredArc(k->centre.x,k->centre.y,radius,radius,0,angle(lo),angle(std::max(hi,lo+.004f)),true);
+            g.setColour(Colours::black.withAlpha(.35f));g.strokePath(arc,PathStrokeType(4.f,PathStrokeType::curved,PathStrokeType::rounded));
+            g.setColour(link.colour());g.strokePath(arc,PathStrokeType(2.6f,PathStrokeType::curved,PathStrokeType::rounded));
+            ++ring;
+        }
+        if(live){
+            const float a=angle(knobProportion(modulatedValue(base,*live))),radius=k->radius-1.5f;
+            const juce::Point<float> p{k->centre.x+std::sin(a)*radius,k->centre.y-std::cos(a)*radius};
+            g.setColour(ink);g.fillEllipse(p.x-3.4f,p.y-3.4f,6.8f,6.8f);
+            g.setColour(Colours::white);g.fillEllipse(p.x-2.3f,p.y-2.3f,4.6f,4.6f);
+        }
     }
     enum class Activity { unspecified, ready, waiting };
     Activity activity=Activity::unspecified;
@@ -251,6 +290,7 @@ struct Control : juce::Component {
         repaint();
     }
     void paintOverChildren(Graphics& g) override {
+        paintMovement(g);
         if(activity!=Activity::unspecified)
             drawActivityLamp(g,{3.f,float(labelHeight+2),8.f,8.f},activity==Activity::ready,label.findColour(Label::textColourId));
     }
@@ -271,7 +311,7 @@ struct Control : juce::Component {
     // Widest text this control must show: its label and its current value.
     // Covers the range ends, every stepped value (choices) and the current value, so text never clips.
     int textWidth() const {
-        if(isSwitch)return int(std::ceil(GlyphArrangement::getStringWidth(font(text::label),toggle.getButtonText())))+28+badgeWidth;
+        if(isSwitch)return int(std::ceil(GlyphArrangement::getStringWidth(font(text::label),toggle.getButtonText())))+28;
         float w=GlyphArrangement::getStringWidth(font(text::label),label.getText())+float(badgeWidth);
         auto& s=const_cast<Slider&>(slider);   // getTextFromValue is not const in JUCE; it does not modify the slider
         auto measure=[&](double v){w=std::max(w,GlyphArrangement::getStringWidth(font(text::value),s.getTextFromValue(v)));};
@@ -281,13 +321,12 @@ struct Control : juce::Component {
     }
     void resized() override {
         if(isSwitch){
-            toggle.setBounds(getLocalBounds().withTrimmedRight(badgeWidth));
-            if(modulationButton)modulationButton->setBounds(getWidth()-badgeWidth,0,badgeWidth,labelHeight);
+            toggle.setBounds(getLocalBounds());
             return;
         }
         if(slider.getTextBoxWidth()!=getWidth())slider.setTextBoxStyle(Slider::TextBoxBelow,false,getWidth(),valueHeight);
         const int buttonWidth=badgeWidth;
-        if(modulationButton)modulationButton->setBounds(getWidth()-buttonWidth,0,buttonWidth,labelHeight);
+        if(movementAvailable)movement.setBounds(getWidth()-buttonWidth,0,buttonWidth,labelHeight);
         label.setBounds(0,0,getWidth()-buttonWidth,labelHeight);slider.setBounds(0,labelHeight-1,getWidth(),getHeight()-labelHeight+1);
     }
 };
@@ -485,13 +524,18 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         }
         resized();
     }
-    ModulationActions modalModAction;
-    void setConnections(const GraphSpec& graph) {
-        {
-            const auto& params=panel(current).parameters;
-            for(size_t i=0;i<knobs.size();++i)
-                knobs[i]->bindModulation(current,params[i].id,instance,graph,modalModAction);
+    // Movement on a parameter opens its anchored editor; liveOffset feeds the knob's effective-value tick.
+    std::function<void(const std::string&,const std::string&)> openMovement;
+    std::function<std::optional<float>(const MovementLink&)> movementOffset;
+    void bindMovement(const GraphSpec& graph){
+        for(auto& k:knobs){
+            k->movementClicked=[this](Control& c){if(openMovement)openMovement(instance,c.param.id);};
+            k->liveOffset=movementOffset;k->bindMovement(current,instance,graph);
         }
+    }
+    void tickMovement(){for(auto& k:knobs)k->tickMovement();}
+    void setConnections(const GraphSpec& graph) {
+        bindMovement(graph);
         if(current=="analog.filter")if(auto* fm=control("fm_depth"))fm->showFilterFmSource(graph,instance);
         for(auto& j:jacks){j->connected=false;String links;
             for(const auto& c:graph.connections){const auto& e=j->output?c.source:c.destination;if(e.node==instance&&e.port==j->port.id){j->connected=true;const auto& other=j->output?c.destination:c.source;links+="\n"+String(other.node)+"."+String(other.port);}}
