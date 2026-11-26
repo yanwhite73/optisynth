@@ -1326,3 +1326,26 @@ silent CV steps and checks that the resulting audio matches.
 Delivered standalone 0.0.29 at the existing Release path and verified its
 executable hash against the candidate. Native recall/render and 400 modular
 checks passed, including the address/undefined-behaviour sanitizer run.
+
+## Requests 116–118 — Module faces and shared LFOs
+
+The first module panel milestone uses eight authored row layouts, bottom sockets
+and inverse output plates. Each row measures its own controls, allowing larger
+primary knobs while reserving space for labels. Bottom jacks route around the
+card edge to the existing row cable lane.
+
+Yan’s Mallet screenshot exposed two issues. The old shortcut only inspected
+direct modal cables and displayed “LFO” on an empty input. Prism afterimage
+routes timbre.out to both blend.gain_b (Strike) and strike.brightness in the
+matrix. Identify matrix assignments as well as direct modal cables, distinguish
+addition from assignment, and read the actual DSP output for movement.
+Opening a shared LFO edits both destinations. Splitting one copies its settings
+and incoming modulation and redirects just the chosen route.
+
+Delivered standalone 0.0.30 to the usual Release bundle. Candidate and installed
+executables match. Native checks passed for socket gestures, recall, shared LFO
+labels and splitting the Strike route. Control geometry passed at five knob
+densities. Prism afterimage, Optical vapour, Clay and water and the three-body
+Skin and vessel comparison rendered byte-identically to 0.0.29. All 402 modular
+checks passed in regular and sanitizer builds. The native editor checks used
+offline audio. [Panel captures](../ui/CONTEXTUAL_UI.md)

@@ -1,4 +1,18 @@
-# Optisynth status — 24 November 2026
+# Optisynth status — 26 November 2026
+
+## 0.0.30 — Module panels and shared modulation
+
+**Modular** and **Focus module** show eight authored panels: Prism tank, VA and
+sine oscillators, modal percussion, modal resonator, bass drum, dual looping delay and dual low-pass gate. Their main
+controls are larger, related controls sit in named rows, and sockets sit
+below the controls. A filled jack plate with a right-pointing arrow denotes
+an output throughout the rack. The module review tracks the remaining ports.
+
+**Prism afterimage → Mallet** shows the source number beside Strike and
+Brightness. “Shared” identifies a source with multiple destinations. Click its
+badge to open the LFO or give that destination an independent copy. Colour
+rate edits the original LFO. A moving dot follows rendered LFO output during
+playback. “+ LFO” adds a new source at an available modal CV input.
 
 ## 0.0.29 — Udu palm and shell
 

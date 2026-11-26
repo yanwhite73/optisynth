@@ -27,6 +27,7 @@ const Panel& panel(const std::string& type);
 struct Controls {
     std::array<std::atomic<float>, maxParameters> values{};
     std::atomic<int> playhead{-1};
+    std::atomic<float> lfoOutput{0};
     std::array<std::atomic<int>,4> laneHeads{};
     std::atomic<int> cycle{0};
     std::atomic<bool> stepFired{false};

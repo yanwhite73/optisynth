@@ -1083,3 +1083,77 @@ do a review of how much open source modules have been faithfully recreated, and 
 Claude session, 24 November 2026. "vhykk x" is taken to be the Forge TME Vhikk X.
 Review: [MODULE_FIDELITY_REVIEW.md](../research/modules/MODULE_FIDELITY_REVIEW.md).
 No implementation started; the recommended order awaits Yan's choice.
+
+## 116 — Continue the module fidelity handoff
+
+```text
+continue claude's work:
+
+In short, no open-source module has been faithfully recreated yet. Six modules use original open-source DSP code, but inside our own controls and the same generic card layout, which is why they're hard to tell apart and you can't easily see their ins and outs. The full review is in docs/research/modules/MODULE_FIDELITY_REVIEW.md (pushed as 80b2352).
+
+What exists today
+- Mutable-derived modules:
+  - VA oscillator, sine, modal percussion, modal resonator, bass drum: original Plaits code, about three of its 24 models.
+  - Digital filters: stmlib filter code.
+  - Prism tank: the Clouds Parasites reverb, one of six Clouds modes.
+
+  None reproduces the original's controls, inputs and outputs, or panel. The "modal resonator" is a part from inside Plaits, not Rings.
+- Dual looping delay and dual low-pass gate: modelled from the 4ms and Make Noise manuals, not from their code.
+- Panels: none follows its original.
+
+Fixing the look
+The Mutable panels have a clear structure: big knobs for the main parameters, medium ones for secondary, small attenuators beside their CV inputs, and all jacks at the bottom with outputs marked differently. We can copy that arrangement. We can't trace the artwork (it's share-alike licensed) or use the Mutable or original module names. I'm proposing a panel description for each module, built on the same JUCE layout as now so text stays readable. Every module would get its outputs visibly marked, not just the Mutable ones.
+
+What else can be approached, by how much is known
+- Open code we can use: a faithful port is possible.
+  - Mutable: Beads, all Clouds modes, Rings, Elements, all of Plaits, Warps, Tides 2, Stages and Marbles.
+  - 4ms: the real Dual Looping Delay firmware, the Spectral Multiband Resonator, and the Ensemble Oscillator.
+  - Airwindows reverbs.
+  - Beads is the strongest candidate for a deep delay/reverb: it has granular, delay and reverb processing with feedback.
+- Open code we can only study: Valley Plateau and VCV's Mutable versions (both GPL).
+- Closed but well documented: Mimeophon's manual is detailed enough for a convincing model of its controls and behaviour:
+  - eight time zones, from 1.3 ms to 41 s;
+  - Color, Halo, Skew, Flip, Hold and the μ pitch input;
+  - matching its actual sound would need recordings to compare against.
+
+  Erbe-Verb, Echophon, Morphagene, Sealegs and StarLab fall in the same group.
+- Closed and barely documented: I've taken "vhykk x" to be the Forge TME Vhikk X. Public descriptions only name its nine algorithms and its two effect engines (a metallic delay/reverb and a diffuse delay). I couldn't reach a manual. Anything built would be "inspired by", and would depend on recordings or the hardware.
+
+Proposed order (nothing started):
+1. Panel descriptions, with outputs marked on every module.
+2. A Beads-based delay/granular/reverb.
+3. The full Plaits.
+4. Rings and Elements.
+5. The real DLD code behind the looping delay.
+6. A Mimeophon-style repeater from its manual.
+7. Vhikk X once there's a manual or recordings.
+
+Which should I start on? Do you have a Mimeophon or Vhikk X, or recordings of them, for comparison?
+
+Sources: Mutable eurorack repository, 4ms SMR, 4ms Ensemble Oscillator, Mimeophon manual, Forge TME Vhikk X review (Perfect Circuit), Vhikk X listing (Rubadub).
+
+Cogitated for 4m 14s · done 15:05
+
+recap: You asked how faithfully Optisynth recreates open-source modules. The answer is that none are complete recreations yet, and the review is pushed. Next, choose which to start: original-style panels, a Beads-based delay/reverb, full Plaits, Rings/Elements, or a Mimeophon-style repeater. (turn off recaps in /config)
+Read docs/research/modules/MODULE_FIDELITY_REVIEW.md (167 lines)
+Read ../../../../../../private/tmp/claude-501/-Users-yanwhite-Documents-Music-docs-Code-optisynth/94ced1d5-0393-4892-b942-0866ef5504ab/scratchpad/site-check/built.mjs (55 lines)
+Read ../../../../Local Sites/yanwhite/v2/.tmp/audio-release-2026-11-23-optisynth/build.sh (7 lines)
+Read ../../../../.claude/projects/-Users-yanwhite-Documents-Music-docs-Code-optisynth/memory/public-copy-for-readers.md (16 lines)
+```
+
+## 117 — Claude handoff
+
+```text
+give a handoff doc to codex
+```
+
+[Handoff](HANDOFF_CLAUDE_TO_CODEX_20261126.md)
+
+## 118 — Make the Mallet panel’s LFO activity and sharing visible
+
+```text
+[Image #1] its not clear that the lfo is active, and both controls linked to the same lfo
+```
+
+Screenshot shows the Mallet section of Prism afterimage. The original factory
+graph routes timbre.out to Strike and Brightness in the matrix.

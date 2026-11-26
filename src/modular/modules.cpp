@@ -19,13 +19,13 @@ const std::vector<Panel>& panels() {
                 {"transpose","Pitch","st",-36,36,0}, {"root_note","Root note","note",0,127,48,false,1},
                 {"start","Start","",0,1,0}, {"end","End","",0,1,1},
                 {"level","Level","",0,1,.8f}, {"loop","Loop while held","",0,1,0,false,1}}},
-            {"osc.variable", "VA oscillator", "Original Plaits DSP: triangle / saw / pulse with hard sync", "source", {
+            {"osc.variable", "VA oscillator", "Triangle / saw / pulse with hard sync", "source", {
                 {"transpose","Pitch","st",-36,36,0}, {"shape","Shape","",0,1,.5f},
                 {"pulse_width","Pulse width","",.01f,.99f,.5f},
                 {"sync","Sync ratio",":1",1,16,1,true}, {"level","Level","",0,1,.5f}}},
-            {"osc.sine", "Sine oscillator", "Original Plaits DSP: continuous sine wave", "source", {
+            {"osc.sine", "Sine oscillator", "Continuous sine wave", "source", {
                 {"transpose","Pitch","st",-36,36,0}, {"level","Level","",0,1,.5f}}},
-            {"modal.resonator", "Modal resonator", "Original Plaits DSP: excite 24 modes with another module", "resonator", {
+            {"modal.resonator", "Modal resonator", "Excite 24 modes with another module", "resonator", {
                 {"transpose","Pitch","st",-36,36,0}, {"structure","Material","",0,1,.35f},
                 {"brightness","Brightness","",0,1,.5f}, {"decay","Decay","",0,1,.45f},
                 {"input_gain","Excitation","",0,1,.25f}}},
@@ -73,7 +73,7 @@ const std::vector<Panel>& panels() {
             {"mod_depth","LFO depth","",0,1,0}}});
         const char* miIds[]={"mutable.lowpass","mutable.bandpass","mutable.highpass"};
         const char* miNames[]={"Digital SVF low-pass","Digital SVF band-pass","Digital SVF high-pass"};
-        for(int i=0;i<3;++i)p.push_back({miIds[i],miNames[i],"Original Mutable stmlib DSP: resonant digital filter","filter",{
+        for(int i=0;i<3;++i)p.push_back({miIds[i],miNames[i],"Resonant state-variable filter","filter",{
             {"cutoff_hz","Cutoff","Hz",20,20000,2500,true},
             {"resonance","Resonance","Q",.5f,20,.707f,true},
             {"env_octaves","Mod amount","oct",-6,6,2}}});
@@ -407,6 +407,7 @@ public:
             const float v=shape==0?float(std::sin(6.283185307179586*phase)):shape==1?float(1-4*std::abs(phase-.5)):shape==2?float(2*phase-1):phase<.5?1.f:-1.f;
             b.outputs[0][i]=v*values[1];phase+=values[0]/48000.;phase-=std::floor(phase);
         }
+        controls->lfoOutput.store(b.outputs[0][b.frames-1],std::memory_order_relaxed);
     }
 private:double phase=0;
 };

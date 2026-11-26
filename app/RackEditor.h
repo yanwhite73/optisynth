@@ -78,7 +78,20 @@ public:
         panelViewButton.onClick=[this]{setView("panel",true);};modularViewButton.onClick=[this]{setView("modular",true);};
         panelViewButton.setTooltip("Synth panel: the patch's playing controls on one front panel");modularViewButton.setTooltip("Modular rack: every module, socket and route");
         viewMenu.onClick=[this]{showViewMenu();};viewMenu.setTooltip("Which view opens when a patch loads");
-        synthPanel.modalModAction=editor.modalModAction=[this](const Endpoint& input){editModalCV(input);};
+        synthPanel.modalModAction.add=[this](const Endpoint& input){editModalCV(input);};
+        synthPanel.modalModAction.edit=[this](const std::string& source,const Endpoint& dest,int route,bool split){
+            if(split)splitLfo(source,dest,route);
+            else {setView("modular",true);selectNode(source);}
+        };
+        synthPanel.modalModAction.signal=[this](const std::string& source,int route)->std::optional<float>{
+            const auto it=handles.find(source);
+            if(!running || it==handles.end() || !it->second)return {};
+            const float depth=route>=0 && routeHandles?routeHandles->amounts[size_t(route)].load():1.f;
+            if(depth==0.f)return {};
+            // Show the source excursion even on a deliberately shallow route.
+            return it->second->lfoOutput.load(std::memory_order_relaxed)*(depth<0?-1.f:1.f);
+        };
+        editor.modalModAction=synthPanel.modalModAction;
         synthPanel.changed=[this](const std::string& node,const std::string& key,float value){setParameter(node,key,value);};
         synthPanel.openEditor=[this](const std::string& node){if(auto* card=hardware.find(node))card->openSequencerWindow();};
         browser.load=[this](const PresetEntry& e){loadPreset(e);};
@@ -259,14 +272,27 @@ public:
         require(hardware.find("source")->current=="osc.sine"&&hardware.find("source")->knobs.size()==2,"Contextual replacement panel");
         // Request 72: every module card at three densities. Controls sit inside the card's grid area,
         // never overlap, and are at least as wide as their label and every value they can show.
-        for(const auto& spec:panels())for(int density:{32,44,60}){
+        for(const auto& spec:panels())for(int density:{32,38,44,52,60}){
             ModulePanel test("all");Values values;test.instance="layout";test.knob=density;test.show(spec.type,values,{});test.setSize(test.naturalSize().getWidth(),test.naturalSize().getHeight());
             for(size_t i=0;i<test.knobs.size();++i){if(!test.knobs[i]->isVisible())continue;const auto bounds=test.knobs[i]->getBounds();
-                require(bounds.getY()>=test.dividerY&&bounds.getBottom()<=test.getHeight()-ModulePanel::footerHeight&&bounds.getX()>=ModulePanel::pad-1&&bounds.getRight()<=test.getWidth()-ModulePanel::pad+1,"Module control bounds");
+                require(bounds.getY()>=test.content.getY()&&bounds.getBottom()<=test.content.getBottom()&&bounds.getX()>=ModulePanel::pad-1&&bounds.getRight()<=test.getWidth()-ModulePanel::pad+1,"Module control bounds");
                 if(bounds.getWidth()<test.knobs[i]->textWidth())throw std::runtime_error("Module control text fits: "+spec.type+" / "+test.knobs[i]->label.getText().toStdString()+" width "+std::to_string(bounds.getWidth())+" < "+std::to_string(test.knobs[i]->textWidth())+" at knob "+std::to_string(density));
                 for(size_t j=i+1;j<test.knobs.size();++j)if(test.knobs[j]->isVisible())require(!bounds.intersects(test.knobs[j]->getBounds()),"Module controls overlap");
             }
-            for(const auto& jack:test.jacks)require(test.getLocalBounds().contains(jack->getBounds())&&jack->getBottom()<=test.dividerY,"Module sockets inside the card header");
+            for(const auto& jack:test.jacks){
+                require(test.getLocalBounds().contains(jack->getBounds()),"Socket inside module");
+                require(jack->getY()>=test.content.getBottom(),"Socket bank clears controls");
+            }
+            if(test.plate){
+                std::set<std::string> placed;
+                for(const auto& row:*test.plate)for(const auto& id:row.parameters)require(placed.insert(id).second,"Unique panel control");
+                require(placed.size()==test.knobs.size(),"Every parameter visible on faceplate");
+                if(density==44){
+                    auto image=test.createComponentSnapshot(test.getLocalBounds());
+                    FileOutputStream stream(directory.getChildFile(String(spec.type)+"-faceplate.png"));
+                    require(stream.openedOk()&&PNGImageFormat().writeImageToStream(image,stream),"Faceplate preview");
+                }
+            }
         }
         // Exercise explicit old-format import using the actual 0.0.2 keys.
         const auto legacy=JSON::parse(R"({"format":"optisynth.instrument","version":1,"source":"modal.voice","envelope":"spectral.ahdsfr","filter":"spectral.lowpass","amplitudeEnvelope":true,"filterEnvelope":true,"gain":0.25,"parameters":{"modal.voice":{"decay":0.7},"spectral.lowpass":{"cutoff_hz":1800}}})");
@@ -338,7 +364,7 @@ public:
                 PathFlatteningIterator path(c.path);
                 require(!c.path.isEmpty(),"Cable has a laid-out path");
                 while(path.next())for(const auto& m:hardware.modules){
-                    const auto body=m->getBounds().withTrimmedTop(m->dividerY).toFloat().expanded(1.f);
+                    const auto body=m->content.translated(m->getX(),m->getY()).toFloat().expanded(1.f);
                     require(!body.intersects(Line<float>(path.x1,path.y1,path.x2,path.y2)),"Cable crossing a module control area");
                 }
             }
@@ -353,10 +379,10 @@ public:
         focusMode.setToggleState(false,dontSendNotification);commit({rackPreset(2),.25f},"resonator");capture("hardware-resonator.png");
         setSize(1120,800);commit({rackPreset(1),.25f},"envelope");capture("hardware-minimum.png");
         auto* decay=hardware.find("source")->control("decay");
-        require(decay->modulationButton && decay->modulationButton->getButtonText()=="LFO","Decay exposes LFO shortcut");
+        require(decay->modulationButton && decay->modulationButton->getButtonText()=="+ LFO","Decay exposes LFO shortcut");
         const auto dryModal=render(document.graph);
         editModalCV({"source","decay"});const auto lfoId=selected;
-        require(hardware.find(lfoId)->current=="mod.lfo" && hardware.find("source")->control("decay")->modulationButton->getButtonText()=="CV","Created and patched a decay LFO");
+        require(hardware.find(lfoId)->current=="mod.lfo" && hardware.find("source")->control("decay")->modulationButton->getButtonText().startsWith("LFO "),"Created and patched a decay LFO");
         const auto wetModal=render(readRack(rackJSON(document)).graph);
         double delta=0;for(size_t i=0;i<wetModal.size();++i)delta+=std::abs(wetModal[i]-dryModal[i]);
         require(delta>1,"LFO cable changes rendered modal decay");
@@ -578,8 +604,24 @@ public:
             require(loadFactory(24),"Prism afterimage loads");drain();
             require(synthPanel.layoutSound() && document.graph.outputs.front().node=="prism" && synthPanel.control("prism","mix"),"Ostinato echo controls");
             require(handles.at("prism")->values[14].load()==0 && !synthPanel.control("prism","freeze"),"Ostinato isolates the clocked echo");
+            auto* strikeBadge=synthPanel.control("blend","gain_b")->modulationButton.get();
+            auto* brightBadge=synthPanel.control("strike","brightness")->modulationButton.get();
+            require(strikeBadge && brightBadge && strikeBadge->getButtonText()==brightBadge->getButtonText()
+                    && strikeBadge->getTooltip().contains("strike.brightness") && strikeBadge->getTooltip().contains("blend.gain_b"),
+                    "Mallet panel identifies both destinations of the timbre LFO");
+            require(synthPanel.control("strike","structure")->modulationButton->getButtonText()=="+ LFO","Material has an available input");
+            require(synthPanel.control("timbre","rate")->modulationButton->getButtonText()=="LFO 1 source",
+                    "Colour rate identifies the source rather than another destination");
+            auto* tankCard=hardware.find("prism");
+            auto tankImage=tankCard->createComponentSnapshot(tankCard->getLocalBounds());
+            FileOutputStream tankStream(directory.getChildFile("prism-connected.png"));
+            require(tankStream.openedOk()&&PNGImageFormat().writeImageToStream(tankImage,tankStream),"Connected Prism module capture");
             capture("prism-afterimage.png");
             setSize(1120,800);resized();capture("prism-minimum.png");setSize(1440,940);resized();
+            splitLfo("timbre",{"blend","gain_b"},1);
+            require(document.graph.modulations[0].source.node=="timbre" && document.graph.modulations[1].source.node!="timbre"
+                    && synthPanel.control("blend","gain_b")->modulationButton->getButtonText()!=synthPanel.control("strike","brightness")->modulationButton->getButtonText(),
+                    "Separate Strike from Brightness and show both independent LFOs");
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
         }
         {
@@ -1109,6 +1151,32 @@ private:
             auto node=std::find_if(document.graph.nodes.begin(),document.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id;});
             if(node!=document.graph.nodes.end()){const auto& ps=panel(node->type).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==key)handle->second->values[i]=value;}
         }
+    }
+    void splitLfo(const std::string& source,const Endpoint& dest,int route){
+        const auto& graph=document.graph;
+        const auto osc=std::find_if(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& n){return n.id==source && n.type=="mod.lfo";});
+        if(osc==graph.nodes.end())return;
+        auto next=document;
+        const auto base=dest.node+"_"+dest.port+"_lfo";auto id=base;
+        for(int n=2;std::any_of(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& other){return other.id==id;});++n)
+            id=base+"_"+std::to_string(n);
+        auto copy=*osc;copy.id=id;next.graph.nodes.push_back(copy);
+        if(route>=0){
+            if(size_t(route)>=next.graph.modulations.size())return;
+            auto& m=next.graph.modulations[size_t(route)];
+            if(m.source.node!=source || m.destination.node!=dest.node || m.destination.port!=dest.port)return;
+            m.source.node=id;
+        }else{
+            const std::string port=dest.port=="structure"?"mat":dest.port=="brightness"?"bright":"decay";
+            auto cable=std::find_if(next.graph.connections.begin(),next.graph.connections.end(),[&](const Connection& c){
+                return c.source.node==source && c.destination.node==dest.node && c.destination.port==port;
+            });
+            if(cable==next.graph.connections.end())return;
+            cable->source.node=id;
+        }
+        for(auto c:graph.connections)if(c.destination.node==source){c.destination.node=id;next.graph.connections.push_back(c);}
+        for(auto m:graph.modulations)if(m.destination.node==source){m.destination.node=id;next.graph.modulations.push_back(m);}
+        if(commit(std::move(next),id))message(String(id)+" now drives "+String(dest.node)+"."+String(dest.port));
     }
     void editModalCV(const Endpoint& input){
         std::string source;

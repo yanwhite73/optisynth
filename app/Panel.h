@@ -23,7 +23,8 @@ Colour panelColour(const std::string& id) {
     if(id=="fx.prism_tank")return Colour(0xffabb8d7);
     if(id=="fx.dual_loop")return Colour(0xffb5c1be);
     if(id=="mod.lfo")return Colour(0xffd7b282);
-    if(id=="modal.voice"||id=="modal.resonator")return Colour(0xffb4a4d1);
+    if(id=="modal.voice")return Colour(0xffdac9bd);
+    if(id=="modal.resonator")return Colour(0xffbecdc2);
     if(id=="drum.analog")return Colour(0xffd7b282);
     if(id.rfind("osc.",0)==0||id=="analog.vco")return Colour(0xff8ebecb);
     if(id=="voice.mix")return Colour(0xffc9a96a);
@@ -82,6 +83,35 @@ struct KnobLook : LookAndFeel_V4 {
         g.setColour(paper);g.drawLine(c.x+std::sin(a)*outer*.68f,c.y-std::cos(a)*outer*.68f,c.x+std::sin(a)*outer,c.y-std::cos(a)*outer,2.3f);
     }
 };
+// The meter shows the source waveform in the direction of the route.
+struct RouteBadge final : TextButton, private Timer {
+    std::function<std::optional<float>()> signal;
+    std::optional<float> level;
+    void timerCallback() override {
+        if(!isShowing() || !signal)return;
+        const auto value=signal();
+        if(value!=level){
+            level=value;
+            setColour(TextButton::buttonColourId,level?Colour(0xff196c51):Colour(0xff405957));
+            repaint();
+        }
+    }
+    void monitor(std::function<std::optional<float>()> read){
+        signal=std::move(read);if(signal)startTimerHz(20);
+    }
+    void paintButton(Graphics& g,bool over,bool down) override {
+        TextButton::paintButton(g,over,down);
+        if(!level)return;
+        const float span=getWidth()*.38f,mid=getWidth()*.5f,y=getHeight()-2.f;
+        g.setColour(Colour(0xff17372d));g.drawLine(mid-span,y,mid+span,y);
+        g.setColour(Colours::white);g.fillEllipse(mid+span*std::clamp(*level,-1.f,1.f)-1.5f,y-1.5f,3,3);
+    }
+};
+struct ModulationActions {
+    std::function<void(const Endpoint&)> add;
+    std::function<void(const std::string&,const Endpoint&,int,bool)> edit;
+    std::function<std::optional<float>(const std::string&,int)> signal;
+};
 // One parameter: label, knob (or trim slider / switch) and value, stacked tightly.
 struct Control : juce::Component {
     static constexpr int labelHeight=15,valueHeight=18;
@@ -121,27 +151,73 @@ struct Control : juce::Component {
             toggle.setToggleState(value>=.5f,dontSendNotification);toggle.onClick=[this]{slider.setValue(toggle.getToggleState()?1:0,sendNotificationSync);};
         }
     }
-    std::unique_ptr<TextButton> modulationButton;
-    using ModalModAction=std::function<void(const Endpoint&)>;
-    void bindModalModulation(const std::string& model,const std::string& param,const std::string& node,
-                             const GraphSpec& graph,const ModalModAction& action){
-        if(!action || (model!="modal.voice" && model!="modal.resonator"))return;
-        const std::string port=param=="structure"?"mat":param=="brightness"?"bright":param=="decay"?"decay":"";
-        if(port.empty())return;
-        Endpoint input{node,port};
-        const auto cable=std::find_if(graph.connections.begin(),graph.connections.end(),[&](const Connection& c){
-            return c.destination.node==node && c.destination.port==port;
-        });
-        const bool patched=cable!=graph.connections.end();
-        modulationButton=std::make_unique<TextButton>();
-        modulationButton->setButtonText(patched?"CV":"LFO");
-        modulationButton->setTooltip(patched?"Edit modulation source: "+String(cable->source.node)
-                                         :"Create an LFO and patch it to "+label.getText().toLowerCase());
-        modulationButton->onClick=[safe=SafePointer<Control>(this),input,action]{
-            MessageManager::callAsync([safe,input,action]{if(safe)action(input);});
+    std::unique_ptr<RouteBadge> modulationButton;
+    struct Link { std::string source; String name; int route; bool lfo,shared; };
+    int badgeWidth=0;
+    void bindModulation(const std::string& model,const std::string& param,const std::string& node,
+                        const GraphSpec& graph,const ModulationActions& actions){
+        modulationButton.reset();badgeWidth=0;
+        if(!actions.add)return;
+        const bool modal=model=="modal.voice"||model=="modal.resonator";
+        const std::string port=modal?(param=="structure"?"mat":param=="brightness"?"bright":param=="decay"?"decay":""):"";
+        const bool sourceKnob=model=="mod.lfo"&&param=="rate";
+        const Endpoint destination{node,param};
+        std::vector<Link> links;String details;
+        auto append=[&](const std::string& source,int route){
+            int ordinal=0;bool lfo=false;
+            for(const auto& n:graph.nodes){
+                if(n.type=="mod.lfo")++ordinal;
+                if(n.id==source){lfo=n.type=="mod.lfo";break;}
+            }
+            const String name=lfo?"LFO "+String(ordinal):String(source);
+            StringArray destinations;
+            for(const auto& m:graph.modulations)if(m.source.node==source)
+                destinations.add(String(m.destination.node)+"."+String(m.destination.port));
+            for(const auto& c:graph.connections)if(c.source.node==source)
+                destinations.add(String(c.destination.node)+"."+String(c.destination.port));
+            details+=name+" ("+String(source)+") → "+destinations.joinIntoString(", ")+"\n";
+            links.push_back({source,name,route,lfo,destinations.size()>1});
         };
-        addAndMakeVisible(*modulationButton);
-        resized();
+        for(size_t i=0;i<graph.modulations.size();++i){
+            const auto& m=graph.modulations[i];
+            if(m.destination.node==node&&m.destination.port==param)append(m.source.node,int(i));
+        }
+        if(!port.empty())for(const auto& c:graph.connections)
+            if(c.destination.node==node&&c.destination.port==port)append(c.source.node,-1);
+        const bool sourceIndicator=sourceKnob && links.empty();
+        if(sourceIndicator)append(node,-1);
+        if(links.empty()&&port.empty())return;
+        modulationButton=std::make_unique<RouteBadge>();
+        auto& button=*modulationButton;
+        const String title=links.empty()?String("+ LFO"):links.front().name
+            +(sourceIndicator?" source":links.size()>1?" +":links.front().shared?" shared":"");
+        button.setButtonText(title);
+        badgeWidth=int(std::ceil(GlyphArrangement::getStringWidth(font(12),title)))+16;
+        if(links.empty()){
+            button.setTooltip("Add an independent LFO to "+label.getText().toLowerCase());
+            button.onClick=[safe=SafePointer<Control>(this),input=Endpoint{node,port},add=actions.add]{
+                MessageManager::callAsync([safe,input,add]{if(safe)add(input);});
+            };
+        }else{
+            button.setColour(TextButton::buttonColourId,Colour(0xff405957));
+            button.setColour(TextButton::textColourOffId,Colours::white);
+            button.setTooltip(details.trimEnd()+"\nClick to inspect the source or separate a shared LFO.");
+            const auto& first=links.front();
+            if(first.lfo && actions.signal)button.monitor([read=actions.signal,source=first.source,route=first.route]{return read(source,route);});
+            button.onClick=[safe=SafePointer<Control>(this),links,destination,sourceIndicator,edit=actions.edit]{
+                if(!safe || !edit)return;
+                PopupMenu menu;
+                for(size_t i=0;i<links.size();++i){
+                    const auto& link=links[i];const String name=link.name+" ("+String(link.source)+")";
+                    menu.addItem(int(2*i+1),"Open "+name);
+                    if(link.lfo && link.shared && !sourceIndicator)
+                        menu.addItem(int(2*i+2),"Give "+safe->label.getText().toLowerCase()+" its own LFO");
+                }
+                menu.showMenuAsync(PopupMenu::Options().withTargetComponent(safe->modulationButton.get()),
+                    [safe,links,destination,edit](int result){if(safe && result>0)edit(links[size_t(result-1)/2].source,destination,links[size_t(result-1)/2].route,result%2==0);});
+            };
+        }
+        addAndMakeVisible(button);resized();
     }
     enum class Activity { unspecified, ready, waiting };
     Activity activity=Activity::unspecified;
@@ -181,8 +257,8 @@ struct Control : juce::Component {
     // Widest text this control must show: its label and its current value.
     // Covers the range ends, every stepped value (choices) and the current value, so text never clips.
     int textWidth() const {
-        if(isSwitch)return int(std::ceil(GlyphArrangement::getStringWidth(font(text::label),toggle.getButtonText())))+28;
-        float w=GlyphArrangement::getStringWidth(font(text::label),label.getText())+(modulationButton?31.f:0.f);
+        if(isSwitch)return int(std::ceil(GlyphArrangement::getStringWidth(font(text::label),toggle.getButtonText())))+28+badgeWidth;
+        float w=GlyphArrangement::getStringWidth(font(text::label),label.getText())+float(badgeWidth);
         auto& s=const_cast<Slider&>(slider);   // getTextFromValue is not const in JUCE; it does not modify the slider
         auto measure=[&](double v){w=std::max(w,GlyphArrangement::getStringWidth(font(text::value),s.getTextFromValue(v)));};
         const auto range=slider.getRange();measure(range.getStart());measure(range.getEnd());measure(slider.getValue());
@@ -190,9 +266,13 @@ struct Control : juce::Component {
         return int(std::ceil(w))+4;   // a little air either side so text never touches the next column
     }
     void resized() override {
-        if(isSwitch){toggle.setBounds(getLocalBounds());return;}
+        if(isSwitch){
+            toggle.setBounds(getLocalBounds().withTrimmedRight(badgeWidth));
+            if(modulationButton)modulationButton->setBounds(getWidth()-badgeWidth,0,badgeWidth,labelHeight);
+            return;
+        }
         if(slider.getTextBoxWidth()!=getWidth())slider.setTextBoxStyle(Slider::TextBoxBelow,false,getWidth(),valueHeight);
-        const int buttonWidth=modulationButton?31:0;
+        const int buttonWidth=badgeWidth;
         if(modulationButton)modulationButton->setBounds(getWidth()-buttonWidth,0,buttonWidth,labelHeight);
         label.setBounds(0,0,getWidth()-buttonWidth,labelHeight);slider.setBounds(0,labelHeight-1,getWidth(),getHeight()-labelHeight+1);
     }
@@ -225,30 +305,47 @@ struct Jack : Button {
     void mouseExit(const MouseEvent& e) override {Button::mouseExit(e);if(cableHover)cableHover(nullptr);}
     void paintButton(Graphics& g,bool over,bool down) override {
         const auto centre=socket();const float cx=float(centre.x),cy=float(centre.y);
+        if(output){g.setColour(text);g.fillRoundedRectangle(getLocalBounds().toFloat().reduced(1),4);}
         g.setColour(Colour(0xff16181a));g.fillEllipse(cx-10,cy-10,20,20);
         g.setColour(over||down?Colour(0xfff0c76c):Colour(0xffc2c3bd));g.drawEllipse(cx-8.5f,cy-8.5f,17,17,2.4f);
         g.setColour(connected?(port.type==SignalType::Control?Colour(0xfff0c76c):teal):Colour(0xff080a0c));g.fillEllipse(cx-4,cy-4,8,8);
-        g.setColour(text);g.setFont(font(text::jack));g.drawFittedText(String(port.id).toUpperCase(),0,23,getWidth(),13,Justification::centred,1,.8f);
-        if(output){g.setColour(text.withAlpha(.6f));g.drawLine(cx-9,getHeight()-1.f,cx+9,getHeight()-1.f,1);}
+        g.setColour(output?(text==ink?paper:ink):text);g.setFont(font(text::jack));g.drawFittedText(String(port.id).toUpperCase(),0,23,getWidth(),13,Justification::centred,1,.8f);
+        if(output){Path arrow;arrow.addTriangle(cx+10,9,cx+10,15,cx+14,12);g.fillPath(arrow);}
     }
 };
+// Rows follow the playing gesture. Diameter is expressed as a percentage of rack density.
+struct FaceRow { const char* legend; int diameterPercent; std::vector<std::string> parameters; };
+using Faceplate=std::vector<FaceRow>;
+inline const Faceplate* faceplate(const std::string& type) {
+    static const std::map<std::string,Faceplate> plates{
+        {"analog.dual_lpg",{{"Gate opening",145,{"a_control","b_control"}},{"Damping",95,{"a_damp","b_damp"}},
+                             {"Key strike",70,{"a_keys","b_keys"}}}},
+        {"fx.dual_loop",{{"Channel clocks",145,{"a_time","b_time"}},
+                         {"Loop A",85,{"a_feed","a_feedback","a_mix"}},{"Loop B",85,{"b_feed","b_feedback","b_mix"}},
+                         {"Playback",70,{"a_hold","a_reverse","b_hold","b_reverse"}}}},
+        {"modal.voice",{{"Struck body",145,{"structure","decay"}},{"Strike colour",90,{"transpose","brightness"}}}},
+        {"modal.resonator",{{"Resonant body",145,{"transpose","structure"}},{"Response",95,{"brightness","decay"}},{"Input trim",65,{"input_gain"}}}},
+        {"drum.analog",{{"Drum head",145,{"transpose","decay"}},{"Attack",80,{"tone","attack_fm","self_fm"}}}},
+        {"osc.variable",{{"Waveform",145,{"transpose","shape"}},{"Pulse and sync",85,{"pulse_width","sync","level"}}}},
+        {"osc.sine",{{"Frequency",145,{"transpose"}},{"Output level",80,{"level"}}}},
+        {"fx.prism_tank",{{"Space",135,{"size","decay","diffusion","freeze"}},
+                          {"Echo",90,{"sync","predelay","feedback","echo"}},
+                          {"Pitch and motion",80,{"pitch","shift","rate","motion"}},
+                          {"Return",80,{"tone","tank","mix"}}}}
+    };
+    const auto it=plates.find(type);
+    return it==plates.end()?nullptr:&it->second;
+}
 // Parameter rows per module, read left to right. Modules without an entry flow into rows of three.
 inline std::vector<std::vector<std::string>> controlRows(const std::string& type) {
     static const std::map<std::string,std::vector<std::vector<std::string>>> rows{
-        {"analog.dual_lpg",{{"a_control","a_damp","a_keys"},{"b_control","b_damp","b_keys"}}},
-        {"fx.prism_tank",{{"sync","predelay","feedback","echo"},{"size","decay","diffusion","tone"},{"pitch","shift","rate","motion"},{"freeze","tank","mix"}}},
-        {"fx.dual_loop",{{"a_time","a_feed","a_feedback"},{"a_mix","a_hold","a_reverse"},
-                          {"b_time","b_feed","b_feedback"},{"b_mix","b_hold","b_reverse"}}},
         {"analog.vco",{{"transpose","fine","drift"},{"saw","pulse","triangle"},{"pulse_width","pwm_depth","fm_depth","level"}}},
         {"analog.filter",{{"cutoff_hz","resonance","env_octaves","key_track"},{"mode","drive","fm_depth","quality"},{"band","poles","pole_mix"}}},
         {"analog.env",{{"attack","decay","sustain"},{"release","velocity"}}},
         {"voice.mix",{{"voices","unison","detune"},{"glide","spread","level"},{"tuning","root","steal","keyboard"}}},
         {"spectral.adsr",{{"attack","decay"},{"sustain","release"}}},
         {"spectral.ahdsfr",{{"attack","hold","decay"},{"sustain","release","fade"},{"attack_curve","decay_curve","release_curve"}}},
-        {"osc.variable",{{"transpose","sync","shape"},{"pulse_width","level"}}},
-        {"modal.resonator",{{"transpose","input_gain","structure"},{"brightness","decay"}}},
-        {"drum.analog",{{"transpose","tone","decay"},{"attack_fm","self_fm"}}},
-        {"mod.lfo",{{"rate","depth"},{"wave","retrigger"}}},
+                                {"mod.lfo",{{"rate","depth"},{"wave","retrigger"}}},
     };
     const auto& ps=panel(type).parameters;std::vector<std::vector<std::string>> out;std::set<std::string> used;
     if(auto it=rows.find(type);it!=rows.end())
@@ -273,7 +370,14 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     TextButton sampleButton{"Load WAV..."},menuButton{String::fromUTF8("\xe2\x8b\xaf")};Label sampleName,strokeRole;SamplePtr sample;std::string samplePath;
     std::function<void()> chooseSample;std::function<void(const File&)> sampleDropped;
     int knob=44;   // density: knob diameter in pixels
-    Rectangle<int> content,waveArea;int dividerY=0;
+    Rectangle<int> content,waveArea;int dividerY=0,jackTop=headerHeight;
+    const Faceplate* plate=nullptr;
+    static constexpr int legendHeight=16;
+    int rowDiameter(const FaceRow& row) const {return knob*row.diameterPercent/100;}
+    int faceRowHeight(const FaceRow& row) const {return legendHeight+Control::labelHeight+Control::valueHeight+rowDiameter(row);}
+    int faceCellWidth(const std::string& id,const FaceRow& row) const {
+        return std::max(control(id)->textWidth()+8,rowDiameter(row)+12);
+    }
     ModulePanel(std::string group):family(std::move(group)) {
         choice.setColour(ComboBox::backgroundColourId,Colour(0xff232527));choice.setColour(ComboBox::textColourId,paper);
         choice.setColour(ComboBox::outlineColourId,Colours::transparentBlack);
@@ -313,7 +417,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     std::string selected() const {int i=choice.getSelectedId()-1;return i>=0&&i<int(types.size())?types[size_t(i)]:types.front();}
     void select(const std::string& type) {auto it=std::find(types.begin(),types.end(),type);if(it==types.end())throw std::invalid_argument("Wrong module family: "+type);choice.setSelectedId(int(it-types.begin())+1,dontSendNotification);}
     void show(const std::string& type,Values& state,std::shared_ptr<Controls> controls,std::function<void(const std::string&,float)> changed={}) {
-        current=type;family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();referenceSequence.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
+        current=type;plate=faceplate(type);family=panel(type).family;routed=bool(controls);select(type);sequence.reset();performance.reset();referenceSequence.reset();knobs.clear();jacks.clear();look.markings=panelInk(type);
         sampleButton.setVisible(type=="sample.player");sampleName.setVisible(type=="sample.player");strokeRole.setVisible(type=="sample.player");
         const bool spectral=type=="spectral.engine";section.setVisible(spectral);presetButton.setVisible(spectral);presetName.setVisible(spectral);more.setVisible(spectral);subpage=0;
         const auto& d=panel(type);
@@ -367,12 +471,12 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         }
         resized();
     }
-    Control::ModalModAction modalModAction;
+    ModulationActions modalModAction;
     void setConnections(const GraphSpec& graph) {
-        if(current=="modal.voice" || current=="modal.resonator"){
+        {
             const auto& params=panel(current).parameters;
             for(size_t i=0;i<knobs.size();++i)
-                knobs[i]->bindModalModulation(current,params[i].id,instance,graph,modalModAction);
+                knobs[i]->bindModulation(current,params[i].id,instance,graph,modalModAction);
         }
         if(current=="analog.filter")if(auto* fm=control("fm_depth"))fm->showFilterFmSource(graph,instance);
         for(auto& j:jacks){j->connected=false;String links;
@@ -413,6 +517,15 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     Control* control(const std::string& id) const {const auto& ps=panel(current).parameters;for(size_t i=0;i<ps.size()&&i<knobs.size();++i)if(ps[i].id==id)return knobs[i].get();return nullptr;}
     Rectangle<int> contentSize() const {
         const int cw=cellWidth(),ch=cellHeight();
+        if(plate){
+            int width=0,height=0;
+            for(const auto& row:*plate){
+                int rowWidth=0;
+                for(const auto& id:row.parameters)rowWidth+=faceCellWidth(id,row)+gap;
+                width=std::max(width,rowWidth-gap);height+=faceRowHeight(row)+gap;
+            }
+            return {0,0,width,height-gap};
+        }
         if(editorContent())return {0,0,panelWidth(current)-2*pad,300};   // sequencer editors keep their own layouts
         if(current=="spectral.engine")return {0,0,3*cw+2*gap,28+gap+28+gap+2*ch+gap};
         if(current=="sample.player")return {0,0,std::max(total(columnWidths(gridRows())),3*cw+2*gap),26+gap+36+gap+44+gap+2*ch+gap};
@@ -421,11 +534,20 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         return {0,0,total(columnWidths(rows)),int(rows.size())*ch+int(rows.size()-1)*gap};
     }
     int innerWidth() const {return std::max({contentSize().getWidth(),156,std::min(int(jacks.size()),current=="spectral.engine"?10:8)*Jack::size});}
-    int jackRows(int inner) const {const int perRow=std::max(1,inner/Jack::size);return jacks.empty()?0:(int(jacks.size())+perRow-1)/perRow;}
+    struct JackBank { int inputs, inputColumns, outputColumns, rows; };
+    JackBank jackBank(int inner) const {
+        const int count=int(jacks.size());
+        const int ins=int(std::count_if(jacks.begin(),jacks.end(),[](const auto& j){return !j->output;}));
+        const int outs=count-ins,slots=std::max(2,inner/Jack::size);
+        const int left=outs==0?slots:ins==0?0:std::clamp((slots*ins+count/2)/count,1,slots-1);
+        const int right=slots-left;
+        return {ins,left,right,std::max(ins?(ins+left-1)/left:0,outs?(outs+right-1)/right:0)};
+    }
+    int jackRows(int inner) const {return jackBank(inner).rows;}
     static constexpr int cableLane=12, jackPitch=Jack::size+cableLane;
     Rectangle<int> naturalSize() const {
         const int inner=innerWidth();
-        return {0,0,inner+2*pad,headerHeight+jackRows(inner)*jackPitch+gap+4+contentSize().getHeight()+gap+footerHeight+4};
+        return {0,0,inner+2*pad,headerHeight+cableLane+jackRows(inner)*jackPitch+gap+4+contentSize().getHeight()+gap+footerHeight+4};
     }
     void paint(Graphics& g) override {
         if(current.empty())return;auto r=getLocalBounds().toFloat();const auto ink2=panelInk(current);
@@ -433,6 +555,16 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
         g.setFont(font(text::header));g.setColour(ink2);g.drawText(String(instance).toUpperCase()+"  /  "+String(family).toUpperCase(),pad,4,getWidth()-2*pad-14,15,Justification::centredLeft,true);
         g.setColour(routed?Colour(0xffcbe0a8):Colour(0xff7b7b70));g.fillEllipse(float(getWidth()-pad-6),8,6,6);
         g.setColour(ink2.withAlpha(.35f));g.drawHorizontalLine(dividerY,float(pad),float(getWidth()-pad));
+        if(plate){
+            int y=content.getY();
+            for(const auto& row:*plate){
+                const String title=String(row.legend).toUpperCase();
+                g.setFont(font(text::header));g.setColour(ink2);g.drawText(title,pad+2,y,getWidth()-2*pad,legendHeight,Justification::centredLeft);
+                const int x=pad+10+int(std::ceil(GlyphArrangement::getStringWidth(font(text::header),title)));
+                g.setColour(ink2.withAlpha(.36f));g.drawHorizontalLine(y+legendHeight/2,float(x),float(getWidth()-pad));
+                y+=faceRowHeight(row)+gap;
+            }
+        }
         if(current=="sample.player"){
             const auto wave=waveArea.toFloat();g.setColour(ink);g.fillRoundedRectangle(wave,2);
             if(sample&&knobs.size()>3){const float start=float(knobs[2]->slider.getValue()),end=float(knobs[3]->slider.getValue());const float mid=wave.getCentreY(),half=wave.getHeight()*.45f;
@@ -456,13 +588,32 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
     void resized() override {
         const int inner=getWidth()-2*pad;
         choice.setBounds(pad,21,inner-(menuButton.isVisible()?28:0),24);menuButton.setBounds(getWidth()-pad-24,21,24,24);
-        const int perRow=std::max(1,inner/Jack::size);
-        for(size_t i=0;i<jacks.size();++i)
-            jacks[i]->setBounds(pad+int(i)%perRow*Jack::size,headerHeight+int(i)/perRow*jackPitch+cableLane,Jack::size,Jack::size);
-        const int jackHeight=jackRows(inner)*jackPitch;
-        dividerY=headerHeight+jackHeight+gap;
-        const auto size=contentSize();content={pad+std::max(0,(inner-size.getWidth())/2),dividerY+4,std::min(inner,size.getWidth()),size.getHeight()};
+        const auto bank=jackBank(inner);
+        jackTop=getHeight()-footerHeight-4-gap-bank.rows*jackPitch;
+        dividerY=jackTop;
+        for(int i=0;i<int(jacks.size());++i){
+            const bool output=jacks[size_t(i)]->output;
+            const int columns=output?bank.outputColumns:bank.inputColumns;
+            const int index=output?i-bank.inputs:i;
+            const int row=index/columns;
+            const int rowCount=output?std::min(columns,int(jacks.size())-bank.inputs-row*columns):0;
+            const int start=output?inner-rowCount*Jack::size:0;
+            jacks[size_t(i)]->setBounds(pad+start+index%columns*Jack::size,jackTop+row*jackPitch+cableLane,Jack::size,Jack::size);
+        }
+        const auto size=contentSize();
+        content={pad+std::max(0,(inner-size.getWidth())/2),headerHeight+cableLane+4,std::min(inner,size.getWidth()),size.getHeight()};
         if(current.empty())return;
+        if(plate){
+            int y=content.getY();
+            for(const auto& row:*plate){
+                FlexBox controls;controls.justifyContent=FlexBox::JustifyContent::spaceAround;
+                for(const auto& id:row.parameters)
+                    controls.items.add(FlexItem(*control(id)).withWidth(float(faceCellWidth(id,row))));
+                controls.performLayout(Rectangle<int>(pad,y+legendHeight,inner,faceRowHeight(row)-legendHeight).toFloat());
+                y+=faceRowHeight(row)+gap;
+            }
+            return;
+        }
         if(referenceSequence){referenceSequence->setBounds(content);return;}
         if(performance){performance->setBounds(content);return;}
         if(sequence){sequence->setBounds(content);return;}
@@ -650,7 +801,7 @@ struct HardwareRack : juce::Component, private AsyncUpdater {
             // While the plug follows the mouse, keep every control and jack legend readable.
             for(const auto& card:modules){
                 auto bounds=card->getBounds();
-                g.excludeClipRegion(bounds.removeFromTop(ModulePanel::headerHeight));
+                g.excludeClipRegion(bounds.removeFromTop(card->jackTop));
                 for(int row=0;row<card->jackRows(card->getWidth()-2*ModulePanel::pad);++row){
                     bounds.removeFromTop(ModulePanel::cableLane+23);
                     g.excludeClipRegion(bounds.removeFromTop(Jack::size-23));

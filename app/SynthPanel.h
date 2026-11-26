@@ -58,7 +58,7 @@ class SynthPanelView final : public juce::Component {
 public:
     std::function<void(const std::string&,const std::string&,float)> changed;
     std::function<void(const std::string&)> openEditor;
-    Control::ModalModAction modalModAction;
+    ModulationActions modalModAction;
     SynthPanelView(){face.owner=this;addAndMakeVisible(viewport);viewport.setViewedComponent(&face,false);viewport.setScrollBarsShown(true,false);viewport.setScrollBarThickness(10);}
     ~SynthPanelView() override {controls.clear();launchers.clear();sections.clear();viewport.setViewedComponent(nullptr,false);}
     void build(const RackDocument& d) {
@@ -88,7 +88,7 @@ public:
                 auto control=std::make_unique<Control>(p,value,[this,id=c.node,key=c.parameter](float v){if(changed)changed(id,key,v);},look,theme.legend);
                 control->slider.setTooltip(String(c.node)+"."+String(c.parameter)+" / double-click to reset");
                 if(node->type=="analog.filter"&&c.parameter=="fm_depth")control->showFilterFmSource(d.graph,c.node);
-                control->bindModalModulation(node->type,c.parameter,c.node,d.graph,modalModAction);
+                control->bindModulation(node->type,c.parameter,c.node,d.graph,modalModAction);
                 face.addAndMakeVisible(*control);section->items.push_back(control.get());
                 keys.push_back({c.node,c.parameter});controls.push_back(std::move(control));
             }

@@ -582,7 +582,7 @@ std::vector<Panel> analogPanels() {
     }
     p.push_back(std::move(gate));
     p.push_back(std::move(delay));
-    p.push_back({"fx.prism_tank", "Prism tank", "Clouds Parasites Miverb tank with a playable clocked echo", "effect", {
+    p.push_back({"fx.prism_tank", "Prism tank", "Modulated stereo reverb with pitch feedback and a clocked echo", "effect", {
         {"mix","Mix","",0,1,.38f}, {"size","Size","",0,1,.65f}, {"decay","Regeneration","",0,1.18f,.82f},
         {"diffusion","Diffusion","",0,1,.75f}, {"tone","Damping tilt","",-1,1,-.24f},
         {"pitch","Loop pitch","st",-12,12,7}, {"shift","Pitch return","",0,1,.34f},

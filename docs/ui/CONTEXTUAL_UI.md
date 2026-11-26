@@ -101,3 +101,17 @@ Stochas's grid/chain screenshot and Kria/Meadowphysics manual diagrams were insp
 and collected under `../references/sequencer_research_20261117/manuals`. The source
 manifest records their URLs/hashes. They are visual references, not app artwork.
 No UI implementation or mockup is claimed for this research milestone.
+
+## Rack panels and LFO sources in 0.0.30
+
+Controls are grouped by musical function. The rack and focus view take their
+panel sizes from the same description. Inputs occupy the left side of the
+bottom socket bank and outputs the right. Outputs have a filled plate and an
+outward arrow. [Prism tank in the factory patch](module-panels/prism-tank.png)
+
+In Prism afterimage, Strike and Brightness show **LFO 1 shared**, Colour rate
+shows **LFO 1 source**, and Material shows **+ LFO**. A destination’s menu
+can open the shared source or split that destination to an independent LFO.
+The meter reads the rendered source waveform with the route polarity. Its
+excursion shows LFO activity even on a shallow assignment. The matrix holds
+the individual route amounts. [Mallet panel at minimum window size](module-panels/prism-afterimage.png)

@@ -163,4 +163,11 @@ Each port follows the existing rules:
 - convert 32 kHz designs to 48 kHz deliberately;
 - run offline render checks before Yan listens.
 
-None of these steps is started by this review.
+The review above records the state at 0.0.29.
+
+**26 November, 0.0.30.** Step 1 shipped in the module rack and focus view.
+Eight panel descriptions set each row’s controls, knob sizes and grouping.
+Prism tank groups space, echo, pitch/motion and returns. All rack outputs
+use an inverse jack plate and a directional mark. The curated preset front
+panel still groups playing gestures across modules. The modules retain
+their previous DSP and ports. Step 2, the Beads-based processor, is next.

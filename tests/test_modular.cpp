@@ -161,6 +161,17 @@ int main(int argc,char** argv){try {
             check(difference>0.01 && energy(wet)>0,"Modal CV input changes the rendered sound");
         }
     }
+    {
+        auto g=rackPreset(2);
+        g.nodes.push_back({"meter","mod.lfo",{{"rate",1},{"depth",.6f}}});
+        g.modulations.push_back({{"meter","out"},{"resonator","brightness"},.2f});
+        Runtime r(g);std::vector<float> quarter(12000);
+        r.render(quarter.data(),int(quarter.size()),{});
+        const auto meter=r.controls("meter");
+        check(std::abs(meter->lfoOutput.load()-.6f)<.001f,"Panel reads the rendered LFO at its positive peak");
+        r.render(quarter.data(),int(quarter.size()),{});
+        check(std::abs(meter->lfoOutput.load())<.001f,"Panel follows the same LFO back to zero");
+    }
     for(const auto* source:{"modal.voice","drum.analog"}) {
         auto g=instrumentPatch(source,"spectral.ahdsfr","filter.bypass",false,false);
         Runtime r(g);check(r.activeModules()==2,"Dormant envelope and VCA excluded");
