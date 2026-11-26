@@ -1298,3 +1298,13 @@ clicking on an lfo should not restart the sequencer
 ```text
 its not good ui to have lfo visual feedback in 2 places, just the param curve is fine, but put the number next to that
 ```
+
+## 136 — Faithful reproductions of sophisticated modules keep being dropped
+
+```text
+what happened to my requests for more faithful reproductions of sophisticated modules? I have asked several times and it seems to get ignored
+```
+
+Claude session, 26 November 2026. Earlier requests on the same programme:
+8, 12, 18, 81, 87, 96–98 and 115. Account and prevention in ENGINEERING_LOG,
+request 136. The standing programme is now [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md).

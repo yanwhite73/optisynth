@@ -1,5 +1,9 @@
 # Optisynth status — 26 November 2026
 
+**Standing programme:** faithful reproductions of sophisticated modules. See
+[MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
+and the current status. It is not cancelled by later requests (request 136).
+
 ## 0.0.34 — Edit LFOs during a playing pattern
 
 Opening or assigning movement during playback preserves the running sequencers, held notes, pending pattern launches and effect tails. The assigned LFO number sits beside the knob's modulation arc. Click the number to edit it. The white marker on the arc is the single live display on the knob.

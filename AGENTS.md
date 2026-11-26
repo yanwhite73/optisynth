@@ -6,7 +6,8 @@ in `docs/ui` and source studies in the appropriate `docs/research` subfolder.
 Historical receipts and inherited Optispectral files retain their original paths
 inside the evidence; `docs/project/document_locations_20261117.json` maps locations.
 
-Read `docs/project/USER_REQUESTS.md`, `docs/project/STATUS.md`, `docs/architecture/ARCHITECTURE.md` and
+Read `docs/project/USER_REQUESTS.md`, `docs/project/STATUS.md`, `docs/project/MODULE_PROGRAMME.md` (a standing,
+ordered programme that later requests do not cancel), `docs/architecture/ARCHITECTURE.md` and
 `docs/research/RESEARCH.md` before continuing. Append every new user request/correction
 verbatim to USER_REQUESTS when it arrives, then reconcile STATUS and the plan.
 

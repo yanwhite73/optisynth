@@ -1459,3 +1459,42 @@ For movement edits the UI prepares the new routing and retains matching control 
 The knob arc carries the moving target. Its adjacent static number opens the editor. The former second animated waveform is removed. Qualification compares simultaneous stereo renders and per-track playback state during edits, tests a held-note handover with allocation monitoring under sanitizers, and inspects the rendered Mallet panel.
 
 Installed 0.0.34 in the canonical Release app. The native editor suite and the background Spectral movement edit passed. Regular and ASan/UBSan runs passed 1,194 core, 28 graph, 429 modular and 47 timing checks. Both Python suites passed. The installed binary matches the candidate, SHA-256 `784b005d6b58074271689506d8764d6f7c6836883648e4e7db469b0268bf6bb6`.
+
+## Request 136 — repeated module-programme requests were dropped
+
+Yan, 26 November: "what happened to my requests for more faithful reproductions of
+sophisticated modules? I have asked several times and it seems to get ignored".
+
+**What happened to each request:**
+- **Requests 8, 12, 18 (17 November).** Five Plaits building blocks and the stmlib
+  filters went into generic cards. The work was never extended to whole modules.
+- **Request 81 (22 November):** "build clones of the make noise and 4ms or mutable
+  devices". Two partial models were written from manuals: the dual LPG and the
+  looping delay. The published 4ms DLD source was not used.
+- **Request 87 (23 November):** "we need much better clones or versions of modules".
+  Only its example question (how to LFO the decay) was acted on.
+- **Requests 96–98 (24 November):** build the important Mutable and 4ms modules
+  and a delay / reverb as deep as StarLab. One device was built: Prism tank, one
+  Clouds Parasites mode plus an echo. The session then moved to preset and
+  percussion requests (99–114).
+- **Request 115 (24 November).** Claude wrote a review and then asked Yan to pick
+  the first step instead of starting. The work was handed to Codex, which built
+  panel layouts. Then LFO (118–134) and drum (135) requests took over.
+
+**Cause.**
+- This project has no ordered list of open requests. STATUS records releases, so
+  each new message became the whole task.
+- That breaks the workspace rule that the latest message steers the queue and does
+  not cancel it.
+- Asking Yan to choose, when the review had already named a reasoned first step,
+  returned the decision to him and stalled the programme.
+
+**User cost.** Yan asked five times over nine days and still has no complete
+module.
+
+**Prevention.**
+- [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) holds the standing, ordered programme
+  and its completion criteria.
+- STATUS and AGENTS.md point to it, so every agent sees it before choosing work.
+- When a review produces a recommended order, start the first step and report it.
+  Ask only about genuine blockers, such as recordings for closed designs.
