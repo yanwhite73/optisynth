@@ -1341,26 +1341,6 @@ original name. "Love Beads" is a new name that shares one common word with the
 original. The saved module id stays neutral (`fx.granular_tape`), so a rename
 before public release changes no patches.
 
-## 143 — Physical modelling research
-
-```text
-do proper research
-
-Physical modeling synthesis generates sound using mathematical equations and algorithms that simulate how real or imaginary objects vibrate and resonate, rather than playing back recorded samples or standard oscillators.
-
-How It Works
-
-Most physical modeling synths split sound generation into two core parts:
-• Exciter: Delivers initial energy—like a pluck, bow, mallet strike, or burst of air/noise—to set a virtual object in motion.
-• Resonator: Simulates how that energy rings, damps, and reflects across a string, tube, plate, membrane, or mass-spring network.
-Because it models physical behavior in real time, it excels at responsive dynamics, organic nuances, and expressive controllers (like MPE, velocity, and aftertouch), while also letting you bend physics to make impossible or surreal instruments. Learn more about the underlying math and techniques on Wikipedia or explore concepts and history via Perfect Circuit and Attack Magazine.
-
-Notable Software & Hardware Synths
-
-• Software: Applied Acoustic Systems (Chromaphone 3, String Studio VS-3), Reason Studios Objekt, Modartt Pianoteq, Baby Audio Atoms, SWAM instruments, Madrona Labs Kaivo, Ableton Live (Collision, Tension), and free options like RipplerX. Users on r/synthesizers generally agree on recommending plugins like Chromaphone, Objekt, SWAM, and Kaivo for physical modeling and resonators, while users on VI-Control generally agree on plugins from Physical Audio, Anukari, and AAS for modal and physical modeling sound design.
-• Hardware: Classic units like the Yamaha VL1/VL70m and Korg Z1/Prophecy; modern synths and Eurorack modules such as Expressive E Osmose, Waldorf Iridium, Polyend PMD engine, Mutable Instruments Elements/Rings, and Aodyo Anyma Phi (often found secondhand).
-```
-
 ## 140 — Name: Mala
 
 ```text
