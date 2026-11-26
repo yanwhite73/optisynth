@@ -108,7 +108,7 @@ struct RouteBadge final : TextButton, private Timer {
     }
 };
 struct ModulationActions {
-    std::function<void(const Endpoint&)> add;
+    std::function<void(const Endpoint&)> add,addLayer;
     std::function<void(const std::string&,const Endpoint&,int,bool)> edit;
     std::function<std::optional<float>(const std::string&,int)> signal;
 };
@@ -189,8 +189,13 @@ struct Control : juce::Component {
         if(links.empty()&&port.empty())return;
         modulationButton=std::make_unique<RouteBadge>();
         auto& button=*modulationButton;
-        const String title=links.empty()?String("+ LFO"):links.front().name
-            +(sourceIndicator?" source":links.size()>1?" +":links.front().shared?" shared":"");
+        String title="+ LFO";
+        if(links.size()==1)
+            title=links.front().name+(sourceIndicator?" source":links.front().shared?" shared":"");
+        else if(links.size()>1){
+            const bool allLfos=std::all_of(links.begin(),links.end(),[](const Link& link){return link.lfo;});
+            title=String(int(links.size()))+(allLfos?" LFO routes":" routes");
+        }
         button.setButtonText(title);
         badgeWidth=int(std::ceil(GlyphArrangement::getStringWidth(font(12),title)))+16;
         if(links.empty()){
@@ -204,7 +209,7 @@ struct Control : juce::Component {
             button.setTooltip(details.trimEnd()+"\nClick to inspect the source or separate a shared LFO.");
             const auto& first=links.front();
             if(first.lfo && actions.signal)button.monitor([read=actions.signal,source=first.source,route=first.route]{return read(source,route);});
-            button.onClick=[safe=SafePointer<Control>(this),links,destination,sourceIndicator,edit=actions.edit]{
+            button.onClick=[safe=SafePointer<Control>(this),links,destination,sourceIndicator,edit=actions.edit,addLayer=actions.addLayer]{
                 if(!safe || !edit)return;
                 PopupMenu menu;
                 for(size_t i=0;i<links.size();++i){
@@ -213,8 +218,17 @@ struct Control : juce::Component {
                     if(link.lfo && link.shared && !sourceIndicator)
                         menu.addItem(int(2*i+2),"Give "+safe->label.getText().toLowerCase()+" its own LFO");
                 }
+                const int addId=int(links.size()*2)+1;
+                if(!sourceIndicator && addLayer){
+                    menu.addSeparator();menu.addItem(addId,"Add another LFO to "+safe->label.getText().toLowerCase());
+                }
                 menu.showMenuAsync(PopupMenu::Options().withTargetComponent(safe->modulationButton.get()),
-                    [safe,links,destination,edit](int result){if(safe && result>0)edit(links[size_t(result-1)/2].source,destination,links[size_t(result-1)/2].route,result%2==0);});
+                    [safe,links,destination,edit,addLayer,addId](int result){
+                        if(!safe || result<=0)return;
+                        if(result==addId){if(addLayer)addLayer(destination);return;}
+                        const auto& link=links[size_t(result-1)/2];
+                        edit(link.source,destination,link.route,result%2==0);
+                    });
             };
         }
         addAndMakeVisible(button);resized();

@@ -400,16 +400,22 @@ private:int kind_;
 class Lfo final:public Module {
 public:
     explicit Lfo(const NodeSpec& n):Module(n){}
+    double* freeLfoPhase() noexcept override {return &freePhase;}
     void process(const AudioBlock& b) noexcept override {
-        update(b);if(b.note.trigger&&values[3]>=.5f)phase=0;
+        update(b);
+        if(values[3]<.5f)noteOrigin=0;
+        else if(b.note.trigger)noteOrigin=freePhase;
+        double phase=freePhase-noteOrigin;
+        if(phase<0)phase+=1;
         for(int i=0;i<b.frames;++i){
             const int shape=int(values[2]);
             const float v=shape==0?float(std::sin(6.283185307179586*phase)):shape==1?float(1-4*std::abs(phase-.5)):shape==2?float(2*phase-1):phase<.5?1.f:-1.f;
             b.outputs[0][i]=v*values[1];phase+=values[0]/48000.;phase-=std::floor(phase);
         }
+        freePhase=phase+noteOrigin;freePhase-=std::floor(freePhase);
         controls->lfoOutput.store(b.outputs[0][b.frames-1],std::memory_order_relaxed);
     }
-private:double phase=0;
+private:double freePhase=0,noteOrigin=0;
 };
 }
 Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) {

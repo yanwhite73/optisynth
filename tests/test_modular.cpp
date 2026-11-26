@@ -172,6 +172,46 @@ int main(int argc,char** argv){try {
         r.render(quarter.data(),int(quarter.size()),{});
         check(std::abs(meter->lfoOutput.load())<.001f,"Panel follows the same LFO back to zero");
     }
+    {
+        // The third LFO uses a cable into the voice group. Its neighbours use
+        // matrix routes, as in Prism afterimage after splitting and adding LFOs.
+        GraphSpec g;
+        g.nodes={{"strike","modal.voice",{}},{"voices","voice.mix",{{"voices",4}}}};
+        g.connections={{{"strike","out"},{"voices","in"}}};
+        g.outputs={{"voices","out"}};
+        for(int i=1;i<=4;++i){
+            const auto id="lfo"+std::to_string(i);
+            g.nodes.push_back({id,"mod.lfo",{{"rate",float(i)}}});
+            if(i==3)g.connections.push_back({{id,"out"},{"strike","mat"}});
+            else g.modulations.push_back({{id,"out"},{"strike","brightness"},.05f});
+        }
+        Runtime r(g);
+        std::vector<float> scratch(48000);
+        int elapsed=0;
+        auto advance=[&](int frames){r.render(scratch.data(),frames,{});elapsed+=frames;};
+        auto key=[&](int pitch,bool on){
+            NoteEventBlock keys;keys.begin(quantum);
+            auto event=keyEvent(pitch,on);event.offset=7;keys.push(event);
+            float left[quantum],right[quantum];r.render(left,right,quantum,{},nullptr,&keys);elapsed+=quantum;
+        };
+        auto checkFree=[&]{
+            for(int i=1;i<=4;++i){
+                const auto handle=r.controls("lfo"+std::to_string(i));
+                const double expected=std::sin(6.283185307179586*i*(elapsed-1)/48000.);
+                check(handle && std::abs(handle->lfoOutput.load()-expected)<.0001,
+                      "All four active LFOs follow audio time across polyphonic note allocation");
+            }
+        };
+        advance(3100);checkFree();
+        key(48,true);checkFree();advance(1300);key(55,true);checkFree();
+        key(48,false);key(55,false);advance(48000);checkFree();key(62,true);checkFree();
+        r.controls("lfo3")->values[3]=1;
+        key(65,true);
+        const double reset=std::sin(6.283185307179586*3*(quantum-7-1)/48000.);
+        check(std::abs(r.controls("lfo3")->lfoOutput.load()-reset)<.0001,
+              "Reset-enabled cabled LFO restarts at the note event sample");
+        r.controls("lfo3")->values[3]=0;advance(883);checkFree();
+    }
     for(const auto* source:{"modal.voice","drum.analog"}) {
         auto g=instrumentPatch(source,"spectral.ahdsfr","filter.bypass",false,false);
         Runtime r(g);check(r.activeModules()==2,"Dormant envelope and VCA excluded");

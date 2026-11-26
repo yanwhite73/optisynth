@@ -1,5 +1,14 @@
 # Optisynth status — 26 November 2026
 
+## 0.0.31 — Free-running polyphonic LFOs
+
+A cabled modular LFO keeps time through rests and voice allocation. **Reset
+on note** starts the waveform on that voice’s note-on sample. Switching it
+off returns the voice to the continuous phase. Click a destination’s existing
+modulation badge and choose **Add another LFO** to layer independent sources.
+The badge counts stacked routes and its menu opens each source. Presets use
+the existing modulation matrix format.
+
 ## 0.0.30 — Module panels and shared modulation
 
 **Modular** and **Focus module** show eight authored panels: Prism tank, VA and

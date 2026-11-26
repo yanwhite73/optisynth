@@ -79,6 +79,7 @@ public:
         panelViewButton.setTooltip("Synth panel: the patch's playing controls on one front panel");modularViewButton.setTooltip("Modular rack: every module, socket and route");
         viewMenu.onClick=[this]{showViewMenu();};viewMenu.setTooltip("Which view opens when a patch loads");
         synthPanel.modalModAction.add=[this](const Endpoint& input){editModalCV(input);};
+        synthPanel.modalModAction.addLayer=[this](const Endpoint& dest){addLfoLayer(dest);};
         synthPanel.modalModAction.edit=[this](const std::string& source,const Endpoint& dest,int route,bool split){
             if(split)splitLfo(source,dest,route);
             else {setView("modular",true);selectNode(source);}
@@ -622,6 +623,12 @@ public:
             require(document.graph.modulations[0].source.node=="timbre" && document.graph.modulations[1].source.node!="timbre"
                     && synthPanel.control("blend","gain_b")->modulationButton->getButtonText()!=synthPanel.control("strike","brightness")->modulationButton->getButtonText(),
                     "Separate Strike from Brightness and show both independent LFOs");
+            for(int layer=0;layer<3;++layer)synthPanel.modalModAction.addLayer({"strike","brightness"});
+            const auto layered=readRack(rackJSON(document));
+            require(layered.graph.modulations.size()==5 &&
+                    synthPanel.control("strike","brightness")->modulationButton->getButtonText()=="4 LFO routes" &&
+                    synthPanel.control("strike","brightness")->modulationButton->getTooltip().contains("LFO 5"),
+                    "Five independent LFOs survive recall and the panel lists every layer");
             require(readRack(rackJSON(document)).graph.outputs.front().node=="prism","Prism recall");
         }
         {
@@ -1152,14 +1159,25 @@ private:
             if(node!=document.graph.nodes.end()){const auto& ps=panel(node->type).parameters;for(size_t i=0;i<ps.size();++i)if(ps[i].id==key)handle->second->values[i]=value;}
         }
     }
+    std::string newLfoId(const Endpoint& target) const {
+        const auto base=target.node+"_"+target.port+"_lfo";auto id=base;
+        for(int n=2;std::any_of(document.graph.nodes.begin(),document.graph.nodes.end(),
+            [&](const NodeSpec& node){return node.id==id;});++n)id=base+"_"+std::to_string(n);
+        return id;
+    }
+    void addLfoLayer(const Endpoint& dest){
+        auto next=document;
+        const auto id=newLfoId(dest);
+        next.graph.nodes.push_back({id,"mod.lfo",{{"rate",1.f}}});
+        next.graph.modulations.push_back({{id,"out"},dest,.15f});
+        if(commit(std::move(next),id))message(String(id)+" added to "+String(dest.node)+"."+String(dest.port));
+    }
     void splitLfo(const std::string& source,const Endpoint& dest,int route){
         const auto& graph=document.graph;
         const auto osc=std::find_if(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& n){return n.id==source && n.type=="mod.lfo";});
         if(osc==graph.nodes.end())return;
         auto next=document;
-        const auto base=dest.node+"_"+dest.port+"_lfo";auto id=base;
-        for(int n=2;std::any_of(graph.nodes.begin(),graph.nodes.end(),[&](const NodeSpec& other){return other.id==id;});++n)
-            id=base+"_"+std::to_string(n);
+        const auto id=newLfoId(dest);
         auto copy=*osc;copy.id=id;next.graph.nodes.push_back(copy);
         if(route>=0){
             if(size_t(route)>=next.graph.modulations.size())return;
@@ -1184,10 +1202,7 @@ private:
             if(c.destination.node==input.node && c.destination.port==input.port)source=c.source.node;
         if(source.empty()){
             auto next=document;
-            const std::string base=input.node+"_"+input.port+"_lfo";
-            source=base;
-            for(int i=2;std::any_of(next.graph.nodes.begin(),next.graph.nodes.end(),[&](const NodeSpec& n){return n.id==source;});++i)
-                source=base+"_"+std::to_string(i);
+            source=newLfoId(input);
             next.graph.nodes.push_back({source,"mod.lfo",{{"rate",1.f},{"depth",.35f}}});
             setRackConnection(next.graph,input,{source,"out"});
             if(!commit(std::move(next),source))return;

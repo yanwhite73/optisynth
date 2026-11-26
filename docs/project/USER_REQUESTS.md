@@ -1157,3 +1157,9 @@ give a handoff doc to codex
 
 Screenshot shows the Mallet section of Prism afterimage. The original factory
 graph routes timbre.out to Strike and Brightness in the matrix.
+
+## 119 — Free-running LFOs beyond two
+
+```text
+lfo 3 seems to be behaving as if reset on note were active, dont limit to 2
+```

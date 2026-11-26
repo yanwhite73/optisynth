@@ -57,6 +57,8 @@ public:
     virtual void process(const AudioBlock&) noexcept = 0;
     // A sleeping voice is about to run again: jump smoothed controls to their targets.
     virtual void wake() noexcept {}
+    // Audio-thread phase shared with a newly woken copy of this LFO.
+    virtual double* freeLfoPhase() noexcept {return nullptr;}
     virtual SpectralPtr spectralState() const { return {}; }
 };
 Registry moduleRegistry(const SampleBank& samples={},const SpectralBank& spectral={});
@@ -84,6 +86,7 @@ public:
 private:
     struct NodeBuffers {
         AudioModule* module = nullptr;
+        double* lfoPhase = nullptr;
         std::vector<std::array<float, quantum>> outputs;
         std::vector<std::array<float, quantum>> right;
         std::vector<const float*> in;

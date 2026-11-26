@@ -1349,3 +1349,28 @@ densities. Prism afterimage, Optical vapour, Clay and water and the three-body
 Skin and vessel comparison rendered byte-identically to 0.0.29. All 402 modular
 checks passed in regular and sanitizer builds. The native editor checks used
 offline audio. [Panel captures](../ui/CONTEXTUAL_UI.md)
+
+## Request 119 — LFO 3 appeared to retrigger
+
+Reproduced on 0.0.30 with four independent LFOs. The third used a modal CV
+cable upstream of Voice mix. Each voice owned an oscillator starting at zero
+and skipped processing while asleep. The same control routed only through the
+matrix already advanced globally in this patch. The apparent retrigger depended
+on routing and voice allocation.
+
+The first voice copy now keeps the cabled LFO clock advancing even between
+notes. A waking copy reads that phase before the block starts. A per-voice
+note-reset offset is applied at the event sample independently of the free
+clock. A regression compares all four LFO outputs to elapsed audio time
+through rests, overlapping notes, releases, reallocation, and toggling reset.
+Only active graph LFOs need a running reference.
+
+The existing graph has rack-wide resource bounds but no two-LFO rule. The
+destination menu now adds successive independent LFOs to the matrix and lists
+them. The native Mallet check splits the factory source, adds three more,
+serialises and reads back all five sources' routes.
+
+Delivered standalone 0.0.31 at the established Release location. The installed
+executable matched the candidate. The previously failing four-LFO regression,
+the five-source native editor/recall check and all 427 modular checks passed,
+including the address and undefined-behaviour sanitizer run.

@@ -16,6 +16,7 @@ const ModuleType& findType(const Registry& registry,const std::string& id) {
 void Runtime::prepareBuffers(NodeBuffers& n,AudioModule* module,const ModuleType& r,const std::string& type) {
     n.module=module;
     if(!n.module)throw std::invalid_argument("Module has no audio implementation");
+    n.lfoPhase=module->freeLfoPhase();
     n.outputs.resize(r.outputs.size());
     n.right.resize(r.outputs.size());
     n.in.assign(r.inputs.size(),zero_.data());
@@ -357,7 +358,17 @@ void Runtime::render(float* out,float* right,int frames,Note note,const ClockFra
                 allocate(bus?bus:(first?keys:nullptr),bus&&first?keys:nullptr,n,voices,note);
                 allocated=true;
             }
-            if(voiceMixer_&&voiceNode_[size_t(i)]){for(int v=0;v<voices;++v)if(slots_[size_t(v)].awake)processVoice(instance(i,v),n,time,v);continue;}
+            if(voiceMixer_&&voiceNode_[size_t(i)]){
+                // Voice zero also keeps this LFO's continuous clock while the rack
+                // is quiet. Seed waking copies before advancing the reference block.
+                if(node.lfoPhase){
+                    for(int v=1;v<voices;++v)if(woke_[size_t(v)])
+                        *instance(i,v).lfoPhase=*node.lfoPhase;
+                }
+                for(int v=0;v<voices;++v)if(slots_[size_t(v)].awake || (v==0 && node.lfoPhase))
+                    processVoice(instance(i,v),n,time,v);
+                continue;
+            }
             if(i==mixer_){
                 node.events.begin(uint32_t(n));
                 computeParameters(node);
