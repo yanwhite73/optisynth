@@ -1422,3 +1422,18 @@ The badges, the menu-driven layering and the jump to Modular view are removed.
 - Treat a defect report as a symptom of the larger design request when one exists.
 - Qualify interaction work by performing the player's task in native captures, step
   by step, not by asserting strings.
+
+## Request 121 — Qualify and install the movement editor
+
+Finished the editor from commit 01c3661. Its Rate formatter supplies both
+units, so the slider’s inherited Hz suffix duplicated the frequency unit
+after the period. Cleared that suffix and checked the native Brightness
+editor capture: **0.380 Hz / 2.6 s**. The editor is below the selected knob.
+[Native capture](../ui/module-panels/movement-editor.png)
+
+The native editor suite passed without opening an audio device. Core (1194),
+graph (28), modular (427) and timing (47) checks passed in regular and
+address/undefined-behaviour sanitizer builds. Four importer tests and one
+renderer test also passed. Delivered 0.0.32 in place. Installed and candidate
+executable SHA-256 matched at
+`6354a7c77d1b05cf40605b6b77fdba8eb756d523994aab3a9b27dc46bb955506`.

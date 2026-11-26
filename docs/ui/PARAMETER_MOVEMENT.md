@@ -1,6 +1,22 @@
 # Movement on a parameter
 
-Requests 94–95. Interaction proposal for the desktop synth. The first review should use Modal Percussion Decay and Analog VCO pulse width at the smallest supported rack zoom. No UI or DSP change has shipped with this study.
+Requests 94–95. Interaction proposal for the desktop synth. The first review should use Modal Percussion Decay and Analog VCO pulse width at the smallest supported rack zoom.
+
+## Using movement in 0.0.32
+
+Click the wave button beside a continuous knob in Panel, Modular or Focus.
+The first click on an unassigned knob creates a free-running sine LFO with
+a four-second period. The editor opens beside the knob. Rate shows both
+frequency and period, for example **0.380 Hz / 2.6 s**.
+
+In **Prism afterimage → Mallet**, open **Brightness**. Depth changes the sweep
+on Brightness alone. Rate and Shape also affect Strike because both use the
+same LFO. Choose **Make independent** to give Brightness its own rate. Use
+**Bypass** on a matrix assignment to audition its contribution or **+ Add
+movement** to layer another source. Older direct CV cables expose the source
+level. Each LFO keeps its colour across destinations; the arc shows the
+extent and the white dot follows the modulation during playback.
+[Brightness movement editor](module-panels/movement-editor.png)
 
 ## The first five seconds
 
@@ -34,7 +50,7 @@ At a parameter boundary, show the range the engine can actually reach. A clipped
 
 ## Routing and cost
 
-The current modal shortcut creates a visible 1 Hz, depth 0.35 LFO, cables it to a typed CV input and selects its source module. The matrix already saves instance-qualified destinations with signed, normalised depth. It adds contributions, clamps the result and supports log-scaled targets. The two paths are distinct today. [Panel control](../../app/Panel.h) · [Modal assignment](../../app/RackEditor.h) · [Matrix editor](../../app/ModulationEditor.h) · [Runtime contract](../architecture/SPECTRAL_ENGINE_INTEGRATION.md)
+When this study was written, the modal shortcut created a visible 1 Hz, depth 0.35 LFO, cabled it to a typed CV input and selected its source module. The matrix already saves instance-qualified destinations with signed, normalised depth. It adds contributions, clamps the result and supports log-scaled targets. The two paths are distinct today. [Panel control](../../app/Panel.h) · [Modal assignment](../../app/RackEditor.h) · [Matrix editor](../../app/ModulationEditor.h) · [Runtime contract](../architecture/SPECTRAL_ENGINE_INTEGRATION.md)
 
 For new assignments, prefer one persisted source and one matrix route with its own amount. Keep the source at unit amplitude so the local Depth has one unambiguous meaning. Signal Flow and the matrix should identify the same assignment. Explicitly mark private ownership for recall, duplication and deletion. Rack disclosure should reveal the source on demand without inserting a big card beside every knob. Existing CV patches retain their exact scaling; verify old preset round-trips before considering migration. A cable with no route attenuator should expose source editing, with shared scope identified. UI for local bypass/depth on that cable needs a defined DSP path.
 

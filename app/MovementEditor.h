@@ -124,6 +124,7 @@ private:
             }else if(link.lfo)depth=sourceControl("depth","Level");
             if(link.lfo){
                 rate=sourceControl("rate","Rate");
+                rate->slider.setTextValueSuffix({});
                 rate->slider.textFromValueFunction=[](double v){return String(v,v<1?3:v<10?2:1)+" Hz / "+(v<1?String(1/v,1)+" s":String(1000/v,0)+" ms");};
                 rate->slider.updateText();
                 shape=sourceControl("wave","Shape");reset=sourceControl("retrigger","Reset on note");

@@ -1,5 +1,17 @@
 # Optisynth status — 26 November 2026
 
+## 0.0.32 — Edit movement beside a knob
+
+Installed at the usual standalone Release location. In **Prism afterimage →
+Mallet**, click the wave next to **Brightness** for its signed Depth, Rate,
+Shape and reset controls. The editor identifies Strike as sharing the same
+LFO. A new assignment starts with a four-second cycle. Rate displays frequency
+and period together, for example **0.380 Hz / 2.6 s**.
+[Movement editor and panel notes](../ui/PARAMETER_MOVEMENT.md)
+
+Native editor checks, regular and sanitized core, graph, modular and timing
+suites, and the importer and renderer tests passed.
+
 ## 0.0.31 — Free-running polyphonic LFOs
 
 A cabled modular LFO keeps time through rests and voice allocation. **Reset

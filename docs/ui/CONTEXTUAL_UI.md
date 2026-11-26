@@ -109,15 +109,10 @@ panel sizes from the same description. Inputs occupy the left side of the
 bottom socket bank and outputs the right. Outputs have a filled plate and an
 outward arrow. [Prism tank in the factory patch](module-panels/prism-tank.png)
 
-In Prism afterimage, Strike and Brightness show **LFO 1 shared**, Colour rate
-shows **LFO 1 source**, and Material shows **+ LFO**. A destination’s menu
-can open the shared source or split that destination to an independent LFO.
-The meter reads the rendered source waveform with the route polarity. Its
-excursion shows LFO activity even on a shallow assignment. The matrix holds
-the individual route amounts. [Mallet panel at minimum window size](module-panels/prism-afterimage.png)
+## Movement in 0.0.32
 
-In 0.0.31, choose **Add another LFO** on a destination badge to layer
-modulation. For example, on Brightness in Prism afterimage the new LFO gets
-a separate rate and depth. The menu lists each source; the matrix sets each
-route’s signed amount. A single CV socket can still carry one cable while the
-parameter also receives matrix modulation.
+Use the wave button beside a continuous knob to edit its movement in place.
+In Prism afterimage, Strike and Brightness share a source colour; the editor
+names the other destination and offers separate depth or an independent
+source. [Player controls and example](PARAMETER_MOVEMENT.md) ·
+[Prism afterimage panel](module-panels/prism-afterimage.png)

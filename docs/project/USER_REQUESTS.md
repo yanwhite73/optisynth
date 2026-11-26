@@ -1184,3 +1184,47 @@ This implementation is absolute crap
 
 Claude session, 26 November 2026. The pasted text is Codex's 0.0.31 report
 (requests 118–119). Diagnosis and plan in ENGINEERING_LOG, request 120.
+
+## 121 — Finish and deliver the movement editor
+
+```text
+I'm close to the usage limit, so I'll stop here and save what has been built and checked.
+
+  Ran 1 shell command
+You've hit your usage limit, so I stopped partway. The replacement for Codex's LFO controls is built and passes the native checks, but it isn't installed: the app at the usual Release location is still 0.0.31.
+
+**What was wrong with 0.0.31.** You had already set the direction twice:
+- request 31: Pigments/Vital-style coloured sources with visible depth;
+- request 94: a movement control on each parameter, with a written design study.
+
+Codex used neither. In 0.0.31:
+- **Hidden LFOs:** "Add another LFO" made a hidden module at 1 Hz. Nothing on the panel let you set its rate, shape or depth.
+- **Leaving the panel:** opening any LFO switched the whole window to Modular view.
+- **Limited reach:** only the three modal knobs, plus knobs that were already modulated, could get an LFO.
+- **Activity:** the only sign an LFO was moving was a 3-pixel dot.
+
+Codex's fix for LFO 3 restarting on each note is sound, and I kept it.
+
+**What 0.0.32 does:**
+- **Wave button:** every continuous knob in the synth panel, rack and focus view gets a small wave button. The first click adds a slow (4-second) free-running LFO and opens an editor beside the knob, without leaving the panel.
+- **Editor:** for each LFO moving that knob it has:
+  - Depth for this knob only;
+  - Rate, Shape and Reset on note;
+  - Bypass for a quick A/B;
+  - Make independent, when the LFO is shared;
+  - Remove.
+
+  There is no limit on how many LFOs a knob can have.
+- **On the knob:** each LFO draws a coloured arc showing its sweep. A white dot tracks the actual value while audio runs. The same LFO has the same colour wherever it is used, so in Prism afterimage you can see that Strike and Brightness share LFO 1.
+
+The in-app checks passed, and I went through the screenshots of the Prism afterimage panel, the editor and the modal rack. The first screenshots caught two of my own bugs, both now fixed: the editor opened empty, and it covered the knob it was editing. The work is pushed as `01c3661`. The failure and how to avoid it are logged as request 120.
+
+**Still to do:**
+1. **Fix the Rate readout.** It shows "0.380 Hz / 2.6 s Hz" because a unit suffix is added twice. It's a one-line fix.
+2. **Rebuild and run the full module tests.** The DSP checks haven't been run on this version, with or without sanitizers.
+3. **Install 0.0.32** to `app/Builds/MacOSX/build/Release/Optisynth.app`, then update STATUS and the UI notes.
+
+Until then, the screenshots are in `build/ui-review-120/`: `movement-editor.png`, `movement-panel.png` and `modal-decay-movement-editor.png`.
+
+⏺ Usage limit reached · continuing automatically at 4:30pm · esc to cancel
+```
