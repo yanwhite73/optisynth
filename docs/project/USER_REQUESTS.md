@@ -1484,3 +1484,9 @@ general lack of discipline in managing files, I have flagged it repeatedly and i
 ```text
 check claude's work so far
 ```
+
+## 158 — Locate the Halo and Cumulus example presets
+
+```text
+where are the example presets demonstrating the work?
+```

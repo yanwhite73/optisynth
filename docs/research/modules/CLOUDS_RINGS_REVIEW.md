@@ -17,3 +17,7 @@ Halo uses the Rings resonator and string-synth code. All 28 files under its vend
 The optimised suite reported 552 passing checks. The two sanitizer runs stopped at the distinct errors above. The independent keyboard and Freeze probes used the same Runtime entry point as rack playback. Factory 42 in the draft does wire a 72 BPM sequence to Halo and feeds Halo’s stereo output into Cumulus. That wiring explains how the showcase can play while a newly added Halo is silent from the keyboard. Hardware A/B, native UI interaction and a listening judgement on factory 42 remain unverified by this review.
 
 Local receipts are in `build/reviews/claude-157/probes.txt` and `build/logs/claude-review-157-{tests,sanitizer-clamped}.log`.
+
+## Audition the draft preset
+
+[Listen to Halo into Cumulus](../../../build/auditions/Halo%20into%20Cumulus.wav). This is the stereo render from Claude’s native check of factory preset 42 in the Texture category. It plays a 72 BPM sympathetic-string sequence through the granular processor and its reverb for 32 beats, followed by an eight-second tail. The prototype embeds this single combined example in the factory browser. Installed version 0.0.38 predates both modules.
