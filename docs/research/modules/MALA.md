@@ -29,6 +29,8 @@ hardware.
     normalisation detector;
   - the [manual](https://pichenettes.github.io/mutable-instruments-documentation/modules/beads/manual/).
 
+The [fidelity assessment and three playable manual studies](MALA_FIDELITY.md) compare the source, test the player-facing differences and give patch recipes.
+
 ## The host (src/modular/granular_tape.cpp)
 
 Each item below is a transcription of upstream behaviour, cited in the code.
@@ -42,7 +44,7 @@ Each item below is a transcription of upstream behaviour, cited in the code.
 | Mono when one audio input is patched; synth mode when neither is | Same rules. **Difference:** the hardware waits 10 s before entering synth mode. Rack patching is explicit, so Mala switches when the patch is built |
 | Automatic input gain with a 1 s settle and 5 s learning, or manual gain (`gain_control.cc`) | Ported from 32-bit codec frames to floats, with the logic and constants unchanged. Input gain 0 = Auto |
 | Seed input delayed by 2.5 ms so CV can settle | Same (ten blocks) |
-| 250 ms of silence after a quality or mono change; no change while frozen | Same |
+| 250 ms of silence after a quality or mono change; no change while frozen | Button-held Freeze blocks the quality change. Gate-held Freeze permits the change and mutes output for 250 ms (see assessment) |
 | Assign CV: Feedback, Dry/wet or Reverb, or custom amounts (default 255 / 0 / 128) | Same defaults. Turning a custom amount selects Custom, as holding Assign does |
 | Gate output on R (Assign + Seed) | The "Grain gate on R" switch |
 

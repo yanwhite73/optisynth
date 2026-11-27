@@ -4,6 +4,8 @@
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).
 
+Three additional presets for Mala are installed in the **Mala Studies** collection. Search **Mala** for Copper Relay (clocked delay), Shards in Reverse (addressed grains) and Lantern Choir (no-input wavetable pad). See the [fidelity assessment, patch instructions and audio checks](../research/modules/MALA_FIDELITY.md).
+
 ## 0.0.37 — Grain circle, and movement you can hear
 
 **Mala / Grain circle** (Percussion) is a frame drummer improvising, with Mala answering.

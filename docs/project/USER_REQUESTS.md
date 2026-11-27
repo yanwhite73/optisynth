@@ -1397,3 +1397,9 @@ codex committed
 
 The signal to merge branch `mala` after Codex's 0.0.35 commit (652b952), as the
 programme note asked. Delivered as 0.0.36.
+
+## 148 — Mala fidelity and playable Beads manual examples
+
+```text
+do an assessment of how faithful mala is to mutable beads, and see if you can create any useful presets for it - maybe the open source documentation has examples of how to use it
+```
