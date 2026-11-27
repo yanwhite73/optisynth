@@ -4,6 +4,27 @@
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).
 
+## 0.0.37 — Grain circle, and movement you can hear
+
+**Mala / Grain circle** (Percussion) is a frame drummer improvising, with Mala answering.
+- **The drummer (track 1)** keeps a skeleton of bass and slaps. Ghost notes play by chance, rolls arrive on chosen passes, and each stroke has its own strike position. Consecutive groove passes differ in 5–9 of their 32 sixteenths.
+- **Mala's tracks.** Track 3 sends Seed gates: off-beat grains, a held cloud, or sixteenths by chance. Track 4 holds Freeze and moves Pitch to exact notches, an octave or a fifth up.
+- **The chain** runs 20 bars: groove, cloud, freeze, an octave cloud over the frozen groove, rolls, groove.
+- **Movement:** four LFOs move Stiffness, Size, Shape and Reverb at depths you can hear.
+- **Level:** the drum enters Mala with headroom. On its own, Mala's output is as loud as the dry drum, and nothing clips.
+
+**Movement on the frame drum** (request 146). A new offline audit measured the seven LFOs on "Frame drum / Skin and rim lfo":
+- **Two did nothing.** Sympathy and Contact area changed the sound by less than 0.6 dB across their whole range, even with the recorded skin off.
+- **The recorded skin hid the rest.** At 0.78 it replaces most of the modelled strike, so the model's controls were partly masked.
+- **The fix.**
+  - Part of the strike now reaches the passive body, and that body sounds above the recording. Sympathy, Passive tune and Ring time are now audible.
+  - Contact area now sets the contact time and tilts the recorded skin, neutral at its measured default.
+  - On that patch every control now spans 4–16 dB across its range.
+  - At the saved ±15% depths, five swing clearly (1.6–7.1 dB).
+  - Sympathy (0.8 dB) and Pressure (1.0 dB) stay subtle at that depth. Pressure sits at 0, so its LFO is clipped for half of every cycle.
+- **The measured default** drum strike changed by at most 0.24 dB. Against the reference recordings, the dominant peaks match as in 0.0.35.
+- **The tool.** `Optisynth --movement-audit "<preset>" "<folder>"`, then `tools/movement_audit.py`, renders a patch with and without its movement and reports what each route changes.
+
 ## 0.0.36 — Mala, the first faithful port
 
 **Mala** is in the rack under Effects, and the browser has a new texture preset, **Seed rain**. Mala is a granular texture processor, delay and reverb. It runs the open Beads DSP unchanged in all four qualities, plus the wavetable synth it plays when nothing is patched in. The card follows the original's arrangement:

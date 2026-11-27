@@ -67,3 +67,18 @@ Pakhawaj: 15/15 dominant peaks within 5%, median absolute T90 error 3 ms.
 The largest remaining peak disagreements are the soft and hard frame stopped strokes. The model emphasises 95 and 88 Hz where the recordings emphasise 135 and 139 Hz. At medium force the stopped pakhawaj improved from 133 to 565 Hz, against a 564 Hz reference. Its bass stroke still loses energy about 50 ms too soon at medium force. A matching frequency and T90 leave room for differences in the attack, partial balance and room sound.
 
 The [reference measurements](hand_drum_measurements/references.json), [first-pass renders](hand_drum_measurements/first-pass.json) and [corrected renders](hand_drum_measurements/corrected.json) preserve the measured spectra, losses, residual band envelopes and durations. The comparison script accepts these files directly.
+
+## 0.0.37: Sympathy and contact area made audible (request 146)
+
+The audit found Sympathy and Contact area within 0.6 dB across their full range. The passive mode only exchanged energy with the main mode. It sat about 70 Hz away from that mode, at a coupling rate near 1.5 Hz, so it received almost nothing. Contact area only reweighted six low modes.
+
+The changes:
+- **Sympathy.** A cubic fraction of the contact force now reaches the passive mode through the frame (0.6 of that on the pakhawaj). The energy exchange is kept. The passive mode sounds above the recorded skin, because the recording is the skin alone.
+- **Contact area.** It scales contact time by 2^(1.5 × (area − 0.38)) and tilts the recorded skin around 1.2 kHz. Both are neutral at the measured 0.38.
+
+Effect on the defaults:
+- **Strike.** The default frame-drum strike changed by at most 0.24 dB with the recorded skin on.
+- **Reference recordings.** Re-measured on the 0.0.37 stroke renders:
+  - Frame drum: 13 of 15 dominant peaks are within 5%, as before. The median T90 error is 6 ms, against 9 ms in 0.0.35.
+  - Pakhawaj: 15 of 15 dominant peaks are within 5%, with a median T90 error of 3 ms, unchanged.
+

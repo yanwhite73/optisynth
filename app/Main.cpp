@@ -1,13 +1,24 @@
 #include "Panel.h"
 #include "RackEditor.h"
+#include "MovementAudit.h"
 namespace {
 class App final : public JUCEApplication {
 public:
     const String getApplicationName() override {return "Optisynth";}
-    const String getApplicationVersion() override {return "0.0.36";}
+    const String getApplicationVersion() override {return "0.0.37";}
     void initialise(const String& args) override {
         // Native checks keep their settings and preset library inside the snapshot folder,
         // starting empty each run; the user's own files are never touched.
+        if(args.startsWith("--movement-audit ")){   // request 146: offline renders only, no window or audio device
+            juce::StringArray words;words.addTokens(args.fromFirstOccurrenceOf("--movement-audit ",false,false),true);
+            words.removeEmptyStrings();for(auto& w:words)w=w.unquoted();
+            try{
+                if(words.size()<2)throw std::runtime_error("Usage: --movement-audit \"<preset>\" \"<folder>\" [node.parameter=value ...]");
+                juce::StringArray overrides;for(int i=2;i<words.size();++i)overrides.add(words[i]);
+                optisynth::movementAudit(words[0],File(words[1]),overrides);
+            }catch(const std::exception& e){std::fprintf(stderr,"%s\n",e.what());setApplicationReturnValue(1);}
+            MessageManager::callAsync([]{JUCEApplicationBase::quit();});return;
+        }
         const bool snapshot=args.startsWith("--snapshot ");
         const File snapshotFolder=snapshot?File(args.fromFirstOccurrenceOf("--snapshot ",false,false).unquoted()):File();
         if(snapshot){snapshotFolder.getChildFile("settings").deleteRecursively();snapshotFolder.getChildFile("library").deleteRecursively();}

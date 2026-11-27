@@ -2,6 +2,17 @@
 
 Requests 94–95. Interaction proposal for the desktop synth. The first review should use Modal Percussion Decay and Analog VCO pulse width at the smallest supported rack zoom.
 
+## Checking that movement can be heard (0.0.37, request 146)
+
+A route can be correct and still inaudible. Possible causes:
+- the destination barely changes the sound;
+- another layer masks it;
+- the base sits at the end of the range, which clips the sweep.
+
+Run `Optisynth --movement-audit "<preset or factory:N>" "<folder>"`, then `python3 tools/movement_audit.py "<folder>"`. For each route, the report gives the change in dB between the two ends of the sweep and between the ends of the whole range. It also compares the patch with and without its movement, half a second at a time.
+
+The audit opens no audio device and never writes the preset. Add `node.parameter=value` to try a different setting, and `seconds=N` to change the length of the moving render.
+
 ## Reading movement in 0.0.34
 
 The coloured arc shows the sweep and its white marker follows the parameter target. The static number beside the arc opens that LFO's editor. A plus after the number means the knob has additional sources, all listed in the editor. When several sources act together the white outer arc covers their combined possible range. An unassigned knob has a small wave button to add movement. Opening, assigning, layering and removing movement while a sequence plays preserve its position and sounding notes.

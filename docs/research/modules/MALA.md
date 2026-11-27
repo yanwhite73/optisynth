@@ -95,6 +95,29 @@ offline render is `Seed rain.wav` in the native review folder:
 - about −30 dB RMS, peak −12 dBFS;
 - a wide stereo image from the randomised grain panning.
 
+## Showcase: Grain circle (requests 145–147)
+
+Factory 41 shows the features Beads is known for on hand percussion, with a sequence that improvises.
+- **Seeds, unlatched, from track 3.** A short gate plays one grain on its edge; a held gate opens the grain generator at the Density rate. That is the upstream trigger generator's behaviour with Seed unlatched and the input patched (`trigger_generator.cc`).
+- **Freeze and Pitch from track 4.** The Pitch route reaches knob positions 0.858 and 0.692, the +12 and +7 semitone notches of the detune law.
+- **Level.** On percussion, Auto input gain pushed the peaks to full scale, and grains plus feedback clipped the output. Grain circle uses unity manual gain with the drum about 6 dB below full scale. The patch gain restores the level.
+- **Balance.** Grains on sparse percussion often land between hits. Longer grains, more seeds and more feedback bring Mala's own output up to the dry drum's level.
+
+Measured over one 50-second chain (Mala alone is Dry/wet 1; the drum is Dry/wet 0):
+
+| Section | Output (dB RMS) | Mala alone (dB RMS) | Drum (dB RMS) |
+| --- | --- | --- | --- |
+| Groove | −28.7 | −31.1 | −29.5 |
+| Cloud | −29.3 | −29.3 | −29.9 |
+| Freeze | −32.7 | −32.3 | −34.8 |
+| Octave cloud | −32.9 | −31.8 | −35.7 |
+| Rolls | −29.2 | −28.8 | −30.8 |
+| Groove | −29.5 | −29.3 | −29.6 |
+
+The native check renders `Grain circle.wav`:
+- −29.7 dB RMS over the chain;
+- peak −9.0 dBFS, with no clipping.
+
 ## Not reproduced
 
 - Calibration mode and the factory test.

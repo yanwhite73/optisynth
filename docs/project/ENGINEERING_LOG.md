@@ -1550,3 +1550,28 @@ Yan found the earlier hand-percussion sound too basic. It gave no way to choose 
 Listening expectations now have a reproducible acoustic check. Testing duration alone missed the medium frame slap and stopped pakhawaj sounding on the wrong modes. Matching measured relative peak strengths brought their dominant peaks to 291.5 and 565.4 Hz. The [study and remaining discrepancies](../research/modules/HAND_DRUM_ACOUSTICS.md) include results for all strengths. Inspecting the native screenshot also caught a panel validation rule silently pruning the stroke-map button. The native test now opens it through the same button as the player.
 
 0.0.35 delivered at the canonical Release app. Regular and ASan/UBSan runs passed 1,194 core, 28 graph, 488 modular and 47 timing checks each. Native QA and both saved dry phrases passed. The first-party checks cover stroke differentiation, zero allocation, position, force, pressure, coupling, sample selection and the pure model. Perceptual fidelity and bol identification remain open.
+
+## Requests 145–147 — A showcase for Mala, and movement that could not be heard
+
+**Request 146: "I set 7 lfos but arent heariong much moevement in the sound".**
+- **Evidence.** A new offline audit (`--movement-audit`, `tools/movement_audit.py`) rendered the user's saved "Frame drum / Skin and rim lfo".
+  - It rendered the patch with its movement, without it, and with each destination held at both ends of its swing and of its range.
+  - Contact area and Sympathy changed the strike by under 0.6 dB across their full range. That held with the recorded skin on and off.
+  - At Recorded skin 0.78 the recording replaces most of the modelled strike, which hid the model's other controls.
+  - The seven LFOs ran at 0.026–0.1 Hz with the default ±15% depth. Pressure sat at 0, so its LFO was clipped for half of every cycle.
+- **Cause.** The sympathy check accepted a difference of 0.00001, so a nearly dead control passed. Nothing checked that a control could be heard across its range.
+- **Correction.**
+  - Part of the strike force now reaches the passive mode, and that mode sounds above the recording.
+  - Contact area now sets the contact time and tilts the recorded skin. It is neutral at the measured 0.38.
+  - Sympathy uses a cubic law so that the measured default stays close.
+- **Mistake during the fix.** The first version drove the passive mode from the head's motion. With the existing coupling that formed a feedback loop: full range rose to 41.6 dB. Driving it from the contact force removed the loop.
+- **Prevention.**
+  - New checks require Sympathy, Passive tune and Contact area to change a hit substantially across their range (difference above 0.1).
+  - The movement audit can measure any saved patch when the user reports something inaudible.
+
+**Requests 145 and 147: Grain circle.**
+- **Clipping.** The first render clipped 22 samples. Auto input gain drives percussion peaks to full scale.
+- **Too little Mala.** Mala's own output sat 8–10 dB below the drum.
+- **Each fix was measured** against fully dry and fully wet renders before the native check: unity manual gain with headroom; then longer grains, more seeds and more feedback.
+- **The improvisation** was checked by counting the sixteenths that differ between passes.
+

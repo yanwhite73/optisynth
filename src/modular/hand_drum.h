@@ -7,7 +7,8 @@ inline bool isHandDrum(const std::string& type){return type=="drum.frame"||type=
 inline std::string sampleKey(const std::string& node,int index){return node+"__skin_"+std::to_string(index);}
 
 // A finite contact force drives six measured membrane modes. One passive mode
-// exchanges velocity with the strongest driven mode. All states run at 48 kHz.
+// exchanges velocity with the strongest driven mode and also takes part of the
+// strike through the frame (Sympathy). All states run at 48 kHz.
 class Head {
     struct Mode {
         float x=0,y=0,c=1,s=0,drive=0;
@@ -24,7 +25,7 @@ class Head {
     struct Layer {
         const StrokeFit* fit=nullptr;const SampleData* sample=nullptr;
         Mode poles[6],passive;
-        float weight=0,noiseEnv=1,noiseLoss=1,low=0,mid=0;
+        float weight=0,noiseEnv=1,noiseLoss=1,low=0,mid=0,skinLow=0;
         double cursor=0;
     };
     std::array<SamplePtr,30> files{};
@@ -48,7 +49,9 @@ public:
         const float dynamic=std::clamp((velocity-.22f)/.69f,0.f,1.f)*2;
         const int lower=std::min(1,int(dynamic));const float fraction=dynamic-lower;
         count=0;age=0;
-        contactLength=std::max(12,int(48*(.45f+3.6f*(1-p[2])*(1-.55f*velocity))*(stroke==0?1.3f:.85f)));
+        // Request 146: contact area also sets contact time (0.66x to 1.9x), neutral at the measured 0.38.
+        const float areaTime=std::exp2(1.5f*(p[8]-.38f));
+        contactLength=std::max(12,int(48*(.45f+3.6f*(1-p[2])*(1-.55f*velocity))*(stroke==0?1.3f:.85f)*areaTime));
         const int zones=barrel&&(!hasSamples||p[9]==0)?1:2;
         for(int zone=0;zone<zones;++zone)for(int side=0;side<2;++side){
             const float w=(side?fraction:1-fraction)*(zones==1?1.f:zone?radialPosition:1-radialPosition);
@@ -58,7 +61,7 @@ public:
             layer.weight=barrel&&zones==2?std::sqrt(side?fraction:1-fraction)*(zone?radialPosition:1-radialPosition):std::sqrt(w);layer.fit=&fits[index];
             layer.sample=files[size_t(stroke*6+zone*3+lower+side)].get();
             if(layer.sample)layer.cursor=layer.sample->strikeStart;
-            layer.noiseLoss=std::exp(-1.f/(48000*layer.fit->noiseTime));
+            layer.noiseLoss=std::exp(-1.f/(48000*layer.fit->noiseTime));layer.passive.drive=1;
             auto displacement=[](int mode,float radius){
                 const float pos=std::clamp(radius,0.f,1.f)*8;const int r=std::min(7,int(pos));
                 return radial[mode][r]+(pos-r)*(radial[mode][r+1]-radial[mode][r]);
@@ -83,6 +86,13 @@ public:
         const float stretch=p[3]/(1+held*2.8f);
         const float kappa=p[5]*(barrel?55.f:23.f)/48000.f;
         const float rotation=1.f-.5f*kappa*kappa;
+        // Request 146: part of the strike reaches the passive mode through the frame, so Sympathy,
+        // Passive tune and Ring time are audible. 
+        // Driven by the contact force, not the head's motion, so there is no feedback loop.
+        // Cubic: 0.07 at the measured default 0.42, full strength at 1.
+        const float sympathy=p[5]*p[5]*p[5]*(barrel?.6f:1.f);
+        // Request 146: a wider hand also smooths the recorded skin; tilt around 1.2 kHz, neutral at 0.38.
+        const float areaTilt=std::clamp((p[8]-.38f)*1.6f,-.6f,1.f);
         for(int l=0;l<count;++l){
             auto& layer=layers[l];
             for(int k=0;k<6;++k){
@@ -115,15 +125,16 @@ public:
                         recorded=(sample.mono[pos]+frac*(sample.mono[pos+1]-sample.mono[pos]))/sample.strikePeak;
                     }
                     layer.cursor+=sample.rate/48000.*pitch;
+                    layer.skinLow+=.145f*(recorded-layer.skinLow);
+                    recorded+=areaTilt*(layer.skinLow-recorded);
                 }
                 const float recordedImpulse=layer.sample&&age<960?recorded*p[9]*.008f*(1-age/960.f):0;
                 float body=0;
                 for(auto& mode:layer.poles){mode.advance(force+recordedImpulse);body+=mode.x;}
-                passive.advance(0);
+                passive.advance(sympathy*(force+recordedImpulse));
                 auto& main=layer.poles[0];
                 const float y=rotation*main.y-kappa*passive.y;
                 passive.y=rotation*passive.y+kappa*main.y;main.y=y;
-                body+=passive.x*.78f;
                 layer.low+=.08f*(white-layer.low);layer.mid+=.36f*(white-layer.mid);
                 const auto& colour=layer.fit->contact;
                 const float impact=layer.noiseEnv*(colour[0]*layer.low*3+colour[1]*(layer.mid-layer.low)*5.3f
@@ -135,7 +146,8 @@ public:
                     const float mix=p[9]*std::exp(-float(age)/48000.f*(2.8f+held*16.f));
                     dry+=mix*(recorded-dry);
                 }
-                out+=layer.weight*dry;
+                // The recording is the skin alone; the sympathetic body sounds on top of it.
+                out+=layer.weight*(dry+passive.x*.78f);
             }
             const float endFade=std::clamp((288000-age)/1920.f,0.f,1.f);
             b.outputs[0][i]=out*overall*endFade;

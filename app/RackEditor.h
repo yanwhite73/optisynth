@@ -565,7 +565,7 @@ public:
             for(const auto& f:factoryPresets()){starters.insert(f.starter);
                 require(std::find(presetCategories().begin(),presetCategories().end(),f.info.category)!=presetCategories().end()&&!f.info.tags.empty()&&!f.info.description.empty(),"Factory metadata complete");
                 for(const auto& t:f.info.tags)require(normaliseTag(t)==t,"Factory tags normalised");}
-            require(starters.size()==factoryPresets().size()&&*starters.begin()==0&&starters.count(27)&&starters.count(28)&&starters.count(29)&&starters.count(40),"Factory catalogue lists every starter once");}
+            require(starters.size()==factoryPresets().size()&&*starters.begin()==0&&starters.count(27)&&starters.count(28)&&starters.count(29)&&starters.count(40)&&starters.count(41),"Factory catalogue lists every starter once");}
         {
             const auto newest=std::max_element(factoryPresets().begin(),factoryPresets().end(),[](const FactoryPreset& a,const FactoryPreset& b){return a.updatedSeconds<b.updatedSeconds;});
             require(browser.visibleEntry(0).starter==newest->starter,"Newest factory revision comes first");
@@ -926,6 +926,37 @@ public:
             const auto recalled=readRack(rackJSON(document));
             require(nodeParameter(recalled.graph,"mala","assign_rv",-1)>.69f && recalled.graph.outputs.front().node=="mala","Mala settings survive save and recall");
             setView("panel",false);resized();
+        }
+        {
+            // Requests 145-147: Grain circle, a frame drummer improvising with Mala answering.
+            require(loadFactory(41),"Grain circle loads");drain();
+            require(document.graph.outputs.front().node=="mala" && synthPanel.control("hands","position") && synthPanel.control("mala","size")
+                    && synthPanel.control("mala","freeze") && synthPanel.layoutSound(),"Grain circle shows the drum and Mala on one panel");
+            const auto moving=std::count_if(document.graph.modulations.begin(),document.graph.modulations.end(),
+                [](const Modulation& m){return privateMovementSource(m.source.node)&&std::abs(m.amount)>=.2f;});
+            require(moving==4,"Grain circle carries four movement assignments at audible depths");
+            capture("grain-circle-panel.png");
+            auto saved=readRack(rackJSON(document));
+            require(nodeParameter(saved.graph,"sequence","chain",0)==1 && nodeParameter(saved.graph,"mala","seed_latch",1)==0,
+                    "Chain play and unlatched seeds survive save and recall");
+            prepareSamples(saved);
+            // One pass of the 20-bar chain and a tail, with the local skin recordings when present.
+            Runtime instrument(saved.graph,sampleBank(saved));instrument.clock.tempo(saved.tempo);
+            const int playFrames=int(std::lround(80*60*48000/saved.tempo))/quantum*quantum,frames=playFrames+48000*6;
+            AudioBuffer<float> sound(2,frames);
+            for(int i=0;i+quantum<=frames;i+=quantum){
+                if(i==0)instrument.clock.play(true);
+                if(i==playFrames)instrument.clock.play(false);
+                instrument.render(sound.getWritePointer(0,i),sound.getWritePointer(1,i),quantum,{},nullptr,nullptr);
+            }
+            sound.applyGain(saved.gain);
+            const float peak=std::max(sound.getMagnitude(0,0,frames),sound.getMagnitude(1,0,frames));
+            const float rms=std::sqrt(.5f*(sound.getRMSLevel(0,0,playFrames)*sound.getRMSLevel(0,0,playFrames)+sound.getRMSLevel(1,0,playFrames)*sound.getRMSLevel(1,0,playFrames)));
+            require(std::isfinite(peak)&&peak<.8f&&rms>.015f&&rms<.08f,"Grain circle renders with headroom at the factory loudness");
+            auto wav=directory.getChildFile("Grain circle.wav");wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
+            std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
+            if(writer)stream.release();
+            require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write Grain circle audition");
         }
         {
             require(loadFactory(25),"Optical vapour loads");drain();

@@ -26,6 +26,13 @@ void handDrumChecks(){
         check(noCoupling==hit(model,48,.64f,.31f,{{"couple",0},{"body_tune",7}}),"Passive head stays silent without energy transfer");
         check(difference(hit(model,48,.64f,.31f,{{"couple",1},{"body_tune",0}}),
                          hit(model,48,.64f,.31f,{{"couple",1},{"body_tune",7}}))>.00001,"Tuning an excited passive mode affects the response");
+        // Request 146: a control that can carry movement must be audible across its range.
+        const double sympathy=difference(noCoupling,hit(model,48,.64f,.31f,{{"couple",1}}));
+        const double passiveTune=difference(hit(model,48,.64f,.31f,{{"couple",1},{"body_tune",-7}}),hit(model,48,.64f,.31f,{{"couple",1},{"body_tune",7}}));
+        const double area=difference(hit(model,48,.64f,.31f,{{"area",0}}),hit(model,48,.64f,.31f,{{"area",1}}));
+        check(sympathy>.1,"Sympathy is audible across its range");
+        check(passiveTune>.1,"Passive tune is audible at full sympathy");
+        check(area>.1,"Contact area is audible across its range");
     }
     // A tiny first-party test impulse occupies exactly one of thirty local frame layers.
     SampleBank bank;auto contact=std::make_shared<SampleData>();contact->mono.assign(4800,.3f);
