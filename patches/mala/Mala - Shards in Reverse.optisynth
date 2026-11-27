@@ -1,0 +1,202 @@
+{
+  "format": "optisynth.rack",
+  "version": 6,
+  "gain": 0.68,
+  "tempo": 83,
+  "info": {
+    "name": "Mala - Shards in Reverse",
+    "category": "Texture",
+    "description": "A struck string feeds the recorder. Two independent lanes address its memory: CV 1 chooses how far back to read and CV 2 fires individual grains. Freeze after a phrase, then edit the CV lanes to rearrange the held material.",
+    "tags": [
+      "mala",
+      "slicing",
+      "reverse",
+      "seed"
+    ]
+  },
+  "view": "panel",
+  "samples": {},
+  "spectral": {},
+  "modulations": [],
+  "nodes": [
+    {
+      "id": "phrase",
+      "type": "seq.pattern",
+      "parameters": {
+        "length": 8,
+        "division": 2,
+        "gate": 0.65,
+        "cv_slew": 0,
+        "velocity": 1,
+        "step1_pitch": 50,
+        "step1_on": 1,
+        "step1_velocity": 0.9,
+        "step1_cv1": 0.03,
+        "step1_cv2": 1,
+        "step2_pitch": 57,
+        "step2_on": 1,
+        "step2_velocity": 0.44,
+        "step2_cv1": 0.03,
+        "step2_cv2": 0,
+        "step3_pitch": 62,
+        "step3_on": 1,
+        "step3_velocity": 0.63,
+        "step3_cv1": 0.15,
+        "step3_cv2": 1,
+        "step4_pitch": 65,
+        "step4_on": 1,
+        "step4_velocity": 0.55,
+        "step4_cv1": 0.52,
+        "step4_cv2": 0,
+        "step5_pitch": 64,
+        "step5_on": 1,
+        "step5_velocity": 0.82,
+        "step5_cv1": 0.11,
+        "step5_cv2": 0,
+        "step6_pitch": 57,
+        "step6_on": 1,
+        "step6_velocity": 0.48,
+        "step6_cv1": 0.11,
+        "step6_cv2": 1,
+        "step7_pitch": 53,
+        "step7_on": 1,
+        "step7_velocity": 0.7,
+        "step7_cv1": 0.36,
+        "step7_cv2": 0,
+        "step8_pitch": 60,
+        "step8_on": 1,
+        "step8_velocity": 0.43,
+        "step8_cv1": 0.65,
+        "step8_cv2": 0
+      }
+    },
+    {
+      "id": "wire",
+      "type": "modal.voice",
+      "parameters": {
+        "structure": 0.34,
+        "brightness": 0.78,
+        "decay": 0.62
+      }
+    },
+    {
+      "id": "mala",
+      "type": "fx.granular_tape",
+      "parameters": {
+        "size": 0.22,
+        "density": 0.5,
+        "time": 0.018,
+        "time_amt": 0.77,
+        "shape": 0.65,
+        "seed_latch": 0,
+        "pitch": 0,
+        "quality": 0,
+        "feedback": 0.08,
+        "dry_wet": 0.77,
+        "reverb": 0.16,
+        "input_gain": 0.1
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": {
+        "node": "phrase",
+        "port": "notes"
+      },
+      "to": {
+        "node": "wire",
+        "port": "notes"
+      }
+    },
+    {
+      "from": {
+        "node": "wire",
+        "port": "out"
+      },
+      "to": {
+        "node": "mala",
+        "port": "in_l"
+      }
+    },
+    {
+      "from": {
+        "node": "phrase",
+        "port": "cv1"
+      },
+      "to": {
+        "node": "mala",
+        "port": "time"
+      }
+    },
+    {
+      "from": {
+        "node": "phrase",
+        "port": "cv2"
+      },
+      "to": {
+        "node": "mala",
+        "port": "seed"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "node": "mala",
+      "port": "out"
+    }
+  ],
+  "panel": {
+    "style": "slate",
+    "sections": [
+      {
+        "title": "PICK",
+        "controls": [
+          {
+            "node": "wire",
+            "parameter": "structure",
+            "label": "Material"
+          },
+          {
+            "node": "wire",
+            "parameter": "decay",
+            "label": "Ring"
+          }
+        ]
+      },
+      {
+        "title": "SPLICES",
+        "controls": [
+          {
+            "node": "mala",
+            "parameter": "size",
+            "label": "Reverse length"
+          },
+          {
+            "node": "mala",
+            "parameter": "time_amt",
+            "label": "Address span"
+          },
+          {
+            "node": "mala",
+            "parameter": "shape",
+            "label": "Grain envelope"
+          },
+          {
+            "node": "mala",
+            "parameter": "dry_wet",
+            "label": "Splice level"
+          },
+          {
+            "node": "mala",
+            "parameter": "freeze",
+            "label": "Hold phrase"
+          }
+        ]
+      }
+    ]
+  },
+  "rack": {
+    "rows": []
+  }
+}

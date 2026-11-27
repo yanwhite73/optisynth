@@ -1426,6 +1426,12 @@ the sequence should be somewhat generative, like an improvisation on hand drum
 Steers request 145: the showcase sequence should vary as it plays, phrased like a
 hand drummer improvising, rather than a fixed loop.
 
+## 148 — Mala fidelity and playable Beads manual examples
+
+```text
+do an assessment of how faithful mala is to mutable beads, and see if you can create any useful presets for it - maybe the open source documentation has examples of how to use it
+```
+
 ## 149 — Grain circle sounds broken; musical uses of Beads
 
 ```text

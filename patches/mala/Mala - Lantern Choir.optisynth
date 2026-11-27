@@ -1,0 +1,207 @@
+{
+  "format": "optisynth.rack",
+  "version": 6,
+  "gain": 0.57,
+  "tempo": 68,
+  "info": {
+    "name": "Mala - Lantern Choir",
+    "category": "Pad",
+    "description": "Mala is the sound source. Pattern CV 1 plays the wavetable pitch jack while overlapping grains carry fragments of the preceding notes. Feedback selects the bank, Dry/wet moves from continuous tone to grains, and Freeze suspends the cloud.",
+    "tags": [
+      "mala",
+      "wavetable",
+      "granular",
+      "pad"
+    ]
+  },
+  "view": "panel",
+  "samples": {},
+  "spectral": {},
+  "modulations": [],
+  "nodes": [
+    {
+      "id": "phrase",
+      "type": "seq.pattern",
+      "parameters": {
+        "length": 16,
+        "division": 2,
+        "gate": 0.65,
+        "cv_slew": 0,
+        "velocity": 1,
+        "step1_pitch": 48,
+        "step1_on": 1,
+        "step1_velocity": 0.7,
+        "step1_cv1": 0.0,
+        "step1_cv2": 0,
+        "step2_pitch": 48,
+        "step2_on": 1,
+        "step2_velocity": 0.7,
+        "step2_cv1": 0.11666666666666667,
+        "step2_cv2": 0,
+        "step3_pitch": 48,
+        "step3_on": 1,
+        "step3_velocity": 0.7,
+        "step3_cv1": 0.2,
+        "step3_cv2": 0,
+        "step4_pitch": 48,
+        "step4_on": 1,
+        "step4_velocity": 0.7,
+        "step4_cv1": 0.25,
+        "step4_cv2": 0,
+        "step5_pitch": 48,
+        "step5_on": 1,
+        "step5_velocity": 0.7,
+        "step5_cv1": 0.11666666666666667,
+        "step5_cv2": 0,
+        "step6_pitch": 48,
+        "step6_on": 1,
+        "step6_velocity": 0.7,
+        "step6_cv1": 0.0,
+        "step6_cv2": 0,
+        "step7_pitch": 48,
+        "step7_on": 1,
+        "step7_velocity": 0.7,
+        "step7_cv1": -0.08333333333333333,
+        "step7_cv2": 0,
+        "step8_pitch": 48,
+        "step8_on": 1,
+        "step8_velocity": 0.7,
+        "step8_cv1": 0.03333333333333333,
+        "step8_cv2": 0,
+        "step9_pitch": 48,
+        "step9_on": 1,
+        "step9_velocity": 0.7,
+        "step9_cv1": 0.0,
+        "step9_cv2": 0,
+        "step10_pitch": 48,
+        "step10_on": 1,
+        "step10_velocity": 0.7,
+        "step10_cv1": 0.11666666666666667,
+        "step10_cv2": 0,
+        "step11_pitch": 48,
+        "step11_on": 1,
+        "step11_velocity": 0.7,
+        "step11_cv1": 0.23333333333333334,
+        "step11_cv2": 0,
+        "step12_pitch": 48,
+        "step12_on": 1,
+        "step12_velocity": 0.7,
+        "step12_cv1": 0.2,
+        "step12_cv2": 0,
+        "step13_pitch": 48,
+        "step13_on": 1,
+        "step13_velocity": 0.7,
+        "step13_cv1": 0.11666666666666667,
+        "step13_cv2": 0,
+        "step14_pitch": 48,
+        "step14_on": 1,
+        "step14_velocity": 0.7,
+        "step14_cv1": 0.05,
+        "step14_cv2": 0,
+        "step15_pitch": 48,
+        "step15_on": 1,
+        "step15_velocity": 0.7,
+        "step15_cv1": 0.03333333333333333,
+        "step15_cv2": 0,
+        "step16_pitch": 48,
+        "step16_on": 1,
+        "step16_velocity": 0.7,
+        "step16_cv1": -0.08333333333333333,
+        "step16_cv2": 0
+      }
+    },
+    {
+      "id": "mala",
+      "type": "fx.granular_tape",
+      "parameters": {
+        "density": 0.77,
+        "size": 0.76,
+        "shape": 0.77,
+        "time": 0.19,
+        "time_amt": -0.19,
+        "pitch": -0.72,
+        "pitch_amt": -0.09,
+        "feedback": 0.42,
+        "dry_wet": 0.85,
+        "reverb": 0.28,
+        "quality": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": {
+        "node": "phrase",
+        "port": "cv1"
+      },
+      "to": {
+        "node": "mala",
+        "port": "pitch"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "node": "mala",
+      "port": "out"
+    }
+  ],
+  "panel": {
+    "style": "slate",
+    "sections": [
+      {
+        "title": "WAVETABLE",
+        "controls": [
+          {
+            "node": "mala",
+            "parameter": "feedback",
+            "label": "Wave bank"
+          },
+          {
+            "node": "mala",
+            "parameter": "pitch",
+            "label": "Base pitch"
+          },
+          {
+            "node": "mala",
+            "parameter": "dry_wet",
+            "label": "Grain blend"
+          }
+        ]
+      },
+      {
+        "title": "VOICES",
+        "controls": [
+          {
+            "node": "mala",
+            "parameter": "density",
+            "label": "Seed density"
+          },
+          {
+            "node": "mala",
+            "parameter": "size",
+            "label": "Grain length"
+          },
+          {
+            "node": "mala",
+            "parameter": "shape",
+            "label": "Swell"
+          },
+          {
+            "node": "mala",
+            "parameter": "reverb",
+            "label": "Room"
+          },
+          {
+            "node": "mala",
+            "parameter": "freeze",
+            "label": "Suspend"
+          }
+        ]
+      }
+    ]
+  },
+  "rack": {
+    "rows": []
+  }
+}

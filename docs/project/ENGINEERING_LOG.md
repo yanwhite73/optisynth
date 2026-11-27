@@ -1575,6 +1575,12 @@ Listening expectations now have a reproducible acoustic check. Testing duration 
 - **Each fix was measured** against fully dry and fully wet renders before the native check: unity manual gain with headroom; then longer grains, more seeds and more feedback.
 - **The improvisation** was checked by counting the sixteenths that differ between passes.
 
+## 27 November 2026 — Mala fidelity and manual studies (request 148)
+
+Verified the 36 Beads source blobs against the pinned upstream Git tree. Probed the hardware state-change guard against the host and reproduced a 250 ms output interruption for externally gated Freeze. The existing host table had overstated parity here. Documented the discrepancy, output routing and buffer recall in [Mala fidelity](../research/modules/MALA_FIDELITY.md). Resolving the gate case requires respecting and displaying the effective gate/button state when deferring media changes.
+
+Installed three ordinary library presets with their own saved sequences. Both the offline graph renderer and the released 0.0.37 executable reproduced their levels and the effect of disconnecting their defining CV cables. Two independent renders per preset matched exactly. Opening the browser rescans the library. No new app installation is needed for these presets.
+
 ## Request 149 — "that sounds awful … It just sounds broken"
 
 - **What happened.** Grain circle (0.0.37) was designed to show many features at once: random seeds, sixteenth-note triggers, random Time, Size and Shape, tape flutter and pitch jumps, all on dry percussion. Its checks measured level, clipping, wet/dry balance and pass-to-pass variation. None measured whether the grains themselves were smooth.

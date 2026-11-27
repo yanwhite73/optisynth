@@ -12,6 +12,8 @@ On pure tones, Mala's dry path is clean in Bright digital and Sunny tape, at −
 
 **Mala / Handpan drift** (Texture) takes the same slot (factory 41). A steel handpan voice improvises in D minor by random walk, with a low ding. Mala turns it into long, smooth clouds, then an octave shimmer, then holds the harmony with Freeze while the melody carries on. [Settings, playing guide and measurements](../research/modules/MALA.md)
 
+Three additional presets for Mala are installed in the **Mala Studies** collection. Search **Mala** for Copper Relay (clocked delay), Shards in Reverse (addressed grains) and Lantern Choir (no-input wavetable pad). See the [fidelity assessment, patch instructions and audio checks](../research/modules/MALA_FIDELITY.md).
+
 ## 0.0.37 — Grain circle, and movement you can hear
 
 **Mala / Grain circle** (Percussion) is a frame drummer improvising, with Mala answering.
