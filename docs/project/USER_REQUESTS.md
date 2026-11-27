@@ -1397,3 +1397,31 @@ codex committed
 
 The signal to merge branch `mala` after Codex's 0.0.35 commit (652b952), as the
 programme note asked. Delivered as 0.0.36.
+
+## 145 — A preset that shows Mala at its best
+
+```text
+please build a preset that allows me to hear the module in its best light, including a sequence thats appropriate
+```
+
+Seed rain only passes an existing chord through Mala. This asks for a dedicated
+showcase: a source and sequence chosen for granular processing, with Mala's
+controls moving the way the module is meant to be played.
+
+## 146 — Little audible movement from seven LFOs
+
+```text
+I set 7 lfos but arent heariong much moevement in the sound
+```
+
+Sent while request 145 was in progress. A defect report on the movement system;
+investigate the user's actual patch and the audible effect of each assignment.
+
+## 147 — Generative sequence like a hand-drum improvisation
+
+```text
+the sequence should be somewhat generative, like an improvisation on hand drum
+```
+
+Steers request 145: the showcase sequence should vary as it plays, phrased like a
+hand drummer improvising, rather than a fixed loop.
