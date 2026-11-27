@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <fstream>
+#include <filesystem>
 #include <new>
 #include <stdexcept>
 #include <limits>
@@ -43,6 +44,8 @@ void wav(const std::string& path,const std::vector<float>& x) {
 #include "performance_checks.h"
 #include "reference_sequencer_checks.h"
 int main(int argc,char** argv){try {
+    std::filesystem::create_directories("build/fixtures");
+    std::filesystem::create_directories("build/auditions/tests");
     // At fixed pitch, doubling bubble size halves its oscillation frequency.
     auto drop=[](float size,float decay){
         GraphSpec g;
@@ -118,7 +121,7 @@ int main(int argc,char** argv){try {
     sequencerChecks();patternChecks();performanceChecks();referenceSequencerChecks();
     spectralChecks();
     sampleChecks();handDrumChecks();
-    for(int i=0;i<4;++i){auto g=rackPreset(i);validateRack(g);auto x=render(g);check(energy(x)>1e-6,"Rack starter audible");check(x==render(g),"Rack starter deterministic");wav("build/rack-"+std::to_string(i)+".wav",x);}
+    for(int i=0;i<4;++i){auto g=rackPreset(i);validateRack(g);auto x=render(g);check(energy(x)>1e-6,"Rack starter audible");check(x==render(g),"Rack starter deterministic");wav("build/auditions/tests/rack-"+std::to_string(i)+".wav",x);}
     for(const auto* source:{"osc.variable","osc.sine"})for(const auto* filter:{"mutable.lowpass","mutable.bandpass","mutable.highpass"}){
         auto g=instrumentPatch(source,"spectral.adsr",filter,true,true);Runtime r(g);
         std::array<float,257> block{};
@@ -221,7 +224,7 @@ int main(int argc,char** argv){try {
         check(!r.controls("envelope"),"No dormant controls allocated");
         auto x=render(g);check(energy(x)>1e-6,"Source audible");
         check(x==render(g),"Deterministic retrigger and recall");
-        wav(std::string("build/")+source+".wav",x);
+        wav(std::string("build/auditions/tests/")+source+".wav",x);
         g.nodes[0].parameters={{"decay",.9f}};
         auto y=render(g);double delta=0;for(size_t i=0;i<x.size();++i)delta+=std::abs(x[i]-y[i]);
         check(delta>1,"Contextual decay changes audio");

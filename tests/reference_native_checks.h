@@ -14,7 +14,7 @@ void referencePresets(){
 }
 void referenceEditors(){
     juce::ScopedJuceInitialiser_GUI initialise;
-    const auto folder=juce::File::getCurrentWorkingDirectory().getChildFile("build/reference-ui-review");require(folder.createDirectory().wasOk(),"Create reference UI folder");
+    const auto folder=juce::File::getCurrentWorkingDirectory().getChildFile("build/reviews/reference");require(folder.createDirectory().wasOk(),"Create reference UI folder");
     auto click=[](juce::Component& editor,const char* title){for(auto* child:editor.getChildren())if(auto* button=dynamic_cast<juce::Button*>(child))if(button->getButtonText()==title){require(button->isEnabled(),"Expected enabled reference action");button->onClick();return;}throw std::runtime_error(std::string("Missing reference action: ")+title);};
     auto capture=[&](juce::Component& editor,const char* name){juce::FileOutputStream stream(folder.getChildFile(name));require(stream.openedOk(),"Open reference image");stream.setPosition(0);stream.truncate();require(juce::PNGImageFormat().writeImageToStream(editor.createComponentSnapshot(editor.getLocalBounds()),stream),"Write reference image");};
     auto gesture=[](optiui::ReferenceSequencerEditor& editor,juce::Point<float> from,juce::Point<float> to){const auto now=juce::Time::getCurrentTime();

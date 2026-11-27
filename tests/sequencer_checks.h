@@ -47,7 +47,7 @@ void sequencerChecks(){
         std::vector<float> audio(48000*4);runtime.clock.play(true);
         allocations=0;watchAllocations=true;runtime.render(audio.data(),int(audio.size()),{});watchAllocations=false;
         check(allocations==0&&energy(audio)>1,"Sequencer starter audible with no render allocation");
-        wav("build/sequencer-"+std::to_string(model)+".wav",audio);
+        wav("build/auditions/tests/sequencer-"+std::to_string(model)+".wav",audio);
         check(runtime.controls("sequence")->playhead.load()>=0,"Audio publishes a live playhead");
         runtime.clock.play(false);runtime.render(audio.data(),int(audio.size()),{});
         check(runtime.controls("sequence")->playhead.load()==-1,"Stopped playhead is explicit");

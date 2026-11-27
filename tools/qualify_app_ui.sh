@@ -4,5 +4,5 @@
 set -eu
 cd "$(dirname "$0")/.."
 sh tools/build_app.sh
-app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth --snapshot "$PWD/build/sequencer-ui-review"
-cat build/sequencer-ui-review/ui-check.txt build/sequencer-ui-review/sequencer-check.txt build/sequencer-ui-review/pad-check.txt build/sequencer-ui-review/panel-browser-check.txt
+app/Builds/MacOSX/build/Release/Optisynth.app/Contents/MacOS/Optisynth --snapshot "$PWD/build/reviews/sequencer"
+cat build/reviews/sequencer/ui-check.txt build/reviews/sequencer/sequencer-check.txt build/reviews/sequencer/pad-check.txt build/reviews/sequencer/panel-browser-check.txt

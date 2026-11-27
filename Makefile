@@ -73,7 +73,11 @@ build/test_core_asan: $(CORE) tests/test_core.cpp $(HEADERS) | build
 asan: build/test_core_asan
 	./build/test_core_asan
 
+CORE_TESTS := $(addprefix build/test_,core graph modular timing)
+SANITIZED_TESTS := $(addsuffix _asan,$(CORE_TESTS))
+
 clean:
-	rm -rf build
+	$(RM) build/partials-render $(CORE_TESTS) $(SANITIZED_TESTS)
+	$(RM) -r $(addsuffix .dSYM,$(SANITIZED_TESTS))
 
 .PHONY: all test test-renderer test-graph test-modular test-timing asan-timing asan-modular asan-graph asan clean

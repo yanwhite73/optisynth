@@ -1459,3 +1459,22 @@ you cant just guess at what a handpan sounds like. Also, I didnt ask for that in
 ```text
 mostly the movement in the delay
 ```
+
+## 153 — Build paths and the launch location
+
+```text
+/Users/yanwhite/Documents/Music\ docs/Code/optisynth/app/Builds/MacOSX/build/Optisynth.build/Release why are the paths so convoluted and messy? is this normal development practice?
+```
+
+## 154 — Organize the development build folder
+
+```text
+this folder is also like a general dump for too many things
+/Users/yanwhite/Documents/Music\ docs/Code/optisynth/build
+```
+
+## 155 — Repeated failure to manage project files
+
+```text
+general lack of discipline in managing files, I have flagged it repeatedly and it must be recorded
+```

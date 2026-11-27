@@ -1,5 +1,7 @@
 # Optisynth status — 27 November 2026
 
+[Listening files](../../build/auditions) · [UI reviews](../../build/reviews) · [Build and test logs](../../build/logs). Requests 153–155 record the repeated file-management issue and its correction in the [engineering log](ENGINEERING_LOG.md#27-november-2026--repeated-failure-to-manage-files-requests-153155).
+
 **Standing programme:** faithful reproductions of sophisticated modules. See
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).

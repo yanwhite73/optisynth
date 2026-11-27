@@ -97,7 +97,8 @@ The C++17 modular core includes a reviewed, pinned MIT DSP subset under
 `third_party/mutable`; it needs no external installation. `build/partials-render`
 retains the legacy name and `.ptch` format for regression comparisons; it renders
 the compatibility engine. `make test-modular asan-modular` checks the new runtime
-and creates short source/starter audio examples under `build/`.
+and writes source and starter examples to `build/auditions/tests/`.
+Open [auditions](build/auditions) for listening files, [reviews](build/reviews) for native captures and [logs](build/logs) for build and test output.
 `make test-timing asan-timing` also checks the clock/event foundation independently.
 The modular tests exercise sequencer timing, note routes and note-release ownership.
 

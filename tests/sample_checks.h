@@ -61,7 +61,7 @@ void sampleChecks(){
     bad=fixture(32,1,48000,true);bad[56]=0;bad[57]=0;bad[58]=0x80;bad[59]=0x7f;check(rejects(bad),"Infinite float rejected");
     bool cancelled=false;try{decodeWave(good,[]{return true;});}catch(const std::exception&){cancelled=true;}check(cancelled,"Decoder cancellation");
     bad=Bytes(maximumSampleBytes+1);check(rejects(bad),"32 MiB input bound");
-    auto path="build/sample-fixture.wav";{std::ofstream file(path,std::ios::binary);file.write(reinterpret_cast<const char*>(good.data()),good.size());}
+    auto path="build/fixtures/sample-fixture.wav";{std::ofstream file(path,std::ios::binary);file.write(reinterpret_cast<const char*>(good.data()),good.size());}
     check(loadWave(path)->fingerprint==decodeWave(good)->fingerprint,"File decoding/fingerprint match");
     good.back()^=1;check(decodeWave(good)->fingerprint!=loadWave(path)->fingerprint,"Changed audio changes fingerprint");
     auto asset=std::make_shared<SampleData>();asset->rate=48000;asset->mono.assign(4800,.5f);
@@ -84,7 +84,7 @@ void sampleChecks(){
     std::vector<float> combined(6000);pair.render(combined.data(),6000,{48,1,true,true});auto lower=play(g,asset,{48,1,true,true},6000),higher=play(g,asset,{60,1,true,true},6000);
     bool independent=true;for(size_t i=0;i<combined.size();++i)independent&=combined[i]==lower[i]+higher[i];check(independent,"Shared sample asset has independent playheads");
     allocations=0;watchAllocations=true;for(int i=0;i<100;++i)r.render(a.data(),300,{i%128,1,true,i%3==0});watchAllocations=false;check(allocations==0,"Sample loop/render/retrigger allocates nothing");
-    for(int i:{4,5}){auto graph=rackPreset(i);validateRack(graph);SampleBank assets{{"source",demoSample()}};Runtime first(graph,assets),second(graph,assets);std::vector<float> y(48000),z(48000);first.render(y.data(),48000,{48,.8f,true,true});second.render(z.data(),48000,{48,.8f,true,true});check(energy(y)>1e-6&&y==z,"Sample/resonator starter audible and deterministic");wav("build/rack-"+std::to_string(i)+".wav",y);}
+    for(int i:{4,5}){auto graph=rackPreset(i);validateRack(graph);SampleBank assets{{"source",demoSample()}};Runtime first(graph,assets),second(graph,assets);std::vector<float> y(48000),z(48000);first.render(y.data(),48000,{48,.8f,true,true});second.render(z.data(),48000,{48,.8f,true,true});check(energy(y)>1e-6&&y==z,"Sample/resonator starter audible and deterministic");wav("build/auditions/tests/rack-"+std::to_string(i)+".wav",y);}
     asset->rate=std::numeric_limits<double>::infinity();bool invalid=false;try{Runtime unsafe(g,bank);}catch(const std::exception&){invalid=true;}check(invalid,"Invalid prepared sample rejected");
 }
 }

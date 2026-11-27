@@ -26,6 +26,7 @@ std::vector<float> render(const RackDocument& document,int seconds){
     std::vector<float> left(48000*seconds),right(left.size());runtime.render(left.data(),right.data(),int(left.size()),{});left.insert(left.end(),right.begin(),right.end());return left;
 }
 void presets(){
+    require(juce::File::getCurrentWorkingDirectory().getChildFile("build/auditions/tests").createDirectory().wasOk(),"Create audition folder");
     for(int i=13;i<=14;++i){auto d=starterDocument(i,.25f);prepareSamples(d);const auto saved=juce::JSON::toString(rackJSON(d));auto restored=readRack(juce::JSON::parse(saved));prepareSamples(restored);
         require(*d.graph.nodes[0].performance==*restored.graph.nodes[0].performance,"Every pattern/chain field survives JSON recall");
         const auto a=render(d,12),b=render(restored,12);require(a==b,"Four-track stereo audio differs after recall");float peak=0;double energy=0;for(float v:a){require(std::isfinite(v),"Nonfinite performance audio");peak=std::max(peak,std::abs(v));energy+=v*v;}require(energy>1e-4,"Silent performance preset");
@@ -34,7 +35,7 @@ void presets(){
         const auto name=i==13?"performance-four-currents":"performance-clockwork-garden";
         std::ofstream preset(std::string("patches/")+name+".optisynth");preset<<saved.replace("\r\n","\n");require(bool(preset),"Write performance preset");
         d.graph.nodes[0].parameters.push_back({"chain",1});auto song=render(d,24);const size_t frames=song.size()/2;
-        std::ofstream wav(std::string("build/")+name+".wav",std::ios::binary);auto u16=[&](uint16_t v){wav.put(char(v));wav.put(char(v>>8));};auto u32=[&](uint32_t v){u16(uint16_t(v));u16(uint16_t(v>>16));};
+        std::ofstream wav(std::string("build/auditions/tests/")+name+".wav",std::ios::binary);auto u16=[&](uint16_t v){wav.put(char(v));wav.put(char(v>>8));};auto u32=[&](uint32_t v){u16(uint16_t(v));u16(uint16_t(v>>16));};
         wav.write("RIFF",4);u32(uint32_t(36+frames*4));wav.write("WAVEfmt ",8);u32(16);u16(1);u16(2);u32(48000);u32(192000);u16(4);u16(16);wav.write("data",4);u32(uint32_t(frames*4));
         for(size_t frame=0;frame<frames;++frame)for(size_t ch=0;ch<2;++ch)u16(uint16_t(int16_t(std::clamp(song[ch*frames+frame]*d.gain,-.95f,.95f)*32767)));
         require(bool(wav),"Write performance audio example");std::printf("PASS %s: all banks/chains recalled; identical 12-second stereo render; four audible solo tracks; peak %.5f; 24-second chain WAV\n",name,peak);
@@ -65,7 +66,7 @@ void editorChecks(){
     for(int i=0;i<16;++i)outputs[i]=output[i].data();for(int t=0;t<4;++t)events[t*4]=&buses[t];
     for(int block=0;block<500;++block){module->controls->performance->collect();for(auto& t:time)t=clock.next();for(auto& bus:buses)bus.begin(24);module->process({24,{},nullptr,outputs.data(),nullptr,nullptr,nullptr,time.data(),&buses[0],events.data()});}
     require(module->controls->performance->steps[0]>=0&&module->controls->performance->queued[2]==6,"UI launch not reflected in actual engine state");editor.setTempoDisplay(120);
-    const juce::File folder(juce::File::getCurrentWorkingDirectory().getChildFile("build/performance-ui-review"));require(folder.createDirectory().wasOk(),"Create UI output folder");
+    const juce::File folder(juce::File::getCurrentWorkingDirectory().getChildFile("build/reviews/performance"));require(folder.createDirectory().wasOk(),"Create UI output folder");
     auto capture=[&](const char* name){auto image=editor.createComponentSnapshot(editor.getLocalBounds());juce::FileOutputStream stream(folder.getChildFile(name));require(stream.openedOk(),"Open editor image");stream.setPosition(0);stream.truncate();require(juce::PNGImageFormat().writeImageToStream(image,stream),"Write editor image");};
     editor.setSize(1260,930);editor.showChain(false);capture("performance-patterns.png");
     module->controls->values[PerfChain]=1;editor.setValue("chain",1);for(auto& t:time)t=clock.next();for(auto& bus:buses)bus.begin(24);module->process({24,{},nullptr,outputs.data(),nullptr,nullptr,nullptr,time.data(),&buses[0],events.data()});

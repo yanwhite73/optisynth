@@ -1,4 +1,5 @@
 // Unit tests for the M1 engine core. Run with `make test`.
+#include <filesystem>
 #include "../plugin/Source/TypingKeyboard.h"
 #include <cmath>
 #include <cstdint>
@@ -198,7 +199,7 @@ void testPatchRoundTrip() {
     p.osc[1].waveA.db[3] = -6.5f;
     p.osc[1].filter.curve.db[7] = kSilentDb;
     std::string err;
-    const std::string path = "build/test_roundtrip.ptch";
+    const std::string path = "build/fixtures/test_roundtrip.ptch";
     check(savePatch(path, p, err), "patch saves");
     Patch q;
     check(loadPatch(path, q, err), "patch loads: " + err);
@@ -318,7 +319,7 @@ void testEngineRendersSound() {
 
 void testHostileInput() {
     // A damaged file must load into a safe patch, and extreme notes must stay finite.
-    const std::string path = "build/test_hostile.ptch";
+    const std::string path = "build/fixtures/test_hostile.ptch";
     {
         std::FILE* f = std::fopen(path.c_str(), "w");
         std::fputs("partials-patch 1\nosc.1.on 1\nosc.1.semitone 1e30\nosc.1.cent nan\nosc.1.symmetry inf\n"
@@ -1299,6 +1300,7 @@ void testFeedbackOversampling() {
 #include "test_host_extension.h"
 
 int main() {
+    std::filesystem::create_directories("build/fixtures");
     testTierLayout();
     testSine();
     testMeasuredWaveformNormalisation();

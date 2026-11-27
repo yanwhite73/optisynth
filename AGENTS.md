@@ -20,6 +20,12 @@ Bundle implementation, checks and documentation into coherent delivery commits
 to origin; this supersedes the
 inherited no-commit restriction for Optisynth. Preserve independent local backups.
 
+## Development outputs
+
+Put listening files in `build/auditions/`, native screenshots and review receipts in `build/reviews/<release-or-task>/`, and logs in `build/logs/`. Keep research runs together in `build/studies/<topic>/` and temporary scripts in `build/scratch/`. Link auditions by a readable preset name. Existing app staging, archives, and compiled Make targets have fixed locations. Put new Git worktrees beside the checkout.
+
+Yan has repeatedly flagged file management (requests 53 and 153–155). Choose a destination before writing files. At handoff inspect the files the task created, verify the exact link given to Yan, and fix any tool that writes future output into the wrong place. See the [record of the recurring failure](docs/project/ENGINEERING_LOG.md#27-november-2026--repeated-failure-to-manage-files-requests-153155).
+
 ## Build delivery discipline
 
 The ONE user-facing standalone app is
