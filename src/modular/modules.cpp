@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "hand_drum.h"
 #include "sequencer.h"
 #include "analog.h"
 #include "performance.h"
@@ -89,6 +90,17 @@ const std::vector<Panel>& panels() {
         p.push_back({"mod.lfo","LFO","Independent sine / triangle / ramp / pulse modulation","modulator",{
             {"rate","Rate","Hz",.01f,30,1,true},{"depth","Depth","",0,1,1},
             {"wave","Shape","",0,3,0,false,1},{"retrigger","Note reset","",0,1,0,false,1}}});
+        for(bool barrel:{false,true}){
+            Panel hand{barrel?"drum.pakhawaj":"drum.frame",barrel?"Pakhawaj":"Frame drum",
+                "C bass / D open / E slap / F stopped / G fingers. Velocity selects the contact layer.","source",{
+                {"tune","Tuning","st",-12,12,0},{"position","Strike radius","",0,1,.42f},
+                {"hard","Contact stiffness","",0,1,.5f},{"decay","Head decay","x",.25f,2,1,true},
+                {"pressure","Hand pressure","",0,1,0},{"couple","Sympathy","",0,1,.42f},
+                {"body_tune","Passive tune","st",-12,12,0},{"body_decay","Passive loss time","x",.2f,3,1,true},
+                {"area","Contact area","",0,1,.38f}}};
+            hand.parameters.push_back({"skin","Recorded skin","",0,1,.78f});
+            p.push_back(std::move(hand));
+        }
         for(auto& sequencer:sequencerPanels())p.push_back(std::move(sequencer));
         for(auto& analog:analogPanels())p.push_back(std::move(analog));
         return p;
@@ -325,6 +337,14 @@ public:
         for(auto& m:modes)if(std::abs(m.x)+std::abs(m.y)<1e-15f)m={};
     }
 };
+class HandDrum final : public Module {
+public:
+    HandDrum(const NodeSpec& n,const SampleBank& samples,int voice)
+        :Module(n),head(n.type=="drum.pakhawaj",n.id,samples,voice){}
+    void process(const AudioBlock& b) noexcept override {update(b);head.render(b,values.data());}
+private:
+    handdrum::Head head;
+};
 class Drum final : public Module {
 public:
     explicit Drum(const NodeSpec& n) : Module(n) { drum.Init(); }
@@ -448,7 +468,7 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
         if(id=="seq.pattern"){type.outputs.push_back({"cv1",SignalType::Control});type.outputs.push_back({"cv2",SignalType::Control});}
         if(id=="seq.performance"){type.outputs.clear();for(int t=1;t<=4;++t){const auto prefix="t"+std::to_string(t)+"_";type.outputs.push_back({prefix+"notes",SignalType::Event});for(const char* name:{"gate","bend","cv"})type.outputs.push_back({prefix+name,SignalType::Control});}type.outputs.push_back({"all_notes",SignalType::Event});}
         if(isReferenceSequencer(id))referenceSequencerPorts(id,type);
-        type.create=[id,assets=id=="sample.player"?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
+        type.create=[id,assets=(id=="sample.player"||handdrum::isHandDrum(id))?samples:SampleBank{},engines=id=="spectral.engine"?spectral:SpectralBank{}](const NodeSpec& n,const PrepareContext& c)->std::unique_ptr<PreparedModule> {
             if(c.sampleRate!=48000 || c.maximumBlock>quantum) throw std::invalid_argument("Module requires 48 kHz / <=24 frame blocks");
             if(isAnalog(id))return makeAnalog(n,c);
             if(isSequencer(id))return makeSequencer(n);
@@ -466,6 +486,7 @@ Registry moduleRegistry(const SampleBank& samples,const SpectralBank& spectral) 
             if(id=="osc.sine")return std::make_unique<Sine>(n);
             const char* miIds[]={"mutable.lowpass","mutable.bandpass","mutable.highpass"};
             for(int i=0;i<3;++i)if(id==miIds[i])return std::make_unique<MutableFilter>(n,i);
+            if(handdrum::isHandDrum(id))return std::make_unique<HandDrum>(n,assets,c.voice);
             if(id=="drum.skin_vessel")return std::make_unique<SkinVessel>(n);
             if(id=="drum.droplet")return std::make_unique<Droplet>(n);
             if(id=="drum.analog")return std::make_unique<Drum>(n);

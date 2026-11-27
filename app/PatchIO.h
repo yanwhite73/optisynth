@@ -1,4 +1,5 @@
 #pragma once
+#include "../src/modular/hand_drum.h"
 #include <JuceHeader.h>
 #include "../src/modular/rack.h"
 #include "../src/modular/sequencer.h"
@@ -107,6 +108,8 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {14,1795100331,{"Performance / Clockwork garden","Sequence","Four-track performance rack with swung, rooted patterns and chimes.",{"performance","multi-track","generative"}},"modular"},
         {17,1795105055,{"Probability / Glass branches","Sequence","Weighted-probability pitch grid driving the spectral motion voice.",{"probability","generative","spectral"}},"modular"},
         {18,1795105055,{"Orbit / Four satellites","Sequence","Four Euclidean rings with drift, each with its own accent lane.",{"orbit","euclidean","polyrhythm","generative"}},"modular"},
+        {29,1795714101,{"Pakhawaj / Two hands","Percussion","A dry twelve-beat study with bass, treble and coincident strokes. C bass, D open, E slap, F stopped, G fingers. The wheel adds hand pressure.",{"pakhawaj","dhrupad","hand-percussion","physical-model"}},"panel"},
+        {28,1795714100,{"Frame drum / Skin and rim","Percussion","Five articulations across C D E F G. Two strike zones and three strengths per articulation use local frame-drum WAVs when present.",{"frame-drum","multisample","physical-model","hand-percussion"}},"panel"},
         {27,1795531650,{"Skin and vessel","Percussion","Turn Frame to udu while the pattern plays. Strike position moves from palm to rim or shell. Short gates let the hand lift off the pot.",{"frame-drum","udu","physical-model","hand-percussion"}},"panel"},
         {26,1795523931,{"Clay and water","Percussion","Four interlocking roles at 92 BPM. Fixed low strokes anchor softer rim, droplet and fingertip variations. Drop a local WAV on contact in the Modular view.",{"organic","drum-machine","physical-model","probability"}},"panel"}};
     return list;
@@ -222,6 +225,55 @@ inline RackDocument starterDocument(int which,float gain) {
         d.panel.sections.erase(std::remove_if(d.panel.sections.begin(),d.panel.sections.end(),[](const PanelSection& s){return s.title=="SPACE";}),d.panel.sections.end());
         d.panel.sections.push_back({"MALA",{{"mala","density","Density"},{"mala","time","Time"},{"mala","size","Size"},{"mala","shape","Shape"},
             {"mala","pitch","Pitch"},{"mala","feedback","Feedback"},{"mala","dry_wet","Dry/wet"},{"mala","reverb","Reverb"},{"mala","freeze","Freeze"}}});
+        return d;
+    }
+    if(which==28||which==29){
+        const bool barrel=which==29;
+        RackDocument d;d.gain=gain;d.tempo=barrel?84:99;
+        auto sequence=std::make_shared<PerformanceData>();
+        sequence->tracks[0].name=barrel?"Bass head":"Palm";
+        sequence->tracks[1].name=barrel?"Treble head":"Edge and fingers";
+        for(auto& track:sequence->tracks)for(auto& bank:track.patterns){
+            bank.scale=0;bank.last=barrel?47:31;bank.division=1;
+            for(auto& step:bank.steps)step.on=false;
+        }
+        auto hit=[&](int hand,int at,int key,float velocity,float gate=.6f,float chance=1.f,int repeat=1){
+            auto& step=sequence->tracks[hand].patterns[0].steps[at];
+            step.on=true;step.pitch=48+key;step.velocity=velocity;step.gate=gate;step.chance=chance;step.ratchets=repeat;
+        };
+        if(barrel){
+            // An original 12-beat exercise, with two simultaneous hands on the return.
+            for(int at:{0,4,16,24,36,44})hit(0,at,0,at==0?.93f:at==24?.84f:.68f);
+            hit(0,14,5,.45f,.28f);hit(0,31,5,.36f,.26f);hit(0,42,0,.56f);
+            for(int at:{0,4,8,20,24,32,40,44})hit(1,at,at==8||at==40?7:2,at%12==0?.87f:.71f);
+            hit(1,12,5,.58f,.29f);hit(1,18,4,.48f);hit(1,27,5,.41f,.26f);
+            hit(1,28,4,.74f);hit(1,34,7,.46f);hit(1,38,5,.53f,.33f);
+            hit(1,46,4,.57f,.45f,1,2);
+        }else{
+            for(int at:{0,10,16,22,26})hit(0,at,0,at%16==0?.92f:.72f);
+            hit(0,7,5,.34f,.3f,.72f);hit(0,29,2,.47f);
+            for(int at:{4,12,20,28})hit(1,at,at==20?2:4,at==12?.85f:.72f);
+            hit(1,3,7,.30f,.3f);hit(1,6,5,.52f);hit(1,14,7,.41f,.4f,1,2);
+            hit(1,19,5,.4f);hit(1,24,2,.61f);hit(1,31,7,.38f,.45f,.72f,2);
+        }
+        d.graph.nodes={{"sequence","seq.performance",{},sequence},{"head",barrel?"drum.pakhawaj":"drum.frame",{}},
+                       {"voices","voice.mix",{{"voices",8},{"spread",.035f},{"level",.91f}}}};
+        d.graph.connections={{{"sequence","all_notes"},{"voices","notes"}},{{"head","out"},{"voices","in"}}};
+        d.graph.outputs={{"voices","out"}};
+        d.panel={"walnut",{{"HAND / STRIKE",{{"head","position","Centre to edge"},{"head","hard","Stiffness"},{"head","pressure","Pressure"}}},
+                            {"MEMBRANE / BODY",{{"head","tune","Tension / tune"},{"head","decay","Damping time"},{"head","area","Contact area"}}},
+                            {"SYMPATHETIC RESPONSE",{{"head","couple","Coupling"},{"head","body_tune","Passive tune"},{"head","body_decay","Ring time"}}}}};
+        if(!barrel){
+            const auto library=juce::File::getSpecialLocation(juce::File::userMusicDirectory).getChildFile(
+                "Audiopool/library/Organic.Loops.Frame.Drums.MULTiFORMAT/FRD_SOUNDS_&_FX/FRD_FRAME_DRUMS");
+            for(int stroke=0;stroke<5;++stroke)for(int zone=0;zone<2;++zone)for(int v=0;v<3;++v){
+                const int file=handdrum::frameFiles[stroke][zone][v];
+                const auto wav=library.getChildFile("FRD_FrameDrums_"+juce::String(file).paddedLeft('0',2)+".wav");
+                if(wav.existsAsFile())d.samples[handdrum::sampleKey("head",stroke*6+zone*3+v)]={wav.getFullPathName().toStdString(),{},{}};
+            }
+        }
+        d.panel.sections.front().controls.push_back({"head","skin","Recorded skin"});
+        d.panel.sections.push_back({"STROKES / SAMPLES",{{"head","","Stroke map"}}});
         return d;
     }
     if(which==27){
@@ -472,9 +524,17 @@ inline RackDocument chooseStarter(const RackDocument& current, int index, bool k
     next.tempo = current.tempo;
     return next;
 }
+inline const NodeSpec* sampleOwner(const GraphSpec& graph,const std::string& key){
+    for(const auto& n:graph.nodes){
+        if(n.type=="sample.player"&&key==n.id)return &n;
+        if(handdrum::isHandDrum(n.type)&&key.rfind(n.id+"__skin_",0)==0)
+            for(int i=0;i<30;++i)if(key==handdrum::sampleKey(n.id,i))return &n;
+    }
+    return nullptr;
+}
 inline void pruneSampleReferences(RackDocument& d) {
     for(auto it=d.samples.begin();it!=d.samples.end();){
-        if(std::none_of(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==it->first&&n.type=="sample.player";}))it=d.samples.erase(it);
+        if(!sampleOwner(d.graph,it->first))it=d.samples.erase(it);
         else ++it;
     }
     for(auto it=d.spectral.begin();it!=d.spectral.end();){
@@ -502,7 +562,7 @@ inline const Parameter* findParameter(const std::string& type,const std::string&
 inline bool panelControlValid(const RackDocument& d,const PanelControl& c) {
     const auto n=std::find_if(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& x){return x.id==c.node;});
     if(n==d.graph.nodes.end())return false;
-    return c.parameter.empty()?isSequencerModule(n->type):findParameter(n->type,c.parameter)!=nullptr;
+    return c.parameter.empty()?(isSequencerModule(n->type)||handdrum::isHandDrum(n->type)):findParameter(n->type,c.parameter)!=nullptr;
 }
 // Patches without a curated layout: one section per module in rack order.
 inline PanelLayout autoPanel(const RackDocument& d) {
@@ -543,7 +603,11 @@ inline SampleBank sampleBank(const RackDocument& d) {
 }
 inline bool needsSamples(const RackDocument& d) {
     auto plan=compileGraph(d.graph,moduleRegistry());
-    for(auto i:plan.nodes){if(d.graph.nodes[i].type=="spectral.engine")return true;auto it=d.samples.find(d.graph.nodes[i].id);if(it!=d.samples.end()&&!it->second.data)return true;}return false;
+    for(auto i:plan.nodes){
+        const auto& node=d.graph.nodes[i];if(node.type=="spectral.engine")return true;
+        for(const auto& [key,ref]:d.samples)if(!ref.data&&sampleOwner(d.graph,key)==&node)return true;
+    }
+    return false;
 }
 inline void prepareSamples(RackDocument& d,const CancelSample& cancelled={}) {
     validateRack(d.graph);const auto plan=compileGraph(d.graph,moduleRegistry());
@@ -552,7 +616,9 @@ inline void prepareSamples(RackDocument& d,const CancelSample& cancelled={}) {
     std::map<std::string,SamplePtr> loaded;std::set<const SampleData*> counted;size_t bytes=0;
     for(auto& s:d.samples){auto& ref=s.second;
         if(cancelled&&cancelled())throw std::runtime_error("Sample load cancelled");
-        if(!active.count(s.first)){ref.data.reset();continue;}
+        const auto* owner=sampleOwner(d.graph,s.first);
+        if(!owner||!active.count(owner->id)){ref.data.reset();continue;}
+        if(!ref.data&&handdrum::isHandDrum(owner->type)&&!juce::File(ref.path).existsAsFile())continue;
         if(!ref.data){auto it=loaded.find(ref.path);ref.data=it!=loaded.end()?it->second:ref.path=="builtin:click"?demoSample():loadWave(ref.path,cancelled);loaded[ref.path]=ref.data;}
         if(!ref.fingerprint.empty()&&ref.fingerprint!=ref.data->fingerprint)throw std::runtime_error("Sample file changed: "+ref.path+". Load WAV again to use the new audio.");
         ref.fingerprint=ref.data->fingerprint;
@@ -692,7 +758,7 @@ inline RackDocument readRack(const juce::var& value) {
                 const auto path=v["path"].toString(),hash=v["fingerprint"].toString();
                 if(path!="builtin:click"&&!juce::File::isAbsolutePath(path))throw std::invalid_argument("Sample paths must be absolute");
                 if(!hash.isEmpty()&&hash!="builtin-click-v1"&&(hash.length()!=16||!hash.containsOnly("0123456789abcdef")))throw std::invalid_argument("Invalid sample fingerprint");
-                if(std::none_of(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==id&&n.type=="sample.player";}))throw std::invalid_argument("Sample reference has no sample module");
+                if(!sampleOwner(d.graph,id))throw std::invalid_argument("Sample reference has no sample module");
                 d.samples[id]={path.toStdString(),hash.toStdString(),{}};
             }
         }

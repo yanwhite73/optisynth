@@ -1,8 +1,35 @@
-# Optisynth status — 26 November 2026
+# Optisynth status — 27 November 2026
 
 **Standing programme:** faithful reproductions of sophisticated modules. See
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).
+
+## 0.0.36 — Mala, the first faithful port
+
+**Mala** is in the rack under Effects, and the browser has a new texture preset, **Seed rain**. Mala is a granular texture processor, delay and reverb. It runs the open Beads DSP unchanged in all four qualities, plus the wavetable synth it plays when nothing is patched in. The card follows the original's arrangement:
+- Freeze and Seed buttons, both lit;
+- large Density, Time and Pitch knobs;
+- the Quality light;
+- the four attenurandomizers and the Assign lights.
+
+Hidden button-hold settings appear as visible controls. **Seed rain** plays the Optical vapour reed chord through Mala. Design, host adaptations and checks are in [MALA.md](../research/modules/MALA.md).
+
+Regular and ASan/UBSan runs passed:
+
+| Suite | Checks |
+| --- | --- |
+| Core | 1,194 |
+| Graph | 28 |
+| Modular | 504 (501 under the sanitizers, which skip the three CPU budgets) |
+| Timing | 47 |
+
+All native interface checks passed, including Mala's controls, buttons, gestures and recall and the Seed rain render. Mala uses 0.5–0.9% of one core. The native captures and `Seed rain.wav` are in `build/ui-review-036/`.
+
+## 0.0.35 — Frame drum and pakhawaj
+
+The standalone browser includes **Frame drum / Skin and rim** and **Pakhawaj / Two hands**. Both presets contain their own two-track sequence. Play C, D, E, F and G for bass, open, slap, stopped and finger strokes. Velocity changes the contact and resonance. The wheel adds pressure. On the preset panel, **Stroke map** assigns local WAVs by stroke, inner/outer skin and force. **Recorded skin** blends them into the model. The frame preset resolves 30 local files when the Organic Loops library is present. Pakhawaj starts fully synthesized.
+
+The [acoustic study](../research/modules/HAND_DRUM_ACOUSTICS.md) documents the recordings, mode fits, playing technique and remaining limitations. The current native captures and dry audition phrases are in `build/ui-review-135-qualified/`.
 
 ## 0.0.34 — Edit LFOs during a playing pattern
 

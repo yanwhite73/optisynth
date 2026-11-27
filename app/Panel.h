@@ -439,7 +439,7 @@ struct LitButton final : Button {
             g.setColour(Colour(0xff26282a));g.fillEllipse(light.expanded(1.5f));
             g.setColour(led.withMultipliedBrightness(.25f+.75f*std::clamp(ledLevel,0.f,1.f)));g.fillEllipse(light);
         }
-        g.setColour(legendColour);g.setFont(font(text::label));g.drawText(legend,r.toNearestInt(),Justification::centredTop,true);
+        g.setColour(legendColour);g.setFont(font(text::label));g.drawFittedText(legend,r.toNearestInt(),Justification::centredTop,2,1.f);// "ASSIGN: CUSTOM" wraps instead of truncating
     }
 };
 struct FaceRow { const char* legend; int diameterPercent; std::vector<std::string> parameters; };
@@ -557,7 +557,7 @@ struct ModulePanel : juce::Component, FileDragAndDropTarget {
             {"",{lit(freezeButton,64),cell("density",L),lit(seedButton,64)}},
             {"",{cell("time",L),lit(qualityButton,112),cell("pitch",L)}},
             {"",{cell("feedback",S),cell("size",M),cell("shape",M),cell("dry_wet",S)}},
-            {"",{lit(assignButton,60),cell("time_amt",S),cell("size_amt",S),cell("shape_amt",S),cell("pitch_amt",S),cell("reverb",S)}},
+            {"",{TapeItem{const_cast<LitButton*>(&assignButton),60,assignButton.diameter+6+2*Control::labelHeight},cell("time_amt",S),cell("size_amt",S),cell("shape_amt",S),cell("pitch_amt",S),cell("reverb",S)}},
             {"Hidden functions",{toggle("seed_latch"),toggle("r_gate"),cell("input_gain",S)}},
             {"Custom assign amounts",{cell("assign_fb",S),cell("assign_dw",S),cell("assign_rv",S)}}};
     }

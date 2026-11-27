@@ -1,8 +1,8 @@
 # Mala: the open Beads design in the rack
 
 Programme item 1 ([MODULE_PROGRAMME.md](../../project/MODULE_PROGRAMME.md)).
-Requests 136–140, 26 November 2026. Display name **Mala** (request 140). Saved
-module id `fx.granular_tape`.
+Requests 136–140, 26 November 2026; delivered in 0.0.36 on 27 November. Display
+name **Mala** (request 140). Saved module id `fx.granular_tape`.
 
 ## What it is
 

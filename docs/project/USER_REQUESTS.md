@@ -1299,6 +1299,12 @@ clicking on an lfo should not restart the sequencer
 its not good ui to have lfo visual feedback in 2 places, just the param curve is fine, but put the number next to that
 ```
 
+## 135 — Reference-based frame drum and dhrupad percussion
+
+```text
+good, can we now get some more convincing frame drum and dhrupad drum sounds. Use samples to analyze them and find a way to either merge samples with synthesis or analyze enough to use synthesis alone
+```
+
 ## 136 — Faithful reproductions of sophisticated modules keep being dropped
 
 ```text
@@ -1308,3 +1314,86 @@ what happened to my requests for more faithful reproductions of sophisticated mo
 Claude session, 26 November 2026. Earlier requests on the same programme:
 8, 12, 18, 81, 87, 96–98 and 115. Account and prevention in ENGINEERING_LOG,
 request 136. The standing programme is now [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md).
+
+## 137 — Include the interface in the faithful port
+
+```text
+include the UI as well plz
+```
+
+Sent while the Beads port (programme item 1) was starting. The port includes the
+panel: the original's control set, buttons, lights and socket arrangement, drawn
+by us under our own name.
+
+## 138 — A fun name for the port
+
+```text
+and suggest a fun name
+```
+
+Sent during the Beads port. Names may not use Mutable Instruments or the original
+module name (LICENSING.md). The internal id stays neutral so the display name can
+change.
+
+## 139 — Name: Love Beads
+
+```text
+love beads maybe
+```
+
+Adopted as the display name of programme item 1. Upstream bans the "Mutable
+Instruments" name on derivative works and advises against keeping a module's
+original name. "Love Beads" is a new name that shares one common word with the
+original. The saved module id stays neutral (`fx.granular_tape`), so a rename
+before public release changes no patches.
+
+## 140 — Name: Mala
+
+```text
+or mala
+```
+
+Adopted "Mala" (a string of prayer beads) as the display name. It shares no word
+with the original name. "Love Beads" remains the alternative; the display name is
+one line and the saved id stays `fx.granular_tape`.
+
+## 141 — Depth of percussion implementation
+
+```text
+too simple, too basic. You need to take this seriously
+```
+
+## 142 — Percussion response and multisampling
+
+```text
+resonance, timbre, sympathetic frequencies, character, multisample based on type of strike and where its struck, and how hard
+```
+
+## 143 — Physical modelling research
+
+```text
+do proper research
+
+Physical modeling synthesis generates sound using mathematical equations and algorithms that simulate how real or imaginary objects vibrate and resonate, rather than playing back recorded samples or standard oscillators.
+
+How It Works
+
+Most physical modeling synths split sound generation into two core parts:
+• Exciter: Delivers initial energy—like a pluck, bow, mallet strike, or burst of air/noise—to set a virtual object in motion.
+• Resonator: Simulates how that energy rings, damps, and reflects across a string, tube, plate, membrane, or mass-spring network.
+Because it models physical behavior in real time, it excels at responsive dynamics, organic nuances, and expressive controllers (like MPE, velocity, and aftertouch), while also letting you bend physics to make impossible or surreal instruments. Learn more about the underlying math and techniques on Wikipedia or explore concepts and history via Perfect Circuit and Attack Magazine.
+
+Notable Software & Hardware Synths
+
+• Software: Applied Acoustic Systems (Chromaphone 3, String Studio VS-3), Reason Studios Objekt, Modartt Pianoteq, Baby Audio Atoms, SWAM instruments, Madrona Labs Kaivo, Ableton Live (Collision, Tension), and free options like RipplerX. Users on r/synthesizers generally agree on recommending plugins like Chromaphone, Objekt, SWAM, and Kaivo for physical modeling and resonators, while users on VI-Control generally agree on plugins from Physical Audio, Anukari, and AAS for modal and physical modeling sound design.
+• Hardware: Classic units like the Yamaha VL1/VL70m and Korg Z1/Prophecy; modern synths and Eurorack modules such as Expressive E Osmose, Waldorf Iridium, Polyend PMD engine, Mutable Instruments Elements/Rings, and Aodyo Anyma Phi (often found secondhand).
+```
+
+## 144 — Release Mala after 0.0.35
+
+```text
+codex committed
+```
+
+The signal to merge branch `mala` after Codex's 0.0.35 commit (652b952), as the
+programme note asked. Delivered as 0.0.36.

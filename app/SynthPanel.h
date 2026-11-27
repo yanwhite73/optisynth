@@ -79,7 +79,7 @@ public:
                 const auto node=std::find_if(d.graph.nodes.begin(),d.graph.nodes.end(),[&](const NodeSpec& n){return n.id==c.node;});
                 if(node==d.graph.nodes.end())continue;
                 if(c.parameter.empty()){
-                    auto button=std::make_unique<TextButton>("Open "+String(panel(node->type).name));
+                    auto button=std::make_unique<TextButton>(c.label=="Stroke map"?String("Stroke map"):("Open "+String(panel(node->type).name)));
                     button->onClick=[this,id=c.node]{if(openEditor)openEditor(id);};
                     face.addAndMakeVisible(*button);section->items.push_back(button.get());launchers.push_back(std::move(button));continue;
                 }
@@ -90,6 +90,11 @@ public:
                 customiseControl(node->type,*control,false);
                 control->slider.setTooltip(String(c.node)+"."+String(c.parameter)+" / double-click to reset");
                 if(node->type=="analog.filter"&&c.parameter=="fm_depth")control->showFilterFmSource(d.graph,c.node);
+                if(handdrum::isHandDrum(node->type)&&c.parameter=="skin"){
+                    const bool mapped=std::any_of(d.samples.begin(),d.samples.end(),[&](const auto& entry){
+                        return entry.second.data&&sampleOwner(d.graph,entry.first)==&*node;});
+                    control->showActivity(mapped?String{}:"Add a local WAV in Stroke map");
+                }
                 control->movementClicked=[this,id=c.node](Control& k){if(openMovement)openMovement(id,k.param.id);};
                 control->liveOffset=movementOffset;control->bindMovement(node->type,c.node,d.graph);
                 face.addAndMakeVisible(*control);section->items.push_back(control.get());
@@ -116,6 +121,10 @@ public:
     void tickMovement(){if(isShowing())for(auto& c:controls)c->tickMovement();}
     size_t controlCount() const {return controls.size();}
     size_t sectionCount() const {return sections.size();}
+    TextButton* strokeMapLauncher() const {
+        for(const auto& button:launchers)if(button->getButtonText()=="Stroke map")return button.get();
+        return nullptr;
+    }
     size_t launcherCount() const {return launchers.size();}
     bool isCurated() const {return curated;}
     void preferKnob(int value) {preferred=value;resized();}
