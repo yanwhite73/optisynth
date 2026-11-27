@@ -1595,3 +1595,7 @@ Installed three ordinary library presets with their own saved sequences. Both th
   - Measure artifacts against the dry source, not just level.
   - Never call a preset a module's best light on the strength of loudness and balance numbers. Say it has not been heard.
 
+
+## 27 November 2026 — Correcting the description of Handpan drift
+
+The 0.0.38 handoff described factory 41 as a steel handpan voice. The saved graph uses two general-purpose modal percussion nodes, and the native checks measured levels and patch recall. Neither the scale nor those checks established instrument identity. Yan had to correct both the sound description and the assumption that he wanted a handpan developed. For Mala, evaluate the processing using the source and musical role being asked for. A reference-instrument name requires recorded evidence for the claimed timbre. Requests 150–151 capture the feedback verbatim.

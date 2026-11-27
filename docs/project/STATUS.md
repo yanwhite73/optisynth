@@ -10,7 +10,7 @@ Grain circle sounded broken (request 149). The cause was its settings, not Mala:
 
 On pure tones, Mala's dry path is clean in Bright digital and Sunny tape, at −105 dB. Smooth grains stay 40 dB clean. Cold digital and Scorched cassette add the noise their media are meant to.
 
-**Mala / Handpan drift** (Texture) takes the same slot (factory 41). A steel handpan voice improvises in D minor by random walk, with a low ding. Mala turns it into long, smooth clouds, then an octave shimmer, then holds the harmony with Freeze while the melody carries on. [Settings, playing guide and measurements](../research/modules/MALA.md)
+**Mala / Handpan drift** (Texture) takes the same slot (factory 41). Two instances of the general-purpose modal percussion voice play a D-minor random walk and a lower accent. Yan heard bells in this patch. Its sound has not been validated against handpan recordings. Mala turns it into long, smooth clouds, then an octave shimmer, then holds the harmony with Freeze while the melody carries on. [Settings, playing guide and measurements](../research/modules/MALA.md)
 
 Three additional presets for Mala are installed in the **Mala Studies** collection. Search **Mala** for Copper Relay (clocked delay), Shards in Reverse (addressed grains) and Lantern Choir (no-input wavetable pad). See the [fidelity assessment, patch instructions and audio checks](../research/modules/MALA_FIDELITY.md).
 

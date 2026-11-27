@@ -1440,3 +1440,16 @@ that sounds awful. so is beads basically granular processing? It just sounds bro
 
 Response to Grain circle (0.0.37). Explain what Beads is for, check whether
 Mala itself has a defect, and replace the showcase with musical uses.
+
+## 150 — Handpan timbre and Copper audition feedback
+
+```text
+handpan sounds like bells
+I dont like any of youre presets really. Copper is almost beginning to sound like something I might use
+```
+
+## 151 — Handpan was not commissioned
+
+```text
+you cant just guess at what a handpan sounds like. Also, I didnt ask for that instrument. It's very complex and rich, and would need deep sample analysis
+```

@@ -141,7 +141,7 @@ Tonal, ringing sources give the grains something to sustain. Short grains on dry
 
 ## Showcase: Handpan drift (requests 145–149)
 
-Factory 41 replaces Grain circle, whose harsh sound came from its settings (below). A steel tuned-percussion voice improvises in D minor, the Kurd layout of a handpan:
+Factory 41 replaces Grain circle, whose harsh sound came from its settings (below). The patch uses two instances of `modal.voice`. Its sequence borrows a D-minor handpan note layout. The tuned scale describes the pitches only. No recorded handpan strikes were analysed to qualify the timbre, and Yan heard bells when auditioning it (requests 150–151). The implemented patch works as follows:
 - **Track 1** random-walks the scale in eighths, with rests by chance and occasional flams.
 - **Track 2** places the low ding.
 - **Track 4** holds Freeze and sets the grains to exact notches.
