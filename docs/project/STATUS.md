@@ -12,7 +12,9 @@ On pure tones, Mala's dry path is clean in Bright digital and Sunny tape, at −
 
 **Mala / Handpan drift** (Texture) takes the same slot (factory 41). Two instances of the general-purpose modal percussion voice play a D-minor random walk and a lower accent. Yan heard bells in this patch. Its sound has not been validated against handpan recordings. Mala turns it into long, smooth clouds, then an octave shimmer, then holds the harmony with Freeze while the melody carries on. [Settings, playing guide and measurements](../research/modules/MALA.md)
 
-Three additional presets for Mala are installed in the **Mala Studies** collection. Search **Mala** for Copper Relay (clocked delay), Shards in Reverse (addressed grains) and Lantern Choir (no-input wavetable pad). See the [fidelity assessment, patch instructions and audio checks](../research/modules/MALA_FIDELITY.md).
+**Copper Undertow** is the 96 BPM variation on Yan’s Copper edit. Time moves the repeats across the clock grid. The first sequencer CV lane brings up the delay mix and feedback over four bars. Search **Undertow** in the preset browser.
+
+Three earlier presets for Mala are installed in the **Mala Studies** collection. Search **Mala** for Copper Relay (clocked delay), Shards in Reverse (addressed grains) and Lantern Choir (no-input wavetable pad). See the [fidelity assessment, patch instructions and audio checks](../research/modules/MALA_FIDELITY.md).
 
 ## 0.0.37 — Grain circle, and movement you can hear
 

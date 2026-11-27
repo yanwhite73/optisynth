@@ -1599,3 +1599,7 @@ Installed three ordinary library presets with their own saved sequences. Both th
 ## 27 November 2026 — Correcting the description of Handpan drift
 
 The 0.0.38 handoff described factory 41 as a steel handpan voice. The saved graph uses two general-purpose modal percussion nodes, and the native checks measured levels and patch recall. Neither the scale nor those checks established instrument identity. Yan had to correct both the sound description and the assumption that he wanted a handpan developed. For Mala, evaluate the processing using the source and musical role being asked for. A reference-instrument name requires recorded evidence for the claimed timbre. Requests 150–151 capture the feedback verbatim.
+
+## 27 November 2026 — Copper Undertow, request 152
+
+Installed one 96 BPM variation in the Mala Studies library. Verified with the released 0.0.38 executable over 40 seconds. Tapping the graph before Mala gave sample-identical output between Yan’s saved Copper and the variation. Two recalls of the installed variation also matched sample for sample. Compared with the moving render, parking the two delay LFOs and disconnecting the phrase lane produced a difference of −0.44 dB relative RMS. Disconnecting only the phrase lane produced −14.97 dB. Peak output was −3.88 dBFS. Renders are under `build/copper-152/installed` and `build/copper-152/native-delay-still`. The development renderer differed slightly from the installed executable, so both listening files and all reported comparisons use the installed executable.

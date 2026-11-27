@@ -1,0 +1,408 @@
+{
+  "format": "optisynth.rack",
+  "version": 6,
+  "gain": 0.639999985694885,
+  "tempo": 96.0,
+  "samples": {},
+  "spectral": {},
+  "modulations": [
+    {
+      "from": {
+        "node": "move_mala_time",
+        "port": "out"
+      },
+      "to": {
+        "node": "mala",
+        "port": "time"
+      },
+      "amount": 0.102
+    },
+    {
+      "from": {
+        "node": "move_copper_brightness",
+        "port": "out"
+      },
+      "to": {
+        "node": "copper",
+        "port": "brightness"
+      },
+      "amount": 0.150000005960464
+    },
+    {
+      "from": {
+        "node": "move_copper_decay",
+        "port": "out"
+      },
+      "to": {
+        "node": "copper",
+        "port": "decay"
+      },
+      "amount": 0.075000002980232
+    },
+    {
+      "from": {
+        "node": "move_mala_feedback",
+        "port": "out"
+      },
+      "to": {
+        "node": "mala",
+        "port": "feedback"
+      },
+      "amount": 0.07
+    },
+    {
+      "from": {
+        "node": "move_copper_structure",
+        "port": "out"
+      },
+      "to": {
+        "node": "copper",
+        "port": "structure"
+      },
+      "amount": 0.045000001788139
+    }
+  ],
+  "nodes": [
+    {
+      "id": "phrase",
+      "type": "seq.pattern",
+      "parameters": {
+        "length": 16.0,
+        "division": 1.0,
+        "gate": 0.649999976158142,
+        "cv_slew": 0.0,
+        "velocity": 1.0,
+        "step1_pitch": 62.0,
+        "step1_on": 1.0,
+        "step1_velocity": 0.930000007152557,
+        "step1_cv1": 0,
+        "step1_cv2": 1.0,
+        "step2_pitch": 62.0,
+        "step2_on": 0.0,
+        "step2_velocity": 0.009999999776483,
+        "step2_cv1": 0,
+        "step2_cv2": 0.0,
+        "step3_pitch": 69.0,
+        "step3_on": 0.0,
+        "step3_velocity": 0.009999999776483,
+        "step3_cv1": 0,
+        "step3_cv2": 0.0,
+        "step4_pitch": 62.0,
+        "step4_on": 1.0,
+        "step4_velocity": 0.389999985694885,
+        "step4_cv1": 0,
+        "step4_cv2": 0.0,
+        "step5_pitch": 65.0,
+        "step5_on": 0.0,
+        "step5_velocity": 0.009999999776483,
+        "step5_cv1": 0,
+        "step5_cv2": 1.0,
+        "step6_pitch": 65.0,
+        "step6_on": 0.0,
+        "step6_velocity": 0.009999999776483,
+        "step6_cv1": 0,
+        "step6_cv2": 0.0,
+        "step7_pitch": 72.0,
+        "step7_on": 1.0,
+        "step7_velocity": 0.670000016689301,
+        "step7_cv1": 0,
+        "step7_cv2": 0.0,
+        "step8_pitch": 69.0,
+        "step8_on": 0.0,
+        "step8_velocity": 0.009999999776483,
+        "step8_cv1": 0,
+        "step8_cv2": 0.0,
+        "step9_pitch": 60.0,
+        "step9_on": 1.0,
+        "step9_velocity": 0.850000023841858,
+        "step9_cv1": 0,
+        "step9_cv2": 1.0,
+        "step10_pitch": 60.0,
+        "step10_on": 0.0,
+        "step10_velocity": 0.009999999776483,
+        "step10_cv1": 0,
+        "step10_cv2": 0.0,
+        "step11_pitch": 67.0,
+        "step11_on": 0.0,
+        "step11_velocity": 0.009999999776483,
+        "step11_cv1": 0,
+        "step11_cv2": 0.0,
+        "step12_pitch": 60.0,
+        "step12_on": 1.0,
+        "step12_velocity": 0.469999998807907,
+        "step12_cv1": 0.12,
+        "step12_cv2": 0.0,
+        "step13_pitch": 64.0,
+        "step13_on": 0.0,
+        "step13_velocity": 0.009999999776483,
+        "step13_cv1": 0.43,
+        "step13_cv2": 1.0,
+        "step14_pitch": 69.0,
+        "step14_on": 1.0,
+        "step14_velocity": 0.610000014305115,
+        "step14_cv1": 0.67,
+        "step14_cv2": 0.0,
+        "step15_pitch": 62.0,
+        "step15_on": 0.0,
+        "step15_velocity": 0.009999999776483,
+        "step15_cv1": 0.39,
+        "step15_cv2": 0.0,
+        "step16_pitch": 57.0,
+        "step16_on": 0.0,
+        "step16_velocity": 0.009999999776483,
+        "step16_cv1": 0.12,
+        "step16_cv2": 0.0,
+        "cv1_length": 64,
+        "step17_cv1": 0,
+        "step18_cv1": 0,
+        "step19_cv1": 0,
+        "step20_cv1": 0,
+        "step21_cv1": 0.12,
+        "step22_cv1": 0.24,
+        "step23_cv1": 0.09,
+        "step24_cv1": 0,
+        "step25_cv1": 0,
+        "step26_cv1": 0,
+        "step27_cv1": 0,
+        "step28_cv1": 0,
+        "step29_cv1": 0.22,
+        "step30_cv1": 0.46,
+        "step31_cv1": 0.26,
+        "step32_cv1": 0.08,
+        "step33_cv1": 0,
+        "step34_cv1": 0,
+        "step35_cv1": 0,
+        "step36_cv1": 0,
+        "step37_cv1": 0,
+        "step38_cv1": 0,
+        "step39_cv1": 0,
+        "step40_cv1": 0,
+        "step41_cv1": 0,
+        "step42_cv1": 0,
+        "step43_cv1": 0.12,
+        "step44_cv1": 0.26,
+        "step45_cv1": 0.42,
+        "step46_cv1": 0.62,
+        "step47_cv1": 0.74,
+        "step48_cv1": 0.38,
+        "step49_cv1": 0,
+        "step50_cv1": 0,
+        "step51_cv1": 0,
+        "step52_cv1": 0,
+        "step53_cv1": 0.06,
+        "step54_cv1": 0.12,
+        "step55_cv1": 0.2,
+        "step56_cv1": 0.32,
+        "step57_cv1": 0.45,
+        "step58_cv1": 0.6,
+        "step59_cv1": 0.75,
+        "step60_cv1": 0.88,
+        "step61_cv1": 1,
+        "step62_cv1": 0.85,
+        "step63_cv1": 0.36,
+        "step64_cv1": 0.08
+      }
+    },
+    {
+      "id": "copper",
+      "type": "modal.voice",
+      "parameters": {
+        "structure": 0.540000021457672,
+        "brightness": 0.620000004768372,
+        "decay": 0.28999999165535
+      }
+    },
+    {
+      "id": "mala",
+      "type": "fx.granular_tape",
+      "parameters": {
+        "size": 1.0,
+        "density": 0.430000007152557,
+        "time": 0.137,
+        "shape": 0.059999998658895,
+        "quality": 2.0,
+        "feedback": 0.34,
+        "dry_wet": 0.34,
+        "reverb": 0.06,
+        "input_gain": 0.0001,
+        "assign": 3,
+        "assign_dw": 0.32,
+        "assign_fb": 0.32,
+        "assign_rv": 0
+      }
+    },
+    {
+      "id": "move_mala_time",
+      "type": "mod.lfo",
+      "parameters": {
+        "rate": 0.05689999833703,
+        "depth": 1.0,
+        "wave": 0.0,
+        "retrigger": 0.0
+      }
+    },
+    {
+      "id": "move_copper_brightness",
+      "type": "mod.lfo",
+      "parameters": {
+        "rate": 0.044799998402596,
+        "depth": 1.0,
+        "wave": 0.0,
+        "retrigger": 0.0
+      }
+    },
+    {
+      "id": "move_copper_decay",
+      "type": "mod.lfo",
+      "parameters": {
+        "rate": 0.055100001394749,
+        "depth": 1.0,
+        "wave": 0.0,
+        "retrigger": 0.0
+      }
+    },
+    {
+      "id": "move_mala_feedback",
+      "type": "mod.lfo",
+      "parameters": {
+        "rate": 0.040899999439716,
+        "depth": 1.0,
+        "wave": 0.0,
+        "retrigger": 0.0
+      }
+    },
+    {
+      "id": "move_copper_structure",
+      "type": "mod.lfo",
+      "parameters": {
+        "rate": 0.012899999506772,
+        "depth": 1.0,
+        "wave": 0.0,
+        "retrigger": 0.0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": {
+        "node": "phrase",
+        "port": "notes"
+      },
+      "to": {
+        "node": "copper",
+        "port": "notes"
+      }
+    },
+    {
+      "from": {
+        "node": "copper",
+        "port": "out"
+      },
+      "to": {
+        "node": "mala",
+        "port": "in_l"
+      }
+    },
+    {
+      "from": {
+        "node": "phrase",
+        "port": "cv2"
+      },
+      "to": {
+        "node": "mala",
+        "port": "seed"
+      }
+    },
+    {
+      "from": {
+        "node": "phrase",
+        "port": "cv1"
+      },
+      "to": {
+        "node": "mala",
+        "port": "assign"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "node": "mala",
+      "port": "out"
+    }
+  ],
+  "info": {
+    "name": "Mala - Copper Undertow",
+    "category": "Sequence",
+    "description": "Copper at 96 BPM. CV 1 raises the echo send and feedback at the ends of a four-bar phrase. The Time movement changes the spacing of the repeats. Return lift controls how much the delay comes forward. Press Play seq.",
+    "tags": [
+      "mala",
+      "copper",
+      "moving-delay",
+      "ostinato"
+    ]
+  },
+  "view": "modular",
+  "panel": {
+    "style": "slate",
+    "sections": [
+      {
+        "title": "COPPER",
+        "controls": [
+          {
+            "node": "copper",
+            "parameter": "brightness",
+            "label": "Strike"
+          },
+          {
+            "node": "copper",
+            "parameter": "decay",
+            "label": "Ring"
+          }
+        ]
+      },
+      {
+        "title": "TAPE REPEATS",
+        "controls": [
+          {
+            "node": "mala",
+            "parameter": "time",
+            "label": "Delay multiple"
+          },
+          {
+            "node": "mala",
+            "parameter": "density",
+            "label": "Clock division"
+          },
+          {
+            "node": "mala",
+            "parameter": "feedback",
+            "label": "Repeats"
+          },
+          {
+            "node": "mala",
+            "parameter": "dry_wet",
+            "label": "Echo level"
+          },
+          {
+            "node": "mala",
+            "parameter": "assign_dw",
+            "label": "Return lift"
+          },
+          {
+            "node": "mala",
+            "parameter": "assign_fb",
+            "label": "Feedback lift"
+          },
+          {
+            "node": "mala",
+            "parameter": "freeze",
+            "label": "Hold slice"
+          }
+        ]
+      }
+    ]
+  },
+  "rack": {
+    "rows": []
+  }
+}

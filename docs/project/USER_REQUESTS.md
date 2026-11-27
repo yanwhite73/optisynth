@@ -1453,3 +1453,9 @@ I dont like any of youre presets really. Copper is almost beginning to sound lik
 ```text
 you cant just guess at what a handpan sounds like. Also, I didnt ask for that instrument. It's very complex and rich, and would need deep sample analysis
 ```
+
+## 152 — What worked in Copper
+
+```text
+mostly the movement in the delay
+```

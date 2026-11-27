@@ -40,3 +40,7 @@ Each saved file was loaded through the app’s patch parser and sample preparati
 The local audition WAVs are in `build/mala-manual`. The sounds and their defining connections are in the committed preset files.
 
 To repeat the audio checks with 0.0.37 or later, run `python3 tools/check_mala_studies.py` through the shared test launcher. Passing `--library "$HOME/Music/Optisynth/Presets/Mala Studies"` tests the installed copies. The release executable’s own offline renderer reproduced all three peak, RMS and cable-difference results above to the displayed precision.
+
+## Copper Undertow
+
+Yan identified movement in the delay as the part of Copper he might use. This variation starts with his 96 BPM edit and keeps the pitch, rests, velocities and three movement assignments to the struck voice. Seed still receives the quarter-note clock on CV 2. The Time LFO sweeps the repeat spacing in about 17.6 seconds. CV 1 has an independent 64-step lane lasting four bars. Its rises increase both the wet level and feedback, with the longest rise in bar four. The two amounts are exposed as **Return lift** and **Feedback lift**. The player's saved Copper edit remains available separately.
