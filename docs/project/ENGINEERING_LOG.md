@@ -1575,3 +1575,17 @@ Listening expectations now have a reproducible acoustic check. Testing duration 
 - **Each fix was measured** against fully dry and fully wet renders before the native check: unity manual gain with headroom; then longer grains, more seeds and more feedback.
 - **The improvisation** was checked by counting the sixteenths that differ between passes.
 
+## Request 149 — "that sounds awful … It just sounds broken"
+
+- **What happened.** Grain circle (0.0.37) was designed to show many features at once: random seeds, sixteenth-note triggers, random Time, Size and Shape, tape flutter and pitch jumps, all on dry percussion. Its checks measured level, clipping, wet/dry balance and pass-to-pass variation. None measured whether the grains themselves were smooth.
+- **Evidence.**
+  - The upstream envelope and size laws show that Shape below about 0.4 starts grains abruptly, and that Size below 0.33 reverses them. Grain circle swept through both.
+  - A pure-tone probe showed Mala's host is clean: dry path −105 dB, smooth grains −40 dB. Sharp grains reach −11.5 dB.
+- **User cost.** One install-and-listen cycle, on a preset billed as showing the module "in its best light".
+- **Correction.** Handpan drift uses long, symmetric grains on tonal, ringing material. Its checks add the share of high-frequency energy and a count of transients against the dry source. MALA.md now has a playing guide derived from the knob laws.
+- **Prevention.** For any showcase:
+  - Start from the module's documented sweet spot, here the manual and the envelope and size laws.
+  - Change one dimension at a time.
+  - Measure artifacts against the dry source, not just level.
+  - Never call a preset a module's best light on the strength of loudness and balance numbers. Say it has not been heard.
+

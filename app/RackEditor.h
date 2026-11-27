@@ -928,21 +928,20 @@ public:
             setView("panel",false);resized();
         }
         {
-            // Requests 145-147: Grain circle, a frame drummer improvising with Mala answering.
-            require(loadFactory(41),"Grain circle loads");drain();
-            require(document.graph.outputs.front().node=="mala" && synthPanel.control("hands","position") && synthPanel.control("mala","size")
-                    && synthPanel.control("mala","freeze") && synthPanel.layoutSound(),"Grain circle shows the drum and Mala on one panel");
+            // Requests 145-149: Handpan drift, an improvised steel melody in Mala's smooth clouds.
+            require(loadFactory(41),"Handpan drift loads");drain();
+            require(document.graph.outputs.front().node=="mala" && synthPanel.control("pan","structure") && synthPanel.control("mala","size")
+                    && synthPanel.control("mala","freeze") && synthPanel.layoutSound(),"Handpan drift shows the voice and Mala on one panel");
             const auto moving=std::count_if(document.graph.modulations.begin(),document.graph.modulations.end(),
-                [](const Modulation& m){return privateMovementSource(m.source.node)&&std::abs(m.amount)>=.2f;});
-            require(moving==4,"Grain circle carries four movement assignments at audible depths");
-            capture("grain-circle-panel.png");
+                [](const Modulation& m){return privateMovementSource(m.source.node);});
+            require(moving==3,"Handpan drift carries its three slow movements");
+            capture("handpan-drift-panel.png");
             auto saved=readRack(rackJSON(document));
-            require(nodeParameter(saved.graph,"sequence","chain",0)==1 && nodeParameter(saved.graph,"mala","seed_latch",1)==0,
-                    "Chain play and unlatched seeds survive save and recall");
-            prepareSamples(saved);
-            // One pass of the 20-bar chain and a tail, with the local skin recordings when present.
+            require(nodeParameter(saved.graph,"mala","shape",0)>.6f && nodeParameter(saved.graph,"mala","size",0)>.8f
+                    && nodeParameter(saved.graph,"mala","pitch_amt",1)==0,"Smooth, long grains without random pitch survive save and recall");
+            // One 16-bar arc and a tail.
             Runtime instrument(saved.graph,sampleBank(saved));instrument.clock.tempo(saved.tempo);
-            const int playFrames=int(std::lround(80*60*48000/saved.tempo))/quantum*quantum,frames=playFrames+48000*6;
+            const int playFrames=int(std::lround(64*60*48000/saved.tempo))/quantum*quantum,frames=playFrames+48000*8;
             AudioBuffer<float> sound(2,frames);
             for(int i=0;i+quantum<=frames;i+=quantum){
                 if(i==0)instrument.clock.play(true);
@@ -952,11 +951,11 @@ public:
             sound.applyGain(saved.gain);
             const float peak=std::max(sound.getMagnitude(0,0,frames),sound.getMagnitude(1,0,frames));
             const float rms=std::sqrt(.5f*(sound.getRMSLevel(0,0,playFrames)*sound.getRMSLevel(0,0,playFrames)+sound.getRMSLevel(1,0,playFrames)*sound.getRMSLevel(1,0,playFrames)));
-            require(std::isfinite(peak)&&peak<.8f&&rms>.015f&&rms<.08f,"Grain circle renders with headroom at the factory loudness");
-            auto wav=directory.getChildFile("Grain circle.wav");wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
+            require(std::isfinite(peak)&&peak<.8f&&rms>.015f&&rms<.08f,"Handpan drift renders with headroom at the factory loudness");
+            auto wav=directory.getChildFile("Handpan drift.wav");wav.deleteFile();auto stream=wav.createOutputStream();WavAudioFormat format;
             std::unique_ptr<AudioFormatWriter> writer(format.createWriterFor(stream.get(),48000,2,24,{},0));
             if(writer)stream.release();
-            require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write Grain circle audition");
+            require(writer&&writer->writeFromAudioSampleBuffer(sound,0,frames),"Write Handpan drift audition");
         }
         {
             require(loadFactory(25),"Optical vapour loads");drain();

@@ -4,6 +4,14 @@
 [MODULE_PROGRAMME.md](MODULE_PROGRAMME.md) for the order, the criteria for done,
 and the current status. It is not cancelled by later requests (request 136).
 
+## 0.0.38 — Handpan drift replaces Grain circle
+
+Grain circle sounded broken (request 149). The cause was its settings, not Mala: abrupt and very short grains, reversed grains, sixteenth-note seeds and random variation everywhere, all on dry percussion.
+
+On pure tones, Mala's dry path is clean in Bright digital and Sunny tape, at −105 dB. Smooth grains stay 40 dB clean. Cold digital and Scorched cassette add the noise their media are meant to.
+
+**Mala / Handpan drift** (Texture) takes the same slot (factory 41). A steel handpan voice improvises in D minor by random walk, with a low ding. Mala turns it into long, smooth clouds, then an octave shimmer, then holds the harmony with Freeze while the melody carries on. [Settings, playing guide and measurements](../research/modules/MALA.md)
+
 ## 0.0.37 — Grain circle, and movement you can hear
 
 **Mala / Grain circle** (Percussion) is a frame drummer improvising, with Mala answering.

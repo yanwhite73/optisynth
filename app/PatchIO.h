@@ -92,7 +92,7 @@ inline const std::vector<FactoryPreset>& factoryPresets() {
         {21,1795378702,{"Reed squelch","Bass","Two struck optical gates blend a resonant saw and a short sub. Play short notes with varying velocity.",{"low-pass-gate","squelch","pluck"}},"panel"},
         {22,1795378702,{"Glass loops","Percussion","Struck modal glass into independent clocked echoes. Hold one side and play over it.",{"modal","looping-delay","glass"}},"panel"},
         {25,1795523516,{"Optical vapour","Pad","An eight-voice reed chord. Play seq for overlapping reed lines, or hold keys for the octave swell.",{"low-pass-gate","polyphonic","swell"}},"panel"},
-        {41,1795776872,{"Mala / Grain circle","Percussion","A frame drummer improvises and Mala answers. Every pass changes; the chain moves from groove to grain cloud, freeze, octave grains and rolls. Track 3 seeds the grains, track 4 holds Freeze and moves Pitch.",{"granular","generative","frame-drum","hand-percussion"}},"panel"},
+        {41,1795778989,{"Mala / Handpan drift","Texture","A steel handpan improvises in D minor and Mala turns it into slow clouds: long smooth grains, then an octave shimmer, then Freeze holds the harmony while the melody carries on. Each pass wanders differently.",{"granular","generative","handpan","ambient"}},"panel"},
         {40,1795734175,{"Seed rain","Texture","The reed chord falling through Mala's grains. Density sets how often seeds fall and Time how far back they reach. Press Freeze to hold the cloud.",{"granular","texture","reverb"}},"panel"},
         {24,1795523516,{"Prism afterimage","Ostinato","A pitched triangle mallet with a changing ceramic strike. Play seq for the four-bar mallet phrase and dotted echo.",{"mallet","modal","echo"}},"panel"},
         {23,1795378702,{"String afterglow","Pad","Slow drifting strings with ensemble movement and two independently held stereo echoes.",{"strings","swells","looping-delay"}},"panel"},
@@ -214,95 +214,68 @@ inline RackDocument clayAndWater(float gain) {
         {"TOP LINE",{{"accents","gain_b","Level"},{"fingers","gain_a","Direct"},{"fingers","gain_b","Shell"},{"shell","decay","Decay"}}}}};
     return d;
 }
-// Requests 145 and 147: Mala heard at its best, answering a hand drummer who improvises.
-// Track 1 is the drummer: a fixed skeleton, ghost notes by chance, rolls on chosen passes
-// and a strike position per stroke. Track 3 seeds Mala's grains (Seed unlatched: a short
-// gate plays one grain, a held gate a cloud). Track 4 holds Freeze and moves Pitch to
-// exact notches. The chain runs groove, cloud, freeze, octave grains, rolls, groove.
-inline RackDocument malaCircle(float gain) {
-    // The drum enters Mala about 6 dB below full scale with unity input gain, leaving headroom
-    // for grains, feedback and reverb; the patch gain restores the level.
-    RackDocument d;d.gain=gain*2.9f;d.tempo=96;
+// Requests 145, 147 and 149: Mala in its sweet spot. Long, smooth grains on tonal, ringing
+// material. A steel tuned-percussion voice improvises in D minor (a handpan's Kurd layout):
+// track 1 random-walks the scale in eighths with rests by chance, track 2 places the low ding,
+// track 4 holds Freeze and sets the grains' pitch to exact notches. Nothing is randomised in
+// Mala except a slow drift of Time; Shape 0.66 gives symmetric grains with no clicks.
+inline RackDocument handpanDrift(float gain) {
+    RackDocument d;d.gain=gain*1.5f;d.tempo=76;   // the voice enters Mala with headroom; the patch gain restores the level
     auto data=std::make_shared<PerformanceData>();
-    const char* names[]={"Hands","Track 2","Seeds","Freeze / pitch"};
+    const char* names[]={"Right hand","Ding","Track 3","Freeze / pitch"};
     for(int t=0;t<4;++t){
         auto& track=data->tracks[size_t(t)];track.name=names[t];
-        for(auto& bank:track.patterns){bank.scale=0;bank.last=31;bank.division=1;for(auto& step:bank.steps)step.on=false;}
+        for(auto& bank:track.patterns){bank.scale=0;for(auto& step:bank.steps)step.on=false;}
     }
-    enum Stroke {Bass=48,Open=50,Slap=52,Stopped=53,Finger=55};
-    auto stroke=[](Stroke s){return s==Bass?-.6f:s==Open?0.f:s==Slap?.7f:s==Stopped?.2f:.85f;};   // centre to rim
-    auto hit=[&](int pattern,int at,Stroke s,float velocity,float chance=1,int ratchets=1,int condition=0){
-        auto& step=data->tracks[0].patterns[size_t(pattern)].steps[size_t(at)];
-        step.on=true;step.pitch=s;step.velocity=velocity;step.gate=.5f;step.chance=chance;
-        step.ratchets=ratchets;step.condition=condition;step.cv=stroke(s);
-    };
-    // Pattern A, groove: bass and slaps hold the cycle; fingers and ghosts come and go.
-    for(int bar:{0,16}){
-        hit(0,bar,Bass,bar?.9f:.95f);hit(0,bar+4,Open,.74f);hit(0,bar+6,Slap,.8f);hit(0,bar+8,Bass,.84f,bar?.85f:1.f);
-        hit(0,bar+10,Open,.68f);hit(0,bar+12,Slap,.83f);hit(0,bar+14,Finger,.48f,.8f);
-        hit(0,bar+2,Finger,.32f,.6f);hit(0,bar+3,Finger,.42f,.45f);hit(0,bar+7,Finger,.3f,.55f);
-        hit(0,bar+11,Finger,.3f,.5f);hit(0,bar+15,Finger,.33f,.45f);
+    // Right hand: the scale above the ding, walked one step at a time (traversal 5).
+    auto& hand=data->tracks[0].patterns[0];hand.first=0;hand.last=9;hand.division=2;hand.traversal=5;
+    const int scale[]={57,58,60,62,64,65,67,69,72,74};
+    const float velocity[]={.62f,.5f,.66f,.78f,.58f,.7f,.55f,.74f,.6f,.52f};
+    for(int i=0;i<10;++i){
+        auto& s=hand.steps[size_t(i)];s.on=true;s.pitch=scale[i];s.velocity=velocity[i];s.gate=.5f;
+        s.chance=i==3||i==7?.75f:.55f;s.ratchets=i==4||i==8?2:1;   // D and A ring most; flams on E and C
     }
-    hit(0,19,Stopped,.5f,.7f);hit(0,25,Bass,.42f,.35f);hit(0,27,Stopped,.4f,.5f);
-    hit(0,29,Finger,.46f,.6f,2);hit(0,30,Finger,.52f,1,3,14);hit(0,31,Slap,.66f,1,1,8);   // a roll every fourth pass
-    // Pattern B, space: a few open tones, so the grains carry the time.
-    hit(1,0,Bass,.9f);hit(1,6,Open,.62f,.85f);hit(1,10,Open,.5f,.5f);hit(1,16,Bass,.74f,.9f);
-    hit(1,22,Slap,.6f,.6f);hit(1,26,Finger,.34f,.5f);hit(1,30,Open,.55f,.5f);
-    // Pattern C, rolls: fingers in twos and threes around slaps.
-    for(int bar:{0,16}){
-        hit(2,bar,Bass,.92f);hit(2,bar+4,Slap,.82f);hit(2,bar+8,Bass,.8f,.8f);hit(2,bar+12,Slap,.86f);
-        for(int at:{2,6,10,14})hit(2,bar+at,Finger,.44f,.7f,at==14?3:2);
-        for(int at:{1,5,9,13})hit(2,bar+at,Finger,.3f,.4f);
-        hit(2,bar+7,Open,.6f,.5f);hit(2,bar+15,Stopped,.5f,.6f);
+    // Ding: low D on the first beat of most bars, an answering A now and then.
+    auto& ding=data->tracks[1].patterns[0];ding.last=31;ding.division=2;
+    for(auto [at,pitch,v,chance]:std::initializer_list<std::tuple<int,int,float,float>>{
+            {0,50,.85f,1.f},{6,50,.5f,.35f},{8,50,.7f,.8f},{12,57,.45f,.4f},{16,50,.8f,.9f},{22,50,.45f,.35f},{24,50,.65f,.7f},{28,57,.5f,.45f}}){
+        auto& s=ding.steps[size_t(at)];s.on=true;s.pitch=pitch;s.velocity=v;s.gate=.5f;s.chance=chance;
     }
-    // Track 3 seeds. A: grains answer the off-beats. B: a held gate, a cloud. C: sixteenths by chance.
-    auto& seeds=data->tracks[2].patterns;
-    for(auto [at,chance]:std::initializer_list<std::pair<int,float>>{{1,.5f},{3,.7f},{5,.4f},{7,.6f},{10,.7f},{11,.4f},{14,.6f},
-                                                                    {17,.5f},{19,.6f},{21,.4f},{23,.6f},{26,.7f},{27,.4f},{30,.7f}}){
-        auto& s=seeds[0].steps[size_t(at)];s.on=true;s.gate=.9f;s.chance=chance;
+    // Track 4, one step per beat for 16 bars: cloud, octave shimmer, freeze, a fifth over the frozen cloud.
+    auto& space=data->tracks[3].patterns[0];space.last=63;space.division=3;
+    for(int i=0;i<64;++i){
+        auto& s=space.steps[size_t(i)];const int bar=i/4;
+        s.cv=bar>=4&&bar<8?.858f:bar>=12&&bar<14?.692f:0;          // +12 and +7 semitone notches
+        s.on=bar>=8&&bar<14;s.tie=true;s.gate=1;                       // Freeze held for bars 9-14
     }
-    for(int i=0;i<32;++i){auto& s=seeds[1].steps[size_t(i)];s.on=true;s.tie=true;s.gate=1;}
-    for(int i=0;i<32;++i){auto& s=seeds[2].steps[size_t(i)];s.on=true;s.gate=.35f;s.chance=.55f;s.ratchets=i%8==6?2:1;}
-    // Track 4: A nothing; B Freeze held; C Freeze held, the cloud an octave up; D grains a fifth up on beats 2 and 4.
-    auto& space=data->tracks[3].patterns;
-    for(int p:{1,2})for(int i=0;i<32;++i){auto& s=space[size_t(p)].steps[size_t(i)];s.on=true;s.tie=true;s.gate=1;s.cv=p==2?.858f:0;}
-    for(int i=0;i<32;++i)space[3].steps[size_t(i)].cv=(i/4)%2?.692f:0;
-    // Chain rows: {patterns of tracks 1-4}, bars. 20 bars, about 50 seconds at 96 BPM.
-    const std::array<std::pair<std::array<int,4>,int>,6> rows{{
-        {{0,0,0,0},4},{{0,0,1,0},4},{{1,0,1,1},2},{{1,0,1,2},2},{{2,0,2,3},4},{{0,0,0,0},4}}};
-    for(size_t r=0;r<rows.size();++r){data->chain[r].patterns=rows[r].first;data->chain[r].bars=rows[r].second;}
-    data->chainFirst=0;data->chainLast=int(rows.size())-1;
-    d.graph.nodes={{"sequence","seq.performance",{{"chain",1}},data},
-        {"hands","drum.frame",{{"position",.45f},{"hard",.55f},{"skin",.7f},{"couple",.55f},{"area",.42f},{"decay",1.15f}}},
-        {"voices","voice.mix",{{"voices",8},{"spread",.3f},{"level",.45f}}},
-        {"mala","fx.granular_tape",{{"density",.84f},{"time",.16f},{"time_amt",.32f},{"size",.58f},{"size_amt",.22f},
-            {"shape",.52f},{"shape_amt",.12f},{"feedback",.45f},{"dry_wet",.6f},{"reverb",.4f},{"quality",2},{"seed_latch",0},
-            {"input_gain",.02f}}},
-        // Movement at depths that can be heard (request 146).
-        {"move_hands_hard","mod.lfo",{{"rate",.11f},{"depth",1},{"wave",0},{"retrigger",0}}},
-        {"move_mala_size","mod.lfo",{{"rate",.07f},{"depth",1},{"wave",0},{"retrigger",0}}},
-        {"move_mala_shape","mod.lfo",{{"rate",.17f},{"depth",1},{"wave",0},{"retrigger",0}}},
-        {"move_mala_reverb","mod.lfo",{{"rate",.045f},{"depth",1},{"wave",0},{"retrigger",0}}}};
-    d.graph.connections={{{"sequence","t1_notes"},{"voices","notes"}},{{"hands","out"},{"voices","in"}},
-        {{"voices","out"},{"mala","in"}},{{"sequence","t3_gate"},{"mala","seed"}},{{"sequence","t4_gate"},{"mala","freeze"}}};
-    d.graph.modulations={{{"sequence","t1_cv"},{"hands","position"},.3f},{{"sequence","t4_cv"},{"mala","pitch"},.5f},
-        {{"move_hands_hard","out"},{"hands","hard"},.25f},{{"move_mala_size","out"},{"mala","size"},.22f},
-        {{"move_mala_shape","out"},{"mala","shape"},.3f},{{"move_mala_reverb","out"},{"mala","reverb"},.25f}};
+    d.graph.nodes={{"sequence","seq.performance",{},data},
+        {"pan","modal.voice",{{"structure",.5f},{"brightness",.3f},{"decay",.62f}}},
+        {"voices","voice.mix",{{"voices",8},{"spread",.35f},{"level",.36f}}},
+        {"ding","modal.voice",{{"transpose",0},{"structure",.5f},{"brightness",.26f},{"decay",.72f}}},
+        {"ding_pair","utility.stereo",{}},
+        {"hands","utility.stereo_mix",{{"gain_a",1},{"gain_b",.45f}}},
+        {"mala","fx.granular_tape",{{"density",.74f},{"time",.22f},{"time_amt",.12f},{"size",.84f},{"size_amt",0},
+            {"shape",.66f},{"shape_amt",0},{"pitch",0},{"pitch_amt",0},{"feedback",.35f},{"dry_wet",.45f},
+            {"reverb",.5f},{"quality",2},{"input_gain",.02f}}},
+        // Slow movement at modest depths: the cloud breathes, nothing jumps.
+        {"move_pan_brightness","mod.lfo",{{"rate",.07f},{"depth",1},{"wave",0},{"retrigger",0}}},
+        {"move_mala_size","mod.lfo",{{"rate",.045f},{"depth",1},{"wave",0},{"retrigger",0}}},
+        {"move_mala_dry_wet","mod.lfo",{{"rate",.03f},{"depth",1},{"wave",0},{"retrigger",0}}}};
+    d.graph.connections={{{"sequence","t1_notes"},{"voices","notes"}},{{"pan","out"},{"voices","in"}},
+        {{"sequence","t2_notes"},{"ding","notes"}},{{"ding","out"},{"ding_pair","left"}},{{"ding","out"},{"ding_pair","right"}},
+        {{"voices","out"},{"hands","a"}},{{"ding_pair","out"},{"hands","b"}},{{"hands","out"},{"mala","in"}},
+        {{"sequence","t4_gate"},{"mala","freeze"}}};
+    d.graph.modulations={{{"sequence","t4_cv"},{"mala","pitch"},.5f},
+        {{"move_pan_brightness","out"},{"pan","brightness"},.05f},{{"move_mala_size","out"},{"mala","size"},.06f},
+        {{"move_mala_dry_wet","out"},{"mala","dry_wet"},.1f}};
     d.graph.outputs={{"mala","out"}};
-    const auto library=juce::File::getSpecialLocation(juce::File::userMusicDirectory).getChildFile(
-        "Audiopool/library/Organic.Loops.Frame.Drums.MULTiFORMAT/FRD_SOUNDS_&_FX/FRD_FRAME_DRUMS");
-    for(int s=0;s<5;++s)for(int zone=0;zone<2;++zone)for(int v=0;v<3;++v){
-        const auto wav=library.getChildFile("FRD_FrameDrums_"+juce::String(handdrum::frameFiles[s][zone][v]).paddedLeft('0',2)+".wav");
-        if(wav.existsAsFile())d.samples[handdrum::sampleKey("hands",s*6+zone*3+v)]={wav.getFullPathName().toStdString(),{},{}};
-    }
-    d.panel={"walnut",{{"HANDS",{{"hands","position","Centre to edge"},{"hands","hard","Stiffness"},{"hands","skin","Recorded skin"},{"hands","couple","Sympathy"}}},
+    d.panel={"slate",{{"HANDPAN",{{"pan","structure","Material"},{"pan","brightness","Brightness"},{"pan","decay","Ring"},{"hands","gain_b","Ding"}}},
         {"MALA / GRAINS",{{"mala","density","Density"},{"mala","time","Time"},{"mala","size","Size"},{"mala","shape","Shape"},{"mala","pitch","Pitch"}}},
-        {"MALA / SPACE",{{"mala","feedback","Feedback"},{"mala","dry_wet","Dry/wet"},{"mala","reverb","Reverb"},{"mala","freeze","Freeze"}}},
-        {"STROKES / SAMPLES",{{"hands","","Stroke map"}}}}};
+        {"MALA / SPACE",{{"mala","feedback","Feedback"},{"mala","dry_wet","Dry/wet"},{"mala","reverb","Reverb"},{"mala","freeze","Freeze"}}}}};
     return d;
 }
 inline RackDocument starterDocument(int which,float gain) {
-    if(which==41)return malaCircle(gain);
+    if(which==41)return handpanDrift(gain);
     // Programme item 1 (request 136): the open Beads design as Mala, fed by the Optical vapour reeds.
     if(which==40){
         auto d=starterDocument(25,gain);

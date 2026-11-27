@@ -95,28 +95,82 @@ offline render is `Seed rain.wav` in the native review folder:
 - about −30 dB RMS, peak −12 dBFS;
 - a wide stereo image from the randomised grain panning.
 
-## Showcase: Grain circle (requests 145–147)
+## Playing it: what makes Beads sound good (request 149)
 
-Factory 41 shows the features Beads is known for on hand percussion, with a sequence that improvises.
-- **Seeds, unlatched, from track 3.** A short gate plays one grain on its edge; a held gate opens the grain generator at the Density rate. That is the upstream trigger generator's behaviour with Seed unlatched and the input patched (`trigger_generator.cc`).
-- **Freeze and Pitch from track 4.** The Pitch route reaches knob positions 0.858 and 0.692, the +12 and +7 semitone notches of the detune law.
-- **Level.** On percussion, Auto input gain pushed the peaks to full scale, and grains plus feedback clipped the output. Grain circle uses unity manual gain with the drum about 6 dB below full scale. The patch gain restores the level.
-- **Balance.** Grains on sparse percussion often land between hits. Longer grains, more seeds and more feedback bring Mala's own output up to the dry drum's level.
+Beads has four uses:
+- a granular processor;
+- a tempo-synced delay, with Size fully clockwise;
+- a reverb;
+- a granular wavetable synth, when nothing is patched in.
 
-Measured over one 50-second chain (Mala alone is Dry/wet 1; the drum is Dry/wet 0):
+Two knob laws in the upstream code decide whether the grains sound smooth or broken:
 
-| Section | Output (dB RMS) | Mala alone (dB RMS) | Drum (dB RMS) |
+- **Shape** (`grain_envelope.h`):
+  - 0: rectangular grains, which click.
+  - About 0.33: an instant attack and a falling slope.
+  - About 0.66: symmetric, smooth grains.
+  - 1: a slow attack and a quick release.
+- **Size** (`granular_player.h`): duration is 4 s × 2^(−9 × shortness).
+  - 0.6 gives about 90 ms grains.
+  - 0.7 gives about 225 ms.
+  - 0.8 gives about 0.6 s.
+  - 0.9 gives about 1.5 s.
+  - Below 0.33, grains play backwards.
+
+| To get | Settings |
+| --- | --- |
+| Slow, smooth clouds | Shape 0.6–0.7; Size 0.75–0.9; Density 0.65–0.8 (random grains, about 1–7 per second); Time 0.1–0.4; little or no random Shape or Pitch |
+| Octave shimmer | As above, with Pitch on the +12 notch, Feedback 0.4–0.6 and Reverb about 0.5 |
+| Held harmony | Freeze over sustained or ringing material, then keep playing dry over it |
+| Tempo-synced echoes | Size fully clockwise, a clock into Seed; Density picks the subdivision and Time the multiple (the *Copper Relay* study, request 148) |
+| Deliberately broken stutter | Shape below 0.35, Size below 0.6, a fast clock into Seed, random amounts up |
+
+Tonal, ringing sources give the grains something to sustain. Short grains on dry percussion mostly catch transients and gaps.
+
+**Pure-tone check (Mala itself is clean).** A 440 Hz sine was run through each quality at unity input gain:
+
+| Path | Quality | Energy outside the tone |
+| --- | --- | --- |
+| Dry | Bright digital, Sunny tape | −105 dB |
+| Dry | Cold digital | −77 dB, as a 12-bit medium should give |
+| Dry | Scorched cassette | −30 dB, its 8-bit μ-law tape character |
+| Grains at Shape 0.66, Size 0.6 | All four | −40 dB, and −65 dB above 2 kHz (Scorched cassette −31 dB) |
+| Grains at Shape 0.3 | All four | −11.5 dB |
+
+## Showcase: Handpan drift (requests 145–149)
+
+Factory 41 replaces Grain circle, whose harsh sound came from its settings (below). A steel tuned-percussion voice improvises in D minor, the Kurd layout of a handpan:
+- **Track 1** random-walks the scale in eighths, with rests by chance and occasional flams.
+- **Track 2** places the low ding.
+- **Track 4** holds Freeze and sets the grains to exact notches.
+
+Mala settings:
+- Shape 0.66 and Size 0.84 (grains of about 0.85 s).
+- Density 0.74.
+- Time 0.22, with a slow random drift.
+- No random Shape or Pitch.
+- Sunny tape, which rolls off the octave grains' top end.
+- Input gain at unity, with the voice entering about 4 dB below full scale.
+
+The 16-bar arc runs: cloud, octave shimmer, Freeze holding the harmony, a fifth over the frozen cloud, then cloud again. Over 100 s:
+
+| Section | Output (dB RMS) | Mala alone | Voice dry |
 | --- | --- | --- | --- |
-| Groove | −28.7 | −31.1 | −29.5 |
-| Cloud | −29.3 | −29.3 | −29.9 |
-| Freeze | −32.7 | −32.3 | −34.8 |
-| Octave cloud | −32.9 | −31.8 | −35.7 |
-| Rolls | −29.2 | −28.8 | −30.8 |
-| Groove | −29.5 | −29.3 | −29.6 |
+| Cloud | −30.9 / −29.8 | −30.5 / −28.1 | −32.7 / −31.9 |
+| Octave | −30.3 / −29.2 | −29.4 / −28.2 | −32.1 / −31.5 |
+| Freeze | −29.9 / −30.0 | −28.5 / −28.8 | −31.9 / −32.8 |
+| Fifth, frozen | −30.0 / −30.8 | −29.3 / −29.3 | −32.5 / −32.3 |
 
-The native check renders `Grain circle.wav`:
-- −29.7 dB RMS over the chain;
-- peak −9.0 dBFS, with no clipping.
+- No samples clip. The native render `Handpan drift.wav` measures −29.9 dB RMS and peaks at −12.1 dBFS.
+- Except in the octave and fifth sections, Mala's share of energy above 4 kHz stays within 3 dB of the dry voice's or below it. The octave sections are brighter, as an octave shift implies.
+- Counts of high-frequency transients with Mala are at most 1.5 times the dry voice's, and lower in most sections.
+
+**Why Grain circle sounded broken.**
+- Its Shape swept from 0.22 to 0.82 with random variation on top, so many grains had abrupt or rectangular envelopes.
+- Its grains were about 25–600 ms, and reversed whenever Size fell below 0.33.
+- Sixteenth-note seeds, tape flutter and dry percussion were added on top.
+
+Each choice was measured for level and balance, but together they put Mala at its "deliberately broken" end.
 
 ## Not reproduced
 

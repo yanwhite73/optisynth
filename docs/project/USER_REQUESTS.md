@@ -1425,3 +1425,12 @@ the sequence should be somewhat generative, like an improvisation on hand drum
 
 Steers request 145: the showcase sequence should vary as it plays, phrased like a
 hand drummer improvising, rather than a fixed loop.
+
+## 149 — Grain circle sounds broken; musical uses of Beads
+
+```text
+that sounds awful. so is beads basically granular processing? It just sounds broken. Im  sure it can have more aesthetic and musical uses
+```
+
+Response to Grain circle (0.0.37). Explain what Beads is for, check whether
+Mala itself has a defect, and replace the showcase with musical uses.
